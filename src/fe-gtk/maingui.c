@@ -588,8 +588,7 @@ mg_show_generic_tab (GtkWidget *box)
 	gtk_notebook_set_current_page (GTK_NOTEBOOK (mg_gui->note_book), num);
 	gtk_tree_view_set_model (GTK_TREE_VIEW (mg_gui->user_tree), NULL);
 	gtk_window_set_title (GTK_WINDOW (mg_gui->window),
-								 g_object_get_data (G_OBJECT (box), "title"));
-	gtk_widget_set_sensitive (mg_gui->menu, FALSE);
+		 g_object_get_data (G_OBJECT (box), "title"));
 
 	if (f)
 		gtk_widget_grab_focus (f);
