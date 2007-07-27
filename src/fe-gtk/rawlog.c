@@ -94,7 +94,7 @@ open_rawlog (struct server *serv)
 		return;
 	}
 
-	snprintf (tbuf, sizeof tbuf, _("XChat: Rawlog (%s)"), serv->servername);
+	snprintf (tbuf, sizeof tbuf, _("Rawlog (%s)"), serv->servername);
 	serv->gui->rawlog_window =
 		mg_create_generic_tab ("RawLog", tbuf, FALSE, TRUE, close_rawlog, serv,
 							 640, 320, &vbox, serv);
