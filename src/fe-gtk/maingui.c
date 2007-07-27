@@ -2497,13 +2497,6 @@ mg_create_userlist (session_gui *gui, GtkWidget *box)
 	vbox = gtk_vbox_new (0, 1);
 	gtk_container_add (GTK_CONTAINER (box), vbox);
 
-	frame = gtk_frame_new (NULL);
-	if (!(prefs.gui_tweaks & 1))
-		gtk_box_pack_start (GTK_BOX (vbox), frame, 0, 0, GUI_SPACING);
-
-	gui->namelistinfo = gtk_label_new (NULL);
-	gtk_container_add (GTK_CONTAINER (frame), gui->namelistinfo);
-
 	gui->user_tree = ulist = userlist_create (vbox);
 
 	if (prefs.style_namelistgad)
