@@ -74,9 +74,7 @@
 #include <gtkspell/gtkspell.h>
 #endif
 
-#ifdef USE_LIBSEXY
 #include "sexy-spell-entry.h"
-#endif
 
 #define GUI_SPACING (3)
 #define GUI_BORDER (0)
@@ -2793,34 +2791,13 @@ mg_create_entry (session *sess, GtkWidget *box)
 	g_signal_connect (G_OBJECT (but), "clicked",
 							G_CALLBACK (mg_nickclick_cb), NULL);
 
-#ifdef USE_GTKSPELL
-	gui->input_box = entry = gtk_text_view_new ();
-	gtk_widget_set_size_request (entry, 0, 1);
-	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (entry), GTK_WRAP_NONE);
-	gtk_text_view_set_accepts_tab (GTK_TEXT_VIEW (entry), FALSE);
-	if (prefs.gui_input_spell)
-		gtkspell_new_attach (GTK_TEXT_VIEW (entry), NULL, NULL);
-
-	sw = gtk_scrolled_window_new (NULL, NULL);
-	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
-													 GTK_SHADOW_IN);
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
-												GTK_POLICY_NEVER,
-												GTK_POLICY_NEVER);
-	gtk_container_add (GTK_CONTAINER (sw), entry);
-	gtk_container_add (GTK_CONTAINER (hbox), sw);
-#else
-#ifdef USE_LIBSEXY
 	gui->input_box = entry = sexy_spell_entry_new ();
 	sexy_spell_entry_set_checked ((SexySpellEntry *)entry, prefs.gui_input_spell);
-#else
-	gui->input_box = entry = gtk_entry_new ();
-#endif
+
 	gtk_entry_set_max_length (GTK_ENTRY (gui->input_box), 2048);
 	g_signal_connect (G_OBJECT (entry), "activate",
 							G_CALLBACK (mg_inputbox_cb), gui);
 	gtk_container_add (GTK_CONTAINER (hbox), entry);
-#endif
 
 	gtk_widget_set_name (entry, "xchat-inputbox");
 	g_signal_connect (G_OBJECT (entry), "key_press_event",

@@ -54,9 +54,7 @@
 #include <gtk/gtktextview.h>
 #include <gtkspell/gtkspell.h>
 #endif
-#ifdef USE_LIBSEXY
 #include "sexy-spell-entry.h"
-#endif
 
 GtkStyle *create_input_style (GtkStyle *);
 
@@ -135,9 +133,7 @@ static const setting inputbox_settings[] =
 {
 	{ST_HEADER, N_("Input box"),0,0,0},
 	{ST_TOGGLE, N_("Use the Text box font and colors"), P_OFFINTNL(style_inputbox),0,0,0},
-#if defined(USE_GTKSPELL) || defined(USE_LIBSEXY)
 	{ST_TOGGLE, N_("Spell checking"), P_OFFINTNL(gui_input_spell),0,0,0},
-#endif
 
 	{ST_HEADER, N_("Nick Completion"),0,0,0},
 	{ST_TOGGLE, N_("Automatic nick completion (without TAB key)"), P_OFFINTNL(nickcompletion),
@@ -1873,9 +1869,7 @@ setup_apply_to_sess (session_gui *gui)
 	}
 #endif
 
-#ifdef USE_LIBSEXY
 	sexy_spell_entry_set_checked ((SexySpellEntry *)gui->input_box, prefs.gui_input_spell);
-#endif
 }
 
 static void

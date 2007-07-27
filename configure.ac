@@ -489,40 +489,6 @@ if test "x$dbus" = "xyes" ; then
 fi
 
 dnl *********************************************************************
-dnl ** SPELL ************************************************************
-dnl *********************************************************************
-
-if test "$spell" = "gtkspell" ; then
-	PKG_CHECK_MODULES(GTKSPELL, gtkspell-2.0 >= 2.0.2, [], [
-		AC_MSG_RESULT(no)
-		spell=no
-	])
-	if test "$spell" != "no" ; then
-		GUI_LIBS="$GUI_LIBS $GTKSPELL_LIBS"
-		GUI_CFLAGS="$GUI_CFLAGS $GTKSPELL_CFLAGS"
-		AC_DEFINE(USE_GTKSPELL)
-	fi
-fi
-
-if test "$spell" = "libsexy" ; then
-	PKG_CHECK_MODULES([LIBSEXY], [libsexy >= 0.1.8], libsexy=yes, AC_MSG_RESULT(no))
-	if test "$libsexy" = "yes" ; then
-		GUI_LIBS="$GUI_LIBS $LIBSEXY_LIBS"
-		GUI_CFLAGS="$GUI_CFLAGS $LIBSEXY_CFLAGS"
-		AC_DEFINE(USE_LIBSEXY)
-	else
-		dnl use builtin static one
-		sexy_spell_entry_c="sexy-spell-entry.c"
-		AC_SUBST(sexy_spell_entry_c)
-		spell="static"
-	fi
-fi
-
-if test "$spell" = "static" ; then
-	AC_DEFINE(USE_LIBSEXY)
-fi
-
-dnl *********************************************************************
 dnl ** CONDITIONALS *****************************************************
 dnl *********************************************************************
 
@@ -780,7 +746,6 @@ echo "  OpenSSL support:                        ${openssl}"
 echo "  DBus support:                           ${dbus}"
 echo "  IPv6 support:                           ${ipv6}"
 echo "  Plugin loader:                          ${plugin}"
-echo "  Spell checking support:                 ${spell}"
 echo
 echo "  Python scripting support:               ${python}"
 echo "  Perl scripting support:                 ${perl}"
