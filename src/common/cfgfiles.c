@@ -34,7 +34,7 @@
 #ifdef WIN32
 #define XCHAT_DIR "X-Chat 2"
 #else
-#define XCHAT_DIR ".xchat2"
+#define XCHAT_DIR ".conspire"
 #endif
 #define DEF_FONT "Monospace 9"
 
