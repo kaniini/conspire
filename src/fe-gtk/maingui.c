@@ -2715,8 +2715,8 @@ mg_place_userlist_and_chanview_real (session_gui *gui, GtkWidget *userlist, GtkW
 			break;
 		case POS_HIDDEN:
 			break;
-		default:/* POS_TOPRIGHT */
-			gtk_paned_pack1 (GTK_PANED (gui->vpane_right), userlist, FALSE, TRUE);
+		default:/* POS_BOTTOMLEFT */
+			gtk_paned_pack2 (GTK_PANED (gui->vpane_left), userlist, FALSE, TRUE);
 		}
 	}
 
