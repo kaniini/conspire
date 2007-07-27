@@ -3378,19 +3378,6 @@ mg_create_generic_tab (char *name, char *title, int force_toplevel,
 	if (prefs.tab_pos == POS_HIDDEN && prefs.windows_as_tabs)
 		prefs.windows_as_tabs = 0;
 
-	if (force_toplevel || !prefs.windows_as_tabs)
-	{
-		win = gtkutil_window_new (title, name, width, height, 3);
-		vbox = gtk_vbox_new (0, 0);
-		*vbox_ret = vbox;
-		gtk_container_add (GTK_CONTAINER (win), vbox);
-		gtk_widget_show (vbox);
-		if (close_callback)
-			g_signal_connect (G_OBJECT (win), "destroy",
-									G_CALLBACK (close_callback), userdata);
-		return win;
-	}
-
 	vbox = gtk_vbox_new (0, 2);
 	g_object_set_data (G_OBJECT (vbox), "w", GINT_TO_POINTER (width));
 	g_object_set_data (G_OBJECT (vbox), "h", GINT_TO_POINTER (height));
