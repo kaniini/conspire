@@ -502,19 +502,9 @@ fe_set_title (session *sess)
 					 sess->server->nick, server_get_network (sess->server, TRUE));
 		break;
 	case SESS_CHANNEL:
-		/* don't display keys in the titlebar */
-		if ((!(prefs.gui_tweaks & 16)) && has_key (sess->current_modes))
-			snprintf (tbuf, sizeof (tbuf),
-						 "conspire: %s @ %s / %s",
-						 sess->server->nick, server_get_network (sess->server, TRUE),
-						 sess->channel);
-		else
-			snprintf (tbuf, sizeof (tbuf),
-						 "conspire: %s @ %s / %s (%s)",
-						 sess->server->nick, server_get_network (sess->server, TRUE),
-						 sess->channel, sess->current_modes ? sess->current_modes : "");
-		if (prefs.gui_tweaks & 1)
-			snprintf (tbuf + strlen (tbuf), 9, " (%d)", sess->total);
+		snprintf (tbuf, sizeof (tbuf), "conspire: %s @ %s / %s (%s) (%d users, %d ops, %d halfops, %d voices)",
+			 sess->server->nick, server_get_network (sess->server, TRUE),
+			 sess->channel, sess->current_modes ? sess->current_modes : "", sess->total, sess->ops, sess->hops, sess->voices);
 		break;
 	case SESS_NOTICES:
 	case SESS_SNOTICES:
