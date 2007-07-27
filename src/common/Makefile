@@ -22,7 +22,7 @@ include ../../mk/objective.mk
 install-posthook:
 	@mv ${DESTDIR}/${LIBDIR}/libconspire$(SHARED_SUFFIX) ${DESTDIR}/${LIBDIR}/libconspire$(SHARED_SUFFIX).$(LIBCONSPIRE_SUFFIX)
 	@ln -sf libconspire$(SHARED_SUFFIX).$(LIBCONSPIRE_SUFFIX) \
-		${DESTDIR}/${LIBDIR}/libconspire$(SHARED_SUFFIX).1
-	@ln -sf libconspire$(SHARED_SUFFIX).1 \
+		${DESTDIR}/${LIBDIR}/libconspire$(SHARED_SUFFIX).0
+	@ln -sf libconspire$(SHARED_SUFFIX).0 \
 		${DESTDIR}/${LIBDIR}/libconspire$(SHARED_SUFFIX)
 
