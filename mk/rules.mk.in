@@ -237,3 +237,4 @@ DBUSDIR = @DBUSDIR@
 DBUSLIBADD = @DBUSLIBADD@
 ssl_c = @ssl_c@
 plugingui_c = @plugingui_c@
+sexy_spell_entry_c = @sexy_spell_entry_c@

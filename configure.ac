@@ -512,6 +512,8 @@ if test "$spell" = "libsexy" ; then
 		AC_DEFINE(USE_LIBSEXY)
 	else
 		dnl use builtin static one
+		sexy_spell_entry_c="sexy-spell-entry.c"
+		AC_SUBST(sexy_spell_entry_c)
 		spell="static"
 	fi
 fi
