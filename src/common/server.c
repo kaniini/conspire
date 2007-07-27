@@ -712,15 +712,12 @@ ssl_do_connect (server * serv)
 		case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
 		case X509_V_ERR_CERT_HAS_EXPIRED:
 		default:
-			if (serv->accept_invalid_cert)
-			{
-				snprintf (buf, sizeof (buf), "* Verify E: %s.? (%d) -- Ignored",
-							 X509_verify_cert_error_string (verify_error),
-							 verify_error);
-				EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-								 NULL, 0);
-				break;
-			}
+			snprintf (buf, sizeof (buf), "* WARNING - COULD NOT VERIFY CERTIFICATE: %s.? (%d)",
+						 X509_verify_cert_error_string (verify_error),
+						 verify_error);
+			EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
+							 NULL, 0);
+			break;
 			return (0);
 		}
 
