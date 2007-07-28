@@ -1246,9 +1246,9 @@ servlist_open_networks (void)
 	if (!settings_get_string(config, "irc", "nick3", &nick3))
 		nick3 = g_strdup_printf("%s%s", nick2, "_");
 	if (!settings_get_string(config, "irc", "user",  &username))
-		username = g_strdup(nick1);
+		username = g_get_user_name();
 	if (!settings_get_string(config, "irc", "real",  &realname))
-		realname = g_strdup(nick1);
+		realname = g_get_real_name();
 	if (!settings_get_bool(config,   "gui", "skip_serverlist", &skip_serverlist))
 		skip_serverlist = FALSE;
 
