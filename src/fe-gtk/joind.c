@@ -24,6 +24,8 @@
 #include <gtk/gtkvbox.h>
 #include <gtk/gtkwindow.h>
 
+#include "../common/configdb.h"
+
 #include "../common/xchat.h"
 #include "../common/xchatc.h"
 #include "../common/server.h"
@@ -91,9 +93,9 @@ joind_ok_cb (GtkWidget *ok, server *serv)
 	chanlist_opengui (serv, TRUE);
 
 xit:
-	prefs.gui_join_dialog = 0;
+	settings_set_bool(config, "gui", "join_dialog", 0); 
 	if (GTK_TOGGLE_BUTTON (serv->gui->joind_check)->active)
-		prefs.gui_join_dialog = 1;
+		settings_set_bool(config, "gui", "join_dialog", 1);
 
 	gtk_widget_destroy (serv->gui->joind_win);
 	serv->gui->joind_win = NULL;
@@ -120,6 +122,7 @@ joind_show_dialog (server *serv)
 	GtkWidget *okbutton1;
 	char buf[256];
 	char buf2[256];
+	gboolean gui_join_dialog;
 
 	serv->gui->joind_win = dialog1 = gtk_dialog_new ();
 	gtk_window_set_title (GTK_WINDOW (dialog1), _("XChat: Connection Complete"));
@@ -210,7 +213,8 @@ joind_show_dialog (server *serv)
 	gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
 
 	serv->gui->joind_check = checkbutton1 = gtk_check_button_new_with_mnemonic (_("_Always show this dialog after connecting."));
-	if (prefs.gui_join_dialog)
+	settings_get_bool(config, "gui", "join_dialog", *gui_join_dialog);
+	if (gui_join_dialog)
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton1), TRUE);
 	gtk_widget_show (checkbutton1);
 	gtk_box_pack_start (GTK_BOX (vbox1), checkbutton1, FALSE, FALSE, 0);
@@ -242,7 +246,9 @@ joind_show_dialog (server *serv)
 void
 joind_open (server *serv)
 {
-	if (prefs.gui_join_dialog)
+	gboolean gui_join_dialog;
+	settings_get_bool(config, "gui", "join_dialog", *gui_join_dialog);
+	if (gui_join_dialog)
 		joind_show_dialog (serv);
 }
 

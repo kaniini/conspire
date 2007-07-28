@@ -8,6 +8,7 @@ typedef struct
 } treeview;
 
 #include "../common/xchat.h"
+#include "../common/configdb.h"
 #include "../common/xchatc.h"
 #include "fe-gtk.h"
 #include "maingui.h"
@@ -71,6 +72,9 @@ cv_tree_click_cb (GtkTreeView *tree, GdkEventButton *event, chanview *cv)
 static void
 cv_tree_init (chanview *cv)
 {
+#ifdef GTK_CHECK_VERSION(2,10,0)
+	gboolean treeview_lines;
+#endif
 	GtkWidget *view, *win;
 	GtkCellRenderer *renderer;
 	static const GtkTargetEntry dnd_src_target[] =
@@ -99,7 +103,8 @@ cv_tree_init (chanview *cv)
 	GTK_WIDGET_UNSET_FLAGS (view, GTK_CAN_FOCUS);
 	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (view), FALSE);
 #if GTK_CHECK_VERSION(2,10,0)
-	if (!(prefs.gui_tweaks & 8))
+	settings_get_bool(config, "gui", "treeview_lines", *treeview_lines);
+	if (treeview_lines)
 		gtk_tree_view_set_enable_tree_lines (GTK_TREE_VIEW (view), TRUE);
 #endif
 	gtk_container_add (GTK_CONTAINER (win), view);
