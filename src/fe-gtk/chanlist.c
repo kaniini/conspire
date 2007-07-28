@@ -99,25 +99,6 @@ chanlist_match (server *serv, const char *str)
 	}
 }
 
-/**
- * Updates the caption to reflect the number of users and channels
- */
-static void
-chanlist_update_caption (server *serv)
-{
-	gchar tbuf[256];
-
-	snprintf (tbuf, sizeof tbuf,
-				 _("Displaying %d/%d users on %d/%d channels."),
-				 serv->gui->chanlist_users_shown_count,
-				 serv->gui->chanlist_users_found_count,
-				 serv->gui->chanlist_channels_shown_count,
-				 serv->gui->chanlist_channels_found_count);
-
-	gtk_label_set_text (GTK_LABEL (serv->gui->chanlist_label), tbuf);
-	serv->gui->chanlist_caption_is_stale = FALSE;
-}
-
 static void
 chanlist_update_buttons (server *serv)
 {
@@ -141,7 +122,6 @@ chanlist_reset_counters (server *serv)
 	serv->gui->chanlist_channels_found_count = 0;
 	serv->gui->chanlist_channels_shown_count = 0;
 
-	chanlist_update_caption (serv);
 	chanlist_update_buttons (serv);
 }
 
@@ -182,11 +162,7 @@ chanlist_flush_pending (server *serv)
 	chanlistrow *row;
 
 	if (!list)
-	{
-		if (serv->gui->chanlist_caption_is_stale)
-			chanlist_update_caption (serv);
 		return;
-	}
 	model = GET_MODEL (serv);
 
 	while (list)
@@ -198,7 +174,6 @@ chanlist_flush_pending (server *serv)
 
 	g_slist_free (serv->gui->chanlist_pending_rows);
 	serv->gui->chanlist_pending_rows = NULL;
-	chanlist_update_caption (serv);
 }
 
 static gboolean
@@ -226,17 +201,11 @@ chanlist_place_row_in_gui (server *serv, chanlistrow *next_row, gboolean force)
 		chanlist_update_buttons (serv);
 
 	if (next_row->users < serv->gui->chanlist_minusers)
-	{
-		serv->gui->chanlist_caption_is_stale = TRUE;
 		return;
-	}
 
 	if (next_row->users > serv->gui->chanlist_maxusers
 		 && serv->gui->chanlist_maxusers > 0)
-	{
-		serv->gui->chanlist_caption_is_stale = TRUE;
 		return;
-	}
 
 	if (GTK_ENTRY (serv->gui->chanlist_wild)->text[0])
 	{
@@ -248,28 +217,19 @@ chanlist_place_row_in_gui (server *serv, chanlistrow *next_row, gboolean force)
 		{
 			if (!chanlist_match (serv, GET_CHAN (next_row))
 				 && !chanlist_match (serv, next_row->topic))
-			{
-				serv->gui->chanlist_caption_is_stale = TRUE;
 				return;
-			}
 		}
 
 		else if (serv->gui->chanlist_match_wants_channel)
 		{
 			if (!chanlist_match (serv, GET_CHAN (next_row)))
-			{
-				serv->gui->chanlist_caption_is_stale = TRUE;
 				return;
-			}
 		}
 
 		else if (serv->gui->chanlist_match_wants_topic)
 		{
 			if (!chanlist_match (serv, next_row->topic))
-			{
-				serv->gui->chanlist_caption_is_stale = TRUE;
 				return;
-			}
 		}
 	}
 
@@ -278,7 +238,6 @@ chanlist_place_row_in_gui (server *serv, chanlistrow *next_row, gboolean force)
 		model = GET_MODEL (serv);
 		/* makes it appear fast :) */
 		custom_list_append (CUSTOM_LIST (model), next_row);
-		chanlist_update_caption (serv);
 	}
 	else
 		/* add it to GUI at the next update interval */
@@ -731,12 +690,6 @@ chanlist_opengui (server *serv, int do_refresh)
 
 	gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
 	gtk_box_set_spacing (GTK_BOX (vbox), 12);
-
-	/* make a label to store the user/channel info */
-	wid = gtk_label_new (NULL);
-	gtk_box_pack_start (GTK_BOX (vbox), wid, 0, 0, 0);
-	gtk_widget_show (wid);
-	serv->gui->chanlist_label = wid;
 
 	/* ============================================================= */
 
