@@ -11,6 +11,7 @@
 #define XCHAT_H
 
 #include "history.h"
+#include "configdb.h"
 
 #ifndef HAVE_SNPRINTF
 #define snprintf g_snprintf

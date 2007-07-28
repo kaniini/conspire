@@ -213,7 +213,7 @@ joind_show_dialog (server *serv)
 	gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
 
 	serv->gui->joind_check = checkbutton1 = gtk_check_button_new_with_mnemonic (_("_Always show this dialog after connecting."));
-	settings_get_bool(config, "gui", "join_dialog", *gui_join_dialog);
+	settings_get_bool(config, "gui", "join_dialog", &gui_join_dialog);
 	if (gui_join_dialog)
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton1), TRUE);
 	gtk_widget_show (checkbutton1);
@@ -247,7 +247,7 @@ void
 joind_open (server *serv)
 {
 	gboolean gui_join_dialog;
-	settings_get_bool(config, "gui", "join_dialog", *gui_join_dialog);
+	settings_get_bool(config, "gui", "join_dialog", &gui_join_dialog);
 	if (gui_join_dialog)
 		joind_show_dialog (serv);
 }

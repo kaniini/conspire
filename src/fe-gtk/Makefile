@@ -7,7 +7,7 @@ OBJECTIVE_BINS = conspire-gtk
 
 CFLAGS += -I../.. $(GUI_CFLAGS) -DG_DISABLE_CAST_CHECKS -DLOCALEDIR=\"$(localedir)\"
 
-LIBADD = -L../common -lconspire $(GUI_LIBS)
+LIBADD = -L../common -lconspire $(COMMON_LIBS) $(GUI_LIBS)
 
 SOURCES = about.c ascii.c banlist.c chanlist.c chanview.c custom-list.c \
 	dccgui.c editlist.c fe-gtk.c fkeys.c gtkutil.c ignoregui.c joind.c menu.c \
