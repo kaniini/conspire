@@ -5,10 +5,10 @@ OBJECTIVE_LIBS = libconspire.so
 OBJECTIVE_SONAME_SUFFIX = 0
 LIBCONSPIRE_SUFFIX = 0.1.0
 
-CFLAGS += $(PICFLAGS) $(COMMON_CFLAGS)
+CFLAGS += $(PICFLAGS) $(COMMON_CFLAGS) $(MCS_CFLAGS)
 
 SUBDIRS = tools $(DBUSDIR)
-LIBADD += $(DBUSLIBADD)
+LIBADD += $(COMMON_LIBS) $(DBUSLIBADD) $(MCS_LIBS)
 
 SOURCES = cfgfiles.c configdb.c ctcp.c dcc.c history.c ignore.c \
 	inbound.c modes.c network.c notify.c outbound.c \

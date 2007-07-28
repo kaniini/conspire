@@ -171,10 +171,7 @@ dnl ** MCS **************************************************************
 dnl *********************************************************************
 
 PKG_CHECK_MODULES(MCS, [libmcs >= 0.4],
-	[
-		COMMON_CFLAGS="$COMMON_CFLAGS $MCS_CFLAGS"
-		COMMON_LIBS="$COMMON_LIBS $MCS_LIBS"
-	],
+	[],
 	[AC_MSG_ERROR([You need mcs to compile conspire.])])
 
 dnl *********************************************************************
