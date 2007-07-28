@@ -1306,32 +1306,6 @@ menu_dcc_chat_win (GtkWidget *wid, gpointer none)
 	fe_dcc_open_chat_win (FALSE);
 }
 
-void
-menu_change_layout (void)
-{
-	if (prefs.tab_layout == 0)
-	{
-		menu_setting_foreach (NULL, MENU_ID_LAYOUT_TABS, 1);
-		menu_setting_foreach (NULL, MENU_ID_LAYOUT_TREE, 0);
-		mg_change_layout (0);
-	} else
-	{
-		menu_setting_foreach (NULL, MENU_ID_LAYOUT_TABS, 0);
-		menu_setting_foreach (NULL, MENU_ID_LAYOUT_TREE, 1);
-		mg_change_layout (2);
-	}
-}
-
-static void
-menu_layout_cb (GtkWidget *item, gpointer none)
-{
-	prefs.tab_layout = 2;
-	if (GTK_CHECK_MENU_ITEM (item)->active)
-		prefs.tab_layout = 0;
-
-	menu_change_layout ();
-}
-
 static void
 menu_apply_metres_cb (session *sess)
 {
@@ -1416,28 +1390,23 @@ static struct mymenu mymenu[] = {
 	{N_("U_serlist Buttons"), menu_ulbuttons_toggle, 0, M_MENUTOG, MENU_ID_ULBUTTONS, 0, 1},
 	{N_("M_ode Buttons"), menu_cmbuttons_toggle, 0, M_MENUTOG, MENU_ID_MODEBUTTONS, 0, 1},
 	{0, 0, 0, M_SEP, 0, 0, 0},
-	{N_("_Channel Switcher"), 0, 0, M_MENUSUB, 0, 0, 1},	/* 23 */
-#define TABS_OFFSET (24)
-		{N_("_Tabs"), menu_layout_cb, 0, M_MENURADIO, MENU_ID_LAYOUT_TABS, 0, 1},
-		{N_("T_ree"), 0, 0, M_MENURADIO, MENU_ID_LAYOUT_TREE, 0, 1},
-		{0, 0, 0, M_END, 0, 0, 0},
-	{N_("_Network Meters"), 0, 0, M_MENUSUB, 0, 0, 1},	/* 27 */
-#define METRE_OFFSET (28)
+	{N_("_Network Meters"), 0, 0, M_MENUSUB, 0, 0, 1},	/* 24 */
+#define METRE_OFFSET (24)
 		{N_("Off"), menu_metres_off, 0, M_MENURADIO, 0, 0, 1},
 		{N_("Graph"), menu_metres_graph, 0, M_MENURADIO, 0, 0, 1},
 		{N_("Text"), menu_metres_text, 0, M_MENURADIO, 0, 0, 1},
 		{N_("Both"), menu_metres_both, 0, M_MENURADIO, 0, 0, 1},
-		{0, 0, 0, M_END, 0, 0, 0},	/* 32 */
+		{0, 0, 0, M_END, 0, 0, 0},	/* 29 */
 
 	{N_("_Server"), 0, 0, M_NEWMENU, 0, 0, 1},
 	{N_("_Disconnect"), menu_disconnect, GTK_STOCK_DISCONNECT, M_MENUSTOCK, MENU_ID_DISCONNECT, 0, 1},
 	{N_("_Reconnect"), menu_reconnect, GTK_STOCK_CONNECT, M_MENUSTOCK, MENU_ID_RECONNECT, 0, 1},
 	{N_("Join Channel..."), menu_join, GTK_STOCK_JUMP_TO, M_MENUSTOCK, MENU_ID_JOIN, 0, 1},
 	{0, 0, 0, M_SEP, 0, 0, 0},
-#define AWAY_OFFSET (38)
+#define AWAY_OFFSET (35)
 	{N_("Marked Away"), menu_away, 0, M_MENUTOG, MENU_ID_AWAY, 0, 1, GDK_a},
 
-	{N_("_Usermenu"), 0, 0, M_NEWMENU, MENU_ID_USERMENU, 0, 1},	/* 39 */
+	{N_("_Usermenu"), 0, 0, M_NEWMENU, MENU_ID_USERMENU, 0, 1},	/* 37 */
 
 	{N_("S_ettings"), 0, 0, M_NEWMENU, 0, 0, 1},
 	{N_("_Preferences"), menu_settings, GTK_STOCK_PREFERENCES, M_MENUSTOCK, 0, 0, 1},
@@ -1468,7 +1437,7 @@ static struct mymenu mymenu[] = {
 	{0, 0, 0, M_SEP, 0, 0, 0},
 	{N_("Reset Marker Line"), menu_resetmarker, 0, M_MENUITEM, 0, 0, 1, GDK_m},
 	{N_("C_lear Text"), menu_flushbuffer, GTK_STOCK_CLEAR, M_MENUSTOCK, 0, 0, 1, GDK_l},
-#define SEARCH_OFFSET 67
+#define SEARCH_OFFSET 63
 	{N_("Search Text..."), menu_search, GTK_STOCK_FIND, M_MENUSTOCK, 0, 0, 1, GDK_f},
 	{N_("Save Text..."), menu_savebuffer, GTK_STOCK_SAVE, M_MENUSTOCK, 0, 0, 1},
 

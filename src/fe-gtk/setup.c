@@ -230,18 +230,9 @@ static const char *const focusnewtabsmenu[] =
 };
 #endif
 
-static const char *const swtype[] =
-{
-	N_("Tabs"),	/* 0 tabs */
-	"",			/* 1 reserved */
-	N_("Tree"),	/* 2 tree */
-	NULL
-};
-
 static const setting tabs_settings[] =
 {
 	/*{ST_HEADER,	N_("Channel Switcher"),0,0,0},*/
-	{ST_RADIO,  N_("Switcher type:"),P_OFFINTNL(tab_layout), 0, swtype, 0},
 	{ST_TOGGLE, N_("Open an extra tab for server messages"), P_OFFINTNL(use_server_tab), 0, 0, 0},
 	{ST_TOGGLE, N_("Open an extra tab for server notices"), P_OFFINTNL(notices_tabs), 0, 0, 0},
 	{ST_TOGGLE, N_("Open a new tab when you receive a private message"), P_OFFINTNL(autodialog), 0, 0, 0},

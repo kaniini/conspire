@@ -72,11 +72,6 @@ static chan *cv_find_chan_by_number (chanview *cv, int num);
 static int cv_find_number_of_chan (chanview *cv, chan *find_ch);
 
 
-/* ======= TABS ======= */
-
-#include "chanview-tabs.c"
-
-
 /* ======= TREE ======= */
 
 #include "chanview-tree.c"
@@ -159,23 +154,6 @@ chanview_set_impl (chanview *cv, int type)
 
 	switch (type)
 	{
-	case 0:
-		cv->func_init = cv_tabs_init;
-		cv->func_postinit = cv_tabs_postinit;
-		cv->func_add = cv_tabs_add;
-		cv->func_move_focus = cv_tabs_move_focus;
-		cv->func_change_orientation = cv_tabs_change_orientation;
-		cv->func_remove = cv_tabs_remove;
-		cv->func_move = cv_tabs_move;
-		cv->func_move_family = cv_tabs_move_family;
-		cv->func_focus = cv_tabs_focus;
-		cv->func_set_color = cv_tabs_set_color;
-		cv->func_rename = cv_tabs_rename;
-		cv->func_is_collapsed = cv_tabs_is_collapsed;
-		cv->func_get_parent = cv_tabs_get_parent;
-		cv->func_cleanup = cv_tabs_cleanup;
-		break;
-
 	default:
 		cv->func_init = cv_tree_init;
 		cv->func_postinit = cv_tree_postinit;
