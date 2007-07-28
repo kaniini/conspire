@@ -1,4 +1,9 @@
+#ifndef __FE_GTK_H__
+#define __FE_GTK_H__
+
 #include "../../config.h"
+
+#include <glib.h>
 
 #ifndef WIN32
 #include <sys/types.h>
@@ -23,6 +28,8 @@
 #include <gtk/gtkwidget.h>
 #include <gtk/gtkcontainer.h>
 #include <gtk/gtksignal.h>
+
+#include "chanview.h"
 
 #undef gtk_signal_connect
 #define gtk_signal_connect g_signal_connect
@@ -178,4 +185,6 @@ void SPELL_ENTRY_INSERT (GtkWidget *entry, const char *text, int len, int *pos);
 #define SPELL_ENTRY_GET_POS(e) gtk_editable_get_position(GTK_EDITABLE(e))
 #define SPELL_ENTRY_SET_POS(e,p) gtk_editable_set_position(GTK_EDITABLE(e),p);
 #define SPELL_ENTRY_INSERT(e,t,l,p) gtk_editable_insert_text(GTK_EDITABLE(e),t,l,p)
+#endif
+
 #endif

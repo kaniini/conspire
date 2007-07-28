@@ -1,3 +1,8 @@
+#ifndef __MAINGUI_H__
+#define __MAINGUI_H__
+
+#include "fe-gtk.h"
+
 extern GtkStyle *input_style;
 extern GtkWidget *parent_window;
 
@@ -16,6 +21,7 @@ void mg_set_title (GtkWidget *button, char *title);
 void mg_set_access_icon (session_gui *gui, GdkPixbuf *pix, gboolean away);
 void mg_apply_setup (void);
 void mg_close_sess (session *);
+void mg_close_gen (chan *chan, GtkWidget *gen);
 void mg_tab_close (session *sess);
 void mg_detach (session *sess, int mode);
 void mg_progressbar_create (session_gui *gui);
@@ -30,3 +36,5 @@ gboolean mg_drag_begin_cb (GtkWidget *widget, GdkDragContext *context, gpointer 
 void mg_drag_end_cb (GtkWidget *widget, GdkDragContext *context, gpointer userdata);
 gboolean mg_drag_drop_cb (GtkWidget *widget, GdkDragContext *context, int x, int y, guint time, gpointer user_data);
 gboolean mg_drag_motion_cb (GtkWidget *widget, GdkDragContext *context, int x, int y, guint time, gpointer user_data); 
+
+#endif

@@ -1409,7 +1409,7 @@ mg_chan_remove (chan *ch)
 
 /* destroy non-irc tab/window */
 
-static void
+void
 mg_close_gen (chan *ch, GtkWidget *box)
 {
 	char *title = g_object_get_data (G_OBJECT (box), "title");

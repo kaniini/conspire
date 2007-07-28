@@ -698,8 +698,7 @@ servlist_connect_cb (GtkWidget *button, gpointer userdata)
 
 	servlist_connect (servlist_sess, selected_net, TRUE);
 
-	gtk_widget_destroy (serverlist_win);
-	serverlist_win = NULL;
+	mg_close_gen(NULL, serverlist_win);
 }
 
 static void
@@ -1253,19 +1252,9 @@ servlist_open_networks (void)
 	if (!settings_get_bool(config,   "gui", "skip_serverlist", &skip_serverlist))
 		skip_serverlist = FALSE;
 
-	servlist = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	gtk_container_set_border_width (GTK_CONTAINER (servlist), 4);
-	gtk_window_set_title (GTK_WINDOW (servlist), _("conspire: Network List"));
-	gtk_window_set_default_size (GTK_WINDOW (servlist), win_width, win_height);
-	gtk_window_set_position (GTK_WINDOW (servlist), GTK_WIN_POS_MOUSE);
-	gtk_window_set_role (GTK_WINDOW (servlist), "servlist");
-	gtk_window_set_type_hint (GTK_WINDOW (servlist), GDK_WINDOW_TYPE_HINT_DIALOG);
-	if (current_sess)
-		gtk_window_set_transient_for (GTK_WINDOW (servlist), GTK_WINDOW (current_sess->gui->window));
-
-	vbox1 = gtk_vbox_new (FALSE, 0);
-	gtk_widget_show (vbox1);
-	gtk_container_add (GTK_CONTAINER (servlist), vbox1);
+	servlist =
+		mg_create_generic_tab(_("Network List"), _("conspire: Networks"),
+			FALSE, TRUE, servlist_close_cb, NULL, 640, 480, &vbox1, NULL);
 
 	label2 = bold_label (_("User Information"));
 	gtk_box_pack_start (GTK_BOX (vbox1), label2, FALSE, FALSE, 0);
@@ -1472,12 +1461,6 @@ servlist_open_networks (void)
 void
 fe_serverlist_open (session *sess)
 {
-	if (serverlist_win)
-	{
-		gtk_window_present (GTK_WINDOW (serverlist_win));
-		return;
-	}
-
 	servlist_sess = sess;
 
 	serverlist_win = servlist_open_networks ();
@@ -1494,5 +1477,5 @@ fe_serverlist_open (session *sess)
 	g_signal_connect (G_OBJECT (networks_tree), "key_press_event",
 							G_CALLBACK (servlist_net_keypress_cb), networks_tree);
 
-	gtk_widget_show (serverlist_win);
+	gtk_widget_show_all (serverlist_win);
 }
