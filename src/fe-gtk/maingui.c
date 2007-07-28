@@ -1035,6 +1035,8 @@ mg_populate (session *sess)
 	mg_set_topic_tip (sess);
 
 	plugin_emit_dummy_print (sess, "Focus Tab");
+
+	mg_update_xtext(sess->gui->xtext);
 }
 
 void
