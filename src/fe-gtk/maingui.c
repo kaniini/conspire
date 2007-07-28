@@ -2734,20 +2734,6 @@ mg_place_userlist_and_chanview (session_gui *gui)
 	mg_place_userlist_and_chanview_real (gui, gui->user_box, chanviewbox);
 }
 
-void
-mg_change_layout (int type)
-{
-	if (mg_gui)
-	{
-		/* put tabs at the bottom */
-		if (type == 0 && prefs.tab_pos != POS_BOTTOM && prefs.tab_pos != POS_TOP)
-			prefs.tab_pos = POS_BOTTOM;
-
-		mg_place_userlist_and_chanview (mg_gui);
-		chanview_set_impl (mg_gui->chanview, type);
-	}
-}
-
 static void
 mg_inputbox_rightclick (GtkEntry *entry, GtkWidget *menu)
 {
