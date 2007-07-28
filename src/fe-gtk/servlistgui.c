@@ -1239,12 +1239,18 @@ servlist_open_networks (void)
 	gchar *nick1, *nick2, *nick3, *username, *realname;
 	gboolean skip_serverlist;
 
-	settings_get_string(config, "irc", "nick1", &nick1);
-	settings_get_string(config, "irc", "nick2", &nick2);
-	settings_get_string(config, "irc", "nick3", &nick3);
-	settings_get_string(config, "irc", "user",  &username);
-	settings_get_string(config, "irc", "real",  &realname);
-	settings_get_bool(config,   "gui", "skip_serverlist", &skip_serverlist);
+	if (!settings_get_string(config, "irc", "nick1", &nick1))
+		nick1 = g_get_user_name();
+	if (!settings_get_string(config, "irc", "nick2", &nick2))
+		nick2 = g_strdup_printf("%s%s", nick1, "_");
+	if (!settings_get_string(config, "irc", "nick3", &nick3))
+		nick3 = g_strdup_printf("%s%s", nick2, "_");
+	if (!settings_get_string(config, "irc", "user",  &username))
+		username = g_strdup(nick1);
+	if (!settings_get_string(config, "irc", "real",  &realname))
+		realname = g_strdup(nick1);
+	if (!settings_get_bool(config,   "gui", "skip_serverlist", &skip_serverlist))
+		skip_serverlist = FALSE;
 
 	servlist = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_container_set_border_width (GTK_CONTAINER (servlist), 4);
