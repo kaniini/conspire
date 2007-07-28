@@ -103,7 +103,8 @@ cv_tree_init (chanview *cv)
 	GTK_WIDGET_UNSET_FLAGS (view, GTK_CAN_FOCUS);
 	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (view), FALSE);
 #if GTK_CHECK_VERSION(2,10,0)
-	settings_get_bool(config, "gui", "treeview_lines", &treeview_lines);
+	if (!settings_get_bool(config, "gui", "treeview_lines", &treeview_lines))
+		treeview_lines = FALSE;
 	if (treeview_lines)
 		gtk_tree_view_set_enable_tree_lines (GTK_TREE_VIEW (view), TRUE);
 #endif
