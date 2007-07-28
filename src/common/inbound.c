@@ -1,4 +1,8 @@
-/* X-Chat
+/* Conspire
+ * Copyright (C) 2007 William Pitcock
+ * Portions copyright (c) 2001 Timo Sirainen
+ *
+ * X-Chat
  * Copyright (C) 1998 Peter Zelezny.
  *
  * This program is free software; you can redistribute it and/or modify
