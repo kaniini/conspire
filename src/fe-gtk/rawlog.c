@@ -107,11 +107,11 @@ open_rawlog (struct server *serv)
 	gtk_container_set_border_width (GTK_CONTAINER (hbox), 4);
 	gtk_widget_show (hbox);
 
-	settings_get_int(config,  "gui", "tint_red",    &tint_red);
-	settings_get_int(config,  "gui", "tint_green",  &tint_green);
-	settings_get_int(config,  "gui", "tint_blue",   &tint_blue);
-	settings_get_bool(config, "gui", "transparent", &transparent);
-	settings_get_str(config,  "gui", "font",        &font);
+	settings_get_int(config,     "gui", "tint_red",    &tint_red);
+	settings_get_int(config,     "gui", "tint_green",  &tint_green);
+	settings_get_int(config,     "gui", "tint_blue",   &tint_blue);
+	settings_get_bool(config,    "gui", "transparent", &transparent);
+	settings_get_string(config,  "gui", "font",        &font);
 
 	serv->gui->rawlog_textlist = gtk_xtext_new (colors, 0);
 	gtk_xtext_set_tint (GTK_XTEXT (serv->gui->rawlog_textlist), tint_red, tint_green, tint_blue);
