@@ -1931,9 +1931,6 @@ setup_apply_real (int new_pix, int do_ulist, int do_layout)
 
 	mg_apply_setup ();
 	tray_apply_setup ();
-
-	if (do_layout)
-		menu_change_layout ();
 }
 
 static void

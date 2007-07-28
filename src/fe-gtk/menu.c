@@ -1867,17 +1867,6 @@ menu_create_main (void *accel_group, int bar, int away, int toplevel,
 
 	mymenu[AWAY_OFFSET].state = away;
 
-	switch (prefs.tab_layout)
-	{
-	case 0:
-		mymenu[TABS_OFFSET].state = 1;
-		mymenu[TABS_OFFSET+1].state = 0;
-		break;
-	default:
-		mymenu[TABS_OFFSET].state = 0;
-		mymenu[TABS_OFFSET+1].state = 1;
-	}
-
 	mymenu[METRE_OFFSET].state = 0;
 	mymenu[METRE_OFFSET+1].state = 0;
 	mymenu[METRE_OFFSET+2].state = 0;
