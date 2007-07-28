@@ -414,8 +414,8 @@ N_("%C22*%O$tYou've invited%C26 $1%O to%C26 $2%O (%C26$3%O)")},
 N_("%C22*%O$tYou are now known as $2")},
 
 {"Netsplit", pevt_generic_none_help, 2, 
-N_("%C22*%O$tNetsplit detected between servers $1 and $2.")},
+N_("%C22*%O$t%C23Netsplit detected between servers $1 and $2.")},
 
 {"Netsplit Victims", pevt_generic_none_help, 1, 
-N_("%C22*%O$tNetsplit victims: $1")},
+N_("%C22*%O$t%C23Netsplit victims: $1")},
 };

@@ -760,17 +760,24 @@ netsplit_display_victims(server *serv)
 
 	for (head = serv->split_list; head != NULL; head = head->next)
 	{
-		while (buffer->len < 420)
+		if (buffer->len < 420)
 		{
 			g_string_append_printf(buffer, "%s%s",
 				*buffer->str != '\0' ? ", " : "",
 				(gchar *) head->data);
-			g_free(head->data);
 		}
+		else
+		{
+			EMIT_SIGNAL(XP_TE_NS_VICTIMS, serv->front_session, buffer->str, 
+				NULL, NULL, NULL, 0);
+			g_string_erase(buffer, 0, -1);
+		}
+		g_free(head->data);
+	}
+
+	if (buffer->len)
 		EMIT_SIGNAL(XP_TE_NS_VICTIMS, serv->front_session, buffer->str, 
 			NULL, NULL, NULL, 0);
-		g_string_erase(buffer, 0, -1);
-	}
 
 	g_string_free(buffer, TRUE);
 	g_slist_free(serv->split_list);
@@ -913,16 +920,16 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 	for (; list != NULL; list = list->next)
 	{
 		sess = (session *) list->data;
-		if (!netsplit && sess->server == serv)
+		if (sess->server == serv)
 		{
  			if (sess == current_sess)
  				was_on_front_session = TRUE;
 			if (userlist_remove (sess, nick))
 			{
-				if (!sess->hide_join_part)
+				if (!netsplit && !sess->hide_join_part)
 					EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, ip, NULL, 0);
 			}
-			else if (sess->type == SESS_DIALOG &&
+			else if (!netsplit && sess->type == SESS_DIALOG &&
 				!serv->p_cmp (sess->channel, nick))
 				EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, ip, NULL, 0);
 		}

@@ -823,12 +823,12 @@ pevt_uchangenick_help
 Netsplit
 XP_TE_NS_START
 pevt_generic_none_help
-%C22*%O$tNetsplit detected between servers $1 and $2.
+%C22*%O$t%C23Netsplit detected between servers $1 and $2.
 2
 
 Netsplit Victims
 XP_TE_NS_VICTIMS
 pevt_generic_none_help
-%C22*%O$tNetsplit victims: $1
+%C22*%O$t%C23Netsplit victims: $1
 1
 
