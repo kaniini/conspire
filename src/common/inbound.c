@@ -781,6 +781,88 @@ netsplit_display_victims(server *serv)
 	return FALSE;
 }
 
+/* check if quit message is a netsplit message -- shamelessly 
+   stolen from irssi. --nenolod */
+static gboolean
+quitmsg_is_split(const char *msg)
+{
+	const char *host1, *host2, *p;
+        int prev, len, host1_dot, host2_dot;
+
+	if (msg == NULL)
+		return FALSE;
+
+	/* NOTE: there used to be some paranoia checks (some older IRC
+	   clients have even more), but they're pretty useless nowadays,
+	   since IRC server prefixes the quit message with a space if it
+	   looks like a netsplit message.
+
+	   So, the check is currently just:
+             - host1.domain1 host2.domain2
+             - top-level domains have to be 2+ characters long,
+	       containing only alphabets
+	     - only 1 space
+	     - no double-dots (".." - probably useless check)
+	     - hosts/domains can't start or end with a dot
+             - the two hosts can't be identical (probably useless check)
+	     - can't contain ':' or '/' chars (some servers allow URLs)
+	   */
+	host1 = msg; host2 = NULL;
+	prev = '\0'; len = 0; host1_dot = host2_dot = 0;
+	while (*msg != '\0') {
+		if (*msg == ' ') {
+			if (prev == '.' || prev == '\0') {
+				/* domains can't end with '.', space can't
+				   be the first character in msg. */
+				return FALSE;
+			}
+			if (host2 != NULL)
+				return FALSE; /* only one space allowed */
+			if (!host1_dot)
+                                return FALSE; /* host1 didn't have domain */
+                        host2 = msg+1; len = -1;
+		} else if (*msg == '.') {
+			if (prev == '\0' || prev == ' ' || prev == '.') {
+				/* domains can't start with '.'
+				   and can't have ".." */
+				return FALSE;
+			}
+
+			if (host2 != NULL)
+				host2_dot = TRUE;
+			else
+                                host1_dot = TRUE;
+		} else if (*msg == ':' || *msg == '/')
+			return FALSE;
+
+		prev = *msg;
+                msg++; len++;
+	}
+
+	if (!host2_dot || prev == '.')
+                return FALSE;
+
+        /* top-domain1 must be 2+ chars long and contain only alphabets */
+	p = host2-1;
+	while (p[-1] != '.') {
+		if (!isalpha(p[-1]))
+                        return FALSE;
+		p--;
+	}
+	if (host2-p-1 < 2) return FALSE;
+
+        /* top-domain2 must be 2+ chars long and contain only alphabets */
+	p = host2+strlen(host2);
+	while (p[-1] != '.') {
+		if (!isalpha(p[-1]))
+                        return FALSE;
+		p--;
+	}
+	if (strlen(p) < 2) return FALSE;
+
+        return TRUE;
+}
+
 void
 inbound_quit (server *serv, char *nick, char *ip, char *reason)
 {
@@ -788,63 +870,33 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 	session *sess;
 	int was_on_front_session = FALSE;
 	gboolean netsplit = FALSE;
-	char *seperator, *p;
 
 	if (serv->split_reason && !strcmp(serv->split_reason, reason))
 		netsplit = TRUE;
-	else if ((seperator = strchr(reason, ' ')))
-	{
-		int tld = 0;
-		gboolean space = FALSE;
-
-		*seperator = '\0';
-
-		if ((p = strchr(reason, '.')) != NULL)
+	else if ((netsplit = quitmsg_is_split(reason)) == TRUE)
+	{		
+		if (netsplit)
 		{
-			for (p++; *p; p++)
+			if (serv->split_list)
 			{
-				if (*p == '.')
-					tld = 0;
-				tld++;
+				if (serv->split_timer)
+					g_source_remove(serv->split_timer);
+				netsplit_display_victims(serv);
 			}
-			if (tld > 1 && tld < 5)
+			else
 			{
-				tld = 0;
-				if ((p = strchr(seperator, '.')) != NULL)
+				gchar *seperator = strchr(reason, ' ');
+
+				if (seperator)
 				{
-					for (p++; *p; p++)
-					{
-						if (*p == ' ')
-						{
-							space = TRUE;
-							break;
-						}
-
-						if (*p == '.')
-							tld = 0;
-						else
-							tld++;
-					}
-
-					if (!space && (tld > 1) && (tld < 6))
-						netsplit = TRUE;
+					*seperator = '\0';
+					EMIT_SIGNAL(XP_TE_NS_START, serv->front_session, reason, seperator + 1, NULL, NULL, 0);
+					*seperator = ' ';
 				}
+
+				serv->split_reason = g_strdup(reason);
 			}
 		}
-
-		if (netsplit && serv->split_list)
-		{
-			if (serv->split_timer)
-				g_source_remove(serv->split_timer);
-			netsplit_display_victims(serv);
-
-			EMIT_SIGNAL(XP_TE_NS_START, serv->front_session, reason, seperator + 1, NULL, NULL, 0);
-
-			*seperator = ' ';
-			serv->split_reason = g_strdup(reason);
-		}
-		else
-			*seperator = ' ';
 	}
 
 	if (netsplit)
