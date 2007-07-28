@@ -935,29 +935,15 @@ xchat_init (void)
 
 	servlist_init ();							/* load server list */
 
+	new_ircwindow (NULL, NULL, SESS_SERVER, 0);
+
+	/* turned OFF via -a arg */
+	if (!arg_dont_autoconnect && servlist_have_auto())
+		fe_idle_add (xchat_auto_connect, NULL);
+
 	/* if we got a URL, don't open the server list GUI */
 	if (!prefs.slist_skip && !arg_url)
 		fe_serverlist_open (NULL);
-
-	/* turned OFF via -a arg */
-	if (!arg_dont_autoconnect)
-	{
-		/* do any auto connects */
-		if (!servlist_have_auto ())	/* if no new windows open .. */
-		{
-			/* and no serverlist gui ... */
-			if (prefs.slist_skip || arg_url)
-				/* we'll have to open one. */
-				new_ircwindow (NULL, NULL, SESS_SERVER, 0);
-		} else
-		{
-			fe_idle_add (xchat_auto_connect, NULL);
-		}
-	} else
-	{
-		if (prefs.slist_skip || arg_url)
-			new_ircwindow (NULL, NULL, SESS_SERVER, 0);
-	}
 }
 
 void
