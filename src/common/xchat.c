@@ -35,6 +35,7 @@
 #include "xchat.h"
 #include "fe.h"
 #include "util.h"
+#include "configdb.h"
 #include "cfgfiles.h"
 #include "ignore.h"
 #include "xchat-plugin.h"
@@ -65,6 +66,8 @@ GSList *ignore_list = 0;
 GSList *usermenu_list = 0;
 GSList *urlhandler_list = 0;
 GSList *tabmenu_list = 0;
+
+ConfigDb *config;
 
 static int in_xchat_exit = FALSE;
 int xchat_is_quitting = FALSE;
@@ -1040,6 +1043,7 @@ main (int argc, char *argv[])
 	xchat_remote ();
 #endif
 
+	config = settings_open();
 	load_config ();
 
 	fe_init ();
