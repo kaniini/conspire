@@ -67,7 +67,7 @@ GSList *usermenu_list = 0;
 GSList *urlhandler_list = 0;
 GSList *tabmenu_list = 0;
 
-ConfigDb *config;
+//ConfigDb *config;
 
 static int in_xchat_exit = FALSE;
 int xchat_is_quitting = FALSE;

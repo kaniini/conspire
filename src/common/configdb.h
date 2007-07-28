@@ -194,5 +194,7 @@ G_BEGIN_DECLS
 
 G_END_DECLS
 
+ConfigDb *config;
+
 #endif /* CONFIGDB_H */
 
