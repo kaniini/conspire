@@ -134,22 +134,6 @@ AC_ARG_ENABLE(xlib,
 [  --disable-xlib          disable use of xlib (for non X11 systems)],
         xlib=$enableval, xlib=yes)
 
-AC_ARG_ENABLE(python,
-[  --disable-python        don't build the python plugin],
-        python=$enableval, python=yes)
-
-AC_ARG_ENABLE(perl,
-[  --disable-perl          don't build the perl plugin],
-        perl=$enableval, perl=yes)
-
-AC_ARG_ENABLE(perl_old,
-[  --disable-perl_old      no backwards compatibility for perl plugin],
-        perl_old=$enableval, perl_old=yes)
-
-AC_ARG_ENABLE(tcl,
-[  --enable-tcl[=PATH]       directory with Tcl config file: tclConfig.sh],
-        tcl=$enableval, tcl=yes)
-
 AC_ARG_ENABLE(plugin,
 [  --disable-plugin        disable plugin support],
         plugin=$enableval, plugin=yes)
@@ -260,92 +244,6 @@ if test "$xlib" = yes; then
 	fi
 else
 	shm=no
-fi
-
-dnl *********************************************************************
-dnl ** PERL *************************************************************
-dnl *********************************************************************
-
-if test "$perl" = yes; then
-	AC_PATH_PROG(perlpath, perl)
-	AC_MSG_CHECKING(for Perl compile flags)
-	PERL_CFLAGS=`$perlpath -MExtUtils::Embed -e ccopts 2>/dev/null`
-	if test "_$PERL_CFLAGS" = _ ; then
-		AC_MSG_RESULT([not found, building without perl.])
-		perl=no
-	else
-		PERL_LDFLAGS=`$perlpath -MExtUtils::Embed -e ldopts |$sedpath 's/-lgdbm //'`
-		PERL_LDFLAGS=`echo $PERL_LDFLAGS |$sedpath 's/-ldb //'`
-		PERL_LDFLAGS=`echo $PERL_LDFLAGS |$sedpath 's/-lndbm //'`
-		if test "$system" = "Linux"; then
-			PERL_LDFLAGS=`echo $PERL_LDFLAGS |$sedpath 's/-lnsl //'`
-			PERL_LDFLAGS=`echo $PERL_LDFLAGS |$sedpath 's/-lposix //'`
-		fi
-		PERL_LDFLAGS=`echo $PERL_LDFLAGS |$sedpath 's/-lc //'`
-		AC_MSG_RESULT(ok)
-
-#		oldLIBS=$LIBS
-#		LIBS="$LIBS $PERL_LDFLAGS"
-#		AC_CHECK_FUNC(eval_pv)
-#		AC_CHECK_FUNC(call_pv)
-#		LIBS=$oldLIBS
-
-		AC_MSG_CHECKING(for perl >= 5.8.0)
-		PERL_VER=`$perlpath -e 'print $]>= 5.008?"yes":"no"'`
-		if test "$PERL_VER" = "yes"; then
-			AC_MSG_RESULT(yes)
-			AC_MSG_CHECKING(if perl plugin will be backward compatible)
-			if test "$perl_old" = "yes"; then
-					  AC_MSG_RESULT(yes)
-					  AC_DEFINE(OLD_PERL)
-			else
-					  AC_MSG_RESULT(no)
-			fi
-		else
-			AC_MSG_RESULT(no)
-			echo "perl version too old, building without perl."
-			perl=no
-		fi
-	fi
-fi
-
-dnl *********************************************************************
-dnl ** PYTHON ***********************************************************
-dnl *********************************************************************
-
-if test "$python" = yes; then
-        AC_PATH_PROG(pythonpath, python2)
-        if test "_$pythonpath" = _ ; then
-                AC_PATH_PROG(pythonpath, python)
-        fi
-        if test "_$pythonpath" = _ ; then
-                python=no
-        else
-                AC_MSG_CHECKING(Python version)
-                changequote(<<, >>)dnl
-                PY_VER=`$pythonpath -c 'import distutils.sysconfig; print distutils.sysconfig.get_config_vars("VERSION")[0];'`
-                PY_LIB=`$pythonpath -c 'import distutils.sysconfig; print distutils.sysconfig.get_python_lib(standard_lib=1);'`
-                PY_INC=`$pythonpath -c 'import distutils.sysconfig; print distutils.sysconfig.get_config_vars("INCLUDEPY")[0];'`
-                $pythonpath -c "import sys; map(int,sys.version[:3].split('.')) >= [2,2] or sys.exit(1)"
-                changequote([, ])dnl
-                AC_MSG_RESULT($PY_VER)
-                if test "$?" != "1"; then
-                        AC_MSG_CHECKING(Python compile flags)
-                        PY_PREFIX=`$pythonpath -c 'import sys; print sys.prefix'`
-                        PY_EXEC_PREFIX=`$pythonpath -c 'import sys; print sys.exec_prefix'`
-                        if test -f $PY_INC/Python.h; then
-                                PY_LIBS="-L$PY_LIB/config -lpython$PY_VER -lpthread -lutil"
-                                PY_CFLAGS="-I$PY_INC"
-                                AC_MSG_RESULT(ok)
-                        else
-                                python=no
-                                AC_MSG_RESULT([Can't find Python.h])
-                        fi
-                else
-                        echo "Python too old. Only 2.2 or above is supported."
-                        python=no
-                fi
-        fi
 fi
 
 dnl *********************************************************************
@@ -495,9 +393,6 @@ dnl *********************************************************************
 AM_CONDITIONAL(USE_OPENSSL, test "x$openssl" = "xyes")
 AM_CONDITIONAL(USE_LIBSEXY, test "x$spell" = "xstatic")
 AM_CONDITIONAL(DO_GTK, test "x$gtkfe" = "xyes")
-AM_CONDITIONAL(DO_PERL, test "x$perl" = "xyes")
-AM_CONDITIONAL(DO_PYTHON, test "x$python" = "xyes")
-AM_CONDITIONAL(DO_TCL, test "x$tcl" = "xyes")
 AM_CONDITIONAL(DO_PLUGIN, test "x$plugin" = "xyes")
 AM_CONDITIONAL(USE_DBUS, test "x$dbus" = "xyes")
 AM_CONDITIONAL(DO_GCONF, test "x$GCONFTOOL" != "xno")
@@ -746,7 +641,4 @@ echo "  OpenSSL support:                        ${openssl}"
 echo "  DBus support:                           ${dbus}"
 echo "  IPv6 support:                           ${ipv6}"
 echo "  Plugin loader:                          ${plugin}"
-echo
-echo "  Python scripting support:               ${python}"
-echo "  Perl scripting support:                 ${perl}"
 echo
