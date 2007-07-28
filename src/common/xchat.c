@@ -1066,7 +1066,5 @@ main (int argc, char *argv[])
 	WSACleanup ();
 #endif
 
-	settings_close(config);
-
 	return 0;
 }
