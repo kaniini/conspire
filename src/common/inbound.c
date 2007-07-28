@@ -750,17 +750,118 @@ inbound_topictime (server *serv, char *chan, char *nick, time_t stamp)
 	EMIT_SIGNAL (XP_TE_TOPICDATE, sess, chan, nick, tim, NULL, 0);
 }
 
+static gboolean
+netsplit_display_victims(server *serv)
+{
+	GString *buffer;
+	GSList *head;
+
+	buffer = g_string_new("");
+
+	for (head = serv->split_list; head != NULL; head = head->next)
+	{
+		while (buffer->len < 420)
+		{
+			g_string_append_printf(buffer, "%s%s",
+				*buffer->str != '\0' ? ", " : "",
+				(gchar *) head->data);
+			g_free(head->data);
+		}
+		EMIT_SIGNAL(XP_TE_NS_VICTIMS, serv->front_session, buffer->str, 
+			NULL, NULL, NULL, 0);
+		g_string_erase(buffer, 0, -1);
+	}
+
+	g_string_free(buffer, TRUE);
+	g_slist_free(serv->split_list);
+	serv->split_list = NULL;
+	g_free(serv->split_reason);
+	serv->split_reason = NULL;
+	serv->split_timer = 0;
+	return FALSE;
+}
+
 void
 inbound_quit (server *serv, char *nick, char *ip, char *reason)
 {
 	GSList *list = sess_list;
 	session *sess;
 	int was_on_front_session = FALSE;
+	gboolean netsplit = FALSE;
+	char *seperator, *p;
 
-	while (list)
+	if (serv->split_reason && !strcmp(serv->split_reason, reason))
+		netsplit = TRUE;
+	else if ((seperator = strchr(reason, ' ')))
+	{
+		int tld = 0;
+		gboolean space = FALSE;
+
+		*seperator = '\0';
+
+		if ((p = strchr(reason, '.')) != NULL)
+		{
+			for (p++; *p; p++)
+			{
+				if (*p == '.')
+					tld = 0;
+				tld++;
+			}
+			if (tld > 1 && tld < 5)
+			{
+				tld = 0;
+				if ((p = strchr(seperator, '.')) != NULL)
+				{
+					for (p++; *p; p++)
+					{
+						if (*p == ' ')
+						{
+							space = TRUE;
+							break;
+						}
+
+						if (*p == '.')
+							tld = 0;
+						else
+							tld++;
+					}
+
+					if (!space && (tld > 1) && (tld < 6))
+						netsplit = TRUE;
+				}
+			}
+		}
+
+		if (netsplit && serv->split_list)
+		{
+			if (serv->split_timer)
+				g_source_remove(serv->split_timer);
+			netsplit_display_victims(serv);
+
+			EMIT_SIGNAL(XP_TE_NS_START, serv->front_session, reason, seperator + 1, NULL, NULL, 0);
+
+			*seperator = ' ';
+			serv->split_reason = g_strdup(reason);
+		}
+		else
+			*seperator = ' ';
+	}
+
+	if (netsplit)
+	{
+		serv->split_list = g_slist_append(serv->split_list, g_strdup(nick));
+
+		if (serv->split_timer)
+			g_source_remove(serv->split_timer);
+
+		serv->split_timer = g_timeout_add(500,
+			(GSourceFunc) netsplit_display_victims, serv);
+	}
+
+	for (; list != NULL; list = list->next)
 	{
 		sess = (session *) list->data;
-		if (sess->server == serv)
+		if (!netsplit && sess->server == serv)
 		{
  			if (sess == current_sess)
  				was_on_front_session = TRUE;
@@ -768,12 +869,11 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 			{
 				if (!sess->hide_join_part)
 					EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, ip, NULL, 0);
-			} else if (sess->type == SESS_DIALOG && !serv->p_cmp (sess->channel, nick))
-			{
-				EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, ip, NULL, 0);
 			}
+			else if (sess->type == SESS_DIALOG &&
+				!serv->p_cmp (sess->channel, nick))
+				EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, ip, NULL, 0);
 		}
-		list = list->next;
 	}
 
 	notify_set_offline (serv, nick, was_on_front_session);

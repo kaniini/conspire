@@ -467,6 +467,11 @@ typedef struct server
 	int sendq_len;						/* queue size */
 	int lag;								/* milliseconds */
 
+	/* netsplit detection. --nenolod */
+	GSList *split_list;
+	guint split_timer;
+	char *split_reason;
+
 	struct session *front_session;	/* front-most window/tab */
 	struct session *server_session;	/* server window/tab */
 
