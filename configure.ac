@@ -170,7 +170,7 @@ dnl *********************************************************************
 dnl ** MCS **************************************************************
 dnl *********************************************************************
 
-PKG_CHECK_MODULES(MCS, [mcs >= 0.4],
+PKG_CHECK_MODULES(MCS, [libmcs >= 0.4],
 	[
 		COMMON_CFLAGS="$COMMON_CFLAGS $MCS_CFLAGS"
 		COMMON_LIBS="$COMMON_LIBS $MCS_LIBS"
