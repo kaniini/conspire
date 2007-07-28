@@ -36,6 +36,7 @@
 #include "../common/xchatc.h"
 #include "../common/servlist.h"
 #include "../common/cfgfiles.h"
+#include "../common/configdb.h"
 #include "../common/fe.h"
 
 #include "fe-gtk.h"
@@ -164,6 +165,7 @@ servlist_networks_populate (GtkWidget *treeview, GSList *netlist)
 	GtkTreeIter iter;
 	int i;
 	ircnet *net;
+	gint servlist_select;
 
 	if (!netlist)
 	{
@@ -180,7 +182,8 @@ servlist_networks_populate (GtkWidget *treeview, GSList *netlist)
 		net = netlist->data;
 		gtk_list_store_append (store, &iter);
 		gtk_list_store_set (store, &iter, 0, net->name, 1, 1, -1);
-		if (i == prefs.slist_select)
+		settings_get_int(config, "gui", "selected_server", &servlist_select);
+		if (i == servlist_select)
 		{
 			/* select this network */
 			servlist_select_and_show (GTK_TREE_VIEW (treeview), &iter, store);
@@ -343,7 +346,6 @@ servlist_move_network (ircnet *net, int delta)
 		pos += delta;
 		if (pos >= 0)
 		{
-			/*prefs.slist_select += delta;*/
 			network_list = g_slist_remove (network_list, net);
 			network_list = g_slist_insert (network_list, net, pos);
 			servlist_networks_populate (networks_tree, network_list);
@@ -624,7 +626,7 @@ servlist_find_selected_net (GtkTreeSelection *sel)
 		net = servlist_net_find (netname, &pos, strcmp);
 		g_free (netname);
 		if (net)
-			prefs.slist_select = pos;
+			settings_set_int(config, "gui", "selected_server", pos);
 	}
 
 	return net;
@@ -645,7 +647,8 @@ servlist_network_row_cb (GtkTreeSelection *sel, gpointer user_data)
 static int
 servlist_savegui (void)
 {
-	char *sp;
+	gchar *sp;
+	gchar *nick1, *nick2, *nick3, *username, *realname;
 
 	/* check for blank username, ircd will not allow this */
 	if (GTK_ENTRY (entry_guser)->text[0] == 0)
@@ -654,14 +657,22 @@ servlist_savegui (void)
 	if (GTK_ENTRY (entry_greal)->text[0] == 0)
 		return 1;
 
-	strcpy (prefs.nick1, GTK_ENTRY (entry_nick1)->text);
-	strcpy (prefs.nick2, GTK_ENTRY (entry_nick2)->text);
-	strcpy (prefs.nick3, GTK_ENTRY (entry_nick3)->text);
-	strcpy (prefs.username, GTK_ENTRY (entry_guser)->text);
-	sp = strchr (prefs.username, ' ');
+	nick1    = g_strdup(GTK_ENTRY(entry_nick1)->text);
+	nick2    = g_strdup(GTK_ENTRY(entry_nick2)->text);
+	nick3    = g_strdup(GTK_ENTRY(entry_nick3)->text);
+	username = g_strdup(GTK_ENTRY(entry_guser)->text);
+	realname = g_strdup(GTK_ENTRY(entry_greal)->text);
+
+	sp = strchr(username, ' ');
 	if (sp)
-		sp[0] = 0;	/* spaces will break the login */
-	strcpy (prefs.realname, GTK_ENTRY (entry_greal)->text);
+		sp[0] = 0; /* user ident should not contain spaces */
+
+	settings_set_string(config, "irc", "nick1", nick1);
+	settings_set_string(config, "irc", "nick2", nick2);
+	settings_set_string(config, "irc", "nick3", nick3);
+	settings_set_string(config, "irc", "user",  username);
+	settings_set_string(config, "irc", "real",  realname);
+
 	servlist_save ();
 
 	return 0;
@@ -925,9 +936,9 @@ static void
 no_servlist (GtkWidget * igad, gpointer serv)
 {
 	if (GTK_TOGGLE_BUTTON (igad)->active)
-		prefs.slist_skip = TRUE;
+		settings_set_bool(config, "gui", "skip_serverlist", TRUE);
 	else
-		prefs.slist_skip = FALSE;
+		settings_set_bool(config, "gui", "skip_serverlist", FALSE);
 }
 
 static GtkWidget *
@@ -1225,6 +1236,16 @@ servlist_open_networks (void)
 	GtkListStore *store;
 	GtkCellRenderer *renderer;
 
+	gchar *nick1, *nick2, *nick3, *username, *realname;
+	gboolean skip_serverlist;
+
+	settings_get_string(config, "irc", "nick1", &nick1);
+	settings_get_string(config, "irc", "nick2", &nick2);
+	settings_get_string(config, "irc", "nick3", &nick3);
+	settings_get_string(config, "irc", "user",  &username);
+	settings_get_string(config, "irc", "real",  &realname);
+	settings_get_bool(config,   "gui", "skip_serverlist", &skip_serverlist);
+
 	servlist = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_container_set_border_width (GTK_CONTAINER (servlist), 4);
 	gtk_window_set_title (GTK_WINDOW (servlist), _("conspire: Network List"));
@@ -1285,35 +1306,35 @@ servlist_open_networks (void)
 	gtk_misc_set_alignment (GTK_MISC (label7), 0, 0.5);
 
 	entry_nick1 = entry1 = gtk_entry_new ();
-	gtk_entry_set_text (GTK_ENTRY (entry1), prefs.nick1);
+	gtk_entry_set_text (GTK_ENTRY (entry1), nick1);
 	gtk_widget_show (entry1);
 	gtk_table_attach (GTK_TABLE (table1), entry1, 1, 2, 0, 1,
 							(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
 							(GtkAttachOptions) (0), 0, 0);
 
 	entry_nick2 = entry2 = gtk_entry_new ();
-	gtk_entry_set_text (GTK_ENTRY (entry2), prefs.nick2);
+	gtk_entry_set_text (GTK_ENTRY (entry2), nick2);
 	gtk_widget_show (entry2);
 	gtk_table_attach (GTK_TABLE (table1), entry2, 1, 2, 1, 2,
 							(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
 							(GtkAttachOptions) (0), 0, 0);
 
 	entry_nick3 = entry3 = gtk_entry_new ();
-	gtk_entry_set_text (GTK_ENTRY (entry3), prefs.nick3);
+	gtk_entry_set_text (GTK_ENTRY (entry3), nick3);
 	gtk_widget_show (entry3);
 	gtk_table_attach (GTK_TABLE (table1), entry3, 1, 2, 2, 3,
 							(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
 							(GtkAttachOptions) (0), 0, 0);
 
 	entry_guser = entry4 = gtk_entry_new ();
-	gtk_entry_set_text (GTK_ENTRY (entry4), prefs.username);
+	gtk_entry_set_text (GTK_ENTRY (entry4), username);
 	gtk_widget_show (entry4);
 	gtk_table_attach (GTK_TABLE (table1), entry4, 1, 2, 3, 4,
 							(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
 							(GtkAttachOptions) (0), 0, 0);
 
 	entry_greal = entry5 = gtk_entry_new ();
-	gtk_entry_set_text (GTK_ENTRY (entry5), prefs.realname);
+	gtk_entry_set_text (GTK_ENTRY (entry5), realname);
 	gtk_widget_show (entry5);
 	gtk_table_attach (GTK_TABLE (table1), entry5, 1, 2, 4, 5,
 							(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -1366,7 +1387,7 @@ servlist_open_networks (void)
 	checkbutton_skip =
 		gtk_check_button_new_with_mnemonic (_("Skip network list on startup"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_skip),
-											prefs.slist_skip);
+											skip_serverlist);
 	g_signal_connect (G_OBJECT (checkbutton_skip), "toggled",
 							G_CALLBACK (no_servlist), 0);
 	gtk_widget_show (checkbutton_skip);

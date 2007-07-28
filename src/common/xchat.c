@@ -970,6 +970,7 @@ xchat_exit (void)
 	if (prefs.autosave)
 	{
 		save_config ();
+		settings_close(config);
 		if (prefs.save_pevents)
 			pevent_save (NULL);
 	}

@@ -35,6 +35,7 @@
 #include "../common/xchat.h"
 #include "../common/xchatc.h"
 #include "../common/cfgfiles.h"
+#include "../common/configdb.h"
 #include "../common/server.h"
 #include "gtkutil.h"
 #include "palette.h"
