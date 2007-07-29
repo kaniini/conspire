@@ -5,7 +5,7 @@ localedir = $(datadir)/locale
 
 OBJECTIVE_BINS = conspire-gtk
 
-CFLAGS += -I../..
+CFLAGS += -I../.. $(COMMON_CFLAGS)
 
 LIBADD = -L../common -lconspire $(COMMON_LIBS)
 
