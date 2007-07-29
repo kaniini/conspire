@@ -434,7 +434,6 @@ const struct prefs vars[] = {
 	{"gui_pane_right_size", P_OFFINT (gui_pane_right_size), TYPE_INT},
 	{"gui_quit_dialog", P_OFFINT (gui_quit_dialog), TYPE_BOOL},
 	{"gui_slist_select", P_OFFINT (slist_select), TYPE_INT},
-	{"gui_slist_skip", P_OFFINT (slist_skip), TYPE_BOOL},
 	{"gui_throttlemeter", P_OFFINT (throttlemeter), TYPE_INT},
 	{"gui_topicbar", P_OFFINT (topicbar), TYPE_BOOL},
 	{"gui_tray", P_OFFINT (gui_tray), TYPE_BOOL},

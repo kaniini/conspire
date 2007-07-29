@@ -674,6 +674,10 @@ xchat_init (void)
 {
 	char buf[3068];
 	const char *cs = NULL;
+	gboolean skip_serverlist;
+
+	if (!settings_get_bool(config, "gui", "sskip_serverlist", &skip_serverlist))
+		skip_serverlist = FALSE;
 
 #ifdef WIN32
 	WSADATA wsadata;
@@ -942,7 +946,7 @@ xchat_init (void)
 		fe_idle_add (xchat_auto_connect, NULL);
 
 	/* if we got a URL, don't open the server list GUI */
-	if (!prefs.slist_skip && !arg_url)
+	if (skip_serverlist && !arg_url)
 		fe_serverlist_open (NULL);
 }
 

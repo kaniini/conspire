@@ -231,7 +231,6 @@ struct xchatprefs
 	unsigned int fastdccsend;
 	unsigned int dcc_send_fillspaces;
 	unsigned int dcc_remove;
-	unsigned int slist_skip;
 	unsigned int slist_select;
 	unsigned int filterbeep;
 

@@ -37,6 +37,7 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "../common/xchat.h"
+#include "../common/configdb.h"
 #include "../common/util.h"
 #include "../common/userlist.h"
 #include "../common/modes.h"
@@ -297,14 +298,20 @@ fe_userlist_rehash (session *sess, struct User *user)
 {
 	GtkTreeIter *iter;
 	int sel;
-	int do_away = TRUE;
+	gboolean do_away = TRUE, away_track;
+	gint away_length;
 
 	iter = find_row (GTK_TREE_VIEW (sess->gui->user_tree),
 						  sess->res->user_model, user, &sel);
 	if (!iter)
 		return;
 
-	if (prefs.away_size_max < 1 || !prefs.away_track)
+	if (!settings_get_int(config, "away", "length", &away_length))
+		away_length = 300;
+	if (!settings_get_bool(config, "away", "track", &away_track))
+		away_track = TRUE;
+
+	if (away_length < 1 || !away_track)
 		do_away = FALSE;
 
 	gtk_list_store_set (GTK_LIST_STORE (sess->res->user_model), iter,
@@ -321,9 +328,15 @@ fe_userlist_insert (session *sess, struct User *newuser, int row, int sel)
 	GtkTreeModel *model = sess->res->user_model;
 	GdkPixbuf *pix = get_user_icon (sess->server, newuser);
 	GtkTreeIter iter;
-	int do_away = TRUE;
+	gboolean do_away = TRUE, away_track;
+	gint away_length;
 
-	if (prefs.away_size_max < 1 || !prefs.away_track)
+	if (!settings_get_int(config, "away", "length", &away_length))
+		away_length = 300;
+	if (!settings_get_bool(config, "away", "track", &away_track))
+		away_track = TRUE;
+
+	if (away_length < 1 || !away_track)
 		do_away = FALSE;
 
 	gtk_list_store_insert_with_values (GTK_LIST_STORE (model), &iter, row,
@@ -432,6 +445,10 @@ static void
 userlist_add_columns (GtkTreeView * treeview)
 {
 	GtkCellRenderer *renderer;
+	gboolean show_hostname;
+
+	if (!settings_get_bool(config, "userlist", "show_hostname", &show_hostname))
+		show_hostname = FALSE;
 
 	/* icon column */
 	renderer = gtk_cell_renderer_pixbuf_new ();
@@ -446,7 +463,7 @@ userlist_add_columns (GtkTreeView * treeview)
 																-1, NULL, renderer,
 													"text", 1, "foreground-gdk", 4, NULL);
 
-	if (prefs.showhostname_in_userlist)
+	if (show_hostname)
 	{
 		/* hostname column */
 		renderer = gtk_cell_renderer_text_new ();
@@ -464,18 +481,21 @@ userlist_click_cb (GtkWidget *widget, GdkEventButton *event, gpointer userdata)
 	int i;
 	GtkTreeSelection *sel;
 	GtkTreePath *path;
+	gchar *dclick_cmd;
 
 	if (!event)
 		return FALSE;
 
+	if (!settings_get_string(config, "userlist", "doubleclick_command", &dclick_cmd))
+		dclick_cmd = g_strdup("QUOTE WHOIS %s %s");
+
 	if (!(event->state & GDK_CONTROL_MASK) &&
-		event->type == GDK_2BUTTON_PRESS && prefs.doubleclickuser[0])
+		event->type == GDK_2BUTTON_PRESS && dclick_cmd[0])
 	{
 		nicks = userlist_selection_list (widget, &i);
 		if (nicks)
 		{
-			nick_command_parse (current_sess, prefs.doubleclickuser, nicks[0],
-									  nicks[0]);
+			nick_command_parse (current_sess, dclick_cmd, nicks[0], nicks[0]);
 			while (i)
 			{
 				i--;
@@ -566,11 +586,16 @@ userlist_create (GtkWidget *box)
 		{"XCHAT_USERLIST", GTK_TARGET_SAME_APP, 75 }
 	};
 
+	gboolean show_hostname;
+
+	if (!settings_get_bool(config, "userlist", "show_hostname", &show_hostname))
+		show_hostname = FALSE;
+
 	sw = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
 													 GTK_SHADOW_ETCHED_IN);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
-											  prefs.showhostname_in_userlist ?
+											  show_hostname ?
 												GTK_POLICY_AUTOMATIC :
 												GTK_POLICY_NEVER,
 											  GTK_POLICY_AUTOMATIC);
