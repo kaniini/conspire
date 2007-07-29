@@ -37,6 +37,7 @@
 #include "xchat.h"
 #include "fe.h"
 #include "cfgfiles.h"
+#include "configdb.h"
 #include "network.h"
 #include "notify.h"
 #include "xchatc.h"
@@ -1720,6 +1721,10 @@ server_new (void)
 {
 	static int id = 0;
 	server *serv;
+	gchar *nick;
+
+	if (!settings_get_string(config, "irc", "nick1", &nick))
+		nick = g_get_user_name();
 
 	serv = malloc (sizeof (struct server));
 	memset (serv, 0, sizeof (struct server));
@@ -1729,7 +1734,7 @@ server_new (void)
 
 	serv->id = id++;
 	serv->sok = -1;
-	strcpy (serv->nick, prefs.nick1);
+	strcpy(serv->nick, nick);
 	server_set_defaults (serv);
 
 	serv_list = g_slist_prepend (serv_list, serv);

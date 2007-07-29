@@ -27,6 +27,7 @@
 #include <glib/ghash.h>
 
 #include "cfgfiles.h"
+#include "configdb.h"
 #include "fe.h"
 #include "server.h"
 #include "text.h"
@@ -499,6 +500,10 @@ servlist_connect (session *sess, ircnet *net, gboolean join)
 	GSList *list;
 	char *port;
 	server *serv;
+	gchar *nick;
+
+	if (!settings_get_string(config, "irc", "nick1", &nick))
+		nick = g_get_user_name();
 
 	if (!sess)
 		sess = new_ircwindow (NULL, NULL, SESS_SERVER, TRUE);
@@ -529,11 +534,11 @@ servlist_connect (session *sess, ircnet *net, gboolean join)
 
 	if (net->flags & FLAG_USE_GLOBAL)
 	{
-		strcpy (serv->nick, prefs.nick1);
+		strcpy(serv->nick, nick);
 	} else
 	{
 		if (net->nick)
-			strcpy (serv->nick, net->nick);
+			strcpy(serv->nick, net->nick);
 	}
 
 	serv->dont_use_proxy = (net->flags & FLAG_USE_PROXY) ? FALSE : TRUE;
