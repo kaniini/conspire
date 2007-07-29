@@ -3,7 +3,7 @@ include ../../mk/init.mk
 
 localedir = $(datadir)/locale
 
-OBJECTIVE_BINS = conspire-gtk
+OBJECTIVE_BINS = conspire-bot
 
 CFLAGS += -I../.. $(COMMON_CFLAGS)
 
