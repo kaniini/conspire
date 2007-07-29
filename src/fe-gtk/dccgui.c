@@ -564,12 +564,12 @@ browse_dcc_folder (void)
 {
 	gchar *completed_dir;
 	gchar *dccdir;
-	if (settings_get_str(config, "dcc", "completed_dir", &completed_dir))
+	if (settings_get_string(config, "dcc", "completed_dir", &completed_dir))
 		browse_folder (completed_dir);
 	else
-		if (!settings_get_str(config, "dcc", "downloads", &dccdir)) {
+		if (!settings_get_string(config, "dcc", "downloads", &dccdir)) {
 			dccdir = g_strdup_printf("%s/downloads", get_xdir_utf8());
-			settings_set_str(config, "dcc", "downloads", dccdir);
+			settings_set_string(config, "dcc", "downloads", dccdir);
 		}
 		browse_folder (dccdir);
 }
@@ -739,7 +739,7 @@ fe_dcc_open_recv_win (int passive)
 	GSList *group;
 	gboolean windows_as_tabs;
 
-	if (!settings_get_str(config, "gui", "windows_as_tabs", &windows_as_tabs))
+	if (!settings_get_string(config, "gui", "windows_as_tabs", &windows_as_tabs))
 		windows_as_tabs = FALSE;
 
 	if (dccfwin.window)
