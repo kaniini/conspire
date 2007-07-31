@@ -30,8 +30,8 @@
 #define PDESC _("plugin for remote access using DBUS")
 #define PVERSION ""
 
-#define DBUS_SERVICE "org.xchat.service"
-#define DBUS_OBJECT_PATH "/org/xchat"
+#define DBUS_SERVICE "org.atheme.conspire.service"
+#define DBUS_OBJECT_PATH "/"
 
 static xchat_plugin *ph;
 static guint last_context_id = 0;

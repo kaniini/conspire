@@ -24,9 +24,9 @@
 #include "../xchat.h"
 #include "../xchatc.h"
 
-#define DBUS_SERVICE "org.xchat.service"
-#define DBUS_REMOTE "/org/xchat/Remote"
-#define DBUS_REMOTE_INTERFACE "org.xchat.plugin"
+#define DBUS_SERVICE "org.atheme.conspire.service"
+#define DBUS_REMOTE "/"
+#define DBUS_REMOTE_INTERFACE "org.atheme.conspire.integration"
 
 static void
 write_error (char *message,
