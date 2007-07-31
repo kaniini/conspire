@@ -39,12 +39,15 @@ void fe_add_rawlog (struct server *serv, char *text, int len, int outbound);
 #define FE_MSG_ERROR 8
 #define FE_MSG_MARKUP 16
 void fe_message (char *msg, int flags);
+
+/* FIXME: rewrite all of this crap to use GIOChannel. passing around raw
+   sockets is STUPID if we don't have to. --nenolod */
 #define FIA_READ 1
 #define FIA_WRITE 2
 #define FIA_EX 4
 #define FIA_FD 8
 int fe_input_add (int sok, int flags, void *func, void *data);
-void fe_input_remove (int tag);
+
 void fe_set_topic (struct session *sess, char *topic);
 void fe_set_hilight (struct session *sess);
 void fe_set_tab_color (struct session *sess, int col);

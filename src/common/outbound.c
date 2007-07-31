@@ -1459,7 +1459,7 @@ exec_check_process (struct session *sess)
 	if (val == -1 || val > 0)
 	{
 		close (sess->running_exec->myfd);
-		fe_input_remove (sess->running_exec->iotag);
+		g_source_remove (sess->running_exec->iotag);
 		free (sess->running_exec);
 		sess->running_exec = NULL;
 	}
@@ -1716,7 +1716,7 @@ exec_data (GIOChannel *source, GIOCondition condition, struct nbexec *s)
 		free(buf);
 		waitpid (s->childpid, NULL, 0);
 		s->sess->running_exec = NULL;
-		fe_input_remove (s->iotag);
+		g_source_remove (s->iotag);
 		close (sok);
 		free (s);
 		return TRUE;

@@ -520,7 +520,7 @@ server_stopconnecting (server * serv)
 {
 	if (serv->iotag)
 	{
-		fe_input_remove (serv->iotag);
+		g_source_remove (serv->iotag);
 		serv->iotag = 0;
 	}
 
@@ -1011,7 +1011,7 @@ server_cleanup (server * serv)
 
 	if (serv->iotag)
 	{
-		fe_input_remove (serv->iotag);
+		g_source_remove (serv->iotag);
 		serv->iotag = 0;
 	}
 

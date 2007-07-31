@@ -354,13 +354,13 @@ dcc_close (struct DCC *dcc, int dccstat, int destroy)
 {
 	if (dcc->wiotag)
 	{
-		fe_input_remove (dcc->wiotag);
+		g_source_remove (dcc->wiotag);
 		dcc->wiotag = 0;
 	}
 
 	if (dcc->iotag)
 	{
-		fe_input_remove (dcc->iotag);
+		g_source_remove (dcc->iotag);
 		dcc->iotag = 0;
 	}
 
@@ -596,7 +596,7 @@ dcc_read_chat (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 	{
 		if (dcc->throttled)
 		{
-			fe_input_remove (dcc->iotag);
+			g_source_remove (dcc->iotag);
 			dcc->iotag = 0;
 			return FALSE;
 		}
@@ -731,7 +731,7 @@ dcc_read (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 			if (need_ack)
 				dcc_send_ack (dcc);
 
-			fe_input_remove (dcc->iotag);
+			g_source_remove (dcc->iotag);
 			dcc->iotag = 0;
 			return FALSE;
 		}
@@ -849,7 +849,7 @@ dcc_connect_finished (GIOChannel *source, GIOCondition condition, struct DCC *dc
 
 	if (dcc->iotag)
 	{
-		fe_input_remove (dcc->iotag);
+		g_source_remove (dcc->iotag);
 		dcc->iotag = 0;
 	}
 
@@ -913,7 +913,7 @@ read_proxy (struct DCC *dcc)
 				fe_dcc_update (dcc);
 				if (dcc->iotag)
 				{
-					fe_input_remove (dcc->iotag);
+					g_source_remove (dcc->iotag);
 					dcc->iotag = 0;
 				}
 				return FALSE;
@@ -943,7 +943,7 @@ write_proxy (struct DCC *dcc)
 				fe_dcc_update (dcc);
 				if (dcc->wiotag)
 				{
-					fe_input_remove (dcc->wiotag);
+					g_source_remove (dcc->wiotag);
 					dcc->wiotag = 0;
 				}
 				return FALSE;
@@ -989,7 +989,7 @@ dcc_wingate_proxy_traverse (GIOChannel *source, GIOCondition condition, struct D
 	{
 		if (!read_proxy (dcc))
 			return TRUE;
-		fe_input_remove (dcc->wiotag);
+		g_source_remove (dcc->wiotag);
 		dcc->wiotag = 0;
 		dcc_connect_finished (source, 0, dcc);
 	}
@@ -1029,7 +1029,7 @@ dcc_socks_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DCC
 	{
 		if (!write_proxy (dcc))
 			return TRUE;
-		fe_input_remove (dcc->wiotag);
+		g_source_remove (dcc->wiotag);
 		dcc->wiotag = 0;
 		proxy->bufferused = 0;
 		proxy->buffersize = 8;
@@ -1042,7 +1042,7 @@ dcc_socks_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DCC
 	{
 		if (!read_proxy (dcc))
 			return TRUE;
-		fe_input_remove (dcc->iotag);
+		g_source_remove (dcc->iotag);
 		dcc->iotag = 0;
 		if (proxy->buffer[1] == 90)
 			dcc_connect_finished (source, 0, dcc);
@@ -1089,7 +1089,7 @@ dcc_socks5_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DC
 	{
 		if (!write_proxy (dcc))
 			return TRUE;
-		fe_input_remove (dcc->wiotag);
+		g_source_remove (dcc->wiotag);
 		dcc->wiotag = 0;
 		proxy->bufferused = 0;
 		proxy->buffersize = 2;
@@ -1102,7 +1102,7 @@ dcc_socks5_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DC
 	{
 		if (!read_proxy (dcc))
 			return TRUE;
-		fe_input_remove (dcc->iotag);
+		g_source_remove (dcc->iotag);
 		dcc->iotag = 0;
 
 		/* did the server say no auth required? */
@@ -1157,7 +1157,7 @@ dcc_socks5_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DC
 	{
 		if (!write_proxy (dcc))
 			return TRUE;
-		fe_input_remove (dcc->wiotag);
+		g_source_remove (dcc->wiotag);
 		dcc->wiotag = 0;
 		proxy->buffersize = 2;
 		proxy->bufferused = 0;
@@ -1172,7 +1172,7 @@ dcc_socks5_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DC
 			return TRUE;
 		if (dcc->iotag)
 		{
-			fe_input_remove (dcc->iotag);
+			g_source_remove (dcc->iotag);
 			dcc->iotag = 0;
 		}
 		if (proxy->buffer[1] != 0)
@@ -1209,7 +1209,7 @@ dcc_socks5_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DC
 	{
 		if (!write_proxy (dcc))
 			return TRUE;
-		fe_input_remove (dcc->wiotag);
+		g_source_remove (dcc->wiotag);
 		dcc->wiotag = 0;
 		proxy->buffersize = 4;
 		proxy->bufferused = 0;
@@ -1224,7 +1224,7 @@ dcc_socks5_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DC
 			return TRUE;
 		if (proxy->buffer[0] != 5 || proxy->buffer[1] != 0)
 		{
-			fe_input_remove (dcc->iotag);
+			g_source_remove (dcc->iotag);
 			dcc->iotag = 0;
 			if (proxy->buffer[1] == 2)
 				PrintText (dcc->serv->front_session, "SOCKS\tProxy refused to connect to host (not allowed).\n");
@@ -1255,7 +1255,7 @@ dcc_socks5_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DC
 		/* everything done? */
 		if (proxy->bufferused == proxy->buffersize)
 		{
-			fe_input_remove (dcc->iotag);
+			g_source_remove (dcc->iotag);
 			dcc->iotag = 0;
 			dcc_connect_finished (source, 0, dcc);
 		}
@@ -1297,7 +1297,7 @@ dcc_http_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DCC 
 	{
 		if (!write_proxy (dcc))
 			return TRUE;
-		fe_input_remove (dcc->wiotag);
+		g_source_remove (dcc->wiotag);
 		dcc->wiotag = 0;
 		proxy->bufferused = 0;
 		dcc->iotag = fe_input_add (dcc->sok, FIA_READ|FIA_EX,
@@ -1313,7 +1313,7 @@ dcc_http_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DCC 
 		if (proxy->bufferused < 12 ||
 			 memcmp (proxy->buffer, "HTTP/", 5) || memcmp (proxy->buffer + 9, "200", 3))
 		{
-			fe_input_remove (dcc->iotag);
+			g_source_remove (dcc->iotag);
 			dcc->iotag = 0;
 			PrintText (dcc->serv->front_session, proxy->buffer);
 			dcc->dccstat = STAT_FAILED;
@@ -1343,7 +1343,7 @@ dcc_http_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DCC 
 			else
 				return TRUE;
 		}
-		fe_input_remove (dcc->iotag);
+		g_source_remove (dcc->iotag);
 		dcc->iotag = 0;
 		dcc_connect_finished (source, 0, dcc);
 	}
@@ -1354,7 +1354,7 @@ dcc_http_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DCC 
 static gboolean
 dcc_proxy_connect (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 {
-	fe_input_remove (dcc->iotag);
+	g_source_remove (dcc->iotag);
 	dcc->iotag = 0;
 
 	if (!dcc_did_connect (source, condition, dcc))
@@ -1443,7 +1443,7 @@ dcc_send_data (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 
 	if (dcc->throttled)
 	{
-		fe_input_remove (dcc->wiotag);
+		g_source_remove (dcc->wiotag);
 		dcc->wiotag = 0;
 		return FALSE;
 	}
@@ -1488,7 +1488,7 @@ abortit:
 		/* it's all sent now, so remove the WRITE/SEND handler */
 		if (dcc->wiotag)
 		{
-			fe_input_remove (dcc->wiotag);
+			g_source_remove (dcc->wiotag);
 			dcc->wiotag = 0;
 		}
 	}
@@ -1588,7 +1588,7 @@ dcc_accept (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 
 	len = sizeof (CAddr);
 	sok = accept (dcc->sok, (struct sockaddr *) &CAddr, &len);
-	fe_input_remove (dcc->iotag);
+	g_source_remove (dcc->iotag);
 	dcc->iotag = 0;
 	closesocket (dcc->sok);
 	if (sok < 0)

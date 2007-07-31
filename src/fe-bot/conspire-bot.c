@@ -421,11 +421,6 @@ fe_input_add (int sok, int flags, void *func, void *data)
         return tag;
 }
 
-void fe_input_remove (int tag)
-{
-	g_source_remove (tag);
-}
-
 void fe_text_clear(session *sess) {}
 void fe_dcc_send_filereq (struct session *sess, char *nick, int maxcps, int passive) {}
 

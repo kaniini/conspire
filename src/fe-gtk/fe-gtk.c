@@ -409,12 +409,6 @@ fe_message (char *msg, int flags)
 		gtk_dialog_run (GTK_DIALOG (dialog));
 }
 
-void
-fe_input_remove (int tag)
-{
-	g_source_remove (tag);
-}
-
 int
 fe_input_add (int sok, int flags, void *func, void *data)
 {

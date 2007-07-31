@@ -382,7 +382,7 @@ exec_notify_kill (session * sess)
 		sess->running_exec = NULL;
 		kill (re->childpid, SIGKILL);
 		waitpid (re->childpid, NULL, WNOHANG);
-		fe_input_remove (re->iotag);
+		g_source_remove (re->iotag);
 		close (re->myfd);
 		if (re->linebuf)
 			free(re->linebuf);

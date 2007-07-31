@@ -671,7 +671,7 @@ plugin_fd_cb (GIOChannel *source, GIOCondition condition, xchat_hook *hook)
 
 	if (ret == 0)
 	{
-		hook->tag = 0; /* avoid fe_input_remove, returning 0 is enough! */
+		hook->tag = 0; /* avoid g_source_remove, returning 0 is enough! */
 		xchat_unhook (hook->pl, hook);
 	}
 
@@ -778,7 +778,7 @@ xchat_unhook (xchat_plugin *ph, xchat_hook *hook)
 		g_source_remove (hook->tag);
 
 	if (hook->type == HOOK_FD && hook->tag != 0)
-		fe_input_remove (hook->tag);
+		g_source_remove (hook->tag);
 
 	hook->type = HOOK_DELETED;	/* expunge later */
 
