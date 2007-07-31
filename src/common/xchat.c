@@ -675,7 +675,7 @@ xchat_init (void)
 	const char *cs = NULL;
 	gboolean skip_serverlist;
 
-	if (!settings_get_bool(config, "gui", "sskip_serverlist", &skip_serverlist))
+	if (!settings_get_bool(config, "gui", "skip_serverlist", &skip_serverlist))
 		skip_serverlist = FALSE;
 
 #ifdef WIN32
@@ -938,14 +938,15 @@ xchat_init (void)
 
 	servlist_init ();							/* load server list */
 
-	new_ircwindow (NULL, NULL, SESS_SERVER, 0);
+	if (!arg_url && !servlist_have_auto() && !skip_serverlist)
+		new_ircwindow (NULL, NULL, SESS_SERVER, 0);
 
 	/* turned OFF via -a arg */
 	if (!arg_dont_autoconnect && servlist_have_auto())
 		g_idle_add (xchat_auto_connect, NULL);
 
 	/* if we got a URL, don't open the server list GUI */
-	if (skip_serverlist && !arg_url)
+	if (!skip_serverlist && !arg_url)
 		fe_serverlist_open (NULL);
 }
 
