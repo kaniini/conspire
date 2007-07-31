@@ -19,10 +19,10 @@
  * xclaesse@gmail.com
  */
 
-#include <config.h>
+#include "../../../../config.h"
 #include <dbus/dbus-glib.h>
 #include <stdlib.h>
-#include "marshallers.h"
+#include "../marshallers.h"
 
 #define DBUS_SERVICE "org.atheme.conspire.service"
 #define DBUS_REMOTE "/"
@@ -120,7 +120,6 @@ main (int argc, char **argv)
 				G_TYPE_STRING, "example",
 				G_TYPE_STRING, "Example of a D-Bus client",
 				G_TYPE_STRING, "1.0",
-				G_TYPE_INVALID,
 				G_TYPE_STRING, &path, G_TYPE_INVALID)) {
 		write_error ("Failed to complete Connect", &error);
 		return EXIT_FAILURE;
