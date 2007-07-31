@@ -84,11 +84,11 @@ list_load_from_data (GSList ** list, char *ibuf, int size)
 		{
 			if (!strncasecmp (buf, "NAME ", 5))
 			{
-				safe_strcpy (name, buf + 5, sizeof (name));
+				g_strlcpy (name, buf + 5, sizeof (name));
 			}
 			else if (!strncasecmp (buf, "CMD ", 4))
 			{
-				safe_strcpy (cmd, buf + 4, sizeof (cmd));
+				g_strlcpy (cmd, buf + 4, sizeof (cmd));
 				if (*name)
 				{
 					list_addentry (list, cmd, name);
@@ -185,7 +185,7 @@ cfg_get_str (char *cfg, char *var, char *dest, int dest_len)
 				cfg++;
 			t = *cfg;
 			*cfg = 0;
-			safe_strcpy (dest, value, dest_len);
+			g_strlcpy (dest, value, dest_len);
 			*cfg = t;
 			return cfg;
 		}

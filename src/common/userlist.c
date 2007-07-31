@@ -301,7 +301,7 @@ userlist_change (struct session *sess, char *oldname, char *newname)
 		tree_remove (sess->usertree, user, &pos);
 		tree_remove (sess->usertree_alpha, user, &pos);
 
-		safe_strcpy (user->nick, newname, NICKLEN);
+		g_strlcpy (user->nick, newname, NICKLEN);
 
 		tree_insert (sess->usertree_alpha, user);
 
@@ -367,7 +367,7 @@ userlist_add (struct session *sess, char *name, char *hostname)
 	/* add it to our linked list */
 	if (hostname)
 		user->hostname = strdup (hostname);
-	safe_strcpy (user->nick, name + prefix_chars, NICKLEN);
+	g_strlcpy (user->nick, name + prefix_chars, NICKLEN);
 	/* is it me? */
 	if (!sess->server->p_cmp (user->nick, sess->server->nick))
 		user->me = TRUE;

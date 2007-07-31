@@ -427,28 +427,28 @@ ban (session * sess, char *tbuf, char *mask, char *bantypestr, int deop)
 		    mask[0] == '=' || mask[0] == '^' || mask[0] == '-')
 		{
 			/* the ident is prefixed with something, we replace that sign with an * */
-			safe_strcpy (username+1, mask+1, sizeof (username)-1);
+			g_strlcpy (username+1, mask+1, sizeof (username)-1);
 			username[0] = '*';
 		} else if (at - mask < USERNAMELEN)
 		{
 			/* we just add an * in the begining of the ident */
-			safe_strcpy (username+1, mask, sizeof (username)-1);
+			g_strlcpy (username+1, mask, sizeof (username)-1);
 			username[0] = '*';
 		} else
 		{
 			/* ident might be too long, we just ban what it gives and add an * in the end */
-			safe_strcpy (username, mask, sizeof (username));
+			g_strlcpy (username, mask, sizeof (username));
 		}
 		*at = '@';
-		safe_strcpy (fullhost, at + 1, sizeof (fullhost));
+		g_strlcpy (fullhost, at + 1, sizeof (fullhost));
 
 		dot = strchr (fullhost, '.');
 		if (dot)
 		{
-			safe_strcpy (domain, dot, sizeof (domain));
+			g_strlcpy (domain, dot, sizeof (domain));
 		} else
 		{
-			safe_strcpy (domain, fullhost, sizeof (domain));
+			g_strlcpy (domain, fullhost, sizeof (domain));
 		}
 
 		if (*bantypestr)
@@ -2308,7 +2308,7 @@ cmd_join (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			po = strchr (chan, ',');
 			if (po)
 				*po = 0;
-			safe_strcpy (sess->waitchannel, chan, CHANLEN);
+			g_strlcpy (sess->waitchannel, chan, CHANLEN);
 		}
 		return TRUE;
 	}
@@ -2582,7 +2582,7 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 					nick = sess->lastnick;
 			} else
 			{
-				safe_strcpy (sess->lastnick, nick, NICKLEN);	/* prime the last nick memory */
+				g_strlcpy (sess->lastnick, nick, NICKLEN);	/* prime the last nick memory */
 			}
 
 			if (*nick == '=')
@@ -2840,10 +2840,10 @@ cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 #endif
 
 		if (*word[4+offset])
-			safe_strcpy (serv->password, word[4+offset], sizeof (serv->password));
+			g_strlcpy (serv->password, word[4+offset], sizeof (serv->password));
 		if (*word[3+offset])
 			serv->port = atoi (word[3+offset]);
-		safe_strcpy (serv->hostname, word[2+offset], sizeof (serv->hostname));
+		g_strlcpy (serv->hostname, word[2+offset], sizeof (serv->hostname));
 		serv->auto_reconnect (serv, TRUE, -1);
 	}
 	else
@@ -2934,7 +2934,7 @@ cmd_settab (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (*word_eol[2])
 	{
 		strcpy (tbuf, sess->channel);
-		safe_strcpy (sess->channel, word_eol[2], CHANLEN);
+		g_strlcpy (sess->channel, word_eol[2], CHANLEN);
 		fe_set_channel (sess);
 		strcpy (sess->channel, tbuf);
 	}
@@ -3051,7 +3051,7 @@ cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (channel)
 	{
 		sess->willjoinchannel[0] = '#';
-		safe_strcpy ((sess->willjoinchannel + 1), channel, (CHANLEN - 1));
+		g_strlcpy ((sess->willjoinchannel + 1), channel, (CHANLEN - 1));
 	}
 
 	/* support +7000 style ports like mIRC */
@@ -3065,7 +3065,7 @@ cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 	if (*pass)
 	{
-		safe_strcpy (serv->password, pass, sizeof (serv->password));
+		g_strlcpy (serv->password, pass, sizeof (serv->password));
 	}
 #ifdef USE_OPENSSL
 	serv->use_ssl = use_ssl;
@@ -3107,7 +3107,7 @@ cmd_servchan (struct session *sess, char *tbuf, char *word[],
 
 	if (*word[4 + offset])
 	{
-		safe_strcpy (sess->willjoinchannel, word[4 + offset], CHANLEN);
+		g_strlcpy (sess->willjoinchannel, word[4 + offset], CHANLEN);
 		return cmd_server (sess, tbuf, word, word_eol);
 	}
 
@@ -3257,7 +3257,7 @@ url_join_only (server *serv, char *tbuf, char *channel)
 	/* already connected, JOIN only. FIXME: support keys? */
 	tbuf[0] = '#';
 	/* tbuf is 4kb */
-	safe_strcpy ((tbuf + 1), channel, 256);
+	g_strlcpy ((tbuf + 1), channel, 256);
 	serv->p_join (serv, tbuf, "");
 }
 
@@ -4100,7 +4100,7 @@ handle_say (session *sess, char *text, int check_spch)
 	if (prefs.nickcompletion)
 		perform_nick_completion (sess, text, newcmd);
 	else
-		safe_strcpy (newcmd, text, newcmdlen);
+		g_strlcpy (newcmd, text, newcmdlen);
 
 	text = newcmd;
 

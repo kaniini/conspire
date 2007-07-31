@@ -142,10 +142,10 @@ inbound_make_idtext (server *serv, char *idtext, int max, int id)
 	{
 		if (id)
 		{
-			safe_strcpy (idtext, prefs.irc_id_ytext, max);
+			g_strlcpy (idtext, prefs.irc_id_ytext, max);
 		} else
 		{
-			safe_strcpy (idtext, prefs.irc_id_ntext, max);
+			g_strlcpy (idtext, prefs.irc_id_ntext, max);
 		}
 		/* convert codes like %C,%U to the proper ones */
 		check_special_chars (idtext, TRUE);
@@ -236,7 +236,7 @@ SearchNick (char *text, char *nicks)
 
 	text = strip_color (text, -1, STRIP_ALL);
 
-	safe_strcpy (S, nicks, sizeof (S));
+	g_strlcpy (S, nicks, sizeof (S));
 	n = strtok (S, ",");
 	while (n != NULL)
 	{
@@ -273,7 +273,7 @@ FromNick (char *nick, char *nicks)
 	if (nicks == NULL || nicks[0] == 0)
 		return 0;
 
-	safe_strcpy (S, nicks, sizeof (S));
+	g_strlcpy (S, nicks, sizeof (S));
 	n = strtok (S, ",");
 	while (n != NULL)
 	{
@@ -468,7 +468,7 @@ inbound_newnick (server *serv, char *nick, char *newnick, int quiet)
 	if (!serv->p_cmp (nick, serv->nick))
 	{
 		me = TRUE;
-		safe_strcpy (serv->nick, newnick, NICKLEN);
+		g_strlcpy (serv->nick, newnick, NICKLEN);
 	}
 
 	while (list)
@@ -490,7 +490,7 @@ inbound_newnick (server *serv, char *nick, char *newnick, int quiet)
 			}
 			if (sess->type == SESS_DIALOG && !serv->p_cmp (sess->channel, nick))
 			{
-				safe_strcpy (sess->channel, newnick, CHANLEN);
+				g_strlcpy (sess->channel, newnick, CHANLEN);
 				fe_set_channel (sess);
 			}
 			fe_set_title (sess);
@@ -563,7 +563,7 @@ inbound_ujoin (server *serv, char *chan, char *nick, char *ip)
 		}
 	}
 
-	safe_strcpy (sess->channel, chan, CHANLEN);
+	g_strlcpy (sess->channel, chan, CHANLEN);
 
 	fe_set_channel (sess);
 	fe_set_title (sess);
@@ -603,7 +603,7 @@ inbound_ukick (server *serv, char *chan, char *kicker, char *reason)
 		if (prefs.autorejoin)
 		{
 			serv->p_join (serv, chan, sess->channelkey);
-			safe_strcpy (sess->waitchannel, chan, CHANLEN);
+			g_strlcpy (sess->waitchannel, chan, CHANLEN);
 		}
 	}
 }

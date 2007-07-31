@@ -325,7 +325,7 @@ session_new (server *serv, char *from, int type, int focus)
 	sess->hide_join_part = prefs.confmode;
 
 	if (from != NULL)
-		safe_strcpy (sess->channel, from, CHANLEN);
+		g_strlcpy (sess->channel, from, CHANLEN);
 
 	sess_list = g_slist_prepend (sess_list, sess);
 

@@ -529,7 +529,7 @@ notify_adduser (char *name, char *networks)
 		if (strlen (name) >= NICKLEN)
 		{
 			notify->name = malloc (NICKLEN);
-			safe_strcpy (notify->name, name, NICKLEN);
+			g_strlcpy (notify->name, name, NICKLEN);
 		} else
 		{
 			notify->name = strdup (name);

@@ -524,13 +524,13 @@ servlist_connect (session *sess, ircnet *net, gboolean join)
 		sess->willjoinchannel[0] = 0;
 
 		if (net->autojoin)
-			safe_strcpy (sess->willjoinchannel, net->autojoin,
+			g_strlcpy (sess->willjoinchannel, net->autojoin,
 							 sizeof (sess->willjoinchannel));
 	}
 
 	serv->password[0] = 0;
 	if (net->pass)
-		safe_strcpy (serv->password, net->pass, sizeof (serv->password));
+		g_strlcpy (serv->password, net->pass, sizeof (serv->password));
 
 	if (net->flags & FLAG_USE_GLOBAL)
 	{

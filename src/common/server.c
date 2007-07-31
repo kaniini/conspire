@@ -1608,10 +1608,10 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 
 	EMIT_SIGNAL (XP_TE_SERVERLOOKUP, sess, hostname, NULL, NULL, NULL, 0);
 
-	safe_strcpy (serv->servername, hostname, sizeof (serv->servername));
+	g_strlcpy (serv->servername, hostname, sizeof (serv->servername));
 	/* overlap illegal in strncpy */
 	if (hostname != serv->hostname)
-		safe_strcpy (serv->hostname, hostname, sizeof (serv->hostname));
+		g_strlcpy (serv->hostname, hostname, sizeof (serv->hostname));
 
 #ifdef USE_OPENSSL
 	if (serv->use_ssl)
@@ -1805,7 +1805,7 @@ server_set_name (server *serv, char *name)
 	/* strncpy parameters must NOT overlap */
 	if (name != serv->servername)
 	{
-		safe_strcpy (serv->servername, name, sizeof (serv->servername));
+		g_strlcpy (serv->servername, name, sizeof (serv->servername));
 	}
 
 	while (list)
@@ -1820,10 +1820,10 @@ server_set_name (server *serv, char *name)
 	{
 		if (serv->network)
 		{
-			safe_strcpy (serv->server_session->channel, ((ircnet *)serv->network)->name, CHANLEN);
+			g_strlcpy (serv->server_session->channel, ((ircnet *)serv->network)->name, CHANLEN);
 		} else
 		{
-			safe_strcpy (serv->server_session->channel, name, CHANLEN);
+			g_strlcpy (serv->server_session->channel, name, CHANLEN);
 		}
 		fe_set_channel (serv->server_session);
 	}
@@ -1884,7 +1884,7 @@ server_away_save_message (server *serv, char *nick, char *msg)
 		if (away)
 		{
 			away->server = serv;
-			safe_strcpy (away->nick, nick, sizeof (away->nick));
+			g_strlcpy (away->nick, nick, sizeof (away->nick));
 			away->message = strdup (msg);
 			away_list = g_slist_prepend (away_list, away);
 		}

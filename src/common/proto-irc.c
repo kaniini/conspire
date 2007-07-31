@@ -763,13 +763,13 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 	ex = strchr (word[1], '!');
 	if (!ex)							  /* no '!', must be a server message */
 	{
-		safe_strcpy (ip, word[1], sizeof (ip));
-		safe_strcpy (nick, word[1], sizeof (nick));
+		g_strlcpy (ip, word[1], sizeof (ip));
+		g_strlcpy (nick, word[1], sizeof (nick));
 	} else
 	{
-		safe_strcpy (ip, ex + 1, sizeof (ip));
+		g_strlcpy (ip, ex + 1, sizeof (ip));
 		ex[0] = 0;
-		safe_strcpy (nick, word[1], sizeof (nick));
+		g_strlcpy (nick, word[1], sizeof (nick));
 		ex[0] = '!';
 	}
 

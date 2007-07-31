@@ -306,7 +306,7 @@ handle_single_mode (mode_run *mr, char sign, char mode, char *nick,
 		switch (mode)
 		{
 		case 'k':
-			safe_strcpy (sess->channelkey, arg, sizeof (sess->channelkey));
+			g_strlcpy (sess->channelkey, arg, sizeof (sess->channelkey));
 			fe_update_channel_key (sess);
 			fe_update_mode_buttons (sess, mode, sign);
 			if (!quiet)
@@ -649,7 +649,7 @@ inbound_005 (server * serv, char *word[])
 
 			if (serv->server_session->type == SESS_SERVER)
 			{
-				safe_strcpy (serv->server_session->channel, word[w] + 8, CHANLEN);
+				g_strlcpy (serv->server_session->channel, word[w] + 8, CHANLEN);
 				fe_set_channel (serv->server_session);
 			}
 

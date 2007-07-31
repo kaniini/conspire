@@ -1774,7 +1774,7 @@ dcc_send (struct session *sess, char *to, char *file, int maxcps, int passive)
 		char wild[256];
 		char *path_fs;	/* local filesystem encoding */
 
-		safe_strcpy (wild, file_part (file), sizeof (wild));
+		g_strlcpy (wild, file_part (file), sizeof (wild));
 		path_part (file, path, sizeof (path));
 		if (path[0] != '/' || path[1] != '\0')
 			path[strlen (path) - 1] = 0;	/* remove trailing slash */
