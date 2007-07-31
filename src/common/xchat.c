@@ -942,7 +942,7 @@ xchat_init (void)
 
 	/* turned OFF via -a arg */
 	if (!arg_dont_autoconnect && servlist_have_auto())
-		fe_idle_add (xchat_auto_connect, NULL);
+		g_idle_add (xchat_auto_connect, NULL);
 
 	/* if we got a URL, don't open the server list GUI */
 	if (skip_serverlist && !arg_url)

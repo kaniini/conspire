@@ -45,7 +45,6 @@ void fe_message (char *msg, int flags);
 #define FIA_FD 8
 int fe_input_add (int sok, int flags, void *func, void *data);
 void fe_input_remove (int tag);
-void fe_idle_add (void *func, void *data);
 void fe_set_topic (struct session *sess, char *topic);
 void fe_set_hilight (struct session *sess);
 void fe_set_tab_color (struct session *sess, int col);

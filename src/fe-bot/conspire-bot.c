@@ -386,12 +386,6 @@ fe_main (void)
 
 void fe_cleanup (void) {}
 
-void
-fe_idle_add (void *func, void *data)
-{
-        g_idle_add (func, data);
-}
-
 void fe_get_file (const char *title, char *initial,
                   void (*callback) (void *userdata, char *file), void *userdata,
                   int flags)

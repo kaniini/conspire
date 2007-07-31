@@ -410,12 +410,6 @@ fe_message (char *msg, int flags)
 }
 
 void
-fe_idle_add (void *func, void *data)
-{
-	g_idle_add (func, data);
-}
-
-void
 fe_input_remove (int tag)
 {
 	g_source_remove (tag);
