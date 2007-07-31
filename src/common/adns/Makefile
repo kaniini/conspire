@@ -5,7 +5,7 @@ OBJECTIVE_LIBS_NOINST = libconspire-adns.a
 SOURCES = check.c  event.c  general.c  parse.c  poll.c  query.c  reply.c  setup.c  \
 	transmit.c  types.c
 
-CFLAGS += $(PICFLAGS) $(COMMON_CFLAGS)
+CFLAGS += $(PICFLAGS) $(COMMON_CFLAGS) -I../../..
 
 OBJECTS = ${SOURCES:.c=.o}
 

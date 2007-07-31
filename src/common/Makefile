@@ -8,7 +8,7 @@ LIBCONSPIRE_SUFFIX = 0.1.0
 CFLAGS += $(PICFLAGS) $(COMMON_CFLAGS) $(MCS_CFLAGS)
 
 SUBDIRS = tools adns $(DBUSDIR)
-LIBADD += $(COMMON_LIBS) $(DBUSLIBADD) $(MCS_LIBS) -L./adns -ladns
+LIBADD += $(COMMON_LIBS) $(DBUSLIBADD) $(MCS_LIBS) -L./adns -lconspire-adns
 
 SOURCES = cfgfiles.c configdb.c ctcp.c dcc.c history.c ignore.c \
 	inbound.c modes.c network.c notify.c outbound.c \

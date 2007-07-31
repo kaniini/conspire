@@ -39,6 +39,7 @@ typedef unsigned char byte;
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/poll.h>
 
 #include <sys/time.h>
 
@@ -347,17 +348,17 @@ int adns__setnonblock(adns_state ads, int fd); /* => errno value */
 
 void adns__vlprintf(adns_state ads, const char *fmt, va_list al);
 void adns__lprintf(adns_state ads, const char *fmt,
-		   ...) PRINTFFORMAT(2,3);
+		   ...);
 
 void adns__vdiag(adns_state ads, const char *pfx, adns_initflags prevent,
 		 int serv, adns_query qu, const char *fmt, va_list al);
 
 void adns__debug(adns_state ads, int serv, adns_query qu,
-		 const char *fmt, ...) PRINTFFORMAT(4,5);
+		 const char *fmt, ...);
 void adns__warn(adns_state ads, int serv, adns_query qu,
-		const char *fmt, ...) PRINTFFORMAT(4,5);
+		const char *fmt, ...);
 void adns__diag(adns_state ads, int serv, adns_query qu,
-		const char *fmt, ...) PRINTFFORMAT(4,5);
+		const char *fmt, ...);
 
 int adns__vbuf_ensure(vbuf *vb, int want);
 int adns__vbuf_appendstr(vbuf *vb, const char *data); /* doesn't include nul */
