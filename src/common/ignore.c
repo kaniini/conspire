@@ -412,7 +412,7 @@ flood_check (char *nick, char *ip, server *serv, session *sess, int what)	/*0=ct
 						/*FIXME: only ignore ctcp or all?, its ignoring ctcps for now */
 						prefs.autodialog = 0;
 						/* turn it back on in 30 secs */
-						fe_timeout_add (30000, flood_autodialog_timeout, NULL);
+						g_timeout_add (30000, flood_autodialog_timeout, NULL);
 					}
 					return 0;
 				}

@@ -68,7 +68,7 @@ clear_channel (session *sess)
 
 	if (sess->mode_timeout_tag)
 	{
-		fe_timeout_remove (sess->mode_timeout_tag);
+		g_source_remove (sess->mode_timeout_tag);
 		sess->mode_timeout_tag = 0;
 	}
 
@@ -918,8 +918,7 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 		if (serv->split_timer)
 			g_source_remove(serv->split_timer);
 
-		serv->split_timer = g_timeout_add(500,
-			(GSourceFunc) netsplit_display_victims, serv);
+		serv->split_timer = g_timeout_add(500, (GSourceFunc) netsplit_display_victims, serv);
 	}
 
 	for (; list != NULL; list = list->next)
@@ -1465,8 +1464,7 @@ inbound_login_end (session *sess, char *text)
 		/* send JOIN now or wait? */
 		if (serv->network && ((ircnet *)serv->network)->nickserv &&
 			 prefs.irc_join_delay)
-			serv->joindelay_tag = fe_timeout_add (prefs.irc_join_delay * 1000,
-															  check_willjoin_channels, serv);
+			serv->joindelay_tag = g_timeout_add (prefs.irc_join_delay * 1000, check_willjoin_channels, serv);
 		else
 			check_willjoin_channels (serv);
 		if (serv->supports_watch)
@@ -1490,7 +1488,7 @@ inbound_identified (server *serv)	/* 'MODE +e MYSELF' on freenode */
 	if (serv->joindelay_tag)
 	{
 		/* stop waiting, just auto JOIN now */
-		fe_timeout_remove (serv->joindelay_tag);
+		g_source_remove (serv->joindelay_tag);
 		serv->joindelay_tag = 0;
 		check_willjoin_channels (serv);
 	}

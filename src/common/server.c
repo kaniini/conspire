@@ -241,7 +241,7 @@ tcp_send_len (server *serv, char *buf, int len)
 	serv->sendq_len += len; /* tcp_send_queue uses strlen */
 
 	if (tcp_send_queue (serv) && noqueue)
-		fe_timeout_add (500, tcp_send_queue, serv);
+		g_timeout_add (500, tcp_send_queue, serv);
 
 	return 1;
 }
@@ -283,7 +283,7 @@ static void
 close_socket (int sok)
 {
 	/* close the socket in 5 seconds so the QUIT message is not lost */
-	fe_timeout_add (5000, close_socket_cb, GINT_TO_POINTER (sok));
+	g_timeout_add (5000, close_socket_cb, GINT_TO_POINTER (sok));
 }
 
 /* handle 1 line of text received from the server */
@@ -526,7 +526,7 @@ server_stopconnecting (server * serv)
 
 	if (serv->joindelay_tag)
 	{
-		fe_timeout_remove (serv->joindelay_tag);
+		g_source_remove (serv->joindelay_tag);
 		serv->joindelay_tag = 0;
 	}
 
@@ -552,7 +552,7 @@ server_stopconnecting (server * serv)
 #ifdef USE_OPENSSL
 	if (serv->ssl_do_connect_tag)
 	{
-		fe_timeout_remove (serv->ssl_do_connect_tag);
+		g_source_remove (serv->ssl_do_connect_tag);
 		serv->ssl_do_connect_tag = 0;
 	}
 #endif
@@ -801,11 +801,11 @@ auto_reconnect (server *serv, int send_quit, int err)
 	/* is this server in a reconnect delay? remove it! */
 	if (serv->recondelay_tag)
 	{
-		fe_timeout_remove (serv->recondelay_tag);
+		g_source_remove (serv->recondelay_tag);
 		serv->recondelay_tag = 0;
 	}
 
-	serv->recondelay_tag = fe_timeout_add (del, timeout_auto_reconnect, serv);
+	serv->recondelay_tag = g_timeout_add (del, timeout_auto_reconnect, serv);
 	fe_server_event (serv, FE_SE_RECONDELAY, del);
 }
 
@@ -868,8 +868,7 @@ server_connect_success (server *serv)
 		/* FIXME: it'll be needed by new servers */
 		/* send(serv->sok, "STLS\r\n", 6, 0); sleep(1); */
 		set_nonblocking (serv->sok);
-		serv->ssl_do_connect_tag = fe_timeout_add (SSLDOCONNTMOUT,
-																 ssl_do_connect, serv);
+		serv->ssl_do_connect_tag = g_timeout_add (SSLDOCONNTMOUT, ssl_do_connect, serv);
 		return;
 	}
 
@@ -1018,7 +1017,7 @@ server_cleanup (server * serv)
 
 	if (serv->joindelay_tag)
 	{
-		fe_timeout_remove (serv->joindelay_tag);
+		g_source_remove (serv->joindelay_tag);
 		serv->joindelay_tag = 0;
 	}
 
@@ -1056,7 +1055,7 @@ server_cleanup (server * serv)
 	/* is this server in a reconnect delay? remove it! */
 	if (serv->recondelay_tag)
 	{
-		fe_timeout_remove (serv->recondelay_tag);
+		g_source_remove (serv->recondelay_tag);
 		serv->recondelay_tag = 0;
 		return 3;
 	}

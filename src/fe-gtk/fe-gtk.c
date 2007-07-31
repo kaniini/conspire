@@ -308,18 +308,6 @@ fe_exit (void)
 	gtk_main_quit ();
 }
 
-int
-fe_timeout_add (int interval, void *callback, void *userdata)
-{
-	return g_timeout_add (interval, (GSourceFunc) callback, userdata);
-}
-
-void
-fe_timeout_remove (int tag)
-{
-	g_source_remove (tag);
-}
-
 #ifdef WIN32
 
 static void

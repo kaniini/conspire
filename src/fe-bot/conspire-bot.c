@@ -103,18 +103,6 @@ fe_gui_info_ptr (session *sess, int info_type)
 	return NULL;
 }
 
-int
-fe_timeout_add(int time, void *callback, void *userdata)
-{
-	return g_timeout_add(time, callback, userdata);
-}
-
-void
-fe_timeout_remove(int source)
-{
-	g_source_remove(source);
-}
-
 void
 fe_uselect (session *sess, char *word[], int do_clear, int scroll_to)
 {

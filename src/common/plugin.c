@@ -620,7 +620,7 @@ plugin_timeout_cb (xchat_hook *hook)
 
 	if (ret == 0)
 	{
-		hook->tag = 0;	/* avoid fe_timeout_remove, returning 0 is enough! */
+		hook->tag = 0;	/* avoid g_source_remove, returning 0 is enough! */
 		xchat_unhook (hook->pl, hook);
 	}
 
@@ -703,7 +703,7 @@ plugin_add_hook (xchat_plugin *pl, int type, int pri, const char *name,
 	plugin_insert_hook (hook);
 
 	if (type == HOOK_TIMER)
-		hook->tag = fe_timeout_add (timeout, plugin_timeout_cb, hook);
+		hook->tag = g_timeout_add (timeout, plugin_timeout_cb, hook);
 
 	return hook;
 }
@@ -775,7 +775,7 @@ xchat_unhook (xchat_plugin *ph, xchat_hook *hook)
 		return NULL;
 
 	if (hook->type == HOOK_TIMER && hook->tag != 0)
-		fe_timeout_remove (hook->tag);
+		g_source_remove (hook->tag);
 
 	if (hook->type == HOOK_FD && hook->tag != 0)
 		fe_input_remove (hook->tag);

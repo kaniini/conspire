@@ -296,11 +296,10 @@ irc_init (session *sess)
 	plugin_add (sess, NULL, NULL, timer_plugin_init, NULL, NULL, FALSE);
 
 	if (prefs.notify_timeout)
-		notify_tag = fe_timeout_add (prefs.notify_timeout * 1000,
-											  notify_checklist, 0);
+		notify_tag = g_timeout_add (prefs.notify_timeout * 1000, notify_checklist, 0);
 
-	fe_timeout_add (prefs.away_timeout * 1000, away_check, 0);
-	fe_timeout_add (500, xchat_misc_checks, 0);
+	g_timeout_add (prefs.away_timeout * 1000, away_check, 0);
+	g_timeout_add (500, xchat_misc_checks, 0);
 
 	if (arg_url != NULL)
 	{
@@ -997,7 +996,7 @@ xchat_exec (const char *cmd)
 	if (pid != -1)
 	/* zombie avoiding system. Don't ask! it has to be like this to work
       with zvt (which overrides the default handler) */
-		fe_timeout_add (1000, child_handler, GINT_TO_POINTER (pid));
+		g_timeout_add (1000, child_handler, GINT_TO_POINTER (pid));
 #endif
 }
 
@@ -1011,7 +1010,7 @@ xchat_execv (char * const argv[])
 	if (pid != -1)
 	/* zombie avoiding system. Don't ask! it has to be like this to work
       with zvt (which overrides the default handler) */
-		fe_timeout_add (1000, child_handler, GINT_TO_POINTER (pid));
+		g_timeout_add (1000, child_handler, GINT_TO_POINTER (pid));
 #endif
 }
 

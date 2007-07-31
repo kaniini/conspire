@@ -662,13 +662,13 @@ mg_progressbar_create (session_gui *gui)
 	gui->bar = gtk_progress_bar_new ();
 	gtk_box_pack_start (GTK_BOX (gui->nick_box), gui->bar, 0, 0, 0);
 	gtk_widget_show (gui->bar);
-	gui->bartag = fe_timeout_add (50, mg_progressbar_update, gui->bar);
+	gui->bartag = g_timeout_add (50, mg_progressbar_update, gui->bar);
 }
 
 void
 mg_progressbar_destroy (session_gui *gui)
 {
-	fe_timeout_remove (gui->bartag);
+	g_source_remove (gui->bartag);
 	gtk_widget_destroy (gui->bar);
 	gui->bar = 0;
 	gui->bartag = 0;
@@ -3443,7 +3443,7 @@ fe_session_callback (session *sess)
 		free (sess->res->lag_tip);
 
 	if (sess->gui->bartag)
-		fe_timeout_remove (sess->gui->bartag);
+		g_source_remove (sess->gui->bartag);
 
 	if (sess->gui != &static_mg_gui)
 		free (sess->gui);
