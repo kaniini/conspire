@@ -349,13 +349,6 @@ fe_userlist_insert (session *sess, struct User *newuser, int row, int sel)
 										:	(NULL),
 								  -1);
 
-	/* is it me? */
-	if (newuser->me && sess->gui->nick_box)
-	{
-		if (!sess->gui->is_tab || sess == current_tab)
-			mg_set_access_icon (sess->gui, pix, sess->server->is_away);
-	}
-
 #if 0
 	if (prefs.hilitenotify && notify_isnotify (sess, newuser->nick))
 	{

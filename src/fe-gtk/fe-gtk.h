@@ -143,9 +143,6 @@ typedef struct session_gui
 		*vpane_right,
 		*menu,
 		*bar,				/* connecting progress bar */
-		*nick_box,		/* contains label to the left of input_box */
-		*nick_label,
-		*op_xpm,			/* icon to the left of nickname */
 		*namelistinfo,	/* label above userlist */
 		*input_box,
 		*flag_wid[NUM_FLAG_WIDS],		/* channelmode buttons */

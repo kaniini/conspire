@@ -540,32 +540,11 @@ fe_close_window (struct session *sess)
 void
 fe_progressbar_start (session *sess)
 {
-	if (!sess->gui->is_tab || current_tab == sess)
-	/* if it's the focused tab, create it for real! */
-		mg_progressbar_create (sess->gui);
-	else
-	/* otherwise just remember to create on when it gets focused */
-		sess->res->c_graph = TRUE;
 }
 
 void
 fe_progressbar_end (server *serv)
 {
-	GSList *list = sess_list;
-	session *sess;
-
-	while (list)				  /* check all windows that use this server and  *
-									   * remove the connecting graph, if it has one. */
-	{
-		sess = list->data;
-		if (sess->server == serv)
-		{
-			if (sess->gui->bar)
-				mg_progressbar_destroy (sess->gui);
-			sess->res->c_graph = FALSE;
-		}
-		list = list->next;
-	}
 }
 
 void

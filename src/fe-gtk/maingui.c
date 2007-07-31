@@ -359,34 +359,6 @@ fe_set_tab_color (struct session *sess, int col)
 	}
 }
 
-static void
-mg_set_myself_away (session_gui *gui, gboolean away)
-{
-	gtk_label_set_attributes (GTK_LABEL (GTK_BIN (gui->nick_label)->child),
-									  away ? away_list : NULL);
-}
-
-/* change the little icon to the left of your nickname */
-
-void
-mg_set_access_icon (session_gui *gui, GdkPixbuf *pix, gboolean away)
-{
-	if (gui->op_xpm)
-	{
-		gtk_widget_destroy (gui->op_xpm);
-		gui->op_xpm = 0;
-	}
-
-	if (pix)
-	{
-		gui->op_xpm = gtk_image_new_from_pixbuf (pix);
-		gtk_box_pack_start (GTK_BOX (gui->nick_box), gui->op_xpm, 0, 0, 0);
-		gtk_widget_show (gui->op_xpm);
-	}
-
-	mg_set_myself_away (gui, away);
-}
-
 static gboolean
 mg_inputbox_focus (GtkWidget *widget, GdkEventFocus *event, session_gui *gui)
 {
@@ -630,50 +602,6 @@ mg_focus (session *sess)
 	}
 }
 
-static int
-mg_progressbar_update (GtkWidget *bar)
-{
-	static int type = 0;
-	static float pos = 0;
-
-	pos += 0.05;
-	if (pos >= 0.99)
-	{
-		if (type == 0)
-		{
-			type = 1;
-			gtk_progress_bar_set_orientation ((GtkProgressBar *) bar,
-														 GTK_PROGRESS_RIGHT_TO_LEFT);
-		} else
-		{
-			type = 0;
-			gtk_progress_bar_set_orientation ((GtkProgressBar *) bar,
-														 GTK_PROGRESS_LEFT_TO_RIGHT);
-		}
-		pos = 0.05;
-	}
-	gtk_progress_bar_set_fraction ((GtkProgressBar *) bar, pos);
-	return 1;
-}
-
-void
-mg_progressbar_create (session_gui *gui)
-{
-	gui->bar = gtk_progress_bar_new ();
-	gtk_box_pack_start (GTK_BOX (gui->nick_box), gui->bar, 0, 0, 0);
-	gtk_widget_show (gui->bar);
-	gui->bartag = g_timeout_add (50, mg_progressbar_update, gui->bar);
-}
-
-void
-mg_progressbar_destroy (session_gui *gui)
-{
-	g_source_remove (gui->bartag);
-	gtk_widget_destroy (gui->bar);
-	gui->bar = 0;
-	gui->bartag = 0;
-}
-
 /* switching tabs away from this one, so remember some info about it! */
 
 static void
@@ -705,12 +633,6 @@ mg_unpopulate (session *sess)
 	if (gui->throttlemeter)
 		res->queue_value = gtk_progress_bar_get_fraction (
 													GTK_PROGRESS_BAR (gui->throttlemeter));
-
-	if (gui->bar)
-	{
-		res->c_graph = TRUE;	/* still have a graph, just not visible now */
-		mg_progressbar_destroy (gui);
-	}
 }
 
 static void
@@ -898,10 +820,6 @@ mg_populate_userlist (session *sess)
 	if (is_session (sess))
 	{
 		gui = sess->gui;
-		if (sess->type == SESS_DIALOG)
-			mg_set_access_icon (sess->gui, NULL, sess->server->is_away);
-		else
-			mg_set_access_icon (sess->gui, get_user_icon (sess->server, sess->me), sess->server->is_away);
 		userlist_show (sess);
 		userlist_set_value (sess->gui->user_tree, sess->res->old_ul_value);
 	}
@@ -979,10 +897,6 @@ mg_populate (session *sess)
 	mg_focus (sess);
 	fe_set_title (sess);
 
-	/* this one flickers, so only change if necessary */
-	if (strcmp (sess->server->nick, gtk_button_get_label (GTK_BUTTON (gui->nick_label))) != 0)
-		gtk_button_set_label (GTK_BUTTON (gui->nick_label), sess->server->nick);
-
 	/* this is slow, so make it a timeout event */
 	if (!gui->is_tab)
 	{
@@ -1015,13 +929,6 @@ mg_populate (session *sess)
 												 res->queue_value);
 		if (res->queue_tip)
 			add_tip (sess->gui->throttlemeter->parent, res->queue_tip);
-	}
-
-	/* did this tab have a connecting graph? restore it.. */
-	if (res->c_graph)
-	{
-		res->c_graph = FALSE;
-		mg_progressbar_create (gui);
 	}
 
 	/* menu items */
@@ -2550,16 +2457,8 @@ mg_create_center (session *sess, session_gui *gui, GtkWidget *box)
 	/* sep between xtext and right side */
 	gui->hpane_right = gtk_hpaned_new ();
 
-	if (prefs.gui_tweaks & 4)
-	{
-		gtk_paned_pack2 (GTK_PANED (gui->hpane_left), gui->vpane_left, FALSE, TRUE);
-		gtk_paned_pack1 (GTK_PANED (gui->hpane_left), gui->hpane_right, TRUE, TRUE);
-	}
-	else
-	{
-		gtk_paned_pack1 (GTK_PANED (gui->hpane_left), gui->vpane_left, FALSE, TRUE);
-		gtk_paned_pack2 (GTK_PANED (gui->hpane_left), gui->hpane_right, TRUE, TRUE);
-	}
+	gtk_paned_pack1 (GTK_PANED (gui->hpane_left), gui->vpane_left, FALSE, TRUE);
+	gtk_paned_pack2 (GTK_PANED (gui->hpane_left), gui->hpane_right, TRUE, TRUE);
 	gtk_paned_pack2 (GTK_PANED (gui->hpane_right), gui->vpane_right, FALSE, TRUE);
 
 	gtk_container_add (GTK_CONTAINER (box), gui->hpane_left);
@@ -2749,16 +2648,6 @@ mg_create_entry (session *sess, GtkWidget *box)
 
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), hbox, 0, 0, 0);
-
-	gui->nick_box = gtk_hbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), gui->nick_box, 0, 0, 0);
-
-	gui->nick_label = but = gtk_button_new_with_label (sess->server->nick);
-	gtk_button_set_relief (GTK_BUTTON (but), GTK_RELIEF_NONE);
-	GTK_WIDGET_UNSET_FLAGS (but, GTK_CAN_FOCUS);
-	gtk_box_pack_end (GTK_BOX (gui->nick_box), but, 0, 0, 0);
-	g_signal_connect (G_OBJECT (but), "clicked",
-							G_CALLBACK (mg_nickclick_cb), NULL);
 
 	gui->input_box = entry = sexy_spell_entry_new ();
 	sexy_spell_entry_set_checked ((SexySpellEntry *)entry, prefs.gui_input_spell);
@@ -2954,9 +2843,6 @@ mg_create_topwindow (session *sess)
 	if (!prefs.userlistbuttons)
 		gtk_widget_hide (sess->gui->button_box);
 
-	if (prefs.gui_tweaks & 2)
-		gtk_widget_hide (sess->gui->nick_box);
-
 	mg_decide_userlist (sess, FALSE);
 
 	if (sess->type == SESS_DIALOG)
@@ -3057,9 +2943,6 @@ mg_create_tabwindow (session *sess)
 	if (!prefs.userlistbuttons)
 		gtk_widget_hide (sess->gui->button_box);
 
-	if (prefs.gui_tweaks & 2)
-		gtk_widget_hide (sess->gui->nick_box);
-
 	mg_place_userlist_and_chanview (sess->gui);
 
 	gtk_widget_show (win);
@@ -3149,15 +3032,8 @@ fe_clear_channel (session *sess)
 	}
 
 	if (!sess->gui->is_tab || sess == current_tab)
-	{
 		gtk_entry_set_text (GTK_ENTRY (gui->topic_entry), "");
-
-		if (gui->op_xpm)
-		{
-			gtk_widget_destroy (gui->op_xpm);
-			gui->op_xpm = 0;
-		}
-	} else
+	else
 	{
 		if (sess->res->topic_text)
 		{
@@ -3224,19 +3100,6 @@ fe_update_mode_buttons (session *sess, char mode, char sign)
 void
 fe_set_nick (server *serv, char *newnick)
 {
-	GSList *list = sess_list;
-	session *sess;
-
-	while (list)
-	{
-		sess = list->data;
-		if (sess->server == serv)
-		{
-			if (current_tab == sess || !sess->gui->is_tab)
-				gtk_button_set_label (GTK_BUTTON (sess->gui->nick_label), newnick);
-		}
-		list = list->next;
-	}
 }
 
 void
@@ -3251,11 +3114,7 @@ fe_set_away (server *serv)
 		if (sess->server == serv)
 		{
 			if (!sess->gui->is_tab || sess == current_tab)
-			{
 				GTK_CHECK_MENU_ITEM (sess->gui->menu_item[MENU_ID_AWAY])->active = serv->is_away;
-				/* gray out my nickname */
-				mg_set_myself_away (sess->gui, serv->is_away);
-			}
 		}
 		list = list->next;
 	}
