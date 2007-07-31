@@ -331,21 +331,38 @@ cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	GSList *list;
 	char *reason = word_eol[2];
 
-	if (!(*reason))
+	if (!(*reason) && sess->server->is_away)
 	{
-		if (sess->server->is_away)
+		unsigned int gone;
+
+		sess->server->p_set_back (sess->server);
+
+		if (prefs.show_away_message)
 		{
-			if (sess->server->last_away_reason)
-				PrintTextf (sess, _("Already marked away: %s\n"), sess->server->last_away_reason);
-			return FALSE;
+			gone = time (NULL) - sess->server->away_time;
+			sprintf (tbuf, "me is back (gone %.2d:%.2d:%.2d)", gone / 3600,
+						(gone / 60) % 60, gone % 60);
+			for (list = sess_list; list; list = list->next)
+			{
+				/* am I the right server and not a dialog box */
+				if (((struct session *) list->data)->server == sess->server
+					 && ((struct session *) list->data)->type == SESS_CHANNEL
+					 && ((struct session *) list->data)->channel[0])
+				{
+					handle_command ((session *) list->data, tbuf, TRUE);
+				}
+			}
 		}
 
-		if (sess->server->reconnect_away)
-			reason = sess->server->last_away_reason;
-		else
-			/* must manage memory pointed to by random_line() */
-			reason = random_line (prefs.awayreason);
+		if (sess->server->last_away_reason)
+			free (sess->server->last_away_reason);
+		sess->server->last_away_reason = NULL;
+
+		return TRUE;
 	}
+	else
+		reason = g_strdup(prefs.awayreason);
+
 	sess->server->p_set_away (sess->server, reason);
 
 	if (prefs.show_away_message)
@@ -373,45 +390,6 @@ cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		else
 			sess->server->last_away_reason = reason;
 	}
-
-	return TRUE;
-}
-
-static int
-cmd_back (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	GSList *list;
-	unsigned int gone;
-
-	if (sess->server->is_away)
-	{
-		sess->server->p_set_back (sess->server);
-
-		if (prefs.show_away_message)
-		{
-			gone = time (NULL) - sess->server->away_time;
-			sprintf (tbuf, "me is back (gone %.2d:%.2d:%.2d)", gone / 3600,
-						(gone / 60) % 60, gone % 60);
-			for (list = sess_list; list; list = list->next)
-			{
-				/* am I the right server and not a dialog box */
-				if (((struct session *) list->data)->server == sess->server
-					 && ((struct session *) list->data)->type == SESS_CHANNEL
-					 && ((struct session *) list->data)->channel[0])
-				{
-					handle_command ((session *) list->data, tbuf, TRUE);
-				}
-			}
-		}
-	}
-	else
-	{
-		PrintText (sess, _("Already marked back.\n"));
-	}
-
-	if (sess->server->last_away_reason)
-		free (sess->server->last_away_reason);
-	sess->server->last_away_reason = NULL;
 
 	return TRUE;
 }
@@ -3507,8 +3485,7 @@ const struct commands xc_cmds[] = {
 	 N_("ALLCHANL <cmd>, sends a command to all channels you're in")},
 	{"ALLSERV", cmd_allservers, 0, 0, 1,
 	 N_("ALLSERV <cmd>, sends a command to all servers you're in")},
-	{"AWAY", cmd_away, 1, 0, 1, N_("AWAY [<reason>], sets you away")},
-	{"BACK", cmd_back, 1, 0, 1, N_("BACK, sets you back (not away)")},
+	{"AWAY", cmd_away, 1, 0, 1, N_("AWAY [<reason>], toggles away status")},
 	{"BAN", cmd_ban, 1, 1, 1,
 	 N_("BAN <mask> [<bantype>], bans everyone matching the mask from the current channel. If they are already on the channel this doesn't kick them (needs chanop)")},
 	{"CHANOPT", cmd_chanopt, 0, 0, 1,
