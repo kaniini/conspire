@@ -3,14 +3,12 @@
 import dbus
 
 bus = dbus.SessionBus()
-proxy = bus.get_object('org.atheme.conspire.service', '/')
-remote = dbus.Interface(proxy, 'org.atheme.conspire.dbusproxy')
-path = remote.Connect ("example.py",
-		       "Python example",
-		       "Example of a D-Bus client written in python",
-		       "1.0")
-proxy = bus.get_object('org.atheme.conspire.service', path)
-conspire = dbus.Interface(proxy, 'org.atheme.conspire.integration')
+proxy = bus.get_object('org.atheme.conspire', '/')
+conspire = dbus.Interface(proxy, 'org.atheme.conspire')
+path = conspire.Connect ("example.py",
+		         "Python example",
+		         "Example of a D-Bus client written in python",
+		         "1.0")
 
 channels = conspire.ListGet ("channels")
 while conspire.ListNext (channels):

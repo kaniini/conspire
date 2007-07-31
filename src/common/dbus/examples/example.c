@@ -24,10 +24,10 @@
 #include <stdlib.h>
 #include "../marshallers.h"
 
-#define DBUS_SERVICE "org.atheme.conspire.service"
-#define DBUS_REMOTE "/"
-#define DBUS_REMOTE_CONNECTION_INTERFACE "org.atheme.conspire.dbusproxy"
-#define DBUS_REMOTE_PLUGIN_INTERFACE "org.atheme.conspire.integration"
+#define DBUS_SERVICE "org.atheme.conspire"
+#define DBUS_REMOTE "/org/atheme/conspire"
+#define DBUS_REMOTE_CONNECTION_INTERFACE "org.atheme.conspire"
+#define DBUS_REMOTE_PLUGIN_INTERFACE "org.atheme.conspire"
 
 guint command_id;
 guint server_id;

@@ -2,7 +2,7 @@
 
 <node name="/">
 
-  <interface name="org.atheme.conspire.dbusproxy">
+  <interface name="org.atheme.conspire">
     <method name="Connect">
       <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
       <arg type="s" name="filename" direction="in"/>
@@ -14,9 +14,7 @@
     <method name="Disconnect">
       <annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
     </method>
-  </interface>
 
-  <interface name="org.atheme.conspire.integration">
     <method name="Command">
       <arg type="s" name="command" direction="in"/>
     </method>

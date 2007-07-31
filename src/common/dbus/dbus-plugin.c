@@ -30,8 +30,8 @@
 #define PDESC _("plugin for remote access using DBUS")
 #define PVERSION ""
 
-#define DBUS_SERVICE "org.atheme.conspire.service"
-#define DBUS_OBJECT_PATH "/"
+#define DBUS_SERVICE "org.atheme.conspire"
+#define DBUS_OBJECT_PATH "/org/atheme/conspire"
 
 static xchat_plugin *ph;
 static guint last_context_id = 0;
@@ -929,7 +929,7 @@ init_dbus (void)
 
 	remote = g_object_new (REMOTE_TYPE_OBJECT, NULL);
 	dbus_g_connection_register_g_object (connection,
-					     DBUS_OBJECT_PATH"/Remote",
+					     DBUS_OBJECT_PATH,
 					     G_OBJECT (remote));
 
 	return TRUE;
@@ -1060,7 +1060,7 @@ dbus_plugin_init (xchat_plugin *plugin_handle,
 	*plugin_version = PVERSION;
 
 	if (init_dbus()) {
-		/*xchat_printf (ph, _("%s loaded successfully!\n"), PNAME);*/
+		xchat_printf (ph, "dbus loaded successfully!\n");
 
 		clients = g_hash_table_new_full (g_str_hash,
 						 g_str_equal,
