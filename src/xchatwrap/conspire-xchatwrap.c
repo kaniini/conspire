@@ -278,7 +278,7 @@ xchat_hook_command(gpointer ph, const char *name, int pri,
 				G_TYPE_STRING, name,
 				G_TYPE_INT, pri,
 				G_TYPE_STRING, help_text,
-				G_TYPE_INT, 0, G_TYPE_INVALID,
+				G_TYPE_INT, 1, G_TYPE_INVALID,
 				G_TYPE_UINT, &hook->hook_id, G_TYPE_INVALID)) {
 		write_error ("Failed to complete HookCommand", &error);
 		exit(EXIT_FAILURE);
