@@ -53,7 +53,7 @@ G_BEGIN_DECLS
 #endif /* !G_ENABLE_DEBUG */
 
 
-/* BOOLEAN:UINT,STRING,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:1) */
+/* BOOLEAN:UINT,STRING,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:1) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__UINT_STRING_POINTER_POINTER (GClosure     *closure,
                                                                                   GValue       *return_value,
                                                                                   guint         n_param_values,
@@ -104,7 +104,7 @@ dbus_glib_marshal_remote_object_BOOLEAN__UINT_STRING_POINTER_POINTER (GClosure  
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:2) */
+/* BOOLEAN:POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:2) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__POINTER_POINTER (GClosure     *closure,
                                                                       GValue       *return_value,
                                                                       guint         n_param_values,
@@ -151,7 +151,7 @@ dbus_glib_marshal_remote_object_BOOLEAN__POINTER_POINTER (GClosure     *closure,
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:STRING,INT,INT,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:3) */
+/* BOOLEAN:STRING,INT,INT,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:3) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_INT_POINTER_POINTER (GClosure     *closure,
                                                                                      GValue       *return_value,
                                                                                      guint         n_param_values,
@@ -204,7 +204,7 @@ dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_INT_POINTER_POINTER (GClosur
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:STRING,BOXED,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:4) */
+/* BOOLEAN:STRING,BOXED,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:4) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__STRING_BOXED_POINTER_POINTER (GClosure     *closure,
                                                                                    GValue       *return_value,
                                                                                    guint         n_param_values,
@@ -255,7 +255,7 @@ dbus_glib_marshal_remote_object_BOOLEAN__STRING_BOXED_POINTER_POINTER (GClosure 
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:STRING,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:5) */
+/* BOOLEAN:STRING,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:5) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER (GClosure     *closure,
                                                                              GValue       *return_value,
                                                                              guint         n_param_values,
@@ -304,7 +304,7 @@ dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER (GClosure     *c
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:STRING,INT,STRING,INT,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:6) */
+/* BOOLEAN:STRING,INT,STRING,INT,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:6) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_STRING_INT_POINTER_POINTER (GClosure     *closure,
                                                                                             GValue       *return_value,
                                                                                             guint         n_param_values,
@@ -359,7 +359,7 @@ dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_STRING_INT_POINTER_POINTER (
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:UINT,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:7) */
+/* BOOLEAN:UINT,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:7) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER_POINTER (GClosure     *closure,
                                                                            GValue       *return_value,
                                                                            guint         n_param_values,
@@ -408,7 +408,7 @@ dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER_POINTER (GClosure     *clo
   g_value_set_boolean (return_value, v_return);
 }
 
-/* NONE:STRING,STRING,STRING,STRING,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:8) */
+/* NONE:STRING,STRING,STRING,STRING,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:8) */
 extern void dbus_glib_marshal_remote_object_VOID__STRING_STRING_STRING_STRING_POINTER (GClosure     *closure,
                                                                                        GValue       *return_value,
                                                                                        guint         n_param_values,
@@ -458,7 +458,7 @@ dbus_glib_marshal_remote_object_VOID__STRING_STRING_STRING_STRING_POINTER (GClos
 }
 #define dbus_glib_marshal_remote_object_NONE__STRING_STRING_STRING_STRING_POINTER	dbus_glib_marshal_remote_object_VOID__STRING_STRING_STRING_STRING_POINTER
 
-/* BOOLEAN:STRING,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:9) */
+/* BOOLEAN:STRING,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:9) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER (GClosure     *closure,
                                                                      GValue       *return_value,
                                                                      guint         n_param_values,
@@ -505,7 +505,7 @@ dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER (GClosure     *closure,
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:STRING,STRING,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:10) */
+/* BOOLEAN:STRING,STRING,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:10) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__STRING_STRING_POINTER_POINTER (GClosure     *closure,
                                                                                     GValue       *return_value,
                                                                                     guint         n_param_values,
@@ -556,7 +556,7 @@ dbus_glib_marshal_remote_object_BOOLEAN__STRING_STRING_POINTER_POINTER (GClosure
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:BOXED,INT,UCHAR,UCHAR,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:11) */
+/* BOOLEAN:BOXED,INT,UCHAR,UCHAR,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:11) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__BOXED_INT_UCHAR_UCHAR_POINTER (GClosure     *closure,
                                                                                     GValue       *return_value,
                                                                                     guint         n_param_values,
@@ -609,11 +609,11 @@ dbus_glib_marshal_remote_object_BOOLEAN__BOXED_INT_UCHAR_UCHAR_POINTER (GClosure
   g_value_set_boolean (return_value, v_return);
 }
 
-/* NONE:POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:12) */
+/* NONE:POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:12) */
 #define dbus_glib_marshal_remote_object_VOID__POINTER	g_cclosure_marshal_VOID__POINTER
 #define dbus_glib_marshal_remote_object_NONE__POINTER	dbus_glib_marshal_remote_object_VOID__POINTER
 
-/* BOOLEAN:STRING,POINTER,POINTER,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:13) */
+/* BOOLEAN:STRING,POINTER,POINTER,POINTER,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:13) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER_POINTER_POINTER (GClosure     *closure,
                                                                                              GValue       *return_value,
                                                                                              guint         n_param_values,
@@ -666,7 +666,7 @@ dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER_POINTER_POINTER 
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:UINT,POINTER (/tmp/dbus-binding-tool-c-marshallers.KJGSVT:14) */
+/* BOOLEAN:UINT,POINTER (/tmp/dbus-binding-tool-c-marshallers.EQI2VT:14) */
 extern void dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER (GClosure     *closure,
                                                                    GValue       *return_value,
                                                                    guint         n_param_values,
@@ -720,37 +720,37 @@ G_END_DECLS
 #include <dbus/dbus-glib.h>
 static const DBusGMethodInfo dbus_glib_remote_object_methods[] = {
   { (GCallback) remote_object_connect, dbus_glib_marshal_remote_object_NONE__STRING_STRING_STRING_STRING_POINTER, 0 },
-  { (GCallback) remote_object_disconnect, dbus_glib_marshal_remote_object_NONE__POINTER, 97 },
-  { (GCallback) remote_object_command, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER, 141 },
-  { (GCallback) remote_object_print, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER, 196 },
-  { (GCallback) remote_object_find_context, dbus_glib_marshal_remote_object_BOOLEAN__STRING_STRING_POINTER_POINTER, 246 },
-  { (GCallback) remote_object_get_context, dbus_glib_marshal_remote_object_BOOLEAN__POINTER_POINTER, 331 },
-  { (GCallback) remote_object_set_context, dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER_POINTER, 392 },
-  { (GCallback) remote_object_get_info, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER, 457 },
-  { (GCallback) remote_object_get_prefs, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER_POINTER_POINTER, 524 },
-  { (GCallback) remote_object_hook_command, dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_STRING_INT_POINTER_POINTER, 626 },
-  { (GCallback) remote_object_hook_server, dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_INT_POINTER_POINTER, 741 },
-  { (GCallback) remote_object_hook_print, dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_INT_POINTER_POINTER, 841 },
-  { (GCallback) remote_object_unhook, dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER, 940 },
-  { (GCallback) remote_object_list_get, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER, 989 },
-  { (GCallback) remote_object_list_next, dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER_POINTER, 1056 },
-  { (GCallback) remote_object_list_str, dbus_glib_marshal_remote_object_BOOLEAN__UINT_STRING_POINTER_POINTER, 1119 },
-  { (GCallback) remote_object_list_int, dbus_glib_marshal_remote_object_BOOLEAN__UINT_STRING_POINTER_POINTER, 1194 },
-  { (GCallback) remote_object_list_time, dbus_glib_marshal_remote_object_BOOLEAN__UINT_STRING_POINTER_POINTER, 1269 },
-  { (GCallback) remote_object_list_fields, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER, 1346 },
-  { (GCallback) remote_object_list_free, dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER, 1414 },
-  { (GCallback) remote_object_emit_print, dbus_glib_marshal_remote_object_BOOLEAN__STRING_BOXED_POINTER_POINTER, 1465 },
-  { (GCallback) remote_object_nickcmp, dbus_glib_marshal_remote_object_BOOLEAN__STRING_STRING_POINTER_POINTER, 1547 },
-  { (GCallback) remote_object_strip, dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_INT_POINTER_POINTER, 1622 },
-  { (GCallback) remote_object_send_modes, dbus_glib_marshal_remote_object_BOOLEAN__BOXED_INT_UCHAR_UCHAR_POINTER, 1704 },
+  { (GCallback) remote_object_disconnect, dbus_glib_marshal_remote_object_NONE__POINTER, 87 },
+  { (GCallback) remote_object_command, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER, 121 },
+  { (GCallback) remote_object_print, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER, 164 },
+  { (GCallback) remote_object_find_context, dbus_glib_marshal_remote_object_BOOLEAN__STRING_STRING_POINTER_POINTER, 202 },
+  { (GCallback) remote_object_get_context, dbus_glib_marshal_remote_object_BOOLEAN__POINTER_POINTER, 275 },
+  { (GCallback) remote_object_set_context, dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER_POINTER, 324 },
+  { (GCallback) remote_object_get_info, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER, 377 },
+  { (GCallback) remote_object_get_prefs, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER_POINTER_POINTER, 432 },
+  { (GCallback) remote_object_hook_command, dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_STRING_INT_POINTER_POINTER, 522 },
+  { (GCallback) remote_object_hook_server, dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_INT_POINTER_POINTER, 625 },
+  { (GCallback) remote_object_hook_print, dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_INT_POINTER_POINTER, 713 },
+  { (GCallback) remote_object_unhook, dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER, 800 },
+  { (GCallback) remote_object_list_get, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER, 837 },
+  { (GCallback) remote_object_list_next, dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER_POINTER, 892 },
+  { (GCallback) remote_object_list_str, dbus_glib_marshal_remote_object_BOOLEAN__UINT_STRING_POINTER_POINTER, 943 },
+  { (GCallback) remote_object_list_int, dbus_glib_marshal_remote_object_BOOLEAN__UINT_STRING_POINTER_POINTER, 1006 },
+  { (GCallback) remote_object_list_time, dbus_glib_marshal_remote_object_BOOLEAN__UINT_STRING_POINTER_POINTER, 1069 },
+  { (GCallback) remote_object_list_fields, dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER, 1134 },
+  { (GCallback) remote_object_list_free, dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER, 1190 },
+  { (GCallback) remote_object_emit_print, dbus_glib_marshal_remote_object_BOOLEAN__STRING_BOXED_POINTER_POINTER, 1229 },
+  { (GCallback) remote_object_nickcmp, dbus_glib_marshal_remote_object_BOOLEAN__STRING_STRING_POINTER_POINTER, 1299 },
+  { (GCallback) remote_object_strip, dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_INT_POINTER_POINTER, 1362 },
+  { (GCallback) remote_object_send_modes, dbus_glib_marshal_remote_object_BOOLEAN__BOXED_INT_UCHAR_UCHAR_POINTER, 1432 },
 };
 
 const DBusGObjectInfo dbus_glib_remote_object_object_info = {
   0,
   dbus_glib_remote_object_methods,
   24,
-"org.atheme.conspire.dbusproxy\0Connect\0A\0filename\0I\0s\0name\0I\0s\0desc\0I\0s\0version\0I\0s\0path\0O\0F\0N\0s\0\0org.atheme.conspire.dbusproxy\0Disconnect\0A\0\0org.atheme.conspire.integration\0Command\0S\0command\0I\0s\0\0org.atheme.conspire.integration\0Print\0S\0text\0I\0s\0\0org.atheme.conspire.integration\0FindContext\0S\0server\0I\0s\0channel\0I\0s\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire.integration\0GetContext\0S\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire.integration\0SetContext\0S\0id\0I\0u\0ret\0O\0F\0N\0b\0\0org.atheme.conspire.integration\0GetInfo\0S\0id\0I\0s\0ret_info\0O\0F\0N\0s\0\0org.atheme.conspire.integration\0GetPrefs\0S\0name\0I\0s\0ret_type\0O\0F\0N\0i\0ret_str\0O\0F\0N\0s\0ret_int\0O\0F\0N\0i\0\0org.atheme.conspire.integration\0HookCommand\0S\0name\0I\0s\0priority\0I\0i\0help_text\0I\0s\0return_value\0I\0i\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire.integration\0HookServer\0S\0name\0I\0s\0priority\0I\0i\0return_value\0I\0i\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire.integration\0HookPrint\0S\0name\0I\0s\0priority\0I\0i\0return_value\0I\0i\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire.integration\0Unhook\0S\0id\0I\0u\0\0org.atheme.conspire.integration\0ListGet\0S\0name\0I\0s\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire.integration\0ListNext\0S\0id\0I\0u\0ret\0O\0F\0N\0b\0\0org.atheme.conspire.integration\0ListStr\0S\0id\0I\0u\0name\0I\0s\0ret_str\0O\0F\0N\0s\0\0org.atheme.conspire.integration\0ListInt\0S\0id\0I\0u\0name\0I\0s\0ret_int\0O\0F\0N\0i\0\0org.atheme.conspire.integration\0ListTime\0S\0id\0I\0u\0name\0I\0s\0ret_time\0O\0F\0N\0t\0\0org.atheme.conspire.integration\0ListFields\0S\0name\0I\0s\0ret\0O\0F\0N\0as\0\0org.atheme.conspire.integration\0ListFree\0S\0id\0I\0u\0\0org.atheme.conspire.integration\0EmitPrint\0S\0event_name\0I\0s\0args\0I\0as\0ret\0O\0F\0N\0b\0\0org.atheme.conspire.integration\0Nickcmp\0S\0nick1\0I\0s\0nick2\0I\0s\0ret\0O\0F\0N\0i\0\0org.atheme.conspire.integration\0Strip\0S\0str\0I\0s\0len\0I\0i\0flag\0I\0i\0ret_str\0O\0F\0N\0s\0\0org.atheme.conspire.integration\0SendModes\0S\0targets\0I\0as\0modes_per_line\0I\0i\0sign\0I\0y\0mode\0I\0y\0\0\0",
-"org.atheme.conspire.integration\0CommandSignal\0org.atheme.conspire.integration\0ServerSignal\0org.atheme.conspire.integration\0PrintSignal\0org.atheme.conspire.integration\0UnloadSignal\0\0",
+"org.atheme.conspire\0Connect\0A\0filename\0I\0s\0name\0I\0s\0desc\0I\0s\0version\0I\0s\0path\0O\0F\0N\0s\0\0org.atheme.conspire\0Disconnect\0A\0\0org.atheme.conspire\0Command\0S\0command\0I\0s\0\0org.atheme.conspire\0Print\0S\0text\0I\0s\0\0org.atheme.conspire\0FindContext\0S\0server\0I\0s\0channel\0I\0s\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire\0GetContext\0S\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire\0SetContext\0S\0id\0I\0u\0ret\0O\0F\0N\0b\0\0org.atheme.conspire\0GetInfo\0S\0id\0I\0s\0ret_info\0O\0F\0N\0s\0\0org.atheme.conspire\0GetPrefs\0S\0name\0I\0s\0ret_type\0O\0F\0N\0i\0ret_str\0O\0F\0N\0s\0ret_int\0O\0F\0N\0i\0\0org.atheme.conspire\0HookCommand\0S\0name\0I\0s\0priority\0I\0i\0help_text\0I\0s\0return_value\0I\0i\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire\0HookServer\0S\0name\0I\0s\0priority\0I\0i\0return_value\0I\0i\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire\0HookPrint\0S\0name\0I\0s\0priority\0I\0i\0return_value\0I\0i\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire\0Unhook\0S\0id\0I\0u\0\0org.atheme.conspire\0ListGet\0S\0name\0I\0s\0ret_id\0O\0F\0N\0u\0\0org.atheme.conspire\0ListNext\0S\0id\0I\0u\0ret\0O\0F\0N\0b\0\0org.atheme.conspire\0ListStr\0S\0id\0I\0u\0name\0I\0s\0ret_str\0O\0F\0N\0s\0\0org.atheme.conspire\0ListInt\0S\0id\0I\0u\0name\0I\0s\0ret_int\0O\0F\0N\0i\0\0org.atheme.conspire\0ListTime\0S\0id\0I\0u\0name\0I\0s\0ret_time\0O\0F\0N\0t\0\0org.atheme.conspire\0ListFields\0S\0name\0I\0s\0ret\0O\0F\0N\0as\0\0org.atheme.conspire\0ListFree\0S\0id\0I\0u\0\0org.atheme.conspire\0EmitPrint\0S\0event_name\0I\0s\0args\0I\0as\0ret\0O\0F\0N\0b\0\0org.atheme.conspire\0Nickcmp\0S\0nick1\0I\0s\0nick2\0I\0s\0ret\0O\0F\0N\0i\0\0org.atheme.conspire\0Strip\0S\0str\0I\0s\0len\0I\0i\0flag\0I\0i\0ret_str\0O\0F\0N\0s\0\0org.atheme.conspire\0SendModes\0S\0targets\0I\0as\0modes_per_line\0I\0i\0sign\0I\0y\0mode\0I\0y\0\0\0",
+"org.atheme.conspire\0CommandSignal\0org.atheme.conspire\0ServerSignal\0org.atheme.conspire\0PrintSignal\0org.atheme.conspire\0UnloadSignal\0\0",
 "\0"
 };
 
