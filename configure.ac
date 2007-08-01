@@ -383,10 +383,12 @@ if test "x$dbus" = "xyes" ; then
 		AC_DEFINE(USE_DBUS)
 		AS_AC_EXPAND(DATADIR, $datadir)
 
+		XCHATWRAP="xchatwrap"
 		DBUSDIR="dbus"
 		DBUSLIBADD="-Ldbus/ -lconspire-dbus"
 		AC_SUBST(DBUSDIR)
 		AC_SUBST(DBUSLIBADD)
+		AC_SUBST(XCHATWRAP)
 
 		DBUS_SERVICES_DIR="$DATADIR/dbus-1/services"
 		AC_SUBST(DBUS_SERVICES_DIR)

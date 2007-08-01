@@ -240,4 +240,4 @@ plugingui_c = @plugingui_c@
 sexy_spell_entry_c = @sexy_spell_entry_c@
 MCS_LIBS = @MCS_LIBS@
 MCS_CFLAGS = @MCS_CFLAGS@
-
+XCHATWRAP = @XCHATWRAP@
