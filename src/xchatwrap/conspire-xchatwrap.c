@@ -189,31 +189,6 @@ xchatwrap_connect(void)
 						   DBUS_REMOTE,
 						   DBUS_REMOTE_INTERFACE);
 
-}
-
-gpointer
-xchat_plugingui_add(gpointer unused,
-	const gchar *filename,
-	const gchar *name,
-	const gchar *desc,
-	const gchar *version,
-	gchar *reserved)
-{
-	GError *error = NULL;
-	gchar *path;
-
-	if (!dbus_g_proxy_call (remote_object, "Connect",
-				&error,
-				G_TYPE_STRING, filename,
-				G_TYPE_STRING, name,
-				G_TYPE_STRING, desc,
-				G_TYPE_STRING, version,
-				G_TYPE_INVALID,
-				G_TYPE_STRING, &path, G_TYPE_INVALID)) {
-		write_error ("Failed to complete Connect", &error);
-		exit(EXIT_FAILURE);
-	}
-
 	dbus_g_proxy_add_signal (remote_object, "CommandSignal",
 				 G_TYPE_STRV,
 				 G_TYPE_STRV,
@@ -248,6 +223,30 @@ xchat_plugingui_add(gpointer unused,
 	dbus_g_proxy_connect_signal (remote_object, "UnloadSignal",
 				     G_CALLBACK (unload_signal_cb),
 				     NULL, NULL);
+}
+
+gpointer
+xchat_plugingui_add(gpointer unused,
+	const gchar *filename,
+	const gchar *name,
+	const gchar *desc,
+	const gchar *version,
+	gchar *reserved)
+{
+	GError *error = NULL;
+	gchar *path;
+
+	if (!dbus_g_proxy_call (remote_object, "Connect",
+				&error,
+				G_TYPE_STRING, filename,
+				G_TYPE_STRING, name,
+				G_TYPE_STRING, desc,
+				G_TYPE_STRING, version,
+				G_TYPE_INVALID,
+				G_TYPE_STRING, &path, G_TYPE_INVALID)) {
+		write_error ("Failed to complete Connect", &error);
+		exit(EXIT_FAILURE);
+	}
 
 	return remote_object;
 }
@@ -270,12 +269,14 @@ xchat_hook_command(gpointer ph, const char *name, int pri,
 	xchat_hook *hook = g_new0(xchat_hook, 1);
 	GError *error = NULL;
 
+	if (!*name) return NULL;
+
 	if (!dbus_g_proxy_call (remote_object, "HookCommand",
 				&error,
 				G_TYPE_STRING, name,
 				G_TYPE_INT, pri,
 				G_TYPE_STRING, help_text,
-				G_TYPE_INT, 1, G_TYPE_INVALID,
+				G_TYPE_INT, 0, G_TYPE_INVALID,
 				G_TYPE_UINT, &hook->hook_id, G_TYPE_INVALID)) {
 		write_error ("Failed to complete HookCommand", &error);
 		exit(EXIT_FAILURE);
@@ -296,6 +297,8 @@ xchat_hook_server(gpointer ph, const char *name, int pri,
 {
 	xchat_hook *hook = g_new0(xchat_hook, 1);
 	GError *error = NULL;
+
+	if (!*name) return NULL;
 
 	if (!dbus_g_proxy_call (remote_object, "HookServer",
 				&error,
@@ -322,6 +325,8 @@ xchat_hook_print(gpointer ph, const char *name, int pri,
 {
 	xchat_hook *hook = g_new0(xchat_hook, 1);
 	GError *error = NULL;
+
+	if (!*name) return NULL;
 
 	if (!dbus_g_proxy_call (remote_object, "HookPrint",
 				&error,
@@ -468,7 +473,7 @@ xchat_set_context(gpointer ph, xchat_context *ctx)
 	dbus_g_proxy_call (remote_object, "SetContext",
 				&error,
 				G_TYPE_UINT, &ctx->context_id, 
-				G_TYPE_INVALID);
+				G_TYPE_INVALID, G_TYPE_INVALID);
 
 	return ctx->context_id;
 }
