@@ -63,6 +63,7 @@ typedef enum {
 struct xchat_hook_cb {
 	guint hook_id;
 	xchat_hook_type hook_type;
+	gpointer userdata;
 	void (*callback)(char *word[], char *word_eol[], gpointer);
 	void (*pcallback)(char *word[], gpointer);
 };
@@ -76,11 +77,12 @@ xchat_revectorize(char **pvector)
 
 	for (size = 1; pvector[size - 1] != NULL; size++);
 
-	out = g_new0(char *, size);
+	out = g_new0(char *, size + 2);
 
 	out[0] = "";
 	for (size = 1; pvector[size - 1] != NULL; size++)
 		out[size] = pvector[size - 1];
+	out[size] = "";
 
 	return out;
 }
@@ -105,7 +107,7 @@ server_signal_cb (DBusGProxy *proxy,
 		struct xchat_hook_cb *hook = iter->data;
 
 		if (hook_id == hook->hook_id)
-			hook->callback(word, word_eol, user_data);
+			hook->callback(word, word_eol, hook->userdata);
 	}
 
 	g_free(word);
@@ -130,7 +132,7 @@ print_signal_cb (DBusGProxy *proxy,
 		struct xchat_hook_cb *hook = iter->data;
 
 		if (hook_id == hook->hook_id)
-			hook->pcallback(word, user_data);
+			hook->pcallback(word, hook->userdata);
 	}
 
 	g_free(word);
@@ -156,7 +158,7 @@ command_signal_cb (DBusGProxy *proxy,
 		struct xchat_hook_cb *hook = iter->data;
 
 		if (hook_id == hook->hook_id)
-			hook->callback(word, word_eol, user_data);
+			hook->callback(word, word_eol, hook->userdata);
 	}
 
 	g_free(word);
@@ -283,6 +285,7 @@ xchat_hook_command(gpointer ph, const char *name, int pri,
 	}
 
 	hook->callback = callback;
+	hook->userdata = userdata;
 	hook->hook_type = XCHAT_HOOK_COMMAND;
 
 	command_hooks = g_list_append(command_hooks, hook);
@@ -311,6 +314,7 @@ xchat_hook_server(gpointer ph, const char *name, int pri,
 	}
 
 	hook->callback = callback;
+	hook->userdata = userdata;
 	hook->hook_type = XCHAT_HOOK_SERVER;
 
 	server_hooks = g_list_append(server_hooks, hook);
@@ -339,6 +343,7 @@ xchat_hook_print(gpointer ph, const char *name, int pri,
 	}
 
 	hook->pcallback = callback;
+	hook->userdata = userdata;
 	hook->hook_type = XCHAT_HOOK_PRINT;
 
 	print_hooks = g_list_append(print_hooks, hook);
