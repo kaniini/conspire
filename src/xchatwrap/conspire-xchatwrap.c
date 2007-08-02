@@ -524,6 +524,103 @@ xchat_get_info(gpointer *ph, const char *id)
 	return out;
 }
 
+typedef struct {
+	guint list_id;
+} xchat_list;
+
+xchat_list *
+xchat_list_get(gpointer ph, const char *name)
+{
+	xchat_list *out = g_new0(xchat_list, 1);
+	GError *error = NULL;
+
+	if (!dbus_g_proxy_call (remote_object, "ListGet",
+				&error,
+				G_TYPE_STRING, name,
+				G_TYPE_INVALID,
+				G_TYPE_UINT, &out->list_id, 
+				G_TYPE_INVALID)) {
+		write_error ("Failed to complete ListGet", &error);
+		exit(EXIT_FAILURE);
+	}
+
+	return out;	
+}
+
+void
+xchat_list_free(gpointer ph, xchat_list *list)
+{
+	GError *error = NULL;
+
+	if (!dbus_g_proxy_call (remote_object, "ListFree",
+				&error,
+				G_TYPE_UINT, list->list_id,
+				G_TYPE_INVALID,
+				G_TYPE_INVALID)) {
+		write_error ("Failed to complete ListFree", &error);
+		exit(EXIT_FAILURE);
+	}
+
+	g_free(list);
+}
+
+gboolean
+xchat_list_next(gpointer ph, xchat_list *list)
+{
+	gboolean ret = FALSE;
+	GError *error = NULL;
+
+	if (!dbus_g_proxy_call (remote_object, "ListNext",
+				&error,
+				G_TYPE_UINT, list->list_id,
+				G_TYPE_INVALID,
+				G_TYPE_BOOLEAN, &ret,
+				G_TYPE_INVALID)) {
+		write_error ("Failed to complete ListNext", &error);
+		exit(EXIT_FAILURE);
+	}
+
+	return ret;
+}
+
+const gchar *
+xchat_list_str(gpointer ph, xchat_list *list)
+{
+	gchar *ret;
+	GError *error = NULL;
+
+	if (!dbus_g_proxy_call (remote_object, "ListStr",
+				&error,
+				G_TYPE_UINT, list->list_id,
+				G_TYPE_INVALID,
+				G_TYPE_STRING, &ret,
+				G_TYPE_INVALID)) {
+		write_error ("Failed to complete ListStr", &error);
+		exit(EXIT_FAILURE);
+	}
+
+	return ret;
+}
+
+gint
+xchat_list_int(gpointer ph, xchat_list *list)
+{
+	gint ret;
+	GError *error = NULL;
+
+	if (!dbus_g_proxy_call (remote_object, "ListInt",
+				&error,
+				G_TYPE_UINT, list->list_id,
+				G_TYPE_INVALID,
+				G_TYPE_INT, &ret,
+				G_TYPE_INVALID)) {
+		write_error ("Failed to complete ListInt", &error);
+		exit(EXIT_FAILURE);
+	}
+
+	return ret;
+}
+
 int
 main (int argc, char **argv)
 {
