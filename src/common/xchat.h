@@ -560,4 +560,14 @@ struct popup
 #define xchat_filename_to_utf8 g_filename_to_utf8
 #endif
 
+session * find_channel (server *serv, char *chan);
+session * find_dialog (server *serv, char *nick);
+session * new_ircwindow (server *serv, char *name, int type, int focus);
+int is_session (session * sess);
+void session_free (session *killsess);
+void lag_check (void);
+void xchat_exit (void);
+void xchat_exec (const char *cmd);
+void xchat_execv (char * const argv[]);
+
 #endif
