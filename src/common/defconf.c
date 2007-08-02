@@ -223,7 +223,7 @@ void config_load(ConfigDb *config) {
 	gfloat floatv;
 	gdouble doublev;
 
-	while (&conf_vt[iter] != NULL) {
+	while (conf_vt[iter].section != NULL) {
 		switch (conf_vt[iter].type) {
 			case CONF_STR:
 				if (!settings_get_string(config, conf_vt[iter].section, conf_vt[iter].key, &strv))
@@ -257,6 +257,7 @@ void config_load(ConfigDb *config) {
 		iter++;
 	}
 }
+
 void config_save(ConfigDb *config) {
 	gint iter = 0;
 	gchar *strv;
@@ -265,7 +266,7 @@ void config_save(ConfigDb *config) {
 	gfloat *floatv;
 	gdouble *doublev;
 
-	while (&conf_vt[iter]) {
+	while (conf_vt[iter].section != NULL) {
 		switch (conf_vt[iter].type) {
 			case CONF_STR:
 				strv = g_strdup(conf_vt[iter].value);
