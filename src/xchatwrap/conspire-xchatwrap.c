@@ -505,15 +505,6 @@ xchat_find_context(gpointer ph,
 	return ctx;
 }
 
-int
-strcasecmp(const char *str1, const char *str2)
-{
-	if (str1 == NULL) return 0;
-	if (str2 == NULL) return 0;
-
-	return g_ascii_strcasecmp(str1, str2);
-}
-
 const char *
 xchat_get_info(gpointer *ph, const char *id)
 {
