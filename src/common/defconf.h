@@ -38,25 +38,17 @@ union _Value {
 	gdouble doublev;
 };
 
-union _ValuePtr {
-	gchar **strv;
-	gboolean *boolv;
-	gint *intv;
-	gfloat *floatv;
-	gdouble *doublev;
-};
-
 struct Config {
 	gchar *section;
 	gchar *key;
 	gint type;
 	union _Value def;
-	union _ValuePtr value;
+	gpointer value;
 };
 
 typedef union _Value Value;
 
-struct ConfPrefs {
+struct {
 	gboolean away_auto_unaway;
 	gint     away_check_limit;
 	gboolean away_color_away;
@@ -213,9 +205,7 @@ struct ConfPrefs {
 	gboolean userlist_show_hosts;
 	gint     userlist_sort_order;
 	gboolean userlist_style;
-};
-
-extern struct ConfPrefs prefs;
+} prefs;
 
 void config_load(ConfigDb *config);
 void config_save(ConfigDb *config);
