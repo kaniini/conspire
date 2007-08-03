@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 #include "xchat.h"
-#include "cfgfiles.h"
+#include "defconf.h"
 #include "util.h"
 #include "modes.h"
 #include "outbound.h"
