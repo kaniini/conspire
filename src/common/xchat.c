@@ -36,7 +36,6 @@
 #include "fe.h"
 #include "util.h"
 #include "configdb.h"
-#include "defconf.h"
 #include "cfgfiles.h"
 #include "ignore.h"
 #include "xchat-plugin.h"
@@ -48,8 +47,7 @@
 #include "outbound.h"
 #include "text.h"
 #include "url.h"
-//#include "xchatc.h"
-#include "common.h"
+#include "xchatc.h"
 
 #ifdef USE_OPENSSL
 #include <openssl/ssl.h>		  /* SSL_() */
@@ -86,7 +84,7 @@ gint arg_existing = FALSE;
 
 struct session *current_tab;
 struct session *current_sess = 0;
-struct xchatprefs prefs_;
+struct xchatprefs prefs;
 
 #ifdef USE_OPENSSL
 SSL_CTX *ctx = NULL;
@@ -142,7 +140,7 @@ lagcheck_update (void)
 	server *serv;
 	GSList *list = serv_list;
 	
-	if (!prefs.gui_lagometer)
+	if (!prefs.lagometer)
 		return;
 
 	while (list)
@@ -173,7 +171,7 @@ lag_check (void)
 		if (serv->connected && serv->end_of_motd)
 		{
 			lag = now - serv->ping_recv;
-			if (prefs.server_ping_timeout && lag > prefs.server_ping_timeout && lag > 0)
+			if (prefs.pingtimeout && lag > prefs.pingtimeout && lag > 0)
 			{
 				sprintf (tbuf, "%d", lag);
 				EMIT_SIGNAL (XP_TE_PINGTIMEOUT, serv->server_session, tbuf, NULL,
@@ -198,7 +196,7 @@ away_check (void)
 	GSList *list;
 	int full, sent, loop = 0;
 
-	if (!prefs.away_color_away || prefs.away_color_limit < 1)
+	if (!prefs.away_track || prefs.away_size_max < 1)
 		return 1;
 
 doover:
@@ -213,7 +211,7 @@ doover:
 		if (sess->server->connected &&
 			 sess->type == SESS_CHANNEL &&
 			 sess->channel[0] &&
-			 sess->total <= prefs.away_check_limit)
+			 sess->total <= prefs.away_size_max)
 		{
 			if (!sess->done_away_check)
 			{
@@ -266,7 +264,7 @@ xchat_misc_checks (void)		/* this gets called every 1/2 second */
 
 	if (count >= 60)				/* every 30 seconds */
 	{
-		if (prefs.gui_lagometer)
+		if (prefs.lagometer)
 			lag_check ();
 		count = 0;
 	}
@@ -300,7 +298,7 @@ irc_init (session *sess)
 	if (prefs.notify_timeout)
 		notify_tag = g_timeout_add (prefs.notify_timeout * 1000, notify_checklist, 0);
 
-	g_timeout_add (prefs.away_check_limit * 1000, away_check, 0);
+	g_timeout_add (prefs.away_timeout * 1000, away_check, 0);
 	g_timeout_add (500, xchat_misc_checks, 0);
 
 	if (arg_url != NULL)
@@ -324,7 +322,7 @@ session_new (server *serv, char *from, int type, int focus)
 	sess->logfd = -1;
 	sess->scrollfd = -1;
 	sess->type = type;
-	sess->hide_join_part = prefs.irc_hide_jpq;
+	sess->hide_join_part = prefs.confmode;
 
 	if (from != NULL)
 		g_strlcpy (sess->channel, from, CHANLEN);
@@ -345,7 +343,7 @@ new_ircwindow (server *serv, char *name, int type, int focus)
 	{
 	case SESS_SERVER:
 		serv = server_new ();
-		if (prefs.gui_server_tabs)
+		if (prefs.use_server_tab)
 			sess = session_new (serv, name, SESS_SERVER, focus);
 		else
 			sess = session_new (serv, name, SESS_CHANNEL, focus);
@@ -354,7 +352,7 @@ new_ircwindow (server *serv, char *name, int type, int focus)
 		break;
 	case SESS_DIALOG:
 		sess = session_new (serv, name, type, focus);
-		if (prefs.log_auto)
+		if (prefs.logging)
 			log_open (sess);
 		break;
 	default:
@@ -366,7 +364,7 @@ new_ircwindow (server *serv, char *name, int type, int focus)
 	}
 
 	irc_init (sess);
-	if (prefs.text_reload_buffer)
+	if (prefs.text_replay)
 		scrollback_load (sess);
 	plugin_emit_dummy_print (sess, "Open Context");
 
@@ -640,7 +638,7 @@ sigusr1_handler (int signal, siginfo_t *si, void *un)
 	GSList *list = sess_list;
 	session *sess;
 
-	if (prefs.log_auto)
+	if (prefs.logging)
 	{
 		while (list)
 		{
@@ -721,7 +719,7 @@ xchat_init (void)
 #endif
 
 	if (g_get_charset (&cs))
-		prefs.text_utf8_locale = TRUE;
+		prefs.utf8_locale = TRUE;
 
 	load_text_events ();
 	sound_load ();
@@ -959,15 +957,14 @@ xchat_exit (void)
 	in_xchat_exit = TRUE;
 	plugin_kill_all ();
 	fe_cleanup ();
-	if (prefs.misc_autosave)
+	if (prefs.autosave)
 	{
 		save_config ();
-		config_save(config);
 		settings_close(config);
-		if (prefs.gui_state_save)
+		if (prefs.save_pevents)
 			pevent_save (NULL);
 	}
-	if (prefs.misc_autosave_url)
+	if (prefs.autosave_url)
 		url_autosave ();
 	sound_save ();
 	notify_save ();
@@ -1038,7 +1035,6 @@ main (int argc, char *argv[])
 #endif
 
 	config = settings_open();
-	config_load(config);
 	load_config ();
 
 	fe_init ();
