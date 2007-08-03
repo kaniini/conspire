@@ -938,6 +938,8 @@ xchat_init (void)
 
 	servlist_init ();							/* load server list */
 
+	fe_new_window (NULL, 0);
+
 	if (!arg_url && !servlist_have_auto() && !skip_serverlist)
 		new_ircwindow (NULL, NULL, SESS_SERVER, 0);
 
