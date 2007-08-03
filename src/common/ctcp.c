@@ -128,7 +128,7 @@ ctcp_handle (session *sess, char *to, char *nick,
 	if (ignore_check (word[1], IG_CTCP))
 		return;
 
-	if (!strcasecmp (msg, "VERSION") && !prefs.irc_hide_version)
+	if (!strcasecmp (msg, "VERSION") && !prefs.hidever)
 	{
 		snprintf (outbuf, sizeof (outbuf), "VERSION conspire "PACKAGE_VERSION" %s",
 					 get_cpu_str ());
