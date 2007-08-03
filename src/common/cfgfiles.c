@@ -606,6 +606,211 @@ load_config (void)
 
 	memset (&prefs, 0, sizeof (struct xchatprefs));
 
+	/* put in default values, anything left out is automatically zero */
+	prefs.local_ip = 0xffffffff;
+	prefs.irc_join_delay = 3;
+	prefs.show_marker = 1;
+	prefs.newtabstofront = 2;
+	prefs.completion_amount = 5;
+	prefs.away_timeout = 60;
+	prefs.away_size_max = 300;
+	prefs.away_track = 1;
+	prefs.timestamp_logs = 1;
+	prefs.truncchans = 20;
+	prefs.autoresume = 1;
+	prefs.show_away_once = 1;
+	prefs.indent_nicks = 1;
+	prefs.thin_separator = 1;
+	prefs._tabs_position = 2; /* 2 = left */
+	prefs.fastdccsend = 1;
+	prefs.wordwrap = 1;
+	prefs.autosave = 1;
+	prefs.autodialog = 1;
+	prefs.gui_input_spell = 1;
+	prefs.autoreconnect = 1;
+	prefs.recon_delay = 10;
+	prefs.text_replay = 1;
+	prefs.tabchannels = 1;
+	prefs.tab_layout = 2;	/* 0=Tabs 1=Reserved 2=Tree */
+	prefs.tab_sort = 1;
+	prefs.paned_userlist = 1;
+	prefs.newtabstofront = 2;
+	prefs.use_server_tab = 1;
+	prefs.privmsgtab = 1;
+	/*prefs.style_inputbox = 1;*/
+	prefs.dccpermissions = 0600;
+	prefs.max_lines = 500;
+	prefs.mainwindow_width = 640;
+	prefs.mainwindow_height = 400;
+	prefs.dialog_width = 500;
+	prefs.dialog_height = 256;
+	prefs.gui_join_dialog = 1;
+	prefs.gui_quit_dialog = 1;
+	prefs.dcctimeout = 180;
+	prefs.dccstalltimeout = 60;
+	prefs.notify_timeout = 15;
+	prefs.tint_red =
+		prefs.tint_green =
+		prefs.tint_blue = 195;
+	prefs.auto_indent = 1;
+	prefs.max_auto_indent = 256;
+	prefs.show_separator = 1;
+	prefs.dcc_blocksize = 1024;
+	prefs.throttle = 1;
+	 /*FIXME*/ prefs.msg_time_limit = 30;
+	prefs.msg_number_limit = 5;
+	prefs.ctcp_time_limit = 30;
+	prefs.ctcp_number_limit = 5;
+	prefs.topicbar = 1;
+	prefs.lagometer = 1;
+	prefs.throttlemeter = 1;
+	prefs.autoopendccrecvwindow = 1;
+	prefs.autoopendccsendwindow = 1;
+	prefs.autoopendccchatwindow = 1;
+	prefs.userhost = 1;
+	prefs.gui_url_mod = 4;	/* ctrl */
+	prefs.gui_tray = 1;
+	prefs.gui_pane_left_size = 100;
+	prefs.gui_pane_right_size = 100;
+	prefs.mainwindow_save = 1;
+	prefs.bantype = 2;
+	prefs.input_flash_priv = prefs.input_flash_hilight = 1;
+	prefs.input_tray_priv = prefs.input_tray_hilight = 1;
+	prefs.autodccsend = 2;	/* browse mode */
+#ifdef WIN32
+	prefs.identd = 1;
+#endif
+	strcpy (prefs.stamp_format, "[%H:%M] ");
+	strcpy (prefs.timestamp_log_format, "%b %d %H:%M:%S ");
+	strcpy (prefs.logmask, "%n-%c.log");
+	strcpy (prefs.nick_suffix, ",");
+	strcpy (prefs.cmdchar, "/");
+	strcpy (prefs.nick1, username);
+	strcpy (prefs.nick2, username);
+	strcat (prefs.nick2, "_");
+	strcpy (prefs.nick3, username);
+	strcat (prefs.nick3, "__");
+	strcpy (prefs.realname, realname);
+	strcpy (prefs.username, username);
+#ifdef WIN32
+	strcpy (prefs.sounddir, "./sounds");
+	{
+		char out[256];
+
+		if (get_reg_str ("Software\\Microsoft\\Windows\\CurrentVersion\\"
+						 "Explorer\\Shell Folders", "Personal", out, sizeof (out)))
+			snprintf (prefs.dccdir, sizeof (prefs.dccdir), "%s\\Downloads", out);
+		else
+			snprintf (prefs.dccdir, sizeof (prefs.dccdir), "%s\\Downloads", get_xdir_utf8 ());
+	}
+#else
+	snprintf (prefs.sounddir, sizeof (prefs.sounddir), "%s/sounds", get_xdir_utf8 ());
+	snprintf (prefs.dccdir, sizeof (prefs.dccdir), "%s/downloads", get_xdir_utf8 ());
+#endif
+	strcpy (prefs.doubleclickuser, "QUOTE WHOIS %s %s");
+	strcpy (prefs.awayreason, _("I'm busy"));
+	strcpy (prefs.quitreason, _("Leaving"));
+	strcpy (prefs.partreason, prefs.quitreason);
+	strcpy (prefs.font_normal, DEF_FONT);
+	strcpy (prefs.dnsprogram, "host");
+	strcpy (prefs.irc_no_hilight, "NickServ,ChanServ");
+
+	g_free ((char *)username);
+	g_free ((char *)realname);
+
+	fh = open (default_file (), OFLAGS | O_RDONLY);
+	if (fh != -1)
+	{
+		fstat (fh, &st);
+		cfg = malloc (st.st_size + 1);
+		cfg[0] = '\0';
+		i = read (fh, cfg, st.st_size);
+		if (i >= 0)
+			cfg[i] = '\0';					/* make sure cfg is NULL terminated */
+		close (fh);
+		i = 0;
+		do
+		{
+			switch (vars[i].type)
+			{
+			case TYPE_STR:
+				cfg_get_str (cfg, vars[i].name, (char *) &prefs + vars[i].offset,
+								 vars[i].len);
+				break;
+			case TYPE_BOOL:
+			case TYPE_INT:
+				val = cfg_get_int_with_result (cfg, vars[i].name, &res);
+				if (res)
+					*((int *) &prefs + vars[i].offset) = val;
+				break;
+			}
+			i++;
+		}
+		while (vars[i].name);
+
+		free (cfg);
+
+	} else
+	{
+#ifndef WIN32
+#ifndef __EMX__
+		/* OS/2 uses UID 0 all the time */
+		if (getuid () == 0)
+			fe_message (_("* Running IRC as root is stupid! You should\n"
+							"  create a User Account and use that to login.\n"), FE_MSG_WARN|FE_MSG_WAIT);
+#endif
+#endif /* !WIN32 */
+
+		mkdir_utf8 (prefs.dccdir);
+		mkdir_utf8 (prefs.dcc_completed_dir);
+	}
+	if (prefs.mainwindow_height < 138)
+		prefs.mainwindow_height = 138;
+	if (prefs.mainwindow_width < 106)
+		prefs.mainwindow_width = 106;
+
+	sp = strchr (prefs.username, ' ');
+	if (sp)
+		sp[0] = 0;	/* spaces in username would break the login */
+
+	/* try to make sense of old ulist/tree position settings */
+	if (prefs.gui_ulist_pos == 0)
+	{
+		prefs.gui_ulist_pos = 3;	/* top right */
+		if (prefs._gui_ulist_left)
+			prefs.gui_ulist_pos = 2;	/* bottom left */
+
+		switch (prefs._tabs_position)
+		{
+		case 0:
+			prefs.tab_pos = 6; /* bottom */
+			break;
+		case 1:
+			prefs.tab_pos = 5;	/* top */
+			break;
+		case 2:
+			prefs.tab_pos = 1; 	/* left */
+			break;
+		case 3:
+			prefs.tab_pos = 4; 	/* right */
+			break;
+		case 4:
+			prefs.tab_pos = 1;	/* (hidden)left */
+			break;
+		case 5:
+			if (prefs._gui_ulist_left)
+			{
+				prefs.tab_pos = 1; 	/* above ulist left */
+				prefs.gui_ulist_pos = 2;
+			}
+			else
+			{
+				prefs.tab_pos = 3; 	/* above ulist right */
+				prefs.gui_ulist_pos = 4;
+			}
+			break;
+		}
+	}
 }
 
 int

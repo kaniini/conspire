@@ -961,6 +961,7 @@ xchat_exit (void)
 	fe_cleanup ();
 	if (prefs.misc_autosave)
 	{
+		save_config ();
 		config_save(config);
 		settings_close(config);
 		if (prefs.gui_state_save)
@@ -1038,6 +1039,7 @@ main (int argc, char *argv[])
 
 	config = settings_open();
 	config_load(config);
+	load_config ();
 
 	fe_init ();
 
