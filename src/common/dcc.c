@@ -55,6 +55,8 @@
 #include "url.h"
 #include "xchatc.h"
 
+#include "defconf.h"
+
 #ifdef USE_DCC64
 #define BIG_STR_TO_INT(x) strtoull(x,NULL,10)
 #else
@@ -260,9 +262,9 @@ dcc_check_timeouts (void)
 		case STAT_QUEUED:
 			if (dcc->type == TYPE_SEND || dcc->type == TYPE_CHATSEND)
 			{
-				if (tim - dcc->offertime > prefs.dcctimeout)
+				if (tim - dcc->offertime > prefs.dcc_timeout)
 				{
-					if (prefs.dcctimeout > 0)
+					if (prefs.dcc_timeout > 0)
 					{
 						EMIT_SIGNAL (XP_TE_DCCTOUT, dcc->serv->front_session,
 										 dcctypes[dcc->type],
@@ -314,7 +316,7 @@ dcc_lookup_proxy (char *host, struct sockaddr_in *addr)
 	return FALSE;
 }
 
-#define DCC_USE_PROXY() (prefs.proxy_host[0] && prefs.proxy_type>0 && prefs.proxy_type<5 && prefs.proxy_use!=1)
+#define DCC_USE_PROXY() (prefs.proxy_hostname[0] && prefs.proxy_type>0 && prefs.proxy_type<5 && prefs.proxy_use!=1)
 
 static int
 dcc_connect_sok (struct DCC *dcc)
@@ -330,7 +332,7 @@ dcc_connect_sok (struct DCC *dcc)
 	addr.sin_family = AF_INET;
 	if (DCC_USE_PROXY ())
 	{
-		if (!dcc_lookup_proxy (prefs.proxy_host, &addr))
+		if (!dcc_lookup_proxy (prefs.proxy_hostname, &addr))
 		{
 			closesocket (sok);
 			return -1;
@@ -385,7 +387,7 @@ dcc_close (struct DCC *dcc, int dccstat, int destroy)
 			{			
 				/* mgl: change this to use destfile_fs for correctness and to */
 				/* handle the case where dccwithnick is set */
-				move_file_utf8 (prefs.dccdir, prefs.dcc_completed_dir, 
+				move_file_utf8 (prefs.dcc_downloaded_dir, prefs.dcc_completed_dir, 
 									 file_part (dcc->destfile), prefs.dccpermissions);
 			}
 
@@ -682,7 +684,7 @@ dcc_read (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 	{
 
 		/* try to create the download dir (even if it exists, no harm) */
-		mkdir_utf8 (prefs.dccdir);
+		mkdir_utf8 (prefs.dcc_downloaded_dir);
 
 		if (dcc->resumable)
 		{
@@ -1066,7 +1068,7 @@ static gboolean
 dcc_socks5_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 {
 	struct proxy_state *proxy = dcc->proxy;
-	int auth = prefs.proxy_auth && prefs.proxy_user[0] && prefs.proxy_pass[0];
+	int auth = prefs.proxy_auth && prefs.proxy_user[0] && prefs.proxy_password[0];
 
 	if (proxy->phase == 0)
 	{
@@ -1127,12 +1129,12 @@ dcc_socks5_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DC
 
 			/* form the UPA request */
 			len_u = strlen (prefs.proxy_user);
-			len_p = strlen (prefs.proxy_pass);
+			len_p = strlen (prefs.proxy_password);
 			proxy->buffer[0] = 1;
 			proxy->buffer[1] = len_u;
 			memcpy (proxy->buffer + 2, prefs.proxy_user, len_u);
 			proxy->buffer[2 + len_u] = len_p;
-			memcpy (proxy->buffer + 3 + len_u, prefs.proxy_pass, len_p);
+			memcpy (proxy->buffer + 3 + len_u, prefs.proxy_password, len_p);
 
 			proxy->buffersize = 3 + len_u + len_p;
 			proxy->bufferused = 0;
@@ -1280,7 +1282,7 @@ dcc_http_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DCC 
 		if (prefs.proxy_auth)
 		{
 			n2 = snprintf (auth_data2, sizeof (auth_data2), "%s:%s",
-							prefs.proxy_user, prefs.proxy_pass);
+							prefs.proxy_user, prefs.proxy_password);
 			base64_encode (auth_data, auth_data2, n2);
 			n += snprintf (buf+n, sizeof (buf)-n, "Proxy-Authorization: Basic %s\r\n", auth_data);
 		}
@@ -1841,7 +1843,7 @@ dcc_send (struct session *sess, char *to, char *file, int maxcps, int passive)
 				{
 					if (*file == ' ')
 					{
-						if (prefs.dcc_send_fillspaces)
+						if (prefs.dcc_escape_special)
 				    		*file = '_';
 					  	else
 					   	havespaces = 1;
@@ -1849,7 +1851,7 @@ dcc_send (struct session *sess, char *to, char *file, int maxcps, int passive)
 					file++;
 				}
 				dcc->nick = strdup (to);
-				if (prefs.autoopendccsendwindow)
+				if (prefs.gui_autoopen_dcc_send)
 				{
 					if (fe_dcc_open_send_win (TRUE))	/* already open? add */
 						fe_dcc_add (dcc);
@@ -2066,7 +2068,7 @@ dcc_get (struct DCC *dcc)
 	case STAT_QUEUED:
 		if (dcc->type != TYPE_CHATSEND)
 		{
-			if (dcc->type == TYPE_RECV && prefs.autoresume && dcc->resumable)
+			if (dcc->type == TYPE_RECV && prefs.dcc_autoresume && dcc->resumable)
 			{
 				dcc_resume (dcc);
 			}
@@ -2189,7 +2191,7 @@ dcc_chat (struct session *sess, char *nick, int passive)
 	dcc->nick = strdup (nick);
 	if (passive || dcc_listen_init (dcc, sess))
 	{
-		if (prefs.autoopendccchatwindow)
+		if (prefs.gui_autoopen_dcc_chat)
 		{
 			if (fe_dcc_open_chat_win (TRUE))	/* already open? add only */
 				fe_dcc_add (dcc);
@@ -2292,16 +2294,16 @@ dcc_add_chat (session *sess, char *nick, int port, guint32 addr, int pasvid)
 		EMIT_SIGNAL (XP_TE_DCCCHATOFFER, sess->server->front_session, nick,
 						 NULL, NULL, NULL, 0);
 
-		if (prefs.autoopendccchatwindow)
+		if (prefs.gui_autoopen_dcc_chat)
 		{
 			if (fe_dcc_open_chat_win (TRUE))	/* already open? add only */
 				fe_dcc_add (dcc);
 		} else
 			fe_dcc_add (dcc);
 
-		if (prefs.autodccchat == 1)
+		if (prefs.dcc_chat_autoaccept == 1)
 			dcc_connect (dcc);
-		else if (prefs.autodccchat == 2)
+		else if (prefs.dcc_chat_autoaccept == 2)
 		{
 			char buff[128];
 			snprintf (buff, sizeof (buff), "%s is offering DCC Chat. Do you want to accept?", nick);
@@ -2323,13 +2325,13 @@ dcc_add_file (session *sess, char *file, DCC_SIZE size, int port, char *nick, gu
 	{
 		dcc->file = strdup (file);
 
-		dcc->destfile = g_malloc (strlen (prefs.dccdir) + strlen (nick) +
+		dcc->destfile = g_malloc (strlen (prefs.dcc_downloaded_dir) + strlen (nick) +
 										  strlen (file) + 4);
 
-		strcpy (dcc->destfile, prefs.dccdir);
-		if (prefs.dccdir[strlen (prefs.dccdir) - 1] != '/')
+		strcpy (dcc->destfile, prefs.dcc_downloaded_dir);
+		if (prefs.dcc_downloaded_dir[strlen (prefs.dcc_downloaded_dir) - 1] != '/')
 			strcat (dcc->destfile, "/");
-		if (prefs.dccwithnick)
+		if (prefs.dcc_nick_in_filename)
 		{
 #ifdef WIN32
 			char *t = strlen (dcc->destfile) + dcc->destfile;
@@ -2364,18 +2366,16 @@ dcc_add_file (session *sess, char *file, DCC_SIZE size, int port, char *nick, gu
 
 		is_resumable (dcc);
 
-		/* autodccsend is really autodccrecv.. right? */
-
-		if (prefs.autodccsend == 1)
+		if (prefs.dcc_autoaccept_mode == 1)
 		{
 			dcc_get (dcc);
 		}
-		else if (prefs.autodccsend == 2)
+		else if (prefs.dcc_autoaccept_mode == 2)
 		{
 			snprintf (tbuf, sizeof (tbuf), _("%s is offering \"%s\". Do you want to accept?"), nick, file);
 			fe_confirm (tbuf, dcc_confirm_send, dcc_deny_send, dcc);
 		}
-		if (prefs.autoopendccrecvwindow)
+		if (prefs.gui_autoopen_dcc_get)
 		{
 			if (fe_dcc_open_recv_win (TRUE))	/* was already open? just add*/
 				fe_dcc_add (dcc);
