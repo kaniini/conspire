@@ -23,12 +23,13 @@ AC_PROG_LIBTOOL
 dnl -----------------------------------------------------------
 dnl Language Support
 dnl -----------------------------------------------------------
-GETTEXT_PACKAGE=xchat
+GETTEXT_PACKAGE=conspire
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[Gettext package name])
 
 ALL_LINGUAS="be ca cs de el es fi fr gl hu it ja ko lt mk nl pa pt ru sq sr sv uk vi zh_CN zh_TW"
-AM_GNU_GETTEXT
+AM_GNU_GETTEXT([external])
+AM_GNU_GETTEXT_VERSION([0.16.1])
 
 dnl displaced from acconfig.h
 AH_VERBATIM([OLD_PERL],[#undef OLD_PERL])
