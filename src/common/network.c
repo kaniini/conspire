@@ -31,6 +31,9 @@
 #define WANTDNS
 #include "inet.h"
 
+#include "xchat.h"
+#include "xchatc.h"
+
 #define NETWORK_PRIVATE
 #include "network.h"
 
@@ -186,6 +189,29 @@ net_getsockport (int sok4, int sok6)
 
 /* =================== IPV6 ================== */
 
+/* specialized version of getaddrinfo() which can try IPv6 first */
+static int
+net_getaddrinfo(const char *node, const char *service,
+	struct addrinfo *hints, struct addrinfo **res)
+{
+	int ret;
+	int pfamily;
+
+	pfamily = hints->ai_family;
+
+	if (prefs.net_prefer_ipv6)
+		hints->ai_family = AF_INET6;
+
+	ret = getaddrinfo (node, service, hints, res);
+	if (ret == EAI_ADDRFAMILY)
+	{
+		hints->ai_family = pfamily;
+		ret = getaddrinfo (node, service, hints, res);
+	}
+
+	return ret;
+}
+
 char *
 net_resolve (netstore * ns, char *hostname, int port, char **real_host)
 {
@@ -200,14 +226,14 @@ net_resolve (netstore * ns, char *hostname, int port, char **real_host)
 	sprintf (portstring, "%d", port);
 
 	memset (&hints, 0, sizeof (struct addrinfo));
-	hints.ai_family = PF_UNSPEC; /* support ipv6 and ipv4 */
+	hints.ai_family = PF_UNSPEC;
 	hints.ai_flags = AI_CANONNAME;
 	hints.ai_socktype = SOCK_STREAM;
 
 	if (port == 0)
-		ret = getaddrinfo (hostname, NULL, &hints, &ns->ip6_hostent);
+		ret = net_getaddrinfo (hostname, NULL, &hints, &ns->ip6_hostent);
 	else
-		ret = getaddrinfo (hostname, portstring, &hints, &ns->ip6_hostent);
+		ret = net_getaddrinfo (hostname, portstring, &hints, &ns->ip6_hostent);
 	if (ret != 0)
 		return NULL;
 

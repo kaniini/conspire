@@ -562,6 +562,8 @@ const struct prefs vars[] = {
 	{"text_transparent", P_OFFINT (transparent), TYPE_BOOL},
 	{"text_wordwrap", P_OFFINT (wordwrap), TYPE_BOOL},
 
+	{"net_prefer_ipv6", P_OFFINT (net_prefer_ipv6), TYPE_BOOL},
+
 	{0, 0, 0},
 };
 
@@ -677,6 +679,7 @@ load_config (void)
 	prefs.input_flash_priv = prefs.input_flash_hilight = 1;
 	prefs.input_tray_priv = prefs.input_tray_hilight = 1;
 	prefs.autodccsend = 2;	/* browse mode */
+	prefs.net_prefer_ipv6 = 0;
 #ifdef WIN32
 	prefs.identd = 1;
 #endif
