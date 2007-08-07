@@ -303,8 +303,6 @@ struct xchatprefs
 	unsigned int msg_number_limit;	/*same deal */
 	unsigned int msg_time_limit;
 
-	unsigned int net_prefer_ipv6;
-
 	/* Tells us if we need to save, only when they've been edited.
 		This is so that we continue using internal defaults (which can
 		change in the next release) until the user edits them. */
