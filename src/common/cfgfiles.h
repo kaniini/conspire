@@ -4,6 +4,7 @@
 #define XCHAT_CFGFILES_H
 
 #include "xchat.h"
+#include <stdio.h>
 
 extern char *xdir_fs;
 extern char *xdir_utf;
