@@ -317,12 +317,7 @@ process_numeric (session * sess, int n,
 					  char *word[], char *word_eol[], char *text)
 {
 	server *serv = sess->server;
-	/* show whois is the server tab */
-	session *whois_sess = serv->server_session;
-
-	/* unless this setting is on */
-	if (prefs.irc_whois_front)
-		whois_sess = serv->front_session;
+	session *whois_sess = serv->front_session;
 
 	switch (n)
 	{

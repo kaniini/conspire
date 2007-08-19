@@ -265,7 +265,6 @@ struct xchatprefs
 	unsigned int auto_unmark_away;
 	unsigned int away_track;
 	unsigned int userhost;
-	unsigned int irc_whois_front;
 	unsigned int use_server_tab;
 	unsigned int notices_tabs;
 	unsigned int style_namelistgad;
