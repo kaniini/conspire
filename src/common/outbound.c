@@ -360,7 +360,7 @@ cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 		return TRUE;
 	}
-	else
+	else if (!(*reason))
 		reason = g_strdup(prefs.awayreason);
 
 	sess->server->p_set_away (sess->server, reason);
