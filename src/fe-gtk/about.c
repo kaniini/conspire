@@ -129,8 +129,7 @@ menu_about (GtkWidget * wid, gpointer sess)
 					locale,
 					gtk_major_version,
 					gtk_minor_version,
-					gtk_micro_version,
-					);
+					gtk_micro_version);
 	gtk_label_set_markup (GTK_LABEL (label), buf);
 	gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
 
