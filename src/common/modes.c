@@ -529,7 +529,7 @@ handle_mode (server * serv, char *word[], char *word_eol[],
 	if (word_eol[offset][len] == ' ')
 		word_eol[offset][len] = 0;
 
-	if (prefs.raw_modes && !numeric_324)
+	if (!numeric_324)
 		EMIT_SIGNAL (XP_TE_RAWMODES, sess, nick, word_eol[offset], 0, 0, 0);
 
 	if (numeric_324 && !using_front_tab)
@@ -586,7 +586,7 @@ handle_mode (server * serv, char *word[], char *word_eol[],
 				argstr = word[arg + offset];
 			}
 			handle_single_mode (&mr, sign, *modes, nick, chan,
-									  argstr, numeric_324 || prefs.raw_modes,
+									  argstr, numeric_324,
 									  numeric_324);
 		}
 
@@ -684,9 +684,7 @@ inbound_005 (server * serv, char *word[])
 			/* now wait for numeric 290 */	
 		} else if (strcmp (word[w], "EXCEPTS") == 0)
 		{
-#ifndef WIN32
 			serv->have_except = TRUE;
-#endif
 		} else if (strncmp (word[w], "ELIST=", 6) == 0)
 		{
 			/* supports LIST >< min/max user counts? */

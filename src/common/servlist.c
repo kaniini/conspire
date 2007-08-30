@@ -533,22 +533,19 @@ servlist_save (void)
 	ircserver *serv;
 	GSList *list;
 	GSList *hlist;
-#ifndef WIN32
 	int first = FALSE;
 
 	snprintf (buf, sizeof (buf), "%s/servlist_.conf", get_xdir_fs ());
 	if (access (buf, F_OK) != 0)
 		first = TRUE;
-#endif
 
 	fp = xchat_fopen_file ("servlist_.conf", "w", 0);
 	if (!fp)
 		return FALSE;
 
-#ifndef WIN32
 	if (first)
 		chmod (buf, 0600);
-#endif
+
 	fprintf (fp, "v="PACKAGE_VERSION"\n\n");
 
 	list = network_list;

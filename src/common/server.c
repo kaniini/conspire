@@ -27,12 +27,8 @@
 #define WANTARPA
 #include "inet.h"
 
-#ifndef WIN32
 #include <signal.h>
 #include <sys/wait.h>
-#else
-#include <winbase.h>
-#endif
 
 #include "xchat.h"
 #include "fe.h"
@@ -53,10 +49,6 @@
 #include <openssl/ssl.h>		  /* SSL_() */
 #include <openssl/err.h>		  /* ERR_() */
 #include "ssl.h"
-#endif
-
-#ifdef WIN32
-#include "identd.c"
 #endif
 
 #ifdef USE_OPENSSL
@@ -501,19 +493,6 @@ server_connected (server * serv)
 	fe_server_event (serv, FE_SE_CONNECT, 0);
 }
 
-#ifdef WIN32
-
-static gboolean
-server_close_pipe (int *pipefd)	/* see comments below */
-{
-	close (pipefd[0]);	/* close WRITE end first to cause an EOF on READ */
-	close (pipefd[1]);	/* in giowin32, and end that thread. */
-	free (pipefd);
-	return FALSE;
-}
-
-#endif
-
 static void
 server_stopconnecting (server * serv)
 {
@@ -529,24 +508,12 @@ server_stopconnecting (server * serv)
 		serv->joindelay_tag = 0;
 	}
 
-#ifndef WIN32
 	/* kill the child process trying to connect */
 	kill (serv->childpid, SIGKILL);
 	waitpid (serv->childpid, NULL, 0);
 
 	close (serv->childwrite);
 	close (serv->childread);
-#else
-	PostThreadMessage (serv->childpid, WM_QUIT, 0, 0);
-
-	{
-		/* if we close the pipe now, giowin32 will crash. */
-		int *pipefd = malloc (sizeof (int) * 2);
-		pipefd[0] = serv->childwrite;
-		pipefd[1] = serv->childread;
-		g_idle_add ((GSourceFunc)server_close_pipe, pipefd);
-	}
-#endif
 
 #ifdef USE_OPENSSL
 	if (serv->ssl_do_connect_tag)
@@ -790,11 +757,7 @@ auto_reconnect (server *serv, int send_quit, int err)
 	if (del < 1000)
 		del = 500;				  /* so it doesn't block the gui */
 
-#ifndef WIN32
 	if (err == -1 || err == 0 || err == ECONNRESET || err == ETIMEDOUT)
-#else
-	if (err == -1 || err == 0 || err == WSAECONNRESET || err == WSAETIMEDOUT)
-#endif
 		serv->reconnect_away = serv->is_away;
 
 	/* is this server in a reconnect delay? remove it! */
@@ -816,32 +779,7 @@ server_flush_queue (server *serv)
 	fe_set_throttle (serv);
 }
 
-#ifdef WIN32
-
-static int
-waitline2 (GIOChannel *source, char *buf, int bufsize)
-{
-	int i = 0;
-	int len;
-
-	while (1)
-	{
-		if (g_io_channel_read (source, &buf[i], 1, &len) != G_IO_ERROR_NONE)
-			return -1;
-		if (buf[i] == '\n' || bufsize == i + 1)
-		{
-			buf[i] = 0;
-			return i;
-		}
-		i++;
-	}
-}
-
-#else
-
 #define waitline2(source,buf,size) waitline(serv->childread,buf,size,0)
-
-#endif
 
 /* connect() successed */
 
@@ -937,17 +875,6 @@ server_read_child (GIOChannel *source, GIOCondition condition, server *serv)
 		waitline2 (source, ip, sizeof ip);
 		waitline2 (source, outbuf, sizeof outbuf);
 		EMIT_SIGNAL (XP_TE_CONNECT, sess, host, ip, outbuf, NULL, 0);
-#ifdef WIN32
-		if (prefs.identd)
-		{
-			if (serv->network)
-				identd_start ((((ircnet *)serv->network)->user) ?
-									(((ircnet *)serv->network)->user) :
-									prefs.username);
-			else
-				identd_start (prefs.username);
-		}
-#else
 		snprintf (outbuf, sizeof (outbuf), "%s/auth/xchat_auth",
 					 g_get_home_dir ());
 		if (access (outbuf, X_OK) == 0)
@@ -956,7 +883,6 @@ server_read_child (GIOChannel *source, GIOCondition condition, server *serv)
 						 g_get_home_dir (), prefs.username);
 			handle_command (serv->server_session, outbuf, FALSE);
 		}
-#endif
 		break;
 	case '4':						  /* success */
 		waitline2 (source, tbuf, sizeof (tbuf));
@@ -1349,12 +1275,7 @@ base64_encode (char *to, char *from, unsigned int len)
 static int
 http_read_line (int print_fd, int sok, char *buf, int len)
 {
-#ifdef WIN32
-	/* make sure waitline() uses recv() or it'll fail on win32 */
-	len = waitline (sok, buf, len, FALSE);
-#else
 	len = waitline (sok, buf, len, TRUE);
-#endif
 	if (len >= 1)
 	{
 		/* print the message out (send it to the parent process) */
@@ -1548,7 +1469,7 @@ server_child (server * serv)
 
 xit:
 
-#if defined (USE_IPV6) || defined (WIN32)
+#ifdef USE_IPV6
 	/* this is probably not needed */
 	net_store_destroy (ns_server);
 	if (ns_proxy)
@@ -1556,15 +1477,6 @@ xit:
 #endif
 
 	/* no need to free ip/real_hostname, this process is exiting */
-#ifdef WIN32
-	/* under win32 we use a thread -> shared memory, must free! */
-	if (proxy_ip)
-		free (proxy_ip);
-	if (ip)
-		free (ip);
-	if (real_hostname)
-		free (real_hostname);
-#endif
 
 	return 0;
 }
@@ -1633,11 +1545,7 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 	fe_set_away (serv);
 	server_flush_queue (serv);
 
-#ifdef WIN32
-	if (_pipe (read_des, 4096, _O_BINARY) < 0)
-#else
 	if (pipe (read_des) < 0)
-#endif
 		return;
 #ifdef __EMX__ /* os/2 */
 	setmode (read_des[0], O_BINARY);

@@ -31,11 +31,7 @@
 #include "text.h"
 #include "xchatc.h"
 
-#ifdef WIN32
-#define XCHAT_DIR "X-Chat 2"
-#else
 #define XCHAT_DIR ".conspire"
-#endif
 #define DEF_FONT "Monospace 9"
 
 void
@@ -276,50 +272,6 @@ cfg_get_int (char *cfg, char *var)
 char *xdir_fs = NULL;	/* file system encoding */
 char *xdir_utf = NULL;	/* utf-8 encoding */
 
-#ifdef WIN32
-
-#include <windows.h>
-
-static gboolean
-get_reg_str (const char *sub, const char *name, char *out, DWORD len)
-{
-	HKEY hKey;
-	DWORD t;
-
-	if (RegOpenKeyEx (HKEY_CURRENT_USER, sub, 0, KEY_READ, &hKey) ==
-			ERROR_SUCCESS)
-	{
-		if (RegQueryValueEx (hKey, name, NULL, &t, out, &len) != ERROR_SUCCESS ||
-			 t != REG_SZ)
-		{
-			RegCloseKey (hKey);
-			return FALSE;
-		}
-		out[len-1] = 0;
-		RegCloseKey (hKey);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-char *
-get_xdir_fs (void)
-{
-	if (!xdir_fs)
-	{
-		char out[256];
-
-		if (!get_reg_str ("Software\\Microsoft\\Windows\\CurrentVersion\\"
-				"Explorer\\Shell Folders", "AppData", out, sizeof (out)))
-			return "./config";
-		xdir_fs = g_strdup_printf ("%s\\" XCHAT_DIR, out);
-	}
-	return xdir_fs;
-}
-
-#else
-
 char *
 get_xdir_fs (void)
 {
@@ -328,8 +280,6 @@ get_xdir_fs (void)
 
 	return xdir_fs;
 }
-
-#endif	/* !WIN32 */
 
 char *
 get_xdir_utf8 (void)
@@ -346,11 +296,7 @@ check_prefs_dir (void)
 	char *dir = get_xdir_fs ();
 	if (access (dir, F_OK) != 0)
 	{
-#ifdef WIN32
-		if (mkdir (dir) != 0)
-#else
 		if (mkdir (dir, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
-#endif
 			fe_message (_("Cannot create ~/.xchat2"), FE_MSG_ERROR);
 	}
 }
@@ -458,9 +404,6 @@ const struct prefs vars[] = {
 	{"gui_win_top", P_OFFINT (mainwindow_top), TYPE_INT},
 	{"gui_win_width", P_OFFINT (mainwindow_width), TYPE_INT},
 
-#ifdef WIN32
-	{"identd", P_OFFINT (identd), TYPE_BOOL},
-#endif
 	{"input_balloon_chans", P_OFFINT (input_balloon_chans), TYPE_BOOL},
 	{"input_balloon_hilight", P_OFFINT (input_balloon_hilight), TYPE_BOOL},
 	{"input_balloon_priv", P_OFFINT (input_balloon_priv), TYPE_BOOL},
@@ -496,7 +439,6 @@ const struct prefs vars[] = {
 	{"irc_no_hilight", P_OFFSET (irc_no_hilight), TYPE_STR},
 	{"irc_part_reason", P_OFFSET (partreason), TYPE_STR},
 	{"irc_quit_reason", P_OFFSET (quitreason), TYPE_STR},
-	{"irc_raw_modes", P_OFFINT (raw_modes), TYPE_BOOL},
 	{"irc_real_name", P_OFFSET (realname), TYPE_STR},
 	{"irc_servernotice", P_OFFINT (servernotice), TYPE_BOOL},
 	{"irc_skip_motd", P_OFFINT (skipmotd), TYPE_BOOL},
@@ -677,9 +619,6 @@ load_config (void)
 	prefs.input_flash_priv = prefs.input_flash_hilight = 1;
 	prefs.input_tray_priv = prefs.input_tray_hilight = 1;
 	prefs.autodccsend = 2;	/* browse mode */
-#ifdef WIN32
-	prefs.identd = 1;
-#endif
 	strcpy (prefs.stamp_format, "[%H:%M] ");
 	strcpy (prefs.timestamp_log_format, "%b %d %H:%M:%S ");
 	strcpy (prefs.logmask, "%n-%c.log");
@@ -692,21 +631,8 @@ load_config (void)
 	strcat (prefs.nick3, "__");
 	strcpy (prefs.realname, realname);
 	strcpy (prefs.username, username);
-#ifdef WIN32
-	strcpy (prefs.sounddir, "./sounds");
-	{
-		char out[256];
-
-		if (get_reg_str ("Software\\Microsoft\\Windows\\CurrentVersion\\"
-						 "Explorer\\Shell Folders", "Personal", out, sizeof (out)))
-			snprintf (prefs.dccdir, sizeof (prefs.dccdir), "%s\\Downloads", out);
-		else
-			snprintf (prefs.dccdir, sizeof (prefs.dccdir), "%s\\Downloads", get_xdir_utf8 ());
-	}
-#else
 	snprintf (prefs.sounddir, sizeof (prefs.sounddir), "%s/sounds", get_xdir_utf8 ());
 	snprintf (prefs.dccdir, sizeof (prefs.dccdir), "%s/downloads", get_xdir_utf8 ());
-#endif
 	strcpy (prefs.doubleclickuser, "QUOTE WHOIS %s %s");
 	strcpy (prefs.awayreason, _("I'm busy"));
 	strcpy (prefs.quitreason, _("Leaving"));
@@ -752,15 +678,6 @@ load_config (void)
 
 	} else
 	{
-#ifndef WIN32
-#ifndef __EMX__
-		/* OS/2 uses UID 0 all the time */
-		if (getuid () == 0)
-			fe_message (_("* Running IRC as root is stupid! You should\n"
-							"  create a User Account and use that to login.\n"), FE_MSG_WARN|FE_MSG_WAIT);
-#endif
-#endif /* !WIN32 */
-
 		mkdir_utf8 (prefs.dccdir);
 		mkdir_utf8 (prefs.dcc_completed_dir);
 	}
@@ -869,9 +786,6 @@ save_config (void)
 		return 0;
 	}
 
-#ifdef WIN32
-	unlink (config);	/* win32 can't rename to an existing file */
-#endif
 	if (rename (new_config, config) == -1)
 	{
 		free (new_config);

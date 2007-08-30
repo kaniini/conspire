@@ -27,10 +27,8 @@
 #define WANTSOCKET
 #include "inet.h"
 
-#ifndef WIN32
 #include <sys/wait.h>
 #include <signal.h>
-#endif
 
 #include "xchat.h"
 #include "fe.h"
@@ -373,7 +371,6 @@ new_ircwindow (server *serv, char *name, int type, int focus)
 static void
 exec_notify_kill (session * sess)
 {
-#ifndef WIN32
 	struct nbexec *re;
 	if (sess->running_exec != NULL)
 	{
@@ -387,7 +384,6 @@ exec_notify_kill (session * sess)
 			free(re->linebuf);
 		free (re);
 	}
-#endif
 }
 
 static void
@@ -574,10 +570,6 @@ static char defaultconf_commands[] =
 static char defaultconf_urlhandlers[] =
 		"NAME Open Link in Opera\n"		"CMD !opera -remote 'openURL(%s)'\n\n";
 #else
-#ifdef WIN32
-static char defaultconf_urlhandlers[] =
-	"NAME Connect as IRC server\n"		"CMD url %s\n\n";
-#else
 static char defaultconf_urlhandlers[] =
 	"NAME SUB\n"								"CMD Epiphany...\n\n"\
 		"NAME Open\n"							"CMD !epiphany '%s'\n\n"\
@@ -625,7 +617,6 @@ static char defaultconf_urlhandlers[] =
 		"NAME Ping\n"							"CMD !"XTERM"ping -c 4 %s\n\n"\
 	"NAME ENDSUB\n"							"CMD \n\n"\
 	"NAME Connect as IRC server\n"		"CMD url %s\n\n";
-#endif
 #endif
 
 #ifdef USE_SIGACTION

@@ -25,15 +25,10 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef WIN32
-#include <sys/timeb.h>
-#include <process.h>
-#else
 #include <sys/types.h>
 #include <pwd.h>
 #include <sys/time.h>
 #include <sys/utsname.h>
-#endif
 #include <fcntl.h>
 #include <dirent.h>
 #include <errno.h>
@@ -251,9 +246,6 @@ file_part (char *file)
 		case 0:
 			return (filepart);
 		case '/':
-#ifdef WIN32
-		case '\\':
-#endif
 			filepart = file + 1;
 			break;
 		}
@@ -294,66 +286,7 @@ errorstring (int err)
 		return "";
 	case 0:
 		return _("Remote host closed socket");
-#ifndef WIN32
 	}
-#else
-	case WSAECONNREFUSED:
-		return _("Connection refused");
-	case WSAENETUNREACH:
-	case WSAEHOSTUNREACH:
-		return _("No route to host");
-	case WSAETIMEDOUT:
-		return _("Connection timed out");
-	case WSAEADDRNOTAVAIL:
-		return _("Cannot assign that address");
-	case WSAECONNRESET:
-		return _("Connection reset by peer");
-	}
-
-	/* can't use strerror() on Winsock errors! */
-	if (err >= WSABASEERR)
-	{
-		static char tbuf[384];
-		OSVERSIONINFO osvi;
-
-		osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
-		GetVersionEx (&osvi);
-
-		/* FormatMessage works on WSA*** errors starting from Win2000 */
-		if (osvi.dwMajorVersion >= 5)
-		{
-			if (FormatMessageA (FORMAT_MESSAGE_FROM_SYSTEM |
-									  FORMAT_MESSAGE_IGNORE_INSERTS |
-									  FORMAT_MESSAGE_MAX_WIDTH_MASK,
-									  NULL, err,
-									  MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
-									  tbuf, sizeof (tbuf), NULL))
-			{
-				int len;
-				char *utf;
-
-				tbuf[sizeof (tbuf) - 1] = 0;
-				len = strlen (tbuf);
-				if (len >= 2)
-					tbuf[len - 2] = 0;	/* remove the cr-lf */
-
-				/* now convert to utf8 */
-				utf = g_locale_to_utf8 (tbuf, -1, 0, 0, 0);
-				if (utf)
-				{
-					g_strlcpy (tbuf, utf, sizeof (tbuf));
-					g_free (utf);
-					return tbuf;
-				}
-			}
-		}	/* ! if (osvi.dwMajorVersion >= 5) */
-
-		/* fallback to error number */
-		sprintf (tbuf, "%s %d", _("Error"), err);
-		return tbuf;
-	} /* ! if (err >= WSABASEERR) */
-#endif	/* ! WIN32 */
-
 	return strerror (err);
 }
 
@@ -387,7 +320,6 @@ waitline (int sok, char *buf, int bufsize, int use_recv)
 char *
 expand_homedir (char *file)
 {
-#ifndef WIN32
 	char *ret, *user;
 	struct passwd *pw;
 
@@ -416,7 +348,6 @@ expand_homedir (char *file)
 		}
 		return ret;
 	}
-#endif
 	return strdup (file);
 }
 
@@ -595,55 +526,6 @@ get_cpu_info (double *mhz, int *cpus)
 }
 #endif
 
-#ifdef WIN32
-
-static int
-get_mhz (void)
-{
-	HKEY hKey;
-	int result, data, dataSize;
-
-	if (RegOpenKeyEx (HKEY_LOCAL_MACHINE, "Hardware\\Description\\System\\"
-		"CentralProcessor\\0", 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
-	{
-		dataSize = sizeof (data);
-		result = RegQueryValueEx (hKey, "~MHz", 0, 0, (LPBYTE)&data, &dataSize);
-		RegCloseKey (hKey);
-		if (result == ERROR_SUCCESS)
-			return data;
-	}
-	return 0;	/* fails on Win9x */
-}
-
-char *
-get_cpu_str (void)
-{
-	static char verbuf[64];
-	OSVERSIONINFO osvi;
-	SYSTEM_INFO si;
-	double mhz;
-
-	osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
-	GetVersionEx (&osvi);
-	GetSystemInfo (&si);
-
-	mhz = get_mhz ();
-	if (mhz)
-	{
-		double cpuspeed = ( mhz > 1000 ) ? mhz / 1000 : mhz;
-		const char *cpuspeedstr = ( mhz > 1000 ) ? "GHz" : "MHz";
-		sprintf (verbuf, "Windows %ld.%ld [i%d86/%.2f%s]",
-					osvi.dwMajorVersion, osvi.dwMinorVersion, si.wProcessorLevel, 
-					cpuspeed, cpuspeedstr);
-	} else
-		sprintf (verbuf, "Windows %ld.%ld [i%d86]",
-			osvi.dwMajorVersion, osvi.dwMinorVersion, si.wProcessorLevel);
-
-	return verbuf;
-}
-
-#else
-
 char *
 get_cpu_str (void)
 {
@@ -679,8 +561,6 @@ get_cpu_str (void)
 
 	return buf;
 }
-
-#endif
 
 int
 buf_get_line (char *ibuf, char **buf, int *position, int len)
@@ -1243,7 +1123,6 @@ util_exec (const char *cmd)
 	if (my_poptParseArgvString (cmd, &argc, &argv) != 0)
 		return -1;
 
-#ifndef WIN32
 	pid = fork ();
 	if (pid == -1)
 		return -1;
@@ -1258,11 +1137,6 @@ util_exec (const char *cmd)
 		free (argv);
 		return pid;
 	}
-#else
-	spawnvp (_P_DETACH, argv[0], argv);
-	free (argv);
-	return 0;
-#endif
 }
 
 int
@@ -1270,7 +1144,6 @@ util_execv (char * const argv[])
 {
 	int pid, fd;
 
-#ifndef WIN32
 	pid = fork ();
 	if (pid == -1)
 		return -1;
@@ -1284,22 +1157,13 @@ util_execv (char * const argv[])
 	{
 		return pid;
 	}
-#else
-	spawnv (_P_DETACH, argv[0], argv);
-	return 0;
-#endif
 }
 
 unsigned long
 make_ping_time (void)
 {
-#ifndef WIN32
-	struct timeval timev;
-	gettimeofday (&timev, 0);
-#else
 	GTimeVal timev;
 	g_get_current_time (&timev);
-#endif
 	return (timev.tv_sec - 50000) * 1000000 + timev.tv_usec;
 }
 
@@ -1607,11 +1471,7 @@ mkdir_utf8 (char *dir)
 	if (!dir)
 		return -1;
 
-#ifdef WIN32
-	ret = mkdir (dir);
-#else
 	ret = mkdir (dir, S_IRUSR | S_IWUSR | S_IXUSR);
-#endif
 	g_free (dir);
 
 	return ret;

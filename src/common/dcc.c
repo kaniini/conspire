@@ -39,10 +39,6 @@
 #define WANTDNS
 #include "inet.h"
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #include "xchat.h"
 #include "util.h"
 #include "fe.h"
@@ -801,23 +797,6 @@ dcc_did_connect (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 	int er;
 	struct sockaddr_in addr;
 	
-#ifdef WIN32
-	if (condition & G_IO_ERR)
-	{
-		int len;
-
-		/* find the last errno for this socket */
-		len = sizeof (er);
-		getsockopt (dcc->sok, SOL_SOCKET, SO_ERROR, (char *)&er, &len);
-		EMIT_SIGNAL (XP_TE_DCCCONFAIL, dcc->serv->front_session,
-						 dcctypes[dcc->type], dcc->nick, errorstring (er),
-						 NULL, 0);
-		dcc->dccstat = STAT_FAILED;
-		fe_dcc_update (dcc);
-		return FALSE;
-	}
-
-#else
 	memset (&addr, 0, sizeof (addr));
 	addr.sin_port = htons (dcc->port);
 	addr.sin_family = AF_INET;
@@ -837,7 +816,6 @@ dcc_did_connect (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 			return FALSE;
 		}
 	}
-#endif
 	
 	return TRUE;
 }
@@ -1983,9 +1961,6 @@ is_same_file (struct DCC *dcc, struct DCC *new_dcc)
 		return TRUE;
 
 	/* now handle case-insensitive Filesystems: HFS+, FAT */
-#ifdef WIN32
-#warning no win32 implementation - behaviour may be unreliable
-#else
 	/* this fstat() shouldn't really fail */
 	if ((dcc->fp == -1 ? stat (dcc->destfile_fs, &st_a) : fstat (dcc->fp, &st_a)) == -1)
 		return FALSE;
@@ -1996,7 +1971,6 @@ is_same_file (struct DCC *dcc, struct DCC *new_dcc)
 	if (st_a.st_ino == st_b.st_ino &&
 		 st_a.st_dev == st_b.st_dev)
 		return TRUE;
-#endif
 
 	return FALSE;
 }
@@ -2331,18 +2305,7 @@ dcc_add_file (session *sess, char *file, DCC_SIZE size, int port, char *nick, gu
 			strcat (dcc->destfile, "/");
 		if (prefs.dccwithnick)
 		{
-#ifdef WIN32
-			char *t = strlen (dcc->destfile) + dcc->destfile;
-			strcpy (t, nick);
-			while (*t)
-			{
-				if (*t == '\\' || *t == '|')
-					*t = '_';
-				t++;
-			}
-#else
 			strcat (dcc->destfile, nick);
-#endif
 			strcat (dcc->destfile, ".");
 		}
 		strcat (dcc->destfile, file);

@@ -56,21 +56,7 @@ void *xchat_realloc (char *old, int len, char *file, int line);
 #define WORDL(c0, c1, c2, c3) (guint32)(c0 | (c1 << 8) | (c2 << 16) | (c3 << 24))
 #define WORDW(c0, c1) (guint16)(c0 | (c1 << 8))
 
-#ifdef WIN32						/* for win32 */
-#define OFLAGS O_BINARY
-#define sleep(t) _sleep(t*1000)
-#include <direct.h>
-#define	F_OK	0
-#define	X_OK	1
-#define	W_OK	2
-#define	R_OK	4
-#ifndef S_ISDIR
-#define	S_ISDIR(m)	((m) & _S_IFDIR)
-#endif
-#define NETWORK_PRIVATE
-#else									/* for unix */
 #define OFLAGS 0
-#endif
 
 #define FONTNAMELEN	127
 #define PATHLEN		255
@@ -258,7 +244,6 @@ struct xchatprefs
 	unsigned int dccwithnick;
 	unsigned int hidever;
 	unsigned int ip_from_server;
-	unsigned int raw_modes;
 	unsigned int show_away_once;
 	unsigned int show_away_message;
 	unsigned int auto_unmark_away;
@@ -551,12 +536,7 @@ struct popup
 /* CL: get a random int in the range [0..n-1]. DON'T use rand() % n, it gives terrible results. */
 #define RAND_INT(n) ((int)(rand() / (RAND_MAX + 1.0) * (n)))
 
-#if defined(WIN32) && GLIB_CHECK_VERSION(2,4,0)
-#define xchat_filename_from_utf8 g_locale_from_utf8
-#define xchat_filename_to_utf8 g_locale_to_utf8
-#else
 #define xchat_filename_from_utf8 g_filename_from_utf8
 #define xchat_filename_to_utf8 g_filename_to_utf8
-#endif
 
 #endif
