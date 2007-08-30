@@ -122,7 +122,6 @@ menu_about (GtkWidget * wid, gpointer sess)
 				"%s\n"
 				"<b>Charset</b>: %s "
 				"<b>GTK+</b>: %i.%i.%i\n"
-				"<b>Renderer</b>: %s\n"
 				"<b>Compiled</b>: "__DATE__"\n\n"
 				"<small>Based on XChat by \302\251 1998-2007 Peter \305\275elezn\303\275 &lt;zed@xchat.org></small>",
 					_("IRC for the Atheme Desktop"),
@@ -131,11 +130,6 @@ menu_about (GtkWidget * wid, gpointer sess)
 					gtk_major_version,
 					gtk_minor_version,
 					gtk_micro_version,
-#ifdef USE_XFT
-					"Xft"
-#else
-					"Pango"
-#endif
 					);
 	gtk_label_set_markup (GTK_LABEL (label), buf);
 	gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
