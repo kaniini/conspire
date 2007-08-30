@@ -234,7 +234,8 @@ top_builddir =
 top_srcdir = .
 unamepath = /bin/uname
 xchatlibdir = ${exec_prefix}/lib/conspire
-LIST = traymsgpng $(srcdir)/message.png \
+LIST = conspire $(srcdir)/conspire.png \
+			traymsgpng $(srcdir)/message.png \
 			trayhilightpng $(srcdir)/highlight.png \
 			trayfilepng $(srcdir)/fileoffer.png \
 			bookpng $(srcdir)/book.png \
@@ -256,8 +257,6 @@ inline_pngs.h: $(PNGS)
 	/usr/bin/gdk-pixbuf-csource --raw --build-list $(LIST) > $(srcdir)/inline_pngs.h
 
 clean:
-	$(RM) inline_pngs.h
-
 depend:
 install:
 distclean: clean
