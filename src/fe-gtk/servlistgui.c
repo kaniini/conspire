@@ -1052,16 +1052,6 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 								  11, 1, _("Auto connect to this network at startup"));
 	servlist_create_check (4, net->flags & FLAG_USE_PROXY, table3,
 								  12, 1, _("Use a proxy server"));
-	check = servlist_create_check (2, net->flags & FLAG_USE_SSL, table3,
-								  13, 1, _("Use SSL for all the servers on this network"));
-#ifndef USE_OPENSSL
-	gtk_widget_set_sensitive (check, FALSE);
-#endif
-	check = servlist_create_check (5, net->flags & FLAG_ALLOW_INVALID, table3,
-								  14, 1, _("Accept invalid SSL certificate"));
-#ifndef USE_OPENSSL
-	gtk_widget_set_sensitive (check, FALSE);
-#endif
 
 	edit_entry_join =
 		servlist_create_entry (table3, _("C_hannels to join:"), 15,
