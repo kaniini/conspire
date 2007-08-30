@@ -11,7 +11,6 @@
 #define XCHAT_H
 
 #include "history.h"
-#include "configdb.h"
 
 #ifndef HAVE_SNPRINTF
 #define snprintf g_snprintf
@@ -295,6 +294,7 @@ struct xchatprefs
 	unsigned int confmode;
 	unsigned int utf8_locale;
 	unsigned int identd;
+	unsigned int skip_serverlist;
 
 	unsigned int ctcp_number_limit;	/*flood */
 	unsigned int ctcp_time_limit;	/*seconds of floods */

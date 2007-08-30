@@ -44,7 +44,7 @@
 #include <gtk/gtkradiobutton.h>
 
 #include "../common/xchat.h"
-#include "../common/configdb.h"
+#include "../common/cfgfiles.h"
 #include "../common/xchatc.h"
 #include "../common/fe.h"
 #include "../common/util.h"
@@ -562,16 +562,10 @@ browse_folder (char *dir)
 static void
 browse_dcc_folder (void)
 {
-	gchar *completed_dir;
-	gchar *dccdir;
-	if (settings_get_string(config, "dcc", "completed_dir", &completed_dir))
-		browse_folder (completed_dir);
+	if (prefs.dcc_completed_dir[0])
+		browse_folder (prefs.dcc_completed_dir);
 	else
-		if (!settings_get_string(config, "dcc", "downloads", &dccdir)) {
-			dccdir = g_strdup_printf("%s/downloads", get_xdir_utf8());
-			settings_set_string(config, "dcc", "downloads", dccdir);
-		}
-		browse_folder (dccdir);
+		browse_folder (prefs.dccdir);
 }
 
 static void
@@ -737,11 +731,6 @@ fe_dcc_open_recv_win (int passive)
 	GtkWidget *radio, *table, *vbox, *bbox, *view, *exp, *detailbox;
 	GtkListStore *store;
 	GSList *group;
-	gboolean windows_as_tabs;
-
-	if (!settings_get_string(config, "gui", "windows_as_tabs", &windows_as_tabs))
-		windows_as_tabs = FALSE;
-
 	if (dccfwin.window)
 	{
 		if (!passive)
@@ -779,7 +768,7 @@ fe_dcc_open_recv_win (int passive)
 	view_mode = VIEW_BOTH;
 	gtk_tree_selection_set_mode (dccfwin.sel, GTK_SELECTION_MULTIPLE);
 
-	if (!windows_as_tabs)
+	if (!prefs.windows_as_tabs)
 		g_signal_connect (G_OBJECT (dccfwin.window), "configure_event",
 								G_CALLBACK (dcc_configure_cb), 0);
 	g_signal_connect (G_OBJECT (dccfwin.sel), "changed",

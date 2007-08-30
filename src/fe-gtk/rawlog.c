@@ -35,7 +35,6 @@
 #include "../common/xchat.h"
 #include "../common/xchatc.h"
 #include "../common/cfgfiles.h"
-#include "../common/configdb.h"
 #include "../common/server.h"
 #include "gtkutil.h"
 #include "palette.h"
@@ -88,9 +87,6 @@ open_rawlog (struct server *serv)
 {
 	GtkWidget *hbox, *vscrollbar, *vbox;
 	char tbuf[256];
-	gint tint_red, tint_green, tint_blue;
-	gboolean transparent;
-	gchar *font;
 
 	if (serv->gui->rawlog_window)
 	{
@@ -108,24 +104,13 @@ open_rawlog (struct server *serv)
 	gtk_container_set_border_width (GTK_CONTAINER (hbox), 4);
 	gtk_widget_show (hbox);
 
-	if (!settings_get_int(config,     "gui", "tint_red",    &tint_red))
-		tint_red = 195;
-	if (!settings_get_int(config,     "gui", "tint_green",  &tint_green))
-		tint_green = 195;
-	if (!settings_get_int(config,     "gui", "tint_blue",   &tint_blue))
-		tint_blue = 195;
-	if (!settings_get_bool(config,    "gui", "transparent", &transparent))
-		transparent = FALSE;
-	if (!settings_get_string(config,  "gui", "font",        &font))
-		font = g_strdup("Monospace 9");
-
 	serv->gui->rawlog_textlist = gtk_xtext_new (colors, 0);
-	gtk_xtext_set_tint (GTK_XTEXT (serv->gui->rawlog_textlist), tint_red, tint_green, tint_blue);
+	gtk_xtext_set_tint (GTK_XTEXT (serv->gui->rawlog_textlist), prefs.tint_red, prefs.tint_green, prefs.tint_blue);
 	gtk_xtext_set_background (GTK_XTEXT (serv->gui->rawlog_textlist),
-									  channelwin_pix, transparent);
+									  channelwin_pix, prefs.transparent);
 
 	gtk_container_add (GTK_CONTAINER (hbox), serv->gui->rawlog_textlist);
-	gtk_xtext_set_font (GTK_XTEXT (serv->gui->rawlog_textlist), font);
+	gtk_xtext_set_font (GTK_XTEXT (serv->gui->rawlog_textlist), prefs.font_normal);
 	GTK_XTEXT (serv->gui->rawlog_textlist)->ignore_hidden = 1;
 	gtk_widget_show (serv->gui->rawlog_textlist);
 
