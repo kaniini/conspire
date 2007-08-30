@@ -35,10 +35,6 @@
 #include <gtk/gtkstock.h>
 #include <gtk/gtkwindow.h>
 
-#ifdef USE_XLIB
-#include <gdk/gdkx.h>
-#endif
-
 #include "../common/xchat.h"
 #include "../common/util.h"
 #include "palette.h"
@@ -46,32 +42,6 @@
 #include "gtkutil.h"
 #include "about.h"
 
-
-#if 0 /*def USE_GNOME*/
-
-void
-menu_about (GtkWidget * wid, gpointer sess)
-{
-	char buf[512];
-	const gchar *author[] = { "Peter Zelezny <zed@xchat.org>", 0 };
-
-	(snprintf) (buf, sizeof (buf),
-				 "An IRC Client for UNIX.\n\n"
-				 "This binary was compiled on "__DATE__"\n"
-				 "Using GTK %d.%d.%d X %d\n"
-				 "Running on %s",
-				 gtk_major_version, gtk_minor_version, gtk_micro_version,
-#ifdef USE_XLIB
-				VendorRelease (GDK_DISPLAY ()), get_cpu_str());
-#else
-				666, get_cpu_str());
-#endif
-
-	gtk_widget_show (gnome_about_new ("X-Chat", PACKAGE_VERSION,
-							"(C) 1998-2005 Peter Zelezny", author, buf, 0));
-}
-
-#else
 
 static GtkWidget *about = 0;
 
@@ -145,4 +115,3 @@ menu_about (GtkWidget * wid, gpointer sess)
 
 	gtk_widget_show_all (about);
 }
-#endif
