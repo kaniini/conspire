@@ -34,6 +34,7 @@ struct _ConfigDb
     mcs_handle_t *handle;
 };
 
+ConfigDb *config;
 
 ConfigDb *
 settings_open()

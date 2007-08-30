@@ -7,8 +7,7 @@ OBJECTIVE_BINS = conspire-xchatwrap
 
 CFLAGS += -I../.. $(COMMON_CFLAGS)
 
-# THIS IS WRONG!
-LIBADD = $(DBUS_LIBS) -Wl,--export-dynamic -lgmodule-2.0 -ldl -lglib-2.0 -lm
+LIBADD = $(AUDLDFLAGS) $(DBUS_LIBS) -lgmodule-2.0 -ldl -lglib-2.0 -lm
 
 SOURCES = conspire-xchatwrap.c
 

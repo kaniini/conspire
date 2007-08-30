@@ -2,6 +2,9 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT([conspire],[0.9.0],[http://conspire.atheme.org/],[conspire])
 
+AC_CANONICAL_HOST
+AC_CANONICAL_TARGET
+
 AC_PREREQ([2.59])
 AC_COPYRIGHT([Copyright (C) 1998-2007 atheme.org])
 
@@ -79,7 +82,7 @@ case "$target" in
                 AC_MSG_RESULT([Mac OS X: -fPIC -bundle -fno-common -flat_namespace -undefined suppress, .dylib])
                 PICFLAGS="-fPIC -DPIC"
                 PICLDFLAGS="-fPIC -DPIC -bundle -fno-common -flat_namespace -undefined suppress"
-                LIBLDFLAGS="-dynamiclib -flat_namespace -undefined suppress"
+                LIBLDFLAGS="-dynamiclib -flat_namespace -undefined suppress -single_module"
                 AUDLDFLAGS=""
                 SHARED_SUFFIX=".dylib"
                 ;;
@@ -88,7 +91,7 @@ case "$target" in
                 PICFLAGS="-fPIC -DPIC"
                 PICLDFLAGS="-fPIC -DPIC -shared"
                 LIBLDFLAGS="-fPIC -DPIC -shared"
-                AUDLDFLAGS="-Wl,-export-dynamic $RPATH_VAL"
+                AUDLDFLAGS="-Wl,-export-dynamic"
                 SHARED_SUFFIX=".so"
                 ;;
 esac
