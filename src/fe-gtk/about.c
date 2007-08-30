@@ -77,10 +77,8 @@ menu_about (GtkWidget * wid, gpointer sess)
 
 	vbox = GTK_DIALOG (about)->vbox;
 
-#if 0
-	wid = gtk_image_new_from_pixbuf (pix_xchat);
+	wid = gtk_image_new_from_pixbuf (pix_conspire);
 	gtk_container_add (GTK_CONTAINER (vbox), wid);
-#endif
 
 	label = gtk_label_new (NULL);
 	gtk_label_set_selectable (GTK_LABEL (label), TRUE);

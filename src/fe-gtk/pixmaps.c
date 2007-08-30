@@ -32,6 +32,7 @@
 
 #include "../pixmaps/inline_pngs.h"
 
+GdkPixbuf *pix_conspire;
 GdkPixbuf *pix_book;
 
 GdkPixbuf *pix_purple;
@@ -100,6 +101,7 @@ void
 pixmaps_init (void)
 {
 	pix_book = gdk_pixbuf_new_from_inline (-1, bookpng, FALSE, 0);
+	pix_conspire = gdk_pixbuf_new_from_inline (-1, conspire, FALSE, 0);
 
 	/* userlist icons, with inlined defaults */
 	LOADPIX (pix_hop, hoppng, "hop"EXT);

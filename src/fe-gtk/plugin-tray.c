@@ -35,7 +35,7 @@ typedef GdkPixbuf* TrayIcon;
 #define tray_icon_from_file(f) gdk_pixbuf_new_from_file(f,NULL)
 #define tray_icon_free(i) g_object_unref(i)
 
-#define ICON_NORMAL pix_tray_msg /* XXX */
+#define ICON_NORMAL pix_conspire /* XXX */
 #define ICON_MSG pix_tray_msg
 #define ICON_HILIGHT pix_tray_hilight
 #define ICON_FILE pix_tray_file
