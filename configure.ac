@@ -142,10 +142,6 @@ AC_ARG_ENABLE(mmx,
 [  --disable-mmx           disable MMX assembly routines],
         mmx=$enableval, mmx=yes)
 
-AC_ARG_ENABLE(shm,
-[  --enable-shm            enable use of XShm for fast tinting (default: no)],
-        shm=$enableval, shm=no)
-
 AC_ARG_ENABLE(spell,
 [  --enable-spell=type     enable spelling type: none static libsexy gtkspell],
 		  spell=$enableval, spell=libsexy)
@@ -396,35 +392,6 @@ if test "$socks" = yes; then
 			AC_DEFINE(SOCKS)
 			LIBS="$LIBS -lsocks5"
 		fi
-	fi
-fi
-
-dnl *********************************************************************
-dnl ** XShm *************************************************************
-dnl *********************************************************************
-
-if test "$shm" = yes; then
-	oldl=$LIBS
-	oldc=$CPPFLAGS
-	LIBS="$LIBS `$pkgconfigpath --libs-only-L xft`"
-	CPPFLAGS="$CPPFLAGS `$pkgconfigpath --cflags-only-I xft`"
-	shm=no
-	AC_CHECK_LIB(Xext, XShmAttach, shm=yes)
-	if test "$shm" = yes; then
-		shm=no
-		AC_CHECK_HEADERS(sys/ipc.h, shm=yes)
-		if test "$shm" = yes; then
-			shm=no
-			AC_CHECK_HEADERS(sys/shm.h, shm=yes)
-		fi
-	fi
-
-	LIBS=$oldl
-	if test "$shm" = yes; then
-		GUI_LIBS="$GUI_LIBS `$pkgconfigpath --libs-only-L xft` -lX11 -lXext"
-		AC_DEFINE(USE_SHM)
-	else
-		CPPFLAGS=$oldc
 	fi
 fi
 
