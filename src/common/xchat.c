@@ -938,7 +938,7 @@ xchat_init (void)
 
 	servlist_init ();							/* load server list */
 
-	new_ircwindow (NULL, NULL, SESS_SERVER, 0);
+	new_ircwindow (NULL, _("Event Console"), SESS_SERVER, 0);
 
 	/* turned OFF via -a arg */
 	if (!arg_dont_autoconnect && servlist_have_auto())
