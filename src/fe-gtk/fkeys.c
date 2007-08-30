@@ -315,7 +315,7 @@ key_handle_key_press (GtkWidget *wid, GdkEventKey *evt, session *sess)
 		key_action_tab_clean ();
 		break;
 
-#if defined(USE_GTKSPELL) && !defined(WIN32)
+#ifdef USE_GTKSPELL
 	/* gtktextview has no 'activate' event, so we trap ENTER here */
 	case GDK_Return:
 	case GDK_KP_Enter:

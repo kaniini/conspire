@@ -47,9 +47,6 @@
 #include <gtk/gtktreeselection.h>
 #include <gtk/gtkcellrenderertext.h>
 #include <gtk/gtkhscale.h>
-#ifdef WIN32
-#include "../common/fe.h"
-#endif
 #ifdef USE_GTKSPELL
 #include <gtk/gtktextview.h>
 #include <gtkspell/gtkspell.h>
@@ -310,9 +307,7 @@ static const setting alert_settings[] =
 	{ST_HEADER,	N_("Alerts"),0,0,0},
 
 	{ST_ALERTHEAD},
-#ifndef WIN32
 	{ST_3OGGLE, N_("Show tray balloons on:"), 0, 0, (void *)balloonlist, 0},
-#endif
 	{ST_3OGGLE, N_("Blink tray icon on:"), 0, 0, (void *)trayblinklist, 0},
 	{ST_3OGGLE, N_("Blink task bar on:"), 0, 0, (void *)taskbarlist, 0},
 	{ST_3OGGLE, N_("Make a beep sound on:"), 0, 0, (void *)beeplist, 0},
@@ -1864,11 +1859,7 @@ unslash (char *dir)
 	if (dir[0])
 	{
 		int len = strlen (dir) - 1;
-#ifdef WIN32
-		if (dir[len] == '/' || dir[len] == '\\')
-#else
 		if (dir[len] == '/')
-#endif
 			dir[len] = 0;
 	}
 }
@@ -1980,7 +1971,6 @@ setup_apply (struct xchatprefs *pr)
 		fe_message (_("Some settings were changed that require a"
 						" restart to take full effect."), FE_MSG_WARN);
 
-#ifndef WIN32
 	if (prefs.autodccsend == 1)
 	{
 		if (!strcmp ((char *)g_get_home_dir (), prefs.dccdir))
@@ -1991,7 +1981,6 @@ setup_apply (struct xchatprefs *pr)
 							 "Someone could send you a .bash_profile"), FE_MSG_WARN);
 		}
 	}
-#endif
 }
 
 #if 0

@@ -48,13 +48,8 @@
 static GtkWidget *serverlist_win = NULL;
 static GtkWidget *networks_tree;	/* network TreeView */
 static int ignore_changed = FALSE;
-#ifdef WIN32
-static int win_width = 324;
-static int win_height = 426;
-#else
 static int win_width = 364;
 static int win_height = 478;
-#endif
 
 /* global user info */
 static GtkWidget *entry_nick1;
@@ -267,11 +262,6 @@ servlist_addnet_cb (GtkWidget *item, GtkTreeView *treeview)
 
 	store = (GtkListStore *)gtk_tree_view_get_model (treeview);
 	net = servlist_net_add (_("New Network"), "", TRUE);
-#ifdef WIN32
-	/* Windows gets UTF-8 for new users. Unix gets "System Default",
-		which is often UTF-8 anyway! */
-	net->encoding = strdup ("UTF-8 (Unicode)");
-#endif
 	servlist_server_add (net, "newserver/6667");
 
 	gtk_list_store_prepend (store, &iter);

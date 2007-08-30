@@ -24,10 +24,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #include "fe-gtk.h"
 
 #include <gtk/gtkhbox.h>

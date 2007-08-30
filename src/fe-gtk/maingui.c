@@ -2216,7 +2216,7 @@ mg_create_textarea (session *sess, GtkWidget *box)
 
 	gui->vscrollbar = gtk_vscrollbar_new (GTK_XTEXT (xtext)->adj);
 	gtk_box_pack_start (GTK_BOX (inbox), gui->vscrollbar, FALSE, TRUE, 0);
-#ifndef WIN32	/* needs more work */
+	/* needs more work */
 	gtk_drag_dest_set (gui->vscrollbar, 5, dnd_dest_targets, 2,
 							 GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK);
 	g_signal_connect (G_OBJECT (gui->vscrollbar), "drag_begin",
@@ -2232,7 +2232,6 @@ mg_create_textarea (session *sess, GtkWidget *box)
 							 GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK);
 	g_signal_connect (G_OBJECT (gui->xtext), "drag_data_received",
 							G_CALLBACK (mg_dialog_dnd_drop), NULL);
-#endif
 }
 
 static GtkWidget *
@@ -3301,7 +3300,7 @@ mg_handle_drop (GtkWidget *widget, int y, int *pos, int *other_pos)
 gboolean
 mg_drag_begin_cb (GtkWidget *widget, GdkDragContext *context, gpointer userdata)
 {
-#ifndef WIN32	/* leaks GDI pool memory - don't use on win32 */
+	/* leaks GDI pool memory - don't use on win32 */
 	int width, height;
 	GdkColormap *cmap;
 	GdkPixbuf *pix, *pix2;
@@ -3315,7 +3314,6 @@ mg_drag_begin_cb (GtkWidget *widget, GdkDragContext *context, gpointer userdata)
 
 	gtk_drag_set_icon_pixbuf (context, pix2, 0, 0);
 	g_object_set_data (G_OBJECT (widget), "ico", pix2);
-#endif
 
 	return TRUE;
 }
@@ -3323,9 +3321,7 @@ mg_drag_begin_cb (GtkWidget *widget, GdkDragContext *context, gpointer userdata)
 void
 mg_drag_end_cb (GtkWidget *widget, GdkDragContext *context, gpointer userdata)
 {
-#ifndef WIN32
 	g_object_unref (g_object_get_data (G_OBJECT (widget), "ico"));
-#endif
 }
 
 /* drop complete */

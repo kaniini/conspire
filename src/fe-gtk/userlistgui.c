@@ -594,7 +594,6 @@ userlist_create (GtkWidget *box)
 	g_signal_connect (G_OBJECT (treeview), "key_press_event",
 							G_CALLBACK (userlist_key_cb), 0);
 
-#ifndef WIN32
 	g_signal_connect (G_OBJECT (treeview), "drag_begin",
 							G_CALLBACK (mg_drag_begin_cb), NULL);
 	g_signal_connect (G_OBJECT (treeview), "drag_drop",
@@ -603,7 +602,6 @@ userlist_create (GtkWidget *box)
 							G_CALLBACK (mg_drag_motion_cb), NULL);
 	g_signal_connect (G_OBJECT (treeview), "drag_end",
 							G_CALLBACK (mg_drag_end_cb), NULL);
-#endif
 
 	userlist_add_columns (GTK_TREE_VIEW (treeview));
 

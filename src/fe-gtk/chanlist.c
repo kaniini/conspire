@@ -87,13 +87,11 @@ chanlist_match (server *serv, const char *str)
 	{
 	case 1:
 		return match (GTK_ENTRY (serv->gui->chanlist_wild)->text, str);
-#ifndef WIN32
 	case 2:
 		if (!serv->gui->have_regex)
 			return 0;
 		/* regex returns 0 if it's a match: */
 		return !regexec (&serv->gui->chanlist_match_regex, str, 1, NULL, REG_NOTBOL);
-#endif
 	default:	/* case 0: */
 		return nocasestrstr (str, GTK_ENTRY (serv->gui->chanlist_wild)->text) ? 1 : 0;
 	}
@@ -372,7 +370,6 @@ chanlist_search_pressed (GtkButton * button, server *serv)
 static void
 chanlist_find_cb (GtkWidget * wid, server *serv)
 {
-#ifndef WIN32
 	/* recompile the regular expression. */
 	if (serv->gui->have_regex)
 	{
@@ -383,7 +380,6 @@ chanlist_find_cb (GtkWidget * wid, server *serv)
 	if (regcomp (&serv->gui->chanlist_match_regex, GTK_ENTRY (wid)->text,
 					 REG_ICASE | REG_EXTENDED | REG_NOSUB) == 0)
 		serv->gui->have_regex = 1;
-#endif
 }
 
 static void
@@ -611,13 +607,11 @@ chanlist_destroy_widget (GtkWidget *wid, server *serv)
 		serv->gui->chanlist_tag = 0;
 	}
 
-#ifndef WIN32
 	if (serv->gui->have_regex)
 	{
 		regfree (&serv->gui->chanlist_match_regex);
 		serv->gui->have_regex = 0;
 	}
-#endif
 }
 
 static void
@@ -831,9 +825,8 @@ chanlist_opengui (server *serv, int do_refresh)
 	wid = gtk_combo_box_new_text ();
 	gtk_combo_box_append_text (GTK_COMBO_BOX (wid), _("Simple Search"));
 	gtk_combo_box_append_text (GTK_COMBO_BOX (wid), _("Pattern Match (Wildcards)"));
-#ifndef WIN32
 	gtk_combo_box_append_text (GTK_COMBO_BOX (wid), _("Regular Expression"));
-#endif
+	
 	gtk_combo_box_set_active (GTK_COMBO_BOX (wid), serv->gui->chanlist_search_type);
 	gtk_table_attach (GTK_TABLE (table), wid, 1, 2, 1, 2,
 							GTK_SHRINK | GTK_FILL, GTK_SHRINK | GTK_FILL, 0, 0);
