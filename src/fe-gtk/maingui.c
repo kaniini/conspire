@@ -67,6 +67,7 @@
 #include "pixmaps.h"
 #include "plugin-tray.h"
 #include "xtext.h"
+#include "sync-menu.h"
 
 #ifdef USE_GTKSPELL
 #include <gtk/gtktextview.h>
@@ -2690,8 +2691,14 @@ mg_create_menu (session_gui *gui, GtkWidget *table, int away_state)
 
 	gui->menu = menu_create_main (accel_group, TRUE, away_state, !gui->is_tab,
 											gui->menu_item);
+#ifndef GDK_WINDOWING_QUARTZ
 	gtk_table_attach (GTK_TABLE (table), gui->menu, 0, 3, 0, 1,
 						   GTK_EXPAND | GTK_FILL, GTK_SHRINK | GTK_FILL, 0, 0);
+#else
+	gtk_widget_hide(gui->menu);
+
+	sync_menu_takeover_menu(GTK_MENU_SHELL(gui->menu));
+#endif
 }
 
 static void
