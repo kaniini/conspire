@@ -105,6 +105,8 @@ static const setting textbox_settings[] =
 					N_("Make nick names right-justified"),0,0},
 	{ST_3OGGLE, N_("Show marker line"), P_OFFINTNL(show_marker),
 					N_("Insert a red line after the last read text."),0,0},
+	{ST_3OGGLE, N_("Automatically replay logged chats"), P_OFFINTNL(text_replay),
+					N_("Automatically replays logs for channels and queries."),0,0},
 
 	{ST_HEADER,	N_("Time Stamps"),0,0,0},
 	{ST_TOGGLE, N_("Enable time stamps"), P_OFFINTNL(timestamp),0,0,2},
@@ -132,6 +134,7 @@ static const setting inputbox_settings[] =
 					0,0,0},
 	{ST_ENTRY,	N_("Nick completion suffix:"), P_OFFSETNL(nick_suffix),0,0,sizeof prefs.nick_suffix},
 	{ST_MENU,	N_("Nick completion sorted:"), P_OFFINTNL(completion_sort), 0, tabcompmenu, 0},
+	{ST_NUMBER,	N_("Nick completion minimum length:"), P_OFFINTNL(completion_amount), 0, 0,30},
 
 #if 0	/* obsolete */
 	{ST_HEADER, N_("Input Box Codes"),0,0,0},
