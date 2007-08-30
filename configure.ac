@@ -84,6 +84,7 @@ case "$target" in
                 PICLDFLAGS="-fPIC -DPIC -bundle -fno-common -flat_namespace -undefined suppress"
                 LIBLDFLAGS="-dynamiclib -flat_namespace -undefined suppress -single_module"
                 AUDLDFLAGS=""
+		GUI_LIBS="$GUI_LIBS -framework Carbon"
                 SHARED_SUFFIX=".dylib"
                 ;;
         *)

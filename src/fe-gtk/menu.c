@@ -2040,12 +2040,4 @@ togitem:
 
 		i++;
 	}
-
-#ifdef GDK_WINDOWING_QUARTZ
-	if (bar)
-	{
-		gtk_widget_hide(menu_bar);
-		sync_menu_takeover_menu(GTK_MENU_SHELL(menu_bar));
-	}
-#endif
 }
