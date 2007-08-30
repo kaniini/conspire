@@ -23,38 +23,14 @@ N_("%C22*%O$t$1 is now known as $2")},
 {"Channel Action Hilight", pevt_chanaction_help, 131, 
 "%C21*%O$t%C21%B$1%O%C21 $2"},
 
-{"Channel Ban", pevt_chanban_help, 2, 
-N_("%C22*%O$t$1 sets ban on $2")},
-
 {"Channel Creation", pevt_chandate_help, 2, 
 N_("%C22*%O$tChannel $1 created on $2")},
-
-{"Channel DeHalfOp", pevt_chandehop_help, 2, 
-N_("%C22*%O$t%C26$1%O removes channel half-operator status from%C26 $2")},
-
-{"Channel DeOp", pevt_chandeop_help, 2, 
-N_("%C22*%O$t%C26$1%O removes channel operator status from%C26 $2")},
-
-{"Channel DeVoice", pevt_chandevoice_help, 2, 
-N_("%C22*%O$t%C26$1%O removes voice from%C26 $2")},
-
-{"Channel Exempt", pevt_chanexempt_help, 2, 
-N_("%C22*%O$t$1 sets exempt on $2")},
-
-{"Channel Half-Operator", pevt_chanhop_help, 2, 
-N_("%C22*%O$t%C26$1%O gives channel half-operator status to%C26 $2")},
-
-{"Channel INVITE", pevt_chaninvite_help, 2, 
-N_("%C22*%O$t$1 sets invite on $2")},
 
 {"Channel List", pevt_generic_none_help, 0, 
 N_("%UChannel          Users   Topic")},
 
 {"Channel Message", pevt_chanmsg_help, 132, 
 "%C18%H<%H$4$1%H>%H%O$t$2"},
-
-{"Channel Mode Generic", pevt_chanmodegen_help, 4, 
-N_("%C22*%O$t$1 sets mode $2$3 $4")},
 
 {"Channel Modes", pevt_chanmodes_help, 2, 
 N_("%C22*%O$t%C22Channel $1 modes: $2")},
@@ -64,33 +40,6 @@ N_("%C22*%O$t%C22Channel $1 modes: $2")},
 
 {"Channel Notice", pevt_channotice_help, 131, 
 "%C28-%C29$1/$2%C28-%O$t$3"},
-
-{"Channel Operator", pevt_chanop_help, 2, 
-N_("%C22*%O$t%C26$1%O gives channel operator status to%C26 $2")},
-
-{"Channel Remove Exempt", pevt_chanrmexempt_help, 2, 
-N_("%C22*%O$t$1 removes exempt on $2")},
-
-{"Channel Remove Invite", pevt_chanrminvite_help, 2, 
-N_("%C22*%O$t$1 removes invite on $2")},
-
-{"Channel Remove Keyword", pevt_chanrmkey_help, 1, 
-N_("%C22*%O$t$1 removes channel keyword")},
-
-{"Channel Remove Limit", pevt_chanrmlimit_help, 1, 
-N_("%C22*%O$t$1 removes user limit")},
-
-{"Channel Set Key", pevt_chansetkey_help, 2, 
-N_("%C22*%O$t$1 sets channel keyword to $2")},
-
-{"Channel Set Limit", pevt_chansetlimit_help, 2, 
-N_("%C22*%O$t$1 sets channel limit to $2")},
-
-{"Channel UnBan", pevt_chanunban_help, 2, 
-N_("%C22*%O$t$1 removes ban on $2")},
-
-{"Channel Voice", pevt_chanvoice_help, 2, 
-N_("%C22*%O$t%C26$1%O gives voice to%C26 $2")},
 
 {"Connected", pevt_generic_none_help, 0, 
 N_("%C22*%O$t%C22Connected. Now logging in...")},

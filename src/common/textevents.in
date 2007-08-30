@@ -40,52 +40,10 @@ pevt_chanaction_help
 %C21*%O$t%C21%B$1%O%C21 $2
 n3
 
-Channel Ban
-XP_TE_CHANBAN
-pevt_chanban_help
-%C22*%O$t$1 sets ban on $2
-2
-
 Channel Creation
 XP_TE_CHANDATE
 pevt_chandate_help
 %C22*%O$tChannel $1 created on $2
-2
-
-Channel DeHalfOp
-XP_TE_CHANDEHOP
-pevt_chandehop_help
-%C22*%O$t%C26$1%O removes channel half-operator status from%C26 $2
-2
-
-Channel DeOp
-XP_TE_CHANDEOP
-pevt_chandeop_help
-%C22*%O$t%C26$1%O removes channel operator status from%C26 $2
-2
-
-Channel DeVoice
-XP_TE_CHANDEVOICE
-pevt_chandevoice_help
-%C22*%O$t%C26$1%O removes voice from%C26 $2
-2
-
-Channel Exempt
-XP_TE_CHANEXEMPT
-pevt_chanexempt_help
-%C22*%O$t$1 sets exempt on $2
-2
-
-Channel Half-Operator
-XP_TE_CHANHOP
-pevt_chanhop_help
-%C22*%O$t%C26$1%O gives channel half-operator status to%C26 $2
-2
-
-Channel INVITE
-XP_TE_CHANINVITE
-pevt_chaninvite_help
-%C22*%O$t$1 sets invite on $2
 2
 
 Channel List
@@ -99,12 +57,6 @@ XP_TE_CHANMSG
 pevt_chanmsg_help
 %C18%H<%H$4$1%H>%H%O$t$2
 n4
-
-Channel Mode Generic
-XP_TE_CHANMODEGEN
-pevt_chanmodegen_help
-%C22*%O$t$1 sets mode $2$3 $4
-4
 
 Channel Modes
 XP_TE_CHANMODES
@@ -123,60 +75,6 @@ XP_TE_CHANNOTICE
 pevt_channotice_help
 %C28-%C29$1/$2%C28-%O$t$3
 n3
-
-Channel Operator
-XP_TE_CHANOP
-pevt_chanop_help
-%C22*%O$t%C26$1%O gives channel operator status to%C26 $2
-2
-
-Channel Remove Exempt
-XP_TE_CHANRMEXEMPT
-pevt_chanrmexempt_help
-%C22*%O$t$1 removes exempt on $2
-2
-
-Channel Remove Invite
-XP_TE_CHANRMINVITE
-pevt_chanrminvite_help
-%C22*%O$t$1 removes invite on $2
-2
-
-Channel Remove Keyword
-XP_TE_CHANRMKEY
-pevt_chanrmkey_help
-%C22*%O$t$1 removes channel keyword
-1
-
-Channel Remove Limit
-XP_TE_CHANRMLIMIT
-pevt_chanrmlimit_help
-%C22*%O$t$1 removes user limit
-1
-
-Channel Set Key
-XP_TE_CHANSETKEY
-pevt_chansetkey_help
-%C22*%O$t$1 sets channel keyword to $2
-2
-
-Channel Set Limit
-XP_TE_CHANSETLIMIT
-pevt_chansetlimit_help
-%C22*%O$t$1 sets channel limit to $2
-2
-
-Channel UnBan
-XP_TE_CHANUNBAN
-pevt_chanunban_help
-%C22*%O$t$1 removes ban on $2
-2
-
-Channel Voice
-XP_TE_CHANVOICE
-pevt_chanvoice_help
-%C22*%O$t%C26$1%O gives voice to%C26 $2
-2
 
 Connected
 XP_TE_CONNECTED
