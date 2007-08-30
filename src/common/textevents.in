@@ -517,7 +517,7 @@ pevt_quit_help
 Raw Modes
 XP_TE_RAWMODES
 pevt_rawmodes_help
-%C22*%O$t$1 sets modes%B %C30[%O$2%B%C30]
+%C22*%O$t%C19$1 sets mode: $2%O
 2
 
 Receive Wallops
