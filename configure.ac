@@ -45,7 +45,6 @@ AH_VERBATIM([USE_IPV6],[#undef USE_IPV6])
 AH_VERBATIM([USE_MMX],[#undef USE_MMX])
 AH_VERBATIM([USE_OPENSSL],[#undef USE_OPENSSL])
 AH_VERBATIM([USE_PLUGIN],[#undef USE_PLUGIN])
-AH_VERBATIM([USE_XLIB],[#undef USE_XLIB])
 AH_VERBATIM([USE_SIGACTION],[#undef USE_SIGACTION])
 AH_VERBATIM([USING_FREEBSD],[#undef USING_FREEBSD])
 AH_VERBATIM([USING_LINUX],[#undef USING_LINUX])
@@ -125,10 +124,6 @@ AC_ARG_ENABLE(gtkfe,
 dnl AC_ARG_ENABLE(gnome,
 dnl [  --disable-gnome         disable use of gnome],
 dnl        gnome=$enableval, gnome=yes)
-
-AC_ARG_ENABLE(xlib,
-[  --disable-xlib          disable use of xlib (for non X11 systems)],
-        xlib=$enableval, xlib=yes)
 
 AC_ARG_ENABLE(plugin,
 [  --disable-plugin        disable plugin support],
@@ -211,19 +206,6 @@ gnome=no
 
 # GConf
 AC_PATH_PROG(GCONFTOOL, gconftool-2, no)
-
-dnl *********************************************************************
-dnl ** XLIB *************************************************************
-dnl *********************************************************************
-
-if test "$xlib" = yes; then
-	AC_DEFINE(USE_XLIB)
-	if test "$system" = "SunOS"; then
-		LIBS="$LIBS -L/usr/openwin/lib -lX11"
-	fi
-else
-	shm=no
-fi
 
 dnl *********************************************************************
 dnl ** IPv6 *************************************************************

@@ -50,18 +50,6 @@
 #include <gtk/gtkversion.h>
 #include <gtk/gtkwindow.h>
 
-#ifdef XCHAT
-#include "../../config.h"			/* can define USE_XLIB here */
-#else
-#define USE_XLIB
-#endif
-
-#ifdef USE_XLIB
-#include <gdk/gdkx.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#endif
-
 #include "xtext.h"
 
 #define charlen(str) g_utf8_skip[*(guchar *)(str)]
@@ -126,10 +114,6 @@ int xtext_get_stamp_str (time_t, char **);
 #endif
 static void gtk_xtext_render_page (GtkXText * xtext);
 static void gtk_xtext_calc_lines (xtext_buffer *buf, int);
-#if defined(USE_XLIB) || defined(WIN32)
-static void gtk_xtext_load_trans (GtkXText * xtext);
-static void gtk_xtext_free_trans (GtkXText * xtext);
-#endif
 static char *gtk_xtext_selection_get_text (GtkXText *xtext, int *len_ret);
 static textentry *gtk_xtext_nth (GtkXText *xtext, int line, int *subline);
 static void gtk_xtext_adjustment_changed (GtkAdjustment * adj,
@@ -628,12 +612,7 @@ gtk_xtext_destroy (GtkObject * object)
 
 	if (xtext->pixmap)
 	{
-#if defined(USE_XLIB) || defined(WIN32)
-		if (xtext->transparent)
-			gtk_xtext_free_trans (xtext);
-		else
-#endif
-			g_object_unref (xtext->pixmap);
+		g_object_unref (xtext->pixmap);
 		xtext->pixmap = NULL;
 	}
 
@@ -802,12 +781,6 @@ gtk_xtext_realize (GtkWidget * widget)
 	/* draw directly to window */
 	xtext->draw_buf = widget->window;
 
-#if defined(USE_XLIB) || defined(WIN32)
-	if (xtext->transparent)
-	{
-		gtk_xtext_load_trans (xtext);
-	} else
-#endif
 	if (xtext->pixmap)
 	{
 		gdk_gc_set_tile (xtext->bgc, xtext->pixmap);
@@ -869,13 +842,6 @@ gtk_xtext_size_allocate (GtkWidget * widget, GtkAllocation * allocation)
 			xtext->buffer->pagetop_ent = NULL;
 			gtk_xtext_adjustment_set (xtext->buffer, FALSE);
 		}
-#if defined(USE_XLIB) || defined(WIN32)
-		if (do_trans && xtext->transparent && xtext->shaded)
-		{
-			gtk_xtext_free_trans (xtext);
-			gtk_xtext_load_trans (xtext);
-		}
-#endif
 		if (xtext->buffer->scrollbar_down)
 			gtk_adjustment_set_value (xtext->adj, xtext->adj->upper -
 											  xtext->adj->page_size);
@@ -1118,31 +1084,6 @@ gtk_xtext_paint (GtkWidget *widget, GdkRectangle *area)
 	GtkXText *xtext = GTK_XTEXT (widget);
 	textentry *ent_start, *ent_end;
 	int x, y;
-
-#if defined(USE_XLIB) || defined(WIN32)
-	if (xtext->transparent)
-	{
-		gdk_window_get_origin (widget->window, &x, &y);
-		/* update transparency only if it moved */
-		if (xtext->last_win_x != x || xtext->last_win_y != y)
-		{
-			xtext->last_win_x = x;
-			xtext->last_win_y = y;
-#if !defined(USE_SHM) && !defined(WIN32)
-			if (xtext->shaded)
-			{
-				xtext->recycle = TRUE;
-				gtk_xtext_load_trans (xtext);
-				xtext->recycle = FALSE;
-			} else
-#endif
-			{
-				gtk_xtext_free_trans (xtext);
-				gtk_xtext_load_trans (xtext);
-			}
-		}
-	}
-#endif
 
 	if (area->x == 0 && area->y == 0 &&
 		 area->height == widget->allocation.height &&
@@ -2973,518 +2914,6 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 	return ret;
 }
 
-#ifdef USE_XLIB
-
-/* get the desktop/root window */
-
-static Window desktop_window = None;
-
-static Window
-get_desktop_window (Display *xdisplay, Window the_window)
-{
-	Atom prop, type;
-	int format;
-	unsigned long length, after;
-	unsigned char *data;
-	unsigned int nchildren;
-	Window w, root, *children, parent;
-
-	prop = XInternAtom (xdisplay, "_XROOTPMAP_ID", True);
-	if (prop == None)
-	{
-		prop = XInternAtom (xdisplay, "_XROOTCOLOR_PIXEL", True);
-		if (prop == None)
-			return None;
-	}
-
-	for (w = the_window; w; w = parent)
-	{
-		if ((XQueryTree (xdisplay, w, &root, &parent, &children,
-				&nchildren)) == False)
-			return None;
-
-		if (nchildren)
-			XFree (children);
-
-		XGetWindowProperty (xdisplay, w, prop, 0L, 1L, False,
-								  AnyPropertyType, &type, &format, &length, &after,
-								  &data);
-		if (data)
-			XFree (data);
-
-		if (type != None)
-			return (desktop_window = w);
-	}
-
-	return (desktop_window = None);
-}
-
-/* find the root window (backdrop) Pixmap */
-
-static Pixmap
-get_pixmap_prop (Display *xdisplay, Window the_window)
-{
-	Atom type;
-	int format;
-	unsigned long length, after;
-	unsigned char *data;
-	Pixmap pix = None;
-	static Atom prop = None;
-
-	if (desktop_window == None)
-		desktop_window = get_desktop_window (xdisplay, the_window);
-	if (desktop_window == None)
-		desktop_window = DefaultRootWindow (xdisplay);
-
-	if (prop == None)
-		prop = XInternAtom (xdisplay, "_XROOTPMAP_ID", True);
-	if (prop == None)
-		return None;
-
-	XGetWindowProperty (xdisplay, desktop_window, prop, 0L, 1L, False,
-							  AnyPropertyType, &type, &format, &length, &after,
-							  &data);
-	if (data)
-	{
-		if (type == XA_PIXMAP)
-			pix = *((Pixmap *) data);
-
-		XFree (data);
-	}
-
-	return pix;
-}
-
-/* slow generic routine, for the depths/bpp we don't know about */
-
-static void
-shade_ximage_generic (GdkVisual *visual, XImage *ximg, int bpl, int w, int h, int rm, int gm, int bm, int bg)
-{
-	int x, y;
-	int bgr = (256 - rm) * (bg & visual->red_mask);
-	int bgg = (256 - gm) * (bg & visual->green_mask);
-	int bgb = (256 - bm) * (bg & visual->blue_mask);
-
-	for (x = 0; x < w; x++)
-	{
-		for (y = 0; y < h; y++)
-		{
-			unsigned long pixel = XGetPixel (ximg, x, y);
-			int r, g, b;
-
-			r = rm * (pixel & visual->red_mask) + bgr;
-			g = gm * (pixel & visual->green_mask) + bgg;
-			b = bm * (pixel & visual->blue_mask) + bgb;
-
-			XPutPixel (ximg, x, y,
-							((r >> 8) & visual->red_mask) |
-							((g >> 8) & visual->green_mask) |
-							((b >> 8) & visual->blue_mask));
-		}
-	}
-}
-
-#endif
-
-/* Fast shading routine. Based on code by Willem Monsuwe <willem@stack.nl> */
-
-#define SHADE_IMAGE(bytes, type, rmask, gmask, bmask) \
-	unsigned char *ptr; \
-	int x, y; \
-	int bgr = (256 - rm) * (bg & rmask); \
-	int bgg = (256 - gm) * (bg & gmask); \
-	int bgb = (256 - bm) * (bg & bmask); \
-	ptr = (unsigned char *) data + (w * bytes); \
-	for (y = h; --y >= 0;) \
-	{ \
-		for (x = -w; x < 0; x++) \
-		{ \
-			int r, g, b; \
-			b = ((type *) ptr)[x]; \
-			r = rm * (b & rmask) + bgr; \
-			g = gm * (b & gmask) + bgg; \
-			b = bm * (b & bmask) + bgb; \
-			((type *) ptr)[x] = ((r >> 8) & rmask) \
-										| ((g >> 8) & gmask) \
-										| ((b >> 8) & bmask); \
-		} \
-		ptr += bpl; \
-    }
-
-/* RGB 15 */
-static void
-shade_ximage_15 (void *data, int bpl, int w, int h, int rm, int gm, int bm, int bg)
-{
-	SHADE_IMAGE (2, guint16, 0x7c00, 0x3e0, 0x1f);
-}
-
-/* RGB 16 */
-static void
-shade_ximage_16 (void *data, int bpl, int w, int h, int rm, int gm, int bm, int bg)
-{
-	SHADE_IMAGE (2, guint16, 0xf800, 0x7e0, 0x1f);
-}
-
-/* RGB 24 */
-static void
-shade_ximage_24 (void *data, int bpl, int w, int h, int rm, int gm, int bm, int bg)
-{
-	/* 24 has to be a special case, there's no guint24, or 24bit MOV :) */
-	unsigned char *ptr;
-	int x, y;
-	int bgr = (256 - rm) * ((bg & 0xff0000) >> 16);
-	int bgg = (256 - gm) * ((bg & 0xff00) >> 8);
-	int bgb = (256 - bm) * (bg & 0xff);
-
-	ptr = (unsigned char *) data + (w * 3);
-	for (y = h; --y >= 0;)
-	{
-		for (x = -(w * 3); x < 0; x += 3)
-		{
-			int r, g, b;
-
-#if (G_BYTE_ORDER == G_BIG_ENDIAN)
-			r = (ptr[x + 0] * rm + bgr) >> 8;
-			g = (ptr[x + 1] * gm + bgg) >> 8;
-			b = (ptr[x + 2] * bm + bgb) >> 8;
-			ptr[x + 0] = r;
-			ptr[x + 1] = g;
-			ptr[x + 2] = b;
-#else
-			r = (ptr[x + 2] * rm + bgr) >> 8;
-			g = (ptr[x + 1] * gm + bgg) >> 8;
-			b = (ptr[x + 0] * bm + bgb) >> 8;
-			ptr[x + 2] = r;
-			ptr[x + 1] = g;
-			ptr[x + 0] = b;
-#endif
-		}
-		ptr += bpl;
-	}
-}
-
-/* RGB 32 */
-static void
-shade_ximage_32 (void *data, int bpl, int w, int h, int rm, int gm, int bm, int bg)
-{
-	SHADE_IMAGE (4, guint32, 0xff0000, 0xff00, 0xff);
-}
-
-static void
-shade_image (GdkVisual *visual, void *data, int bpl, int bpp, int w, int h,
-				 int rm, int gm, int bm, int bg, int depth)
-{
-	int bg_r, bg_g, bg_b;
-
-	bg_r = bg & visual->red_mask;
-	bg_g = bg & visual->green_mask;
-	bg_b = bg & visual->blue_mask;
-
-		switch (depth)
-		{
-		case 15:
-			shade_ximage_15 (data, bpl, w, h, rm, gm, bm, bg);
-			break;
-		case 16:
-			shade_ximage_16 (data, bpl, w, h, rm, gm, bm, bg);
-			break;
-		case 24:
-			if (bpp != 32)
-			{
-				shade_ximage_24 (data, bpl, w, h, rm, gm, bm, bg);
-				break;
-			}
-		case 32:
-			shade_ximage_32 (data, bpl, w, h, rm, gm, bm, bg);
-		}
-}
-
-#ifdef USE_XLIB
-
-static GdkPixmap *
-shade_pixmap (GtkXText * xtext, Pixmap p, int x, int y, int w, int h)
-{
-	unsigned int dummy, width, height, depth;
-	GdkPixmap *shaded_pix;
-	Window root;
-	Pixmap tmp;
-	XImage *ximg;
-	XGCValues gcv;
-	GC tgc;
-	Display *xdisplay = GDK_WINDOW_XDISPLAY (xtext->draw_buf);
-
-	XGetGeometry (xdisplay, p, &root, &dummy, &dummy, &width, &height,
-					  &dummy, &depth);
-
-	if (width < x + w || height < y + h || x < 0 || y < 0)
-	{
-		gcv.subwindow_mode = IncludeInferiors;
-		gcv.graphics_exposures = False;
-		tgc = XCreateGC (xdisplay, p, GCGraphicsExposures|GCSubwindowMode,
-							  &gcv);
-		tmp = XCreatePixmap (xdisplay, p, w, h, depth);
-		XSetTile (xdisplay, tgc, p);
-		XSetFillStyle (xdisplay, tgc, FillTiled);
-		XSetTSOrigin (xdisplay, tgc, -x, -y);
-		XFillRectangle (xdisplay, tmp, tgc, 0, 0, w, h);
-		XFreeGC (xdisplay, tgc);
-
-#ifdef USE_SHM
-		ximg = get_image (xtext, xdisplay, &xtext->shminfo, 0, 0, w, h, depth, tmp);
-#else
-		ximg = XGetImage (xdisplay, tmp, 0, 0, w, h, -1, ZPixmap);
-#endif
-		XFreePixmap (xdisplay, tmp);
-	} else
-	{
-#ifdef USE_SHM
-		ximg = get_image (xtext, xdisplay, &xtext->shminfo, x, y, w, h, depth, p);
-#else
-		ximg = XGetImage (xdisplay, p, x, y, w, h, -1, ZPixmap);
-#endif
-	}
-
-	if (!ximg)
-		return NULL;
-
-	if (depth <= 14)
-	{
-		shade_ximage_generic (gdk_drawable_get_visual (GTK_WIDGET (xtext)->window),
-									 ximg, ximg->bytes_per_line, w, h, xtext->tint_red,
-									 xtext->tint_green, xtext->tint_blue,
-									 xtext->palette[XTEXT_BG]);
-	} else
-	{
-		shade_image (gdk_drawable_get_visual (GTK_WIDGET (xtext)->window),
-						 ximg->data, ximg->bytes_per_line, ximg->bits_per_pixel,
-						 w, h, xtext->tint_red, xtext->tint_green, xtext->tint_blue,
-						 xtext->palette[XTEXT_BG], depth);
-	}
-
-	if (xtext->recycle)
-		shaded_pix = xtext->pixmap;
-	else
-	{
-		shaded_pix = gdk_pixmap_new (GTK_WIDGET (xtext)->window, w, h, depth);
-	}
-
-	XPutImage (xdisplay, GDK_WINDOW_XWINDOW (shaded_pix),
-				  GDK_GC_XGC (xtext->fgc), ximg, 0, 0, 0, 0, w, h);
-	XDestroyImage (ximg);
-
-	return shaded_pix;
-}
-
-#endif /* !USE_XLIB */
-
-/* free transparency xtext->pixmap */
-#if defined(USE_XLIB) || defined(WIN32)
-
-static void
-gtk_xtext_free_trans (GtkXText * xtext)
-{
-	if (xtext->pixmap)
-	{
-		g_object_unref (xtext->pixmap);
-		xtext->pixmap = NULL;
-		xtext->shm = 0;
-	}
-}
-
-#endif
-
-#ifdef WIN32
-
-static GdkPixmap *
-win32_tint (GtkXText *xtext, GdkImage *img, int width, int height)
-{
-	guchar *pixelp;
-	int x, y;
-	GdkPixmap *pix;
-	GdkVisual *visual = gdk_drawable_get_visual (GTK_WIDGET (xtext)->window);
-	guint32 pixel;
-	int r, g, b;
-
-	if (img->depth <= 14)
-	{
-		/* slow generic routine */
-		for (y = 0; y < height; y++)
-		{
-			for (x = 0; x < width; x++)
-			{
-				if (img->depth == 1)
-				{
-					pixel = (((guchar *) img->mem)[y * img->bpl + (x >> 3)] & (1 << (7 - (x & 0x7)))) != 0;
-					goto here;
-				}
-
-				if (img->depth == 4)
-				{
-					pixelp = (guchar *) img->mem + y * img->bpl + (x >> 1);
-					if (x&1)
-					{
-						pixel = (*pixelp) & 0x0F;
-						goto here;
-					}
-
-					pixel = (*pixelp) >> 4;
-					goto here;
-				}
-
-				pixelp = (guchar *) img->mem + y * img->bpl + x * img->bpp;
-
-				switch (img->bpp)
-				{
-				case 1:
-					pixel = *pixelp; break;
-
-				/* Windows is always LSB, no need to check img->byte_order. */
-				case 2:
-					pixel = pixelp[0] | (pixelp[1] << 8); break;
-
-				case 3:
-					pixel = pixelp[0] | (pixelp[1] << 8) | (pixelp[2] << 16); break;
-
-				case 4:
-					pixel = pixelp[0] | (pixelp[1] << 8) | (pixelp[2] << 16); break;
-				}
-
-here:
-				r = (pixel & visual->red_mask) >> visual->red_shift;
-				g = (pixel & visual->green_mask) >> visual->green_shift;
-				b = (pixel & visual->blue_mask) >> visual->blue_shift;
-
-				/* actual tinting is only these 3 lines */
-				pixel = ((r * xtext->tint_red) >> 8) << visual->red_shift |
-							((g * xtext->tint_green) >> 8) << visual->green_shift |
-							((b * xtext->tint_blue) >> 8) << visual->blue_shift;
-
-				if (img->depth == 1)
-					if (pixel & 1)
-						((guchar *) img->mem)[y * img->bpl + (x >> 3)] |= (1 << (7 - (x & 0x7)));
-					else
-						((guchar *) img->mem)[y * img->bpl + (x >> 3)] &= ~(1 << (7 - (x & 0x7)));
-				else if (img->depth == 4)
-				{
-					pixelp = (guchar *) img->mem + y * img->bpl + (x >> 1);
-
-					if (x&1)
-					{
-						*pixelp &= 0xF0;
-						*pixelp |= (pixel & 0x0F);
-					} else
-					{
-						*pixelp &= 0x0F;
-						*pixelp |= (pixel << 4);
-					}
-				} else
-				{
-					pixelp = (guchar *) img->mem + y * img->bpl + x * img->bpp;
-
-					/* Windows is always LSB, no need to check img->byte_order. */
-					switch (img->bpp)
-					{
-					case 4:
-						pixelp[3] = 0;
-					case 3:
-						pixelp[2] = ((pixel >> 16) & 0xFF);
-					case 2:
-						pixelp[1] = ((pixel >> 8) & 0xFF);
-					case 1:
-						pixelp[0] = (pixel & 0xFF);
-					}
-				}
-			}
-		}
-	} else
-	{
-		shade_image (visual, img->mem, img->bpl, img->bpp, width, height,
-						 xtext->tint_red, xtext->tint_green, xtext->tint_blue,
-						 xtext->palette[XTEXT_BG], visual->depth);
-	}
-
-	/* no need to dump it to a Pixmap, it's one and the same on win32 */
-	pix = (GdkPixmap *)img;
-
-	return pix;
-}
-
-#endif /* !WIN32 */
-
-/* grab pixmap from root window and set xtext->pixmap */
-#if defined(USE_XLIB) || defined(WIN32)
-
-static void
-gtk_xtext_load_trans (GtkXText * xtext)
-{
-#ifdef WIN32
-	GdkImage *img;
-	int width, height;
-	HDC hdc;
-	HWND hwnd;
-
-	/* if not shaded, we paint directly with PaintDesktop() */
-	if (!xtext->shaded)
-		return;
-
-	hwnd = GDK_WINDOW_HWND (GTK_WIDGET (xtext)->window);
-	hdc = GetDC (hwnd);
-	PaintDesktop (hdc);
-	ReleaseDC (hwnd, hdc);
-
-	gdk_window_get_size (GTK_WIDGET (xtext)->window, &width, &height);
-	img = gdk_image_get (GTK_WIDGET (xtext)->window, 0, 0, width+128, height);
-	xtext->pixmap = win32_tint (xtext, img, img->width, img->height);
-
-#else
-
-	Pixmap rootpix;
-	GtkWidget *widget = GTK_WIDGET (xtext);
-	int x, y;
-
-	rootpix = get_pixmap_prop (GDK_WINDOW_XDISPLAY (widget->window), GDK_WINDOW_XWINDOW (widget->window));
-	if (rootpix == None)
-	{
-		if (xtext->error_function)
-			xtext->error_function (0);
-		xtext->transparent = FALSE;
-		return;
-	}
-
-	gdk_window_get_origin (widget->window, &x, &y);
-
-	if (xtext->shaded)
-	{
-		int width, height;
-		gdk_drawable_get_size (GTK_WIDGET (xtext)->window, &width, &height);
-		xtext->pixmap = shade_pixmap (xtext, rootpix, x, y, width+105, height);
-		if (xtext->pixmap == NULL)
-		{
-			xtext->shaded = 0;
-			goto noshade;
-		}
-		gdk_gc_set_tile (xtext->bgc, xtext->pixmap);
-		gdk_gc_set_ts_origin (xtext->bgc, 0, 0);
-		xtext->ts_x = xtext->ts_y = 0;
-	} else
-	{
-noshade:
-#if (GTK_MAJOR_VERSION == 2) && (GTK_MINOR_VERSION == 0)
-		xtext->pixmap = gdk_pixmap_foreign_new (rootpix);
-#else
-		xtext->pixmap = gdk_pixmap_foreign_new_for_display (gdk_drawable_get_display (GTK_WIDGET (xtext)->window), rootpix);
-#endif
-		gdk_gc_set_tile (xtext->bgc, xtext->pixmap);
-		gdk_gc_set_ts_origin (xtext->bgc, -x, -y);
-		xtext->ts_x = -x;
-		xtext->ts_y = -y;
-	}
-	gdk_gc_set_fill (xtext->bgc, GDK_TILED);
-#endif /* !WIN32 */
-}
-
-#endif /* ! XLIB || WIN32 */
-
 /* walk through str until this line doesn't fit anymore */
 
 static int
@@ -3912,33 +3341,16 @@ gtk_xtext_set_background (GtkXText * xtext, GdkPixmap * pixmap, gboolean trans)
 	if (trans && (xtext->tint_red != 255 || xtext->tint_green != 255 || xtext->tint_blue != 255))
 		shaded = TRUE;
 
-#if !defined(USE_XLIB) && !defined(WIN32)
 	shaded = FALSE;
 	trans = FALSE;
-#endif
 
 	if (xtext->pixmap)
 	{
-#if defined(USE_XLIB) || defined(WIN32)
-		if (xtext->transparent)
-			gtk_xtext_free_trans (xtext);
-		else
-#endif
-			g_object_unref (xtext->pixmap);
+		g_object_unref (xtext->pixmap);
 		xtext->pixmap = NULL;
 	}
 
 	xtext->transparent = trans;
-
-#if defined(USE_XLIB) || defined(WIN32)
-	if (trans)
-	{
-		xtext->shaded = shaded;
-		if (GTK_WIDGET_REALIZED (xtext))
-			gtk_xtext_load_trans (xtext);
-		return;
-	}
-#endif
 
 	dontscroll (xtext->buffer);
 	xtext->pixmap = pixmap;
@@ -4323,16 +3735,7 @@ void
 gtk_xtext_refresh (GtkXText * xtext, int do_trans)
 {
 	if (GTK_WIDGET_REALIZED (GTK_WIDGET (xtext)))
-	{
-#if defined(USE_XLIB) || defined(WIN32)
-		if (xtext->transparent && do_trans)
-		{
-			gtk_xtext_free_trans (xtext);
-			gtk_xtext_load_trans (xtext);
-		}
-#endif
 		gtk_xtext_render_page (xtext);
-	}
 }
 
 /* remove the topline from the list */
