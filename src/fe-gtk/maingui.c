@@ -484,7 +484,7 @@ fe_set_title (session *sess)
 		break;
 	default:
 	def:
-		gtk_window_set_title (GTK_WINDOW (sess->gui->window), "XChat");
+		gtk_window_set_title (GTK_WINDOW (sess->gui->window), "conspire");
 		return;
 	}
 
@@ -1196,7 +1196,7 @@ mg_open_quit_dialog (gboolean minimize_button)
 
 	dialog = gtk_dialog_new ();
 	gtk_container_set_border_width (GTK_CONTAINER (dialog), 6);
-	gtk_window_set_title (GTK_WINDOW (dialog), _("Quit XChat?"));
+	gtk_window_set_title (GTK_WINDOW (dialog), _("Quit conspire?"));
 	gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (parent_window));
 	gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
 	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);
@@ -2793,10 +2793,10 @@ mg_create_topwindow (session *sess)
 	GtkWidget *table;
 
 	if (sess->type == SESS_DIALOG)
-		win = gtkutil_window_new ("XChat", NULL,
+		win = gtkutil_window_new ("conspire", NULL,
 										  prefs.dialog_width, prefs.dialog_height, 0);
 	else
-		win = gtkutil_window_new ("XChat", NULL,
+		win = gtkutil_window_new ("conspire", NULL,
 										  prefs.mainwindow_width,
 										  prefs.mainwindow_height, 0);
 	sess->gui->window = win;
@@ -2891,7 +2891,7 @@ mg_create_tabwindow (session *sess)
 	GtkWidget *win;
 	GtkWidget *table;
 
-	win = gtkutil_window_new ("XChat", NULL, prefs.mainwindow_width,
+	win = gtkutil_window_new ("conspire", NULL, prefs.mainwindow_width,
 									  prefs.mainwindow_height, 0);
 	sess->gui->window = win;
 	gtk_window_move (GTK_WINDOW (win), prefs.mainwindow_left,
