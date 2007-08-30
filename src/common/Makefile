@@ -1,7 +1,8 @@
 include ../../mk/init.mk
 include ../../mk/rules.mk
 
-OBJECTIVE_LIBS = libconspire.so
+PICLDFLAGS = $(LIBLDFLAGS)
+OBJECTIVE_LIBS = libconspire$(SHARED_SUFFIX)
 OBJECTIVE_SONAME_SUFFIX = 0
 LIBCONSPIRE_SUFFIX = 0.1.0
 
