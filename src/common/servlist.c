@@ -27,7 +27,6 @@
 #include <glib/ghash.h>
 
 #include "cfgfiles.h"
-#include "configdb.h"
 #include "fe.h"
 #include "server.h"
 #include "text.h"
@@ -45,10 +44,6 @@ servlist_connect (session *sess, ircnet *net, gboolean join)
 	GSList *list;
 	char *port;
 	server *serv;
-	gchar *nick;
-
-	if (!settings_get_string(config, "irc", "nick1", &nick))
-		nick = g_get_user_name();
 
 	if (!sess)
 		sess = new_ircwindow (NULL, NULL, SESS_SERVER, TRUE);
@@ -79,7 +74,7 @@ servlist_connect (session *sess, ircnet *net, gboolean join)
 
 	if (net->flags & FLAG_USE_GLOBAL)
 	{
-		strcpy(serv->nick, nick);
+		strcpy(serv->nick, prefs.nick1);
 	} else
 	{
 		if (net->nick)
@@ -538,22 +533,19 @@ servlist_save (void)
 	ircserver *serv;
 	GSList *list;
 	GSList *hlist;
-#ifndef WIN32
 	int first = FALSE;
 
 	snprintf (buf, sizeof (buf), "%s/servlist_.conf", get_xdir_fs ());
 	if (access (buf, F_OK) != 0)
 		first = TRUE;
-#endif
 
 	fp = xchat_fopen_file ("servlist_.conf", "w", 0);
 	if (!fp)
 		return FALSE;
 
-#ifndef WIN32
 	if (first)
 		chmod (buf, 0600);
-#endif
+
 	fprintf (fp, "v="PACKAGE_VERSION"\n\n");
 
 	list = network_list;

@@ -36,9 +36,6 @@
 #include "outbound.h"
 #include "xchatc.h"
 #include "text.h"
-#ifdef WIN32
-#include <windows.h>
-#endif
 
 struct pevt_stage1
 {
@@ -320,18 +317,10 @@ mkdir_p (char *dir)	/* like "mkdir -p" from a shell, FS encoding */
 
 	while (*dir)
 	{
-#ifdef WIN32
-		if (dir != start && (*dir == '/' || *dir == '\\'))
-#else
 		if (dir != start && *dir == '/')
-#endif
 		{
 			*dir = 0;
-#ifdef WIN32
-			mkdir (start);
-#else
 			mkdir (start, S_IRUSR | S_IWUSR | S_IXUSR);
-#endif
 			*dir = '/';
 		}
 		dir++;
@@ -350,15 +339,8 @@ log_create_filename (char *channame)
 		mbl = g_utf8_skip[((unsigned char *)tmp)[0]];
 		if (mbl == 1)
 		{
-#ifndef WIN32
 			*tmp = rfc_tolower (*tmp);
 			if (*tmp == '/')
-#else
-			/* win32 can't handle filenames with \|/><:"*? characters */
-			if (*tmp == '\\' || *tmp == '|' || *tmp == '/' ||
-				 *tmp == '>'  || *tmp == '<' || *tmp == ':' ||
-				 *tmp == '\"' || *tmp == '*' || *tmp == '?')
-#endif
 				*tmp = '_';
 		}
 		tmp += mbl;
@@ -469,11 +451,7 @@ log_create_pathname (char *servname, char *channame, char *netname)
 	strftime (fnametime, sizeof (fnametime), fname, tm);
 
 	/* create final path/filename */
-#ifdef WIN32
-	if (fnametime[0] == '/' || (fnametime[0] >= 'A' && fnametime[1] == ':'))
-#else
 	if (fnametime[0] == '/')	/* is it fullpath already? */
-#endif
 		snprintf (fname, sizeof (fname), "%s", fnametime);
 	else
 		snprintf (fname, sizeof (fname), "%s/xchatlogs/%s", get_xdir_utf8 (), fnametime);
@@ -500,11 +478,7 @@ log_open_file (char *servname, char *channame, char *netname)
 	if (!file)
 		return -1;
 
-#ifdef WIN32
-	fd = open (file, O_CREAT | O_APPEND | O_WRONLY, S_IREAD|S_IWRITE);
-#else
 	fd = open (file, O_CREAT | O_APPEND | O_WRONLY, 0644);
-#endif
 	g_free (file);
 
 	if (fd == -1)
@@ -731,11 +705,7 @@ text_validate (char **text, int *len)
 	if (g_utf8_validate (*text, *len, 0))
 		return NULL;
 
-#ifdef WIN32
-	if (GetACP () == 1252) /* our routine is better than iconv's 1252 */
-#else
 	if (prefs.utf8_locale)
-#endif
 		/* fallback to iso-8859-1 */
 		utf = iso_8859_1_to_utf8 (*text, *len, &utf_len);
 	else
@@ -2026,14 +1996,6 @@ sound_play (const char *file, gboolean quiet)
 	if (!file[0])
 		return;
 
-#ifdef WIN32
-	/* check for fullpath, windows style */
-	if (strlen (file) > 3 &&
-		 file[1] == ':' && (file[2] == '\\' || file[2] == '/') )
-	{
-		strncpy (wavfile, file, sizeof (wavfile));
-	} else
-#endif
 	if (file[0] != '/')
 	{
 		snprintf (wavfile, sizeof (wavfile), "%s/%s", prefs.sounddir, file);
@@ -2050,25 +2012,17 @@ sound_play (const char *file, gboolean quiet)
 	if (access (file_fs, R_OK) == 0)
 	{
 		cmd = sound_find_command ();
-
-#ifdef WIN32
-		if (cmd == NULL || strcmp (cmd, "esdplay") == 0)
+		
+		if (cmd)
 		{
-			PlaySound (file_fs, NULL, SND_NODEFAULT|SND_FILENAME|SND_ASYNC);
-		} else
-#endif
-		{
-			if (cmd)
-			{
-				if (strchr (file_fs, ' '))
-					snprintf (buf, sizeof (buf), "%s \"%s\"", cmd, file_fs);
-				else
-					snprintf (buf, sizeof (buf), "%s %s", cmd, file_fs);
-				buf[sizeof (buf) - 1] = '\0';
-				xchat_exec (buf);
-			}
+			if (strchr (file_fs, ' '))
+				snprintf (buf, sizeof (buf), "%s \"%s\"", cmd, file_fs);
+			else
+				snprintf (buf, sizeof (buf), "%s %s", cmd, file_fs);
+			buf[sizeof (buf) - 1] = '\0';
+			xchat_exec (buf);
 		}
-
+		
 		if (cmd)
 			g_free (cmd);
 

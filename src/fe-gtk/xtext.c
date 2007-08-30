@@ -54,11 +54,6 @@
 
 #define charlen(str) g_utf8_skip[*(guchar *)(str)]
 
-#ifdef WIN32
-#include <windows.h>
-#include <gdk/gdkwin32.h>
-#endif
-
 /* is delimiter */
 #define is_del(c) \
 	(c == ' ' || c == '\n' || c == ')' || c == '(' || \
@@ -163,50 +158,8 @@ gtk_xtext_text_width_8bit (GtkXText *xtext, unsigned char *str, int len)
 	return width;
 }
 
-#ifdef WIN32
-
-static void
-win32_draw_bg (GtkXText *xtext, int x, int y, int width, int height)
-{
-	HDC hdc;
-	HWND hwnd;
-	HRGN rgn;
-
-	if (xtext->shaded)
-	{
-		/* xtext->pixmap is really a GdkImage, created in win32_tint() */
-		gdk_draw_image (xtext->draw_buf, xtext->bgc, (GdkImage*)xtext->pixmap,
-							 x, y, x, y, width, height);
-	} else
-	{
-		hwnd = GDK_WINDOW_HWND (xtext->draw_buf);
-		hdc = GetDC (hwnd);
-
-		rgn = CreateRectRgn (x, y, x + width, y + height);
-		SelectClipRgn (hdc, rgn);
-
-		PaintDesktop (hdc);
-
-		ReleaseDC (hwnd, hdc);
-		DeleteObject (rgn);
-	}
-}
-
-static void
-xtext_draw_bg (GtkXText *xtext, int x, int y, int width, int height)
-{
-	if (xtext->transparent)
-		win32_draw_bg (xtext, x, y, width, height);
-	else
-		gdk_draw_rectangle (xtext->draw_buf, xtext->bgc, 1, x, y, width, height);
-}
-
-#else
-
 #define xtext_draw_bg(xt,x,y,w,h) gdk_draw_rectangle(xt->draw_buf, xt->bgc, \
 																	  1,x,y,w,h);
-
-#endif
 
 /* ======================================= */
 /* ============ PANGO BACKEND ============ */
@@ -370,21 +323,13 @@ backend_draw_text (GtkXText *xtext, int dofill, GdkGC *gc, int x, int y,
 
 	if (dofill)
 	{
-#ifdef WIN32
-		if (xtext->transparent && !xtext->backcolor)
-			win32_draw_bg (xtext, x, y - xtext->font->ascent, str_width,
-								xtext->fontsize);
-		else
-#endif
-		{
-			gdk_gc_get_values (gc, &val);
-			col.pixel = val.background.pixel;
-			gdk_gc_set_foreground (gc, &col);
-			gdk_draw_rectangle (xtext->draw_buf, gc, 1, x, y -
-									  xtext->font->ascent, str_width, xtext->fontsize);
-			col.pixel = val.foreground.pixel;
-			gdk_gc_set_foreground (gc, &col);
-		}
+		gdk_gc_get_values (gc, &val);
+		col.pixel = val.background.pixel;
+		gdk_gc_set_foreground (gc, &col);
+		gdk_draw_rectangle (xtext->draw_buf, gc, 1, x, y -
+								  xtext->font->ascent, str_width, xtext->fontsize);
+		col.pixel = val.foreground.pixel;
+		gdk_gc_set_foreground (gc, &col);
 	}
 
 	line = pango_layout_get_lines (xtext->layout)->data;
@@ -1969,10 +1914,8 @@ gtk_xtext_button_press (GtkWidget * widget, GdkEventButton * event)
 static gboolean
 gtk_xtext_selection_kill (GtkXText *xtext, GdkEventSelection *event)
 {
-#ifndef WIN32
 	if (xtext->buffer->last_ent_start)
 		gtk_xtext_unselect (xtext);
-#endif
 	return TRUE;
 }
 
@@ -2433,22 +2376,17 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 	}
 
 #ifdef USE_DB
-#ifdef WIN32
-	if (!xtext->transparent)
-#endif
+	pix = gdk_pixmap_new (xtext->draw_buf, str_width, xtext->fontsize, xtext->depth);
+	if (pix)
 	{
-		pix = gdk_pixmap_new (xtext->draw_buf, str_width, xtext->fontsize, xtext->depth);
-		if (pix)
-		{
-			dest_x = x;
-			dest_y = y - xtext->font->ascent;
+		dest_x = x;
+		dest_y = y - xtext->font->ascent;
 
-			gdk_gc_set_ts_origin (xtext->bgc, xtext->ts_x - x, xtext->ts_y - dest_y);
+		gdk_gc_set_ts_origin (xtext->bgc, xtext->ts_x - x, xtext->ts_y - dest_y);
 
-			x = 0;
-			y = xtext->font->ascent;
-			xtext->draw_buf = pix;
-		}
+		x = 0;
+		y = xtext->font->ascent;
+		xtext->draw_buf = pix;
 	}
 #endif
 
@@ -3658,16 +3596,9 @@ gtk_xtext_render_page (GtkXText * xtext)
 	xtext->buffer->last_pixel_pos = pos;
 
 #ifdef USE_DB
-#ifdef WIN32
-	if (!xtext->transparent && !xtext->pixmap && abs (overlap) < height)
-#else
 	if (!xtext->pixmap && abs (overlap) < height)
-#endif
 #else
 	/* dont scroll PageUp/Down without a DB, it looks ugly */
-#ifdef WIN32
-	if (!xtext->transparent && !xtext->pixmap && abs (overlap) < height - (3*xtext->fontsize))
-#else
 	if (!xtext->pixmap && abs (overlap) < height - (3*xtext->fontsize))
 #endif
 #endif
@@ -3704,7 +3635,6 @@ gtk_xtext_render_page (GtkXText * xtext)
 		return;
 	}
 }
-#endif
 
 	xtext->buffer->grid_dirty = FALSE;
 	width -= MARGIN;

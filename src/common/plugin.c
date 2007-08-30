@@ -200,14 +200,6 @@ xchat_dummy (xchat_plugin *ph)
 	return NULL;
 }
 
-#ifdef WIN32
-static int
-xchat_read_fd (xchat_plugin *ph, GIOChannel *source, char *buf, int *len)
-{
-	return g_io_channel_read (source, buf, *len, len);
-}
-#endif
-
 /* Load a static plugin */
 
 void
@@ -252,11 +244,7 @@ plugin_add (session *sess, char *filename, void *handle, void *init_func,
 		pl->xchat_plugingui_add = xchat_plugingui_add;
 		pl->xchat_plugingui_remove = xchat_plugingui_remove;
 		pl->xchat_emit_print = xchat_emit_print;
-#ifdef WIN32
-		pl->xchat_read_fd = (void *) xchat_read_fd;
-#else
 		pl->xchat_read_fd = xchat_dummy;
-#endif
 		pl->xchat_list_time = xchat_list_time;
 		pl->xchat_gettext = xchat_gettext;
 		pl->xchat_send_modes = xchat_send_modes;
@@ -415,10 +403,9 @@ plugin_auto_load_cb (char *filename)
 {
 	char *pMsg;
 
-#ifndef WIN32	/* black listed */
+	/* black listed */
 	if (!strcmp (file_part (filename), "dbus.so"))
 		return;
-#endif
 
 	pMsg = plugin_load (ps, filename, NULL);
 	if (pMsg)
@@ -432,17 +419,12 @@ void
 plugin_auto_load (session *sess)
 {
 	ps = sess;
-#ifdef WIN32
-	for_files ("./plugins", "*.dll", plugin_auto_load_cb);
-	for_files (get_xdir_fs (), "*.dll", plugin_auto_load_cb);
-#else
 #if defined(__hpux)
 	for_files (XCHATLIBDIR"/plugins", "*.sl", plugin_auto_load_cb);
 	for_files (get_xdir_fs (), "*.sl", plugin_auto_load_cb);
 #else
 	for_files (XCHATLIBDIR"/plugins", "*.so", plugin_auto_load_cb);
 	for_files (get_xdir_fs (), "*.so", plugin_auto_load_cb);
-#endif
 #endif
 }
 

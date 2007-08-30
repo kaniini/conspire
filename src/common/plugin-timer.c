@@ -3,10 +3,6 @@
 #include <glib.h>
 #include "xchat-plugin.h"
 
-#ifdef WIN32
-#define strcasecmp stricmp
-#endif
-
 static xchat_plugin *ph;	/* plugin handle */
 static GSList *timer_list = NULL;
 

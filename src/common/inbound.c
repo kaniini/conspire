@@ -32,7 +32,6 @@
 #define WANTDNS
 #include "inet.h"
 
-#include "configdb.h"
 #include "xchat.h"
 #include "util.h"
 #include "ignore.h"
@@ -1207,15 +1206,13 @@ inbound_next_nick (session *sess, char *nick)
 	char *newnick;
 	server *serv = sess->server;
 	ircnet *net;
-	gchar *tmpnick;
 
 	serv->nickcount++;
 
 	switch (serv->nickcount)
 	{
 	case 2:
-		settings_get_string(config, "irc", "nick2", &tmpnick);
-		newnick = g_strdup(tmpnick);
+		newnick = g_strdup(prefs.nick2);
 		net = serv->network;
 		/* use network specific "Second choice"? */
 		if (net && !(net->flags & FLAG_USE_GLOBAL) && net->nick2)
@@ -1225,9 +1222,8 @@ inbound_next_nick (session *sess, char *nick)
 		break;
 
 	case 3:
-		settings_get_string(config, "irc", "nick3", &tmpnick);
-		serv->p_change_nick (serv, tmpnick);
-		EMIT_SIGNAL (XP_TE_NICKCLASH, sess, nick, tmpnick, NULL, NULL, 0);
+		serv->p_change_nick (serv, prefs.nick3);
+		EMIT_SIGNAL (XP_TE_NICKCLASH, sess, nick, newnick, NULL, NULL, 0);
 		break;
 
 	default:

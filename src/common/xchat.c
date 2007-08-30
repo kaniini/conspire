@@ -27,15 +27,12 @@
 #define WANTSOCKET
 #include "inet.h"
 
-#ifndef WIN32
 #include <sys/wait.h>
 #include <signal.h>
-#endif
 
 #include "xchat.h"
 #include "fe.h"
 #include "util.h"
-#include "configdb.h"
 #include "cfgfiles.h"
 #include "ignore.h"
 #include "xchat-plugin.h"
@@ -374,7 +371,6 @@ new_ircwindow (server *serv, char *name, int type, int focus)
 static void
 exec_notify_kill (session * sess)
 {
-#ifndef WIN32
 	struct nbexec *re;
 	if (sess->running_exec != NULL)
 	{
@@ -388,7 +384,6 @@ exec_notify_kill (session * sess)
 			free(re->linebuf);
 		free (re);
 	}
-#endif
 }
 
 static void
@@ -575,10 +570,6 @@ static char defaultconf_commands[] =
 static char defaultconf_urlhandlers[] =
 		"NAME Open Link in Opera\n"		"CMD !opera -remote 'openURL(%s)'\n\n";
 #else
-#ifdef WIN32
-static char defaultconf_urlhandlers[] =
-	"NAME Connect as IRC server\n"		"CMD url %s\n\n";
-#else
 static char defaultconf_urlhandlers[] =
 	"NAME SUB\n"								"CMD Epiphany...\n\n"\
 		"NAME Open\n"							"CMD !epiphany '%s'\n\n"\
@@ -627,7 +618,6 @@ static char defaultconf_urlhandlers[] =
 	"NAME ENDSUB\n"							"CMD \n\n"\
 	"NAME Connect as IRC server\n"		"CMD url %s\n\n";
 #endif
-#endif
 
 #ifdef USE_SIGACTION
 /* Close and open log files on SIGUSR1. Usefull for log rotating */
@@ -673,24 +663,6 @@ xchat_init (void)
 {
 	char buf[3068];
 	const char *cs = NULL;
-	gboolean skip_serverlist;
-
-	if (!settings_get_bool(config, "gui", "skip_serverlist", &skip_serverlist))
-		skip_serverlist = FALSE;
-
-#ifdef WIN32
-	WSADATA wsadata;
-
-#ifdef USE_IPV6
-	if (WSAStartup(0x0202, &wsadata) != 0)
-	{
-		MessageBox (NULL, "Cannot find winsock 2.2+", "Error", MB_OK);
-		exit (0);
-	}
-#else
-	WSAStartup(0x0101, &wsadata);
-#endif	/* !USE_IPV6 */
-#endif	/* !WIN32 */
 
 #ifdef USE_SIGACTION
 	struct sigaction act;
@@ -712,10 +684,8 @@ xchat_init (void)
 	sigemptyset (&act.sa_mask);
 	sigaction (SIGUSR2, &act, NULL);
 #else
-#ifndef WIN32
 	/* good enough for these old systems */
 	signal (SIGPIPE, SIG_IGN);
-#endif
 #endif
 
 	if (g_get_charset (&cs))
@@ -945,7 +915,7 @@ xchat_init (void)
 		g_idle_add (xchat_auto_connect, NULL);
 
 	/* if we got a URL, don't open the server list GUI */
-	if (!skip_serverlist && !servlist_have_auto() && !arg_url)
+	if (!prefs.skip_serverlist && !servlist_have_auto() && !arg_url)
 		fe_serverlist_open (NULL);
 }
 
@@ -959,7 +929,6 @@ xchat_exit (void)
 	if (prefs.autosave)
 	{
 		save_config ();
-		settings_close(config);
 		if (prefs.save_pevents)
 			pevent_save (NULL);
 	}
@@ -972,8 +941,6 @@ xchat_exit (void)
 	fe_exit ();
 }
 
-#ifndef WIN32
-
 static int
 child_handler (gpointer userdata)
 {
@@ -984,34 +951,24 @@ child_handler (gpointer userdata)
 	return 1;						  /* keep the timeout handler */
 }
 
-#endif
-
 void
 xchat_exec (const char *cmd)
 {
-#ifdef WIN32
-	util_exec (cmd);
-#else
 	int pid = util_exec (cmd);
 	if (pid != -1)
 	/* zombie avoiding system. Don't ask! it has to be like this to work
       with zvt (which overrides the default handler) */
 		g_timeout_add (1000, child_handler, GINT_TO_POINTER (pid));
-#endif
 }
 
 void
 xchat_execv (char * const argv[])
 {
-#ifdef WIN32
-	util_execv (argv);
-#else
 	int pid = util_execv (argv);
 	if (pid != -1)
 	/* zombie avoiding system. Don't ask! it has to be like this to work
       with zvt (which overrides the default handler) */
 		g_timeout_add (1000, child_handler, GINT_TO_POINTER (pid));
-#endif
 }
 
 int
@@ -1033,7 +990,6 @@ main (int argc, char *argv[])
 	xchat_remote ();
 #endif
 
-	config = settings_open();
 	load_config ();
 
 	fe_init ();
@@ -1049,10 +1005,6 @@ main (int argc, char *argv[])
 
 #ifdef USE_DEBUG
 	xchat_mem_list ();
-#endif
-
-#ifdef WIN32
-	WSACleanup ();
 #endif
 
 	return 0;

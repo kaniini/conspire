@@ -11,7 +11,7 @@ CFLAGS += $(PICFLAGS) $(COMMON_CFLAGS) $(MCS_CFLAGS)
 SUBDIRS = tools $(DBUSDIR)
 LIBADD += $(COMMON_LIBS) $(DBUSLIBADD) $(MCS_LIBS)
 
-SOURCES = cfgfiles.c configdb.c ctcp.c dcc.c history.c ignore.c \
+SOURCES = cfgfiles.c ctcp.c dcc.c history.c ignore.c \
 	inbound.c modes.c network.c notify.c outbound.c \
 	plugin.c plugin-timer.c proto-irc.c server.c servlist.c $(ssl_c) \
 	text.c tree.c url.c userlist.c util.c xchat.c

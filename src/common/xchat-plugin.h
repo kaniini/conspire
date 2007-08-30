@@ -292,7 +292,7 @@ void
 xchat_free (xchat_plugin *ph,
 	    void *ptr);
 
-#if !defined(PLUGIN_C) && defined(WIN32)
+#ifndef PLUGIN_C
 #ifndef XCHAT_PLUGIN_HANDLE
 #define XCHAT_PLUGIN_HANDLE (ph)
 #endif

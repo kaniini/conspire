@@ -64,9 +64,6 @@ SSL_CTX *
 _SSL_context_init (void (*info_cb_func), int server)
 {
 	SSL_CTX *ctx;
-#ifdef WIN32
-	int i, r;
-#endif
 
 	SSLeay_add_ssl_algorithms ();
 	SSL_load_error_strings ();
@@ -77,15 +74,6 @@ _SSL_context_init (void (*info_cb_func), int server)
 
 	/* used in SSL_connect(), SSL_accept() */
 	SSL_CTX_set_info_callback (ctx, info_cb_func);
-
-#ifdef WIN32
-	/* under win32, OpenSSL needs to be seeded with some randomness */
-	for (i = 0; i < 128; i++)
-	{
-		r = rand ();
-		RAND_seed ((unsigned char *)&r, sizeof (r));
-	}
-#endif
 
 	return(ctx);
 }

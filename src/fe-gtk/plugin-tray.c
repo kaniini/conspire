@@ -118,7 +118,6 @@ fe_tray_set_tooltip (const char *text)
 void
 fe_tray_set_balloon (const char *title, const char *text)
 {
-#ifndef WIN32
 	const char *argv[8];
 	const char *path;
 	WinStatus ws;
@@ -163,7 +162,6 @@ fe_tray_set_balloon (const char *title, const char *text)
 			fe_message (_("Cannot find 'notify-send' to open balloon alerts.\nPlease install libnotify."), FE_MSG_ERROR);
 		}
 	}
-#endif
 }
 
 static void
@@ -697,8 +695,5 @@ tray_plugin_init (xchat_plugin *plugin_handle, char **plugin_name,
 int
 tray_plugin_deinit (xchat_plugin *plugin_handle)
 {
-#ifdef WIN32
-	tray_cleanup ();
-#endif
 	return 1;
 }

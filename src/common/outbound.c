@@ -28,9 +28,7 @@
 #define WANTARPA
 #include "inet.h"
 
-#ifndef WIN32
 #include <sys/wait.h>
-#endif
 
 #include <unistd.h>
 #include <time.h>
@@ -1408,10 +1406,6 @@ cmd_discon (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 static int
 cmd_dns (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-#ifdef WIN32
-	PrintText (sess, "DNS is not implemented in Windows.\n");
-	return TRUE;
-#else
 	char *nick = word[2];
 	struct User *user;
 
@@ -1436,7 +1430,6 @@ cmd_dns (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		return TRUE;
 	}
 	return FALSE;
-#endif
 }
 
 static int
@@ -1445,8 +1438,6 @@ cmd_echo (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	PrintText (sess, word_eol[2]);
 	return TRUE;
 }
-
-#ifndef WIN32
 
 static void
 exec_check_process (struct session *sess)
@@ -1869,7 +1860,6 @@ cmd_exec (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	return FALSE;
 }
 
-#endif
 
 static int
 cmd_flushq (struct session *sess, char *tbuf, char *word[], char *word_eol[])
@@ -2453,14 +2443,11 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 #ifdef USE_PLUGIN
 	len = strlen (word[2]);
-#ifdef WIN32
 	if (len > 4 && strcasecmp (".dll", word[2] + len - 4) == 0)
-#else
 #if defined(__hpux)
 	if (len > 3 && strcasecmp (".sl", word[2] + len - 3) == 0)
 #else
 	if (len > 3 && strcasecmp (".so", word[2] + len - 3) == 0)
-#endif
 #endif
 	{
 		arg = NULL;
@@ -3190,14 +3177,10 @@ cmd_unload (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	int len, by_file = FALSE;
 
 	len = strlen (word[2]);
-#ifdef WIN32
-	if (len > 4 && strcasecmp (word[2] + len - 4, ".dll") == 0)
-#else
 #if defined(__hpux)
 	if (len > 3 && strcasecmp (word[2] + len - 3, ".sl") == 0)
 #else
 	if (len > 3 && strcasecmp (word[2] + len - 3, ".so") == 0)
-#endif
 #endif
 		by_file = TRUE;
 
@@ -3528,7 +3511,6 @@ const struct commands xc_cmds[] = {
 	{"DISCON", cmd_discon, 0, 0, 1, N_("DISCON, Disconnects from server")},
 	{"DNS", cmd_dns, 0, 0, 1, N_("DNS <nick|host|ip>, Finds a users IP number")},
 	{"ECHO", cmd_echo, 0, 0, 1, N_("ECHO <text>, Prints text locally")},
-#ifndef WIN32
 	{"EXEC", cmd_exec, 0, 0, 1,
 	 N_("EXEC [-o] <command>, runs the command. If -o flag is used then output is sent to current channel, else is printed to current text box")},
 #ifndef __EMX__
@@ -3539,7 +3521,6 @@ const struct commands xc_cmds[] = {
 #ifndef __EMX__
 	{"EXECSTOP", cmd_execs, 0, 0, 1, N_("EXECSTOP, sends the process SIGSTOP")},
 	{"EXECWRITE", cmd_execw, 0, 0, 1, N_("EXECWRITE, sends data to the processes stdin")},
-#endif
 #endif
 	{"FLUSHQ", cmd_flushq, 0, 0, 1,
 	 N_("FLUSHQ, flushes the current server's send queue")},

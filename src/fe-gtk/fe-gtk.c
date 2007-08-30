@@ -57,10 +57,6 @@
 #include <gtk/gtktextview.h>
 #endif
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 GdkPixmap *channelwin_pix;
 
 /* === command-line parameter parsing : requires glib 2.6 === */
@@ -119,18 +115,7 @@ fe_args (int argc, char *argv[])
 
 	if (arg_show_autoload)
 	{
-#ifdef WIN32
-		/* see the chdir() below */
-		char *sl, *exe = strdup (argv[0]);
-		sl = strrchr (exe, '\\');
-		if (sl)
-		{
-			*sl = 0;
-			printf ("%s\\plugins\n", exe);
-		}
-#else
 		printf ("%s\n", XCHATLIBDIR"/plugins");
-#endif
 		return 0;
 	}
 
@@ -139,25 +124,6 @@ fe_args (int argc, char *argv[])
 		printf ("%s\n", get_xdir_fs ());
 		return 0;
 	}
-
-#ifdef WIN32
-	/* this is mainly for irc:// URL handling. When windows calls us from */
-	/* I.E, it doesn't give an option of "Start in" directory, like short */
-	/* cuts can. So we have to set the current dir manually, to the path  */
-	/* of the exe. */
-	{
-		char *tmp = strdup (argv[0]);
-		char *sl;
-
-		sl = strrchr (tmp, '\\');
-		if (sl)
-		{
-			*sl = 0;
-			chdir (tmp);
-		}
-		free (tmp);
-	}
-#endif
 
 	if (arg_cfgdir)	/* we want filesystem encoding */
 	{
@@ -251,30 +217,6 @@ fe_exit (void)
 	gtk_main_quit ();
 }
 
-#ifdef WIN32
-
-static void
-log_handler (const gchar   *log_domain,
-		       GLogLevelFlags log_level,
-		       const gchar   *message,
-		       gpointer	      unused_data)
-{
-	session *sess;
-
-	if (getenv ("XCHAT_WARNING_IGNORE"))
-		return;
-
-	sess = find_dialog (serv_list->data, "(warnings)");
-	if (!sess)
-		sess = new_ircwindow (serv_list->data, "(warnings)", SESS_DIALOG, 0);
-
-	PrintTextf (sess, "%s\t%s\n", log_domain, message);
-	if (getenv ("XCHAT_WARNING_ABORT"))
-		abort ();
-}
-
-#endif
-
 /* install tray stuff */
 
 static int
@@ -308,13 +250,6 @@ fe_new_window (session *sess, int focus)
 	}
 
 	mg_changui_new (sess, NULL, tab, focus);
-
-#ifdef WIN32
-	g_log_set_handler ("GLib", G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING, (GLogFunc)log_handler, 0);
-	g_log_set_handler ("GLib-GObject", G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING, (GLogFunc)log_handler, 0);
-	g_log_set_handler ("Gdk", G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING, (GLogFunc)log_handler, 0);
-	g_log_set_handler ("Gtk", G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING, (GLogFunc)log_handler, 0);
-#endif
 
 	if (!sess_list->next)
 		g_idle_add (fe_idle, NULL);
@@ -358,14 +293,7 @@ fe_input_add (int sok, int flags, void *func, void *data)
 	int tag, type = 0;
 	GIOChannel *channel;
 
-#ifdef WIN32
-	if (flags & FIA_FD)
-		channel = g_io_channel_win32_new_fd (sok);
-	else
-		channel = g_io_channel_win32_new_socket (sok);
-#else
 	channel = g_io_channel_unix_new (sok);
-#endif
 
 	if (flags & FIA_READ)
 		type |= G_IO_IN | G_IO_HUP | G_IO_ERR;
@@ -512,20 +440,16 @@ fe_beep (void)
 	gdk_beep ();
 }
 
-#ifndef WIN32
 static int
 lastlog_regex_cmp (char *a, regex_t *reg)
 {
 	return !regexec (reg, a, 1, NULL, REG_NOTBOL);
 }
-#endif
 
 void
 fe_lastlog (session *sess, session *lastlog_sess, char *sstr, gboolean regexp)
 {
-#ifndef WIN32
 	regex_t reg;
-#endif
 
 	if (gtk_xtext_is_empty (sess->res->buffer))
 	{
@@ -540,14 +464,12 @@ fe_lastlog (session *sess, session *lastlog_sess, char *sstr, gboolean regexp)
 		return;
 	}
 
-#ifndef WIN32
 	if (regcomp (&reg, sstr, REG_ICASE | REG_EXTENDED | REG_NOSUB) == 0)
 	{
 		gtk_xtext_lastlog (lastlog_sess->res->buffer, sess->res->buffer,
 								 (void *) lastlog_regex_cmp, &reg);
 		regfree (&reg);
 	}
-#endif
 }
 
 void
@@ -738,11 +660,7 @@ fe_gui_info_ptr (session *sess, int info_type)
 	switch (info_type)
 	{
 	case 0:	/* native window pointer (for plugins) */
-#ifdef WIN32
-		return GDK_WINDOW_HWND (sess->gui->window->window);
-#else
 		return sess->gui->window;
-#endif
 	}
 	return NULL;
 }
@@ -797,8 +715,6 @@ fe_set_inputbox_contents (session *sess, char *text)
 	}
 }
 
-#ifndef WIN32
-
 static gboolean
 try_browser (const char *browser, const char *arg, const char *url)
 {
@@ -823,14 +739,9 @@ try_browser (const char *browser, const char *arg, const char *url)
 	return 1;
 }
 
-#endif
-
 static void
 fe_open_url_inner (const char *url)
 {
-#ifdef WIN32
-	ShellExecute (0, "open", url, NULL, NULL, SW_SHOWNORMAL);
-#else
 	/* universal desktop URL opener (from xdg-utils). Supports gnome,kde,xfce4. */
 	if (try_browser ("xdg-open", NULL, url))
 		return;
@@ -855,13 +766,11 @@ fe_open_url_inner (const char *url)
 
 	/* fresh out of ideas... */
 	try_browser ("mozilla", NULL, url);
-#endif
 }
 
 static void
 fe_open_url_locale (const char *url)
 {
-#ifndef WIN32
 	if (url[0] != '/' && strchr (url, ':') == NULL)
 	{
 		url = g_strdup_printf ("http://%s", url);
@@ -869,7 +778,6 @@ fe_open_url_locale (const char *url)
 		g_free ((char *)url);
 		return;
 	}
-#endif
 	fe_open_url_inner (url);
 }
 
