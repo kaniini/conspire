@@ -716,10 +716,7 @@ mg_decide_userlist (session *sess, gboolean switch_to_current)
 	case SESS_DIALOG:
 	case SESS_NOTICES:
 	case SESS_SNOTICES:
-		if (mg_is_userlist_and_tree_combined ())
-			mg_userlist_showhide (sess, TRUE);	/* show */
-		else
-			mg_userlist_showhide (sess, FALSE);	/* hide */
+		mg_userlist_showhide (sess, FALSE);	/* hide */
 		break;
 	default:		
 		mg_userlist_showhide (sess, TRUE);	/* show */
