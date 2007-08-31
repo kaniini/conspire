@@ -101,12 +101,12 @@ servlist_connect (session *sess, ircnet *net, gboolean join)
 		{
 #ifdef USE_OPENSSL
 			serv->use_ssl = TRUE;
+			serv->accept_invalid_cert =
+				(net->flags & FLAG_ALLOW_INVALID) ? TRUE : FALSE;
 #endif
 			serv->connect (serv, ircserv->hostname, atoi (port + 2), FALSE);
 		} else
-		{
 			serv->connect (serv, ircserv->hostname, atoi (port + 1), FALSE);
-		}
 
 		*port = '/';
 	} else
