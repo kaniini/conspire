@@ -442,7 +442,7 @@ handle_mode (server * serv, char *word[], char *word_eol[],
 		word_eol[offset][len] = 0;
 
 	if (!numeric_324)
-		EMIT_SIGNAL (XP_TE_RAWMODES, sess, nick, word_eol[offset], 0, 0, 0);
+		EMIT_SIGNAL (XP_TE_RAWMODES, sess, nick, word_eol[offset + 1], 0, 0, 0);
 
 	if (numeric_324 && !using_front_tab)
 	{
