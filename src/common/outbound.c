@@ -741,7 +741,7 @@ cmd_country (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static int
-cmd_cycle (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_hop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *key = sess->channelkey;
 	char *chan = word[2];
@@ -943,7 +943,7 @@ cmd_delbutton (struct session *sess, char *tbuf, char *word[],
 }
 
 static int
-cmd_dehop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_dehalfop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
 
@@ -986,58 +986,6 @@ typedef struct
 	char *reason;
 	char *tbuf;
 } multidata;
-
-static int
-mdehop_cb (struct User *user, multidata *data)
-{
-	if (user->hop && !user->me)
-	{
-		data->nicks[data->i] = user->nick;
-		data->i++;
-	}
-	return TRUE;
-}
-
-static int
-cmd_mdehop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	char **nicks = malloc (sizeof (char *) * sess->hops);
-	multidata data;
-
-	data.nicks = nicks;
-	data.i = 0;
-	tree_foreach (sess->usertree, (tree_traverse_func *)mdehop_cb, &data);
-	send_channel_modes (sess, tbuf, nicks, 0, data.i, '-', 'h', 0);
-	free (nicks);
-
-	return TRUE;
-}
-
-static int
-mdeop_cb (struct User *user, multidata *data)
-{
-	if (user->op && !user->me)
-	{
-		data->nicks[data->i] = user->nick;
-		data->i++;
-	}
-	return TRUE;
-}
-
-static int
-cmd_mdeop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	char **nicks = malloc (sizeof (char *) * sess->ops);
-	multidata data;
-
-	data.nicks = nicks;
-	data.i = 0;
-	tree_foreach (sess->usertree, (tree_traverse_func *)mdeop_cb, &data);
-	send_channel_modes (sess, tbuf, nicks, 0, data.i, '-', 'o', 0);
-	free (nicks);
-
-	return TRUE;
-}
 
 GSList *menu_list = NULL;
 
@@ -1347,35 +1295,6 @@ cmd_menu (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 
 	return FALSE;
-}
-
-static int
-mkick_cb (struct User *user, multidata *data)
-{
-	if (!user->op && !user->me)
-		data->sess->server->p_kick (data->sess->server, data->sess->channel, user->nick, data->reason);
-	return TRUE;
-}
-
-static int
-mkickops_cb (struct User *user, multidata *data)
-{
-	if (user->op && !user->me)
-		data->sess->server->p_kick (data->sess->server, data->sess->channel, user->nick, data->reason);
-	return TRUE;
-}
-
-static int
-cmd_mkick (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	multidata data;
-
-	data.sess = sess;
-	data.reason = word_eol[2];
-	tree_foreach (sess->usertree, (tree_traverse_func *)mkickops_cb, &data);
-	tree_foreach (sess->usertree, (tree_traverse_func *)mkick_cb, &data);
-
-	return TRUE;
 }
 
 static int
@@ -2526,33 +2445,6 @@ cmd_mode (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static int
-mop_cb (struct User *user, multidata *data)
-{
-	if (!user->op)
-	{
-		data->nicks[data->i] = user->nick;
-		data->i++;
-	}
-	return TRUE;
-}
-
-static int
-cmd_mop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	char **nicks = malloc (sizeof (char *) * (sess->total - sess->ops));
-	multidata data;
-
-	data.nicks = nicks;
-	data.i = 0;
-	tree_foreach (sess->usertree, (tree_traverse_func *)mop_cb, &data);
-	send_channel_modes (sess, tbuf, nicks, 0, data.i, '+', 'o', 0);
-
-	free (nicks);
-
-	return TRUE;
-}
-
-static int
 cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *nick = word[2];
@@ -3423,7 +3315,7 @@ cmd_wallchan (struct session *sess, char *tbuf, char *word[],
 }
 
 static int
-cmd_hop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_halfop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
 
@@ -3486,7 +3378,7 @@ const struct commands xc_cmds[] = {
 	 N_("COUNTRY [-s] <code|wildcard>, finds a country code, eg: au = australia")},
 	{"CTCP", cmd_ctcp, 1, 0, 1,
 	 N_("CTCP <nick> <message>, send the CTCP message to nick, common messages are VERSION and USERINFO")},
-	{"CYCLE", cmd_cycle, 1, 1, 1,
+	{"CYCLE", cmd_hop, 1, 1, 1,
 	 N_("CYCLE [<channel>], parts the current or given channel and immediately rejoins")},
 	{"DCC", cmd_dcc, 0, 0, 1,
 	 N_("\n"
@@ -3500,15 +3392,15 @@ const struct commands xc_cmds[] = {
 	 "         /dcc close send johnsmith file.tar.gz")},
 	{"DEBUG", cmd_debug, 0, 0, 1, 0},
 
-	{"DEHOP", cmd_dehop, 1, 1, 1,
-	 N_("DEHOP <nick>, removes chanhalf-op status from the nick on the current channel (needs chanop)")},
+	{"DEHALFOP", cmd_dehalfop, 1, 1, 1,
+	 N_("DEHALFOP <nick>, removes chanhalf-op status from the nick on the current channel (needs chanop)")},
 	{"DELBUTTON", cmd_delbutton, 0, 0, 1,
 	 N_("DELBUTTON <name>, deletes a button from under the user-list")},
 	{"DEOP", cmd_deop, 1, 1, 1,
 	 N_("DEOP <nick>, removes chanop status from the nick on the current channel (needs chanop)")},
 	{"DEVOICE", cmd_devoice, 1, 1, 1,
 	 N_("DEVOICE <nick>, removes voice status from the nick on the current channel (needs chanop)")},
-	{"DISCON", cmd_discon, 0, 0, 1, N_("DISCON, Disconnects from server")},
+	{"DISCONNECT", cmd_discon, 0, 0, 1, N_("DISCON, Disconnects from server")},
 	{"DNS", cmd_dns, 0, 0, 1, N_("DNS <nick|host|ip>, Finds a users IP number")},
 	{"ECHO", cmd_echo, 0, 0, 1, N_("ECHO <text>, Prints text locally")},
 	{"EXEC", cmd_exec, 0, 0, 1,
@@ -3533,8 +3425,10 @@ const struct commands xc_cmds[] = {
 	{"GUI", cmd_gui, 0, 0, 1, "GUI [APPLY|ATTACH|DETACH|SHOW|HIDE|FOCUS|FLASH|ICONIFY|COLOR <n>]\n"
 									  "       GUI [MSGBOX <text>|MENU TOGGLE]"},
 	{"HELP", cmd_help, 0, 0, 1, 0},
+	{"HALFOP", cmd_halfop, 1, 1, 1,
+	 N_("HALFOP <nick>, gives chanhalf-op status to the nick (needs chanop)")},
 	{"HOP", cmd_hop, 1, 1, 1,
-	 N_("HOP <nick>, gives chanhalf-op status to the nick (needs chanop)")},
+	 N_("HOP [<channel>], parts the current or given channel and immediately rejoins")},
 	{"ID", cmd_id, 1, 0, 1, N_("ID <password>, identifies yourself to nickserv")},
 	{"IGNORE", cmd_ignore, 0, 0, 1,
 	 N_("IGNORE <mask> <types..> <options..>\n"
@@ -3558,19 +3452,11 @@ const struct commands xc_cmds[] = {
 	{"LIST", cmd_list, 1, 0, 1, 0},
 	{"LOAD", cmd_load, 0, 0, 1, N_("LOAD [-e] <file>, loads a plugin or script")},
 
-	{"MDEHOP", cmd_mdehop, 1, 1, 1,
-	 N_("MDEHOP, Mass deop's all chanhalf-ops in the current channel (needs chanop)")},
-	{"MDEOP", cmd_mdeop, 1, 1, 1,
-	 N_("MDEOP, Mass deop's all chanops in the current channel (needs chanop)")},
 	{"ME", cmd_me, 0, 0, 1,
 	 N_("ME <action>, sends the action to the current channel (actions are written in the 3rd person, like /me jumps)")},
 	{"MENU", cmd_menu, 0, 0, 1, "MENU [-eX] [-i<ICONFILE>] [-k<mod>,<key>] [-m] [-pX] [-r<X,group>] [-tX] {ADD|DEL} <path> [command] [unselect command]\n"
 										 "       See http://xchat.org/docs/menu/ for more details."},
-	{"MKICK", cmd_mkick, 1, 1, 1,
-	 N_("MKICK, Mass kicks everyone except you in the current channel (needs chanop)")},
 	{"MODE", cmd_mode, 1, 0, 1, 0},
-	{"MOP", cmd_mop, 1, 1, 1,
-	 N_("MOP, Mass op's all users in the current channel (needs chanop)")},
 	{"MSG", cmd_msg, 0, 0, 1, N_("MSG <nick> <message>, sends a private message")},
 
 	{"NAMES", cmd_names, 1, 0, 1,

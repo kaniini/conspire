@@ -1965,23 +1965,11 @@ sound_beep (session *sess)
 static char *
 sound_find_command (void)
 {
-	/* some sensible unix players. You're bound to have one of them */
-	static const char * const progs[] = {"aplay", "esdplay", "soxplay", "artsplay", NULL};
-	char *cmd;
-	int i = 0;
-
-	if (prefs.soundcmd[0])
-		return g_strdup (prefs.soundcmd);
-
-	while (progs[i])
-	{
-		cmd = g_find_program_in_path (progs[i]);
-		if (cmd)
-			return cmd;
-		i++;
-	}
-
-	return NULL;
+	gchar *cmd = g_find_program_in_path(prefs.soundcmd);
+	if (cmd[0])
+		return cmd;
+	else
+		return NULL;
 }
 
 void
