@@ -176,7 +176,7 @@ servlist_auto_connect (session *sess)
 		list = list->next;
 	}
 
-	return ret;
+	return 0;
 }
 
 static gint
