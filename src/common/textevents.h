@@ -261,7 +261,7 @@ N_("%C22*%O$tA process is already running")},
 N_("%C23*%O$t%C23$1 has quit (%O%C23%B%B$2%O%C23)")},
 
 {"Raw Modes", pevt_rawmodes_help, 2, 
-N_("%C22*%O$t%C19$1 sets mode: $2%O")},
+N_("%C19*%O$t%C19$1 sets mode: $2%O")},
 
 {"Receive Wallops", pevt_privmsg_help, 2, 
 N_("%C28-%C29$1/Wallops%C28-%O$t$2")},
