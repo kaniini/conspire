@@ -3378,8 +3378,8 @@ const struct commands xc_cmds[] = {
 	 N_("COUNTRY [-s] <code|wildcard>, finds a country code, eg: au = australia")},
 	{"CTCP", cmd_ctcp, 1, 0, 1,
 	 N_("CTCP <nick> <message>, send the CTCP message to nick, common messages are VERSION and USERINFO")},
-	{"HOP", cmd_hop, 1, 1, 1,
-	 N_("HOP [<channel>], parts the current or given channel and immediately rejoins")},
+	{"CYCLE", cmd_hop, 1, 1, 1,
+	 N_("CYCLE [<channel>], parts the current or given channel and immediately rejoins")},
 	{"DCC", cmd_dcc, 0, 0, 1,
 	 N_("\n"
 	 "DCC GET <nick>                      - accept an offered file\n"
@@ -3427,6 +3427,8 @@ const struct commands xc_cmds[] = {
 	{"HELP", cmd_help, 0, 0, 1, 0},
 	{"HALFOP", cmd_halfop, 1, 1, 1,
 	 N_("HALFOP <nick>, gives chanhalf-op status to the nick (needs chanop)")},
+	{"HOP", cmd_hop, 1, 1, 1,
+	 N_("HOP [<channel>], parts the current or given channel and immediately rejoins")},
 	{"ID", cmd_id, 1, 0, 1, N_("ID <password>, identifies yourself to nickserv")},
 	{"IGNORE", cmd_ignore, 0, 0, 1,
 	 N_("IGNORE <mask> <types..> <options..>\n"
