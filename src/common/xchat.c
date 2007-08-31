@@ -651,13 +651,6 @@ sigusr2_handler (int signal, siginfo_t *si, void *un)
 }
 #endif
 
-static gint
-xchat_auto_connect (gpointer userdata)
-{
-	servlist_auto_connect (NULL);
-	return 0;
-}
-
 static void
 xchat_init (void)
 {
@@ -912,7 +905,7 @@ xchat_init (void)
 
 	/* turned OFF via -a arg */
 	if (!arg_dont_autoconnect && servlist_have_auto())
-		g_idle_add (xchat_auto_connect, NULL);
+		g_idle_add (servlist_auto_connect, NULL);
 
 	/* if we got a URL, don't open the server list GUI */
 	if (!prefs.skip_serverlist && !servlist_have_auto() && !arg_url)
