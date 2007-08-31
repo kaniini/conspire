@@ -1965,8 +1965,8 @@ sound_beep (session *sess)
 static char *
 sound_find_command (void)
 {
-	gchar *cmd = g_strdup(prefs.soundcmd);
-	if (g_find_program_in_path(cmd))
+	gchar *cmd = g_find_program_in_path(prefs.soundcmd);
+	if (cmd[0])
 		return cmd;
 	else
 		return NULL;
