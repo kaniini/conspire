@@ -3424,9 +3424,9 @@ const struct commands xc_cmds[] = {
 	{"GHOST", cmd_ghost, 1, 0, 1, N_("GHOST <nick> <password>, Kills a ghosted nickname")},
 	{"GUI", cmd_gui, 0, 0, 1, "GUI [APPLY|ATTACH|DETACH|SHOW|HIDE|FOCUS|FLASH|ICONIFY|COLOR <n>]\n"
 									  "       GUI [MSGBOX <text>|MENU TOGGLE]"},
-	{"HELP", cmd_help, 0, 0, 1, 0},
 	{"HALFOP", cmd_halfop, 1, 1, 1,
 	 N_("HALFOP <nick>, gives chanhalf-op status to the nick (needs chanop)")},
+	{"HELP", cmd_help, 0, 0, 1, 0},
 	{"HOP", cmd_hop, 1, 1, 1,
 	 N_("HOP [<channel>], parts the current or given channel and immediately rejoins")},
 	{"ID", cmd_id, 1, 0, 1, N_("ID <password>, identifies yourself to nickserv")},
