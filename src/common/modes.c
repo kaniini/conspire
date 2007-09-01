@@ -413,6 +413,7 @@ handle_mode (server * serv, char *word[], char *word_eol[],
 	int offset = 3;
 	int all_modes_have_args = FALSE;
 	int using_front_tab = FALSE;
+	gboolean fwd;
 	mode_run mr;
 
 	mr.serv = serv;
@@ -441,8 +442,17 @@ handle_mode (server * serv, char *word[], char *word_eol[],
 	if (word_eol[offset][len] == ' ')
 		word_eol[offset][len] = 0;
 
+	if (*word_eol[offset + 1] == ':')
+	{
+		fwd = TRUE;
+		word_eol[offset + 1]++;
+	}
+
 	if (!numeric_324)
 		EMIT_SIGNAL (XP_TE_RAWMODES, sess, nick, word_eol[offset + 1], 0, 0, 0);
+
+	if (fwd)
+		word_eol[offset + 1]--;
 
 	if (numeric_324 && !using_front_tab)
 	{
