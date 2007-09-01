@@ -133,10 +133,6 @@ AC_ARG_ENABLE(plugin,
 [  --disable-plugin        disable plugin support],
         plugin=$enableval, plugin=yes)
 
-AC_ARG_ENABLE(dbus,
-[  --disable-dbus          disable DBUS support],
-        dbus=$enableval, dbus=yes)
-
 AC_ARG_ENABLE(mmx,
 [  --disable-mmx           disable MMX assembly routines],
         mmx=$enableval, mmx=yes)
@@ -317,32 +313,31 @@ dnl #######################################################################
 dnl # Check for DBUS libraries
 dnl #######################################################################
 
-if test "x$dbus" = "xyes" ; then
-	PKG_CHECK_MODULES(DBUS, [dbus-1 >= 0.60 dbus-glib-1 >= 0.60 gthread-2.0], dbus=yes, [
-		AC_MSG_RESULT(no)
-		dbus=no
-	])
-	AC_PATH_PROG(DBUS_BINDING_TOOL, dbus-binding-tool, no)
-	AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal, no)
-	if test "x$DBUS_BINDING_TOOL" = "xno" || test "x$GLIB_GENMARSHAL" = "xno" || test "x$dbus" = "xno" ; then
-		dbus="no"
-	else
-		COMMON_LIBS="$COMMON_LIBS $DBUS_LIBS"
-		COMMON_CFLAGS="$COMMON_CFLAGS $DBUS_CFLAGS"
-		AC_DEFINE(USE_DBUS)
-		AS_AC_EXPAND(DATADIR, $datadir)
+PKG_CHECK_MODULES(DBUS, [dbus-1 >= 0.60 dbus-glib-1 >= 0.60 gthread-2.0], dbus=yes, [
+	AC_MSG_RESULT(no)
+	AC_MSG_ERROR([DBus is required by Conspire.])
+	dbus=no
+])
+AC_PATH_PROG(DBUS_BINDING_TOOL, dbus-binding-tool, no)
+AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal, no)
+if test "x$DBUS_BINDING_TOOL" = "xno" || test "x$GLIB_GENMARSHAL" = "xno" || test "x$dbus" = "xno" ; then
+	dbus="no"
+else
+	COMMON_LIBS="$COMMON_LIBS $DBUS_LIBS"
+	COMMON_CFLAGS="$COMMON_CFLAGS $DBUS_CFLAGS"
+	AC_DEFINE(USE_DBUS)
+	AS_AC_EXPAND(DATADIR, $datadir)
 
-		XCHATWRAP="xchatwrap"
-		DBUSDIR="dbus"
-		DBUSLIBADD="-Ldbus/ -lconspire-dbus"
-		AC_SUBST(DBUSDIR)
-		AC_SUBST(DBUSLIBADD)
-		AC_SUBST(XCHATWRAP)
+	XCHATWRAP="xchatwrap"
+	DBUSDIR="dbus"
+	DBUSLIBADD="-Ldbus/ -lconspire-dbus"
+	AC_SUBST(DBUSDIR)
+	AC_SUBST(DBUSLIBADD)
+	AC_SUBST(XCHATWRAP)
 
-		DBUS_SERVICES_DIR="$DATADIR/dbus-1/services"
-		AC_SUBST(DBUS_SERVICES_DIR)
-		AC_DEFINE_UNQUOTED(DBUS_SERVICES_DIR, "$DBUS_SERVICES_DIR", [Where services dir for DBUS is])
-	fi
+	DBUS_SERVICES_DIR="$DATADIR/dbus-1/services"
+	AC_SUBST(DBUS_SERVICES_DIR)
+	AC_DEFINE_UNQUOTED(DBUS_SERVICES_DIR, "$DBUS_SERVICES_DIR", [Where services dir for DBUS is])
 fi
 
 dnl *********************************************************************
