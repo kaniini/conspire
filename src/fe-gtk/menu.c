@@ -1353,7 +1353,12 @@ menu_metres_both (GtkWidget *item, gpointer none)
 }
 
 static struct mymenu mymenu[] = {
+// Change the name on OS X
+#ifndef GDK_WINDOWING_QUARTZ
 	{N_("_Conspire"), 0, 0, M_NEWMENU, 0, 0, 1},
+#else
+	{N_("File"), 0, 0, M_NEWMENU, 0, 0, 1},	
+#endif
 	{N_("Network Li_st..."), menu_open_server_list, (char *)&pix_book, M_MENUPIX, 0, 0, 1, GDK_s},
 	{0, 0, 0, M_SEP, 0, 0, 0},
 
