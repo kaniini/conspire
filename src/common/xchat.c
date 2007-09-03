@@ -968,6 +968,8 @@ int
 main (int argc, char *argv[])
 {
 	int ret;
+
+	g_thread_init(NULL);
 	
 	srand (time (0));	/* CL: do this only once! */
 
