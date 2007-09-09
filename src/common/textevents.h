@@ -291,10 +291,10 @@ N_("-%C10-%C11-%O$tStopped previous connection attempt (pid=$1)")},
 N_("-%C10-%C11-%O$tTopic for %C11$1%C is %C11$2%O")},
 
 {"Topic Change", pevt_newtopic_help, 3, 
-N_("-%C10-%C11-%O$tTopic for %C11$1%C set by %C11$2%C at %C11$3%O")},
+N_("-%C10-%C11-%O$t$1 has changed the topic to: $2%O")},
 
 {"Topic Creation", pevt_topicdate_help, 3, 
-N_("-%C10-%C11-%O$t$1 has changed the topic to: $2%O")},
+N_("-%C10-%C11-%O$tTopic for %C11$1%C set by %C11$2%C at %C11$3%O")},
 
 {"Unknown Host", pevt_generic_none_help, 0, 
 N_("-%C10-%C11-%O$tUnknown host. Maybe you misspelled it?")},

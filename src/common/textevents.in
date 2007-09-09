@@ -577,13 +577,13 @@ pevt_topic_help
 Topic Change
 XP_TE_NEWTOPIC
 pevt_newtopic_help
--%C10-%C11-%O$tTopic for %C11$1%C set by %C11$2%C at %C11$3%O
+-%C10-%C11-%O$t$1 has changed the topic to: $2%O
 3
 
 Topic Creation
 XP_TE_TOPICDATE
 pevt_topicdate_help
--%C10-%C11-%O$t$1 has changed the topic to: $2%O
+-%C10-%C11-%O$tTopic for %C11$1%C set by %C11$2%C at %C11$3%O
 3
 
 Unknown Host
