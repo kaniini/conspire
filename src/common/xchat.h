@@ -6,6 +6,7 @@
 #include <glib/giochannel.h>
 #include <glib/gstrfuncs.h>
 #include <time.h>			/* need time_t */
+#include <glib.h>
 
 #ifndef XCHAT_H
 #define XCHAT_H
@@ -234,6 +235,9 @@ struct xchatprefs
 	unsigned int input_tray_chans;
 	unsigned int input_tray_hilight;
 	unsigned int input_tray_priv;
+
+	gboolean irc_show_nickmode_empty;
+	gboolean irc_show_nickmode;
 
 	unsigned int truncchans;
 	unsigned int privmsgtab;

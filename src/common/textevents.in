@@ -31,13 +31,13 @@ pevt_changenick_help
 Channel Action
 XP_TE_CHANACTION
 pevt_chanaction_help
-%C13*%O$t$1%O $2%O
+%C13*%O$t$3$1%O $2%O
 n3
 
 Channel Action Hilight
 XP_TE_HCHANACTION
 pevt_chanaction_help
-%C13*%O$t%C8%B$1%B%O $2%O
+%C13*%O$t$3%C8%B$1%B%O $2%O
 n3
 
 Channel Creation
@@ -55,7 +55,7 @@ pevt_generic_none_help
 Channel Message
 XP_TE_CHANMSG
 pevt_chanmsg_help
-%C2<%O$1%C2>%O$t$2%O
+%C2<%O$3$1%C2>%O$t$2%O
 n4
 
 Channel Modes
@@ -67,7 +67,7 @@ pevt_chanmodes_help
 Channel Msg Hilight
 XP_TE_HCHANMSG
 pevt_chanmsg_help
-%C2<%C8%B$1%B%C2>%O$t$2%O
+%C2<%O$3%C8%B$1%B%C2>%O$t$2%O
 n4
 
 Channel Notice

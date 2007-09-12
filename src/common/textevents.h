@@ -18,10 +18,10 @@ N_("-%C10-%C11-%O$tCannot join%C11 %B$1 %O(You are banned).")},
 N_("-%C10-%C11-%O$t$1 is now known as $2")},
 
 {"Channel Action", pevt_chanaction_help, 131, 
-"%C13*%O$t$1%O $2%O"},
+"%C13*%O$t$3$1%O $2%O"},
 
 {"Channel Action Hilight", pevt_chanaction_help, 131, 
-"%C13*%O$t%C8%B$1%B%O $2%O"},
+"%C13*%O$t$3%C8%B$1%B%O $2%O"},
 
 {"Channel Creation", pevt_chandate_help, 2, 
 N_("%C22*%O$tChannel $1 created on $2")},
@@ -30,13 +30,13 @@ N_("%C22*%O$tChannel $1 created on $2")},
 N_("%UChannel          Users   Topic%O")},
 
 {"Channel Message", pevt_chanmsg_help, 132, 
-"%C2<%O$1%C2>%O$t$2%O"},
+"%C2<%O$3$1%C2>%O$t$2%O"},
 
 {"Channel Modes", pevt_chanmodes_help, 2, 
 N_("-%C10-%C11-%O$tChannel $1 modes: $2")},
 
 {"Channel Msg Hilight", pevt_chanmsg_help, 132, 
-"%C2<%C8%B$1%B%C2>%O$t$2%O"},
+"%C2<%O$3%C8%B$1%B%C2>%O$t$2%O"},
 
 {"Channel Notice", pevt_channotice_help, 131, 
 "%C12-%C13$1/$2%C12-%O$t$3%O"},
