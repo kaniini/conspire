@@ -577,25 +577,13 @@ pevt_topic_help
 Topic Change
 XP_TE_NEWTOPIC
 pevt_newtopic_help
-<<<<<<< /home/nenolod/dev-src/conspire/src/common/textevents.in.orig.228576393
 %C22*%O$t$1 has changed the topic to: $2
-||||||| /tmp/textevents.in~base.3CiZwY
--%C10-%C11-%O$tTopic for %C11$1%C set by %C11$2%C at %C11$3%O
-=======
--%C10-%C11-%O$t$1 has changed the topic to: $2%O
->>>>>>> /tmp/textevents.in~other.J6f_g-
 3
 
 Topic Creation
 XP_TE_TOPICDATE
 pevt_topicdate_help
-<<<<<<< /home/nenolod/dev-src/conspire/src/common/textevents.in.orig.228576393
 %C29*%O$t%C29Topic for $1%C %C29set by $2%C %C29at $3
-||||||| /tmp/textevents.in~base.3CiZwY
--%C10-%C11-%O$t$1 has changed the topic to: $2%O
-=======
--%C10-%C11-%O$tTopic for %C11$1%C set by %C11$2%C at %C11$3%O
->>>>>>> /tmp/textevents.in~other.J6f_g-
 3
 
 Unknown Host
