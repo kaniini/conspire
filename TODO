@@ -1,0 +1,10 @@
+TODO
+- Implement a sane theme engine
+- Rewrite the ignore system so that it's actually worth using
+- Add irssi-style tabcompletion alongside the bash-style implementation and
+  provide a toggle
+- Possibly implement hilight notifications through a pane above or below the
+  main view so users can see why they're being hilighted even if the message
+  has scrolled out of view or the user has scrolled up for whatever reason
+- Rewrite hilights to be more powerful than the current implementation, with
+  potential per-server/per-channel hilights support
