@@ -293,10 +293,10 @@ irc_init (session *sess)
 	plugin_add (sess, NULL, NULL, timer_plugin_init, NULL, NULL, FALSE);
 
 	if (prefs.notify_timeout)
-		notify_tag = g_timeout_add (prefs.notify_timeout * 1000, notify_checklist, 0);
+		notify_tag = g_timeout_add (prefs.notify_timeout * 1000, (GSourceFunc) notify_checklist, 0);
 
-	g_timeout_add (prefs.away_timeout * 1000, away_check, 0);
-	g_timeout_add (500, xchat_misc_checks, 0);
+	g_timeout_add (prefs.away_timeout * 1000, (GSourceFunc) away_check, 0);
+	g_timeout_add (500, (GSourceFunc) xchat_misc_checks, 0);
 
 	if (arg_url != NULL)
 	{
@@ -905,7 +905,7 @@ xchat_init (void)
 
 	/* turned OFF via -a arg */
 	if (!arg_dont_autoconnect && servlist_have_auto())
-		g_idle_add (servlist_auto_connect, NULL);
+		g_idle_add ((GSourceFunc) servlist_auto_connect, NULL);
 
 	/* if we got a URL, don't open the server list GUI */
 	if (!prefs.skip_serverlist && !servlist_have_auto() && !arg_url)
@@ -951,7 +951,7 @@ xchat_exec (const char *cmd)
 	if (pid != -1)
 	/* zombie avoiding system. Don't ask! it has to be like this to work
       with zvt (which overrides the default handler) */
-		g_timeout_add (1000, child_handler, GINT_TO_POINTER (pid));
+		g_timeout_add (1000, (GSourceFunc) child_handler, GINT_TO_POINTER (pid));
 }
 
 void
@@ -961,7 +961,7 @@ xchat_execv (char * const argv[])
 	if (pid != -1)
 	/* zombie avoiding system. Don't ask! it has to be like this to work
       with zvt (which overrides the default handler) */
-		g_timeout_add (1000, child_handler, GINT_TO_POINTER (pid));
+		g_timeout_add (1000, (GSourceFunc) child_handler, GINT_TO_POINTER (pid));
 }
 
 int

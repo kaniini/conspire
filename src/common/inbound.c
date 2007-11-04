@@ -1231,6 +1231,7 @@ inbound_next_nick (session *sess, char *nick)
 		break;
 
 	case 3:
+		newnick = g_strdup(prefs.nick3);
 		serv->p_change_nick (serv, prefs.nick3);
 		EMIT_SIGNAL (XP_TE_NICKCLASH, sess, nick, newnick, NULL, NULL, 0);
 		break;
@@ -1461,7 +1462,7 @@ inbound_login_end (session *sess, char *text)
 		/* send JOIN now or wait? */
 		if (serv->network && ((ircnet *)serv->network)->nickserv &&
 			 prefs.irc_join_delay)
-			serv->joindelay_tag = g_timeout_add (prefs.irc_join_delay * 1000, check_willjoin_channels, serv);
+			serv->joindelay_tag = g_timeout_add (prefs.irc_join_delay * 1000, (GSourceFunc) check_willjoin_channels, serv);
 		else
 			check_willjoin_channels (serv);
 		if (serv->supports_watch)

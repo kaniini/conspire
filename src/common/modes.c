@@ -27,6 +27,7 @@
 #include "text.h"
 #include "fe.h"
 #include "util.h"
+#include "inbound.h"
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
@@ -243,26 +244,7 @@ record_chan_mode (session *sess)/*, char sign, char mode, char *arg)*/
 		We need to find out the new modes for the titlebar, but let's not
 		flood ourselves off when someone decides to change 100 modes/min. */
 	if (!sess->mode_timeout_tag)
-		sess->mode_timeout_tag = g_timeout_add (15000, mode_timeout_cb, sess);
-}
-
-static char *
-mode_cat (char *str, char *addition)
-{
-	int len;
-
-	if (str)
-	{
-		len = strlen (str) + strlen (addition) + 2;
-		str = realloc (str, len);
-		strcat (str, " ");
-		strcat (str, addition);
-	} else
-	{
-		str = strdup (addition);
-	}
-
-	return str;
+		sess->mode_timeout_tag = g_timeout_add (15000, (GSourceFunc) mode_timeout_cb, sess);
 }
 
 /* handle one mode, e.g.

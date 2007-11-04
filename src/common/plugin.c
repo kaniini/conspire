@@ -685,7 +685,7 @@ plugin_add_hook (xchat_plugin *pl, int type, int pri, const char *name,
 	plugin_insert_hook (hook);
 
 	if (type == HOOK_TIMER)
-		hook->tag = g_timeout_add (timeout, plugin_timeout_cb, hook);
+		hook->tag = g_timeout_add (timeout, (GSourceFunc) plugin_timeout_cb, hook);
 
 	return hook;
 }

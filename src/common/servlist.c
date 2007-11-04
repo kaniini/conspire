@@ -217,7 +217,7 @@ servlist_cycle (server *serv)
 				del = 500;				  /* so it doesn't block the gui */
 
 			if (del)
-				serv->recondelay_tag = g_timeout_add (del, servlist_cycle_cb, serv);
+				serv->recondelay_tag = g_timeout_add (del, (GSourceFunc) servlist_cycle_cb, serv);
 			else
 				servlist_connect (serv->server_session, net, TRUE);
 
