@@ -513,6 +513,21 @@ xchat_get_prefs(gpointer ph, gchar *name, gchar **string, gint *integer)
 	return ret;
 }
 
+gchar **xchat_list_fields(gpointer ph, const gchar *name)
+{
+	gchar **ret;
+	GError *error = NULL;
+
+	dbus_g_proxy_call (remote_object, "ListFields",
+				&error,
+				G_TYPE_STRING, name, 
+				G_TYPE_INVALID,
+				G_TYPE_STRV, &ret,
+				G_TYPE_INVALID);
+
+	return ret;
+}
+
 xchat_context *
 xchat_find_context(gpointer ph,
 	const char *servname,
