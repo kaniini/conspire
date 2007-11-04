@@ -366,54 +366,6 @@ fe_userlist_clear (session *sess)
 	gtk_list_store_clear (sess->res->user_model);
 }
 
-static void
-userlist_dnd_drop (GtkTreeView *widget, GdkDragContext *context,
-						 gint x, gint y, GtkSelectionData *selection_data,
-						 guint info, guint ttime, gpointer userdata)
-{
-	struct User *user;
-	GtkTreePath *path;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-
-	if (!gtk_tree_view_get_path_at_pos (widget, x, y, &path, NULL, NULL, NULL))
-		return;
-
-	model = gtk_tree_view_get_model (widget);
-	if (!gtk_tree_model_get_iter (model, &iter, path))
-		return;
-	gtk_tree_model_get (model, &iter, 3, &user, -1);
-
-	mg_dnd_drop_file (current_sess, user->nick, selection_data->data);
-}
-
-static gboolean
-userlist_dnd_motion (GtkTreeView *widget, GdkDragContext *context, gint x,
-							gint y, guint ttime, gpointer tree)
-{
-	GtkTreePath *path;
-	GtkTreeSelection *sel;
-
-	if (!tree)
-		return FALSE;
-
-	if (gtk_tree_view_get_path_at_pos (widget, x, y, &path, NULL, NULL, NULL))
-	{
-		sel = gtk_tree_view_get_selection (widget);
-		gtk_tree_selection_unselect_all (sel);
-		gtk_tree_selection_select_path (sel, path);
-	}
-
-	return TRUE;
-}
-
-static gboolean
-userlist_dnd_leave (GtkTreeView *widget, GdkDragContext *context, guint ttime)
-{
-	gtk_tree_selection_unselect_all (gtk_tree_view_get_selection (widget));
-	return TRUE;
-}
-
 void *
 userlist_create_model (void)
 {

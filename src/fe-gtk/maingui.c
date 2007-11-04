@@ -219,7 +219,7 @@ void
 fe_flash_window (session *sess)
 {
 	if (fe_gui_info (sess, 0) != 1)	/* only do it if not focused */
-		gtk_window_set_urgency_hint (sess->gui->window, TRUE);
+		gtk_window_set_urgency_hint (GTK_WINDOW(sess->gui->window), TRUE);
 }
 
 /* set a tab plain, red, light-red, or blue */
@@ -357,23 +357,6 @@ mg_inputbox_cb (GtkWidget *igad, session_gui *gui)
 		handle_multiline (sess, cmd, TRUE, FALSE);
 
 	free (cmd);
-}
-
-static gboolean
-has_key (char *modes)
-{
-	if (!modes)
-		return FALSE;
-	/* this is a crude check, but "-k" can't exist, so it works. */
-	while (*modes)
-	{
-		if (*modes == 'k')
-			return TRUE;
-		if (*modes == ' ')
-			return FALSE;
-		modes++;
-	}
-	return FALSE;
 }
 
 void
@@ -2313,7 +2296,7 @@ mg_update_meters (session_gui *gui)
 static void
 mg_create_userlist (session_gui *gui, GtkWidget *box)
 {
-	GtkWidget *frame, *ulist, *vbox;
+	GtkWidget *ulist, *vbox;
 
 	vbox = gtk_vbox_new (0, 1);
 	gtk_container_add (GTK_CONTAINER (box), vbox);
@@ -2405,25 +2388,6 @@ mg_create_center (session *sess, session_gui *gui, GtkWidget *box)
 	mg_create_entry (sess, vbox);
 
 	g_idle_add ((GSourceFunc)mg_add_pane_signals, gui);
-}
-
-static void
-mg_change_nick (int cancel, char *text, gpointer userdata)
-{
-	char buf[256];
-
-	if (!cancel)
-	{
-		snprintf (buf, sizeof (buf), "nick %s", text);
-		handle_command (current_sess, buf, FALSE);
-	}
-}
-
-static void
-mg_nickclick_cb (GtkWidget *button, gpointer userdata)
-{
-	fe_get_str (_("Enter new nickname:"), current_sess->server->nick,
-					mg_change_nick, NULL);
 }
 
 /* make sure chanview and userlist positions are sane */
@@ -2567,7 +2531,7 @@ mg_inputbox_rightclick (GtkEntry *entry, GtkWidget *menu)
 static void
 mg_create_entry (session *sess, GtkWidget *box)
 {
-	GtkWidget *sw, *hbox, *but, *entry;
+	GtkWidget *hbox, *entry;
 	session_gui *gui = sess->gui;
 
 	hbox = gtk_hbox_new (FALSE, 0);
@@ -3127,7 +3091,7 @@ mg_create_generic_tab (char *name, char *title, int force_toplevel,
 							  int width, int height, GtkWidget **vbox_ret,
 							  void *family)
 {
-	GtkWidget *vbox, *win;
+	GtkWidget *vbox;
 
 	if (prefs.tab_pos == POS_HIDDEN && prefs.windows_as_tabs)
 		prefs.windows_as_tabs = 0;
@@ -3356,7 +3320,6 @@ mg_drag_motion_cb (GtkWidget *widget, GdkDragContext *context, int x, int y, gui
 	GdkGCValues val;
 	int half, width, height;
 	int ox, oy;
-	GtkPaned *paned;
 	GdkDrawable *draw;
 
 	if (scbar)	/* scrollbar */

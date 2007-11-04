@@ -42,7 +42,7 @@
 #include "gtkutil.h"
 #include "menu.h"
 #include "pixmaps.h"
-
+#include "maingui.h"
 
 /* servlistgui.c globals */
 static GtkWidget *serverlist_win = NULL;

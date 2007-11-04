@@ -115,18 +115,6 @@ enum
 	WORD_CHECK,
 	LAST_SIGNAL
 };
-static guint signals[LAST_SIGNAL] = {0};
-
-static gboolean
-spell_accumulator(GSignalInvocationHint *hint, GValue *return_accu, const GValue *handler_return, gpointer data)
-{
-	gboolean ret = g_value_get_boolean(handler_return);
-	/* Handlers return TRUE if the word is misspelled.  In this
-	 * case, it means that we want to stop if the word is checked
-	 * as correct */
-	g_value_set_boolean (return_accu, ret);
-	return ret;
-}
 
 static void
 initialize_enchant ()
