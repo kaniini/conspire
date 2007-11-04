@@ -404,7 +404,7 @@ static int
 servlist_load (void)
 {
 	FILE *fp;
-	char buf[258];
+	char buf[2050];
 	int len;
 	char *tmp;
 	ircnet *net = NULL;
