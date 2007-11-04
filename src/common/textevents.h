@@ -30,13 +30,13 @@ N_("%C22*%O$tChannel $1 created on $2")},
 N_("%UChannel          Users   Topic")},
 
 {"Channel Message", pevt_chanmsg_help, 132, 
-"%C18%H<%H$4$1%H>%H%O$t$2"},
+"%C18%H<%H$3$4$1%H>%H%O$t$2"},
 
 {"Channel Modes", pevt_chanmodes_help, 2, 
 N_("%C22*%O$t%C22Channel $1 modes: $2")},
 
 {"Channel Msg Hilight", pevt_chanmsg_help, 132, 
-"$4%C21%B%H<%H$1%H>%H%O%C21$t$2"},
+"$4%C21%B%H<%H$3$1%H>%H%O%C21$t$2"},
 
 {"Channel Notice", pevt_channotice_help, 131, 
 "%C28-%C29$1/$2%C28-%O$t$3"},
