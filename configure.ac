@@ -22,6 +22,7 @@ AC_PROG_CPP
 AM_PROG_AS
 AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
+AM_PROG_MKDIR_P
 
 dnl -----------------------------------------------------------
 dnl Language Support
