@@ -458,7 +458,7 @@ handle_mode (server * serv, char *word[], char *word_eol[],
 	{
 		if (sess->current_modes)
 			free (sess->current_modes);
-		sess->current_modes = strdup (word_eol[offset+1]);
+		sess->current_modes = strdup (*word_eol[offset+1] != ' ' ? word_eol[offset + 1] : (word_eol[offset + 1] + 1));
 		fe_set_title (sess);
 	}
 
