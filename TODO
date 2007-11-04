@@ -8,3 +8,5 @@ TODO
   has scrolled out of view or the user has scrolled up for whatever reason
 - Rewrite hilights to be more powerful than the current implementation, with
   potential per-server/per-channel hilights support
+- Get rid of all "homebrew" tree/blahblahblah shit, replace with GLib/Mowgli
+  primitives where appropriate.
