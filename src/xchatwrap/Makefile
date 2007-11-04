@@ -7,5 +7,5 @@ include ../../extra.mk
 
 CPPFLAGS += -I../.. $(COMMON_CFLAGS)
 
-LIBS += $(AUDLDFLAGS) $(DBUS_LIBS) -lgmodule-2.0 -ldl -lglib-2.0 -lm
+LIBS += $(AUDLDFLAGS) $(DBUS_LIBS) -lgmodule-2.0 -ldl -lglib-2.0 -lm -L../libconspire-xchatemu -lconspire-xchatemu
 
