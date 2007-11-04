@@ -258,7 +258,7 @@ N_("%C22*%O$tNo ping reply for $1 seconds, disconnecting.")},
 N_("%C22*%O$tA process is already running")},
 
 {"Quit", pevt_quit_help, 3, 
-N_("%C23*%O$t%C23$1 has quit: %O%C23%B%B$2%O%C23")},
+N_("%C23*%O$t%C23$1 ($3) has quit: $2")},
 
 {"Raw Modes", pevt_rawmodes_help, 2, 
 N_("%C19*%O$t%C19$1 sets mode: $2%O")},
