@@ -4252,15 +4252,17 @@ gtk_xtext_buffer_show (GtkXText *xtext, xtext_buffer *buf, int render)
 
 	if (render)
 	{
+		gtk_xtext_calc_lines (buf, FALSE);
+
 		/* did the window change size since this buffer was last shown? */
 		if (buf->window_width != w)
 		{
 			buf->window_width = w;
-			gtk_xtext_calc_lines (buf, FALSE);
 			if (buf->scrollbar_down)
 				gtk_adjustment_set_value (xtext->adj, xtext->adj->upper -
 												  xtext->adj->page_size);
-		} else if (buf->window_height != h)
+		}
+		else if (buf->window_height != h)
 		{
 			buf->window_height = h;
 			buf->pagetop_ent = NULL;
@@ -4269,7 +4271,8 @@ gtk_xtext_buffer_show (GtkXText *xtext, xtext_buffer *buf, int render)
 
 		gtk_xtext_render_page (xtext);
 		gtk_adjustment_changed (xtext->adj);
-	} else
+	}
+	else
 	{
 		/* avoid redoing the transparency */
 		xtext->avoid_trans = TRUE;
