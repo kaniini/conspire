@@ -475,7 +475,7 @@ pevt_part_help
 Part with Reason
 XP_TE_PARTREASON
 pevt_partreason_help
-%C23*%O$t%C23$1 (%O%C23$2) has left $3 (%O%C23%B%B$4%O%C23)
+%C23*%O$t%C23$1 (%O%C23$2) has left $3: $4
 4
 
 Ping Reply
@@ -511,7 +511,7 @@ pevt_generic_none_help
 Quit
 XP_TE_QUIT
 pevt_quit_help
-%C23*%O$t%C23$1 has quit (%O%C23%B%B$2%O%C23)
+%C23*%O$t%C23$1 has quit: %O%C23%B%B$2%O%C23
 3
 
 Raw Modes
@@ -679,7 +679,7 @@ pevt_join_help
 You Kicked
 XP_TE_UKICK
 pevt_ukick_help
-%C23*$tYou have been kicked from $2 by $3 ($4%O%C23)
+%C23*$tYou have been kicked from $2 by $3: $4
 4
 
 You Part
@@ -691,7 +691,7 @@ pevt_part_help
 You Part with Reason
 XP_TE_UPARTREASON
 pevt_partreason_help
-%C23*$tYou have left channel $3 (%O%C23%B%B$4%O%C23)
+%C23*$tYou have left channel $3: $4
 4
 
 Your Action

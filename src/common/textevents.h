@@ -240,7 +240,7 @@ N_("%C22*%O$tNotify: $1 is online ($3).")},
 N_("%C23*%O$t%C23$1 (%O%C23$2) has left $3")},
 
 {"Part with Reason", pevt_partreason_help, 4, 
-N_("%C23*%O$t%C23$1 (%O%C23$2) has left $3 (%O%C23%B%B$4%O%C23)")},
+N_("%C23*%O$t%C23$1 (%O%C23$2) has left $3: $4")},
 
 {"Ping Reply", pevt_pingrep_help, 2, 
 N_("%C22*%O$tPing reply from $1: $2 second(s)")},
@@ -258,7 +258,7 @@ N_("%C22*%O$tNo ping reply for $1 seconds, disconnecting.")},
 N_("%C22*%O$tA process is already running")},
 
 {"Quit", pevt_quit_help, 3, 
-N_("%C23*%O$t%C23$1 has quit (%O%C23%B%B$2%O%C23)")},
+N_("%C23*%O$t%C23$1 has quit: %O%C23%B%B$2%O%C23")},
 
 {"Raw Modes", pevt_rawmodes_help, 2, 
 N_("%C19*%O$t%C19$1 sets mode: $2%O")},
@@ -342,13 +342,13 @@ N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
 N_("%C19*%O$t%C19Now talking on $2")},
 
 {"You Kicked", pevt_ukick_help, 4, 
-N_("%C23*$tYou have been kicked from $2 by $3 ($4%O%C23)")},
+N_("%C23*$tYou have been kicked from $2 by $3: $4")},
 
 {"You Part", pevt_part_help, 3, 
 N_("%C23*$tYou have left channel $3")},
 
 {"You Part with Reason", pevt_partreason_help, 4, 
-N_("%C23*$tYou have left channel $3 (%O%C23%B%B$4%O%C23)")},
+N_("%C23*$tYou have left channel $3: $4")},
 
 {"Your Action", pevt_chanaction_help, 131, 
 "%C18*$t$1%O $2"},
