@@ -126,6 +126,10 @@ AC_ARG_ENABLE(gtkfe,
 [  --disable-gtkfe         disable building gtk frontend],
         gtkfe=$enableval, gtkfe=yes)
 
+AC_ARG_ENABLE(python,
+[  --disable-python        don't build the python plugin],
+        python=$enableval, python=yes)
+
 dnl AC_ARG_ENABLE(gnome,
 dnl [  --disable-gnome         disable use of gnome],
 dnl        gnome=$enableval, gnome=yes)
@@ -141,6 +145,43 @@ AC_ARG_ENABLE(mmx,
 AC_ARG_ENABLE(spell,
 [  --enable-spell=type     enable spelling type: none static libsexy gtkspell],
 		  spell=$enableval, spell=libsexy)
+
+dnl ** Python **
+
+if test "$python" = yes; then
+        AC_PATH_PROG(pythonpath, python2)
+        if test "_$pythonpath" = _ ; then
+                AC_PATH_PROG(pythonpath, python)
+        fi
+        if test "_$pythonpath" = _ ; then
+                python=no
+        else
+                AC_MSG_CHECKING(Python version)
+                changequote(<<, >>)dnl
+                PY_VER=`$pythonpath -c 'import distutils.sysconfig; print distutils.sysconfig.get_config_vars("VERSION")[0];'`
+                PY_LIB=`$pythonpath -c 'import distutils.sysconfig; print distutils.sysconfig.get_python_lib(standard_lib=1);'`
+                PY_INC=`$pythonpath -c 'import distutils.sysconfig; print distutils.sysconfig.get_config_vars("INCLUDEPY")[0];'`
+                $pythonpath -c "import sys; map(int,sys.version[:3].split('.')) >= [2,2] or sys.exit(1)"
+                changequote([, ])dnl
+                AC_MSG_RESULT($PY_VER)
+                if test "$?" != "1"; then
+                        AC_MSG_CHECKING(Python compile flags)
+                        PY_PREFIX=`$pythonpath -c 'import sys; print sys.prefix'`
+                        PY_EXEC_PREFIX=`$pythonpath -c 'import sys; print sys.exec_prefix'`
+                        if test -f $PY_INC/Python.h; then
+                                PY_LIBS="-L$PY_LIB/config -lpython$PY_VER -lpthread -lutil"
+                                PY_CFLAGS="-I$PY_INC"
+                                AC_MSG_RESULT(ok)
+                        else
+                                python=no
+                                AC_MSG_RESULT([Can't find Python.h])
+                        fi
+                else
+                        echo "Python too old. Only 2.2 or above is supported."
+                        python=no
+                fi
+        fi
+fi
 
 dnl *********************************************************************
 dnl ** GLIB *************************************************************
