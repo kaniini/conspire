@@ -2,7 +2,7 @@ include ../../extra.mk
 
 SUBDIRS = tools
 
-LIB = ${LIB_PREFIX}libconspire${LIB_SUFFIX}
+LIB = ${LIB_PREFIX}conspire${LIB_SUFFIX}
 LIB_MAJOR=0
 LIB_MINOR=1
 
