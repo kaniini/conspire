@@ -373,7 +373,7 @@ else
 	AC_DEFINE(USE_DBUS)
 	AS_AC_EXPAND(DATADIR, $datadir)
 
-	XCHATWRAP="libconspire-xchatemu xchatwrap"
+	XCHATWRAP="libconspire-xchatemu conspire-python xchatwrap"
 	DBUSDIR="dbus"
 	DBUSLIBADD="-Ldbus/ -lconspire-dbus"
 	AC_SUBST(DBUSDIR)
