@@ -351,8 +351,6 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 	{
 		if (prefs.irc_show_nickmode)
 			nickchar[0] = user->prefix[0];
-		if (prefs.irc_show_nickmode_empty && (user->prefix[0] == 0))
-			nickchar[0] = 0x20;
 		user->lasttalk = time (0);
 	}
 
@@ -419,8 +417,6 @@ inbound_chanmsg (server *serv, session *sess, char *chan, char *from, char *text
 	{
 		if (prefs.irc_show_nickmode)
 			nickchar[0] = user->prefix[0];
-		if (prefs.irc_show_nickmode_empty && (user->prefix[0] == 0x00))
-			nickchar[0] = 0x20;
 		user->lasttalk = time (0);
 	}
 

@@ -440,7 +440,6 @@ const struct prefs vars[] = {
 	{"irc_part_reason", P_OFFSET (partreason), TYPE_STR},
 	{"irc_quit_reason", P_OFFSET (quitreason), TYPE_STR},
 	{"irc_real_name", P_OFFSET (realname), TYPE_STR},
-	{"irc_show_nickmode_empty", P_OFFSET (irc_show_nickmode_empty), TYPE_BOOL},
 	{"irc_show_nickmode", P_OFFSET (irc_show_nickmode), TYPE_BOOL},
 	{"irc_servernotice", P_OFFINT (servernotice), TYPE_BOOL},
 	{"irc_skip_motd", P_OFFINT (skipmotd), TYPE_BOOL},
@@ -633,7 +632,6 @@ load_config (void)
 	strcat (prefs.nick3, "__");
 	strcpy (prefs.realname, realname);
 	strcpy (prefs.username, username);
-	prefs.irc_show_nickmode_empty = 1;
 	prefs.irc_show_nickmode = 1;
 	snprintf (prefs.sounddir, sizeof (prefs.sounddir), "%s/sounds", get_xdir_utf8 ());
 	snprintf (prefs.dccdir, sizeof (prefs.dccdir), "%s/downloads", get_xdir_utf8 ());
