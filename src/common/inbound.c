@@ -934,12 +934,7 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 		char *tmp;
 
 		if ((tmp = strstr(reason, "Quit:")) != NULL)
-		{
-			while (*tmp == ' ')
-				tmp++;
-
-			reason = tmp;
-		}
+			reason = tmp + 5; /* skip past Quit: */
 	}
 
 	for (; list != NULL; list = list->next)
