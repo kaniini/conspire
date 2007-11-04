@@ -928,6 +928,19 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 
 		serv->split_timer = g_timeout_add(500, (GSourceFunc) netsplit_display_victims, serv);
 	}
+	else
+	{
+		/* strip IRCd Quit: prefix */
+		char *tmp;
+
+		if ((tmp = strstr(reason, "Quit:")) != NULL)
+		{
+			while (*tmp == ' ')
+				tmp++;
+
+			reason = tmp;
+		}
+	}
 
 	for (; list != NULL; list = list->next)
 	{
