@@ -1,29 +1,19 @@
-include ../../mk/init.mk
-include ../../mk/rules.mk
+include ../../extra.mk
 
-PICLDFLAGS = $(LIBLDFLAGS)
-OBJECTIVE_LIBS = libconspire$(SHARED_SUFFIX)
-OBJECTIVE_SONAME_SUFFIX = 0
-LIBCONSPIRE_SUFFIX = 0.1.0
+SUBDIRS = tools
 
-CFLAGS += $(PICFLAGS) $(COMMON_CFLAGS) 
+LIB = ${LIB_PREFIX}libconspire${LIB_SUFFIX}
+LIB_MAJOR=0
+LIB_MINOR=1
 
-SUBDIRS = tools $(DBUSDIR)
-LIBADD += $(COMMON_LIBS) $(DBUSLIBADD)
-
-SOURCES = cfgfiles.c ctcp.c dcc.c history.c ignore.c \
+SRCS = cfgfiles.c ctcp.c dcc.c history.c ignore.c \
 	inbound.c modes.c network.c notify.c outbound.c \
 	plugin.c plugin-timer.c proto-irc.c server.c servlist.c $(ssl_c) \
-	text.c tree.c url.c userlist.c util.c xchat.c
+	text.c tree.c url.c userlist.c util.c xchat.c dbus/dbus-plugin.c dbus/dbus-client.c
 
-OBJECTS = ${SOURCES:.c=.o}
+include ../../buildsys.mk
+include ../../extra.mk
 
-include ../../mk/objective.mk
-
-install-posthook:
-	@mv ${DESTDIR}/${LIBDIR}/libconspire$(SHARED_SUFFIX) ${DESTDIR}/${LIBDIR}/libconspire$(SHARED_SUFFIX).$(LIBCONSPIRE_SUFFIX)
-	@ln -sf libconspire$(SHARED_SUFFIX).$(LIBCONSPIRE_SUFFIX) \
-		${DESTDIR}/${LIBDIR}/libconspire$(SHARED_SUFFIX).0
-	@ln -sf libconspire$(SHARED_SUFFIX).0 \
-		${DESTDIR}/${LIBDIR}/libconspire$(SHARED_SUFFIX)
-
+CPPFLAGS += $(COMMON_CFLAGS)
+CFLAGS += $(PLUGIN_CFLAGS)
+LIBS += $(COMMON_LIBS)

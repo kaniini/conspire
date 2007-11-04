@@ -1,17 +1,11 @@
-include ../../mk/rules.mk
-include ../../mk/init.mk
+SRCS = conspire-xchatwrap.c
 
-localedir = $(datadir)/locale
+PROG = conspire-xchatwrap
 
-OBJECTIVE_BINS = conspire-xchatwrap
+include ../../buildsys.mk
+include ../../extra.mk
 
 CFLAGS += -I../.. $(COMMON_CFLAGS)
 
-LIBADD = $(AUDLDFLAGS) $(DBUS_LIBS) -lgmodule-2.0 -ldl -lglib-2.0 -lm
-
-SOURCES = conspire-xchatwrap.c
-
-OBJECTS = ${SOURCES:.c=.o}
-
-include ../../mk/objective.mk
+LIBS += $(AUDLDFLAGS) $(DBUS_LIBS) -lgmodule-2.0 -ldl -lglib-2.0 -lm
 

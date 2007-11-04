@@ -1,5 +1,4 @@
-include ../mk/init.mk
-include ../mk/rules.mk
-include ../mk/objective.mk
+include ../buildsys.mk
+include ../extra.mk
 
 SUBDIRS = common pixmaps fe-gtk fe-bot $(XCHATWRAP)

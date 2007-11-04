@@ -1,17 +1,10 @@
-include ../../mk/rules.mk
-include ../../mk/init.mk
+PROG = conspire-bot
+SRCS = conspire-bot.c
 
-localedir = $(datadir)/locale
-
-OBJECTIVE_BINS = conspire-bot
+include ../../buildsys.mk
+include ../../extra.mk
 
 CFLAGS += -I../.. $(COMMON_CFLAGS)
 
-LIBADD = -L../common -lconspire $(COMMON_LIBS)
-
-SOURCES = conspire-bot.c
-
-OBJECTS = ${SOURCES:.c=.o}
-
-include ../../mk/objective.mk
+LIBS += -L../common -lconspire $(COMMON_LIBS)
 

@@ -79,9 +79,9 @@ parse_options "$@"
 cd $TOP_DIR
 
 if [ -d /opt/gtk/share/aclocal ]; then
-	run_or_die $ACLOCAL -I /opt/gtk/share/aclocal
+	run_or_die $ACLOCAL -I /opt/gtk/share/aclocal -I m4
 else
-	run_or_die $ACLOCAL
+	run_or_die $ACLOCAL -I m4
 fi
 
 run_or_die $AUTOHEADER
