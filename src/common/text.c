@@ -856,6 +856,12 @@ static char * const pevt_chanaction_help[] = {
 	N_("Mode char"),
 };
 
+static char * const pevt_netsplit1_help[] = {
+	N_("Server 1"),
+	N_("Server 2"),
+	N_("Users affected by split"),
+};
+
 static char * const pevt_chanmsg_help[] = {
 	N_("Nickname"),
 	N_("The text"),

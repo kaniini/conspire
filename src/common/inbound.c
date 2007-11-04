@@ -778,22 +778,24 @@ netsplit_display_victims(server *serv)
 		}
 		else
 		{
-			EMIT_SIGNAL(XP_TE_NS_VICTIMS, serv->front_session, buffer->str, 
-				NULL, NULL, NULL, 0);
+			EMIT_SIGNAL(XP_TE_NS_START, serv->front_session, serv->split_serv1, serv->split_serv2, buffer->str, NULL, 0);
 			g_string_erase(buffer, 0, -1);
 		}
 		g_free(head->data);
 	}
 
 	if (buffer->len)
-		EMIT_SIGNAL(XP_TE_NS_VICTIMS, serv->front_session, buffer->str, 
-			NULL, NULL, NULL, 0);
+		EMIT_SIGNAL(XP_TE_NS_START, serv->front_session, serv->split_serv1, serv->split_serv2, buffer->str, NULL, 0);
 
 	g_string_free(buffer, TRUE);
 	g_slist_free(serv->split_list);
 	serv->split_list = NULL;
 	g_free(serv->split_reason);
+	g_free(serv->split_serv1);
+	g_free(serv->split_serv2);
 	serv->split_reason = NULL;
+	serv->split_serv1 = NULL;
+	serv->split_serv2 = NULL;
 	serv->split_timer = 0;
 	return FALSE;
 }
@@ -907,7 +909,8 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 				if (seperator)
 				{
 					*seperator = '\0';
-					EMIT_SIGNAL(XP_TE_NS_START, serv->front_session, reason, seperator + 1, NULL, NULL, 0);
+					serv->split_serv1 = g_strdup(reason);
+					serv->split_serv2 = g_strdup(seperator + 1);
 					*seperator = ' ';
 				}
 

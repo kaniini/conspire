@@ -459,6 +459,8 @@ typedef struct server
 	GSList *split_list;
 	guint split_timer;
 	char *split_reason;
+	char *split_serv1;
+	char *split_serv2;
 
 	struct session *front_session;	/* front-most window/tab */
 	struct session *server_session;	/* server window/tab */
