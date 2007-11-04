@@ -138,6 +138,8 @@ file_to_buffer (char *file, int *len)
 	}
 
 	*len = st.st_size;
+	close(fh);
+
 	return buf;
 }
 
