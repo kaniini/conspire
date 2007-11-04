@@ -495,6 +495,24 @@ xchat_nickcmp(gpointer ph, gchar *s1, gchar *s2)
 	return ret;
 }
 
+int
+xchat_get_prefs(gpointer ph, gchar *name, gchar **string, gint *integer)
+{
+	gint ret;
+	GError *error = NULL;
+
+	dbus_g_proxy_call (remote_object, "GetPrefs",
+				&error,
+				G_TYPE_STRING, name, 
+				G_TYPE_INVALID,
+				G_TYPE_INT, &ret,
+				G_TYPE_STRING, string,
+				G_TYPE_INT, integer,
+				G_TYPE_INVALID);
+
+	return ret;
+}
+
 xchat_context *
 xchat_find_context(gpointer ph,
 	const char *servname,
