@@ -36,7 +36,7 @@ N_("%UChannel          Users   Topic")},
 N_("%C22*%O$t%C22Channel $1 modes: $2")},
 
 {"Channel Msg Hilight", pevt_chanmsg_help, 132, 
-"$4%C21%B%H<%H$3$1%H>%H%O%C21$t$2"},
+"$4%C21%B%H<%H$1%H>%H%O%C21$t$2"},
 
 {"Channel Notice", pevt_channotice_help, 131, 
 "%C28-%C29$1/$2%C28-%O$t$3"},

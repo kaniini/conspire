@@ -67,7 +67,7 @@ pevt_chanmodes_help
 Channel Msg Hilight
 XP_TE_HCHANMSG
 pevt_chanmsg_help
-$4%C21%B%H<%H$3$1%H>%H%O%C21$t$2
+$4%C21%B%H<%H$1%H>%H%O%C21$t$2
 n4
 
 Channel Notice
