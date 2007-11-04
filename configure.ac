@@ -555,7 +555,8 @@ AC_SUBST(xchatlibdir)
 
 AC_OUTPUT([
 po/Makefile.in
-mk/rules.mk
+buildsys.mk
+extra.mk
 ])
 
 echo
