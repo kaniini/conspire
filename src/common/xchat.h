@@ -236,8 +236,6 @@ struct xchatprefs
 	unsigned int input_tray_hilight;
 	unsigned int input_tray_priv;
 
-	gboolean irc_show_nickmode;
-
 	unsigned int truncchans;
 	unsigned int privmsgtab;
 	unsigned int irc_join_delay;

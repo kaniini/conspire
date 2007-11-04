@@ -348,11 +348,7 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 
 	user = userlist_find (sess, from);
 	if (user)
-	{
-		if (prefs.irc_show_nickmode)
-			nickchar[0] = user->prefix[0];
 		user->lasttalk = time (0);
-	}
 
 	if (!fromme)
 	{
@@ -414,11 +410,7 @@ inbound_chanmsg (server *serv, session *sess, char *chan, char *from, char *text
 
 	user = userlist_find (sess, from);
 	if (user)
-	{
-		if (prefs.irc_show_nickmode)
-			nickchar[0] = user->prefix[0];
 		user->lasttalk = time (0);
-	}
 
 	if (fromme)
 	{
