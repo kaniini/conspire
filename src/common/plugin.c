@@ -43,11 +43,7 @@ typedef struct session xchat_context;
 /* the USE_PLUGIN define only removes libdl stuff */
 
 #ifdef USE_PLUGIN
-#ifdef USE_GMODULE
 #include <gmodule.h>
-#else
-#include <dlfcn.h>
-#endif
 #endif
 
 #define DEBUG(x) {x;}
@@ -141,11 +137,7 @@ plugin_free (xchat_plugin *pl, int do_deinit, int allow_refuse)
 
 #ifdef USE_PLUGIN
 	if (pl->handle)
-#ifdef USE_GMODULE
 		g_module_close (pl->handle);
-#else
-		dlclose (pl->handle);
-#endif
 #endif
 
 xit:
