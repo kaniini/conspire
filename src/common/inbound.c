@@ -1130,7 +1130,7 @@ inbound_away (server *serv, char *nick, char *msg)
 
 	sess = serv->front_session;
 
-	EMIT_SIGNAL (XP_TE_WHOIS5, sess, nick, msg, NULL, NULL, 0);
+	EMIT_SIGNAL (XP_TE_WHOIS_AWAY, sess, nick, msg, NULL, NULL, 0);
 
 	list = sess_list;
 	while (list)

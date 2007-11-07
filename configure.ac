@@ -19,9 +19,8 @@ AM_MAINTAINER_MODE
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CPP
+AC_PROG_LN_S
 AM_PROG_AS
-AM_DISABLE_STATIC
-AC_PROG_LIBTOOL
 AM_PROG_MKDIR_P
 
 dnl -----------------------------------------------------------

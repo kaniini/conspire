@@ -305,34 +305,37 @@ N_("%C22*%O$tCannot join%C26 %B$1 %O(User limit reached).")},
 {"Users On Channel", pevt_usersonchan_help, 2, 
 N_("%C22*%O$t%C26Users on $1:%C $2")},
 
-{"WhoIs Authenticated", pevt_whoisauth_help, 3, 
+{"WhoIs Authenticated", pevt_whois_auth_help, 3, 
 N_("%C22*%O$t%C28[%O$1%C28] %O$2%C27 $3")},
 
-{"WhoIs Away Line", pevt_whois5_help, 2, 
+{"WhoIs Away Line", pevt_whois_away_help, 2, 
 N_("%C22*%O$t%C28[%O$1%C28] %Cis away %C30(%O$2%O%C30)")},
 
-{"WhoIs Channel/Oper Line", pevt_whois2_help, 2, 
+{"WhoIs Channel", pevt_whois_channels_help, 2, 
 N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
 
-{"WhoIs End", pevt_whois6_help, 1, 
+{"WhoIs Oper Line", pevt_whois_oper_help, 2, 
+N_("%C22*%O$t%C28[%O$1%c28]%O $2")},
+
+{"WhoIs End", pevt_whois_end_help, 1, 
 N_("%C22*%O$t%C28[%O$1%C28] %OEnd of WHOIS list.")},
 
 {"WhoIs Identified", pevt_whoisid_help, 2, 
 N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
 
-{"WhoIs Idle Line", pevt_whois4_help, 2, 
+{"WhoIs Idle Line", pevt_whois_idle_help, 2, 
 N_("%C22*%O$t%C28[%O$1%C28]%O idle%C26 $2")},
 
-{"WhoIs Idle Line with Signon", pevt_whois4t_help, 3, 
+{"WhoIs Idle Line with Signon", pevt_whois_idle_signon_help, 3, 
 N_("%C22*%O$t%C28[%O$1%C28]%O idle%C26 $2%O, signon:%C26 $3")},
 
-{"WhoIs Name Line", pevt_whois1_help, 4, 
+{"WhoIs Name Line", pevt_whois_name_help, 4, 
 N_("%C22*%O$t%C28[%O$1%C28] %C30(%O$2@$3%C30)%O: $4")},
 
 {"WhoIs Real Host", pevt_whoisrealhost_help, 4, 
 N_("%C22*%O$t%C28[%O$1%C28] %Oreal user@host%C27 $2%O, real IP%C27 $3")},
 
-{"WhoIs Server Line", pevt_whois3_help, 2, 
+{"WhoIs Server Line", pevt_whois_server_help, 2, 
 N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
 
 {"WhoIs Special", pevt_whoisid_help, 3, 

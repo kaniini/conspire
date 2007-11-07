@@ -606,25 +606,31 @@ pevt_usersonchan_help
 
 WhoIs Authenticated
 XP_TE_WHOIS_AUTH
-pevt_whoisauth_help
+pevt_whois_auth_help
 %C22*%O$t%C28[%O$1%C28] %O$2%C27 $3
 3
 
 WhoIs Away Line
-XP_TE_WHOIS5
-pevt_whois5_help
+XP_TE_WHOIS_AWAY
+pevt_whois_away_help
 %C22*%O$t%C28[%O$1%C28] %Cis away %C30(%O$2%O%C30)
 2
 
-WhoIs Channel/Oper Line
-XP_TE_WHOIS2
-pevt_whois2_help
+WhoIs Channel
+XP_TE_WHOIS_CHANNELS
+pevt_whois_channels_help
 %C22*%O$t%C28[%O$1%C28]%O $2
 2
 
+WhoIs Oper Line
+XP_TE_WHOIS_OPER
+pevt_whois_oper_help
+%C22*%O$t%C28[%O$1%c28]%O $2
+2
+
 WhoIs End
-XP_TE_WHOIS6
-pevt_whois6_help
+XP_TE_WHOIS_END
+pevt_whois_end_help
 %C22*%O$t%C28[%O$1%C28] %OEnd of WHOIS list.
 1
 
@@ -635,20 +641,20 @@ pevt_whoisid_help
 2
 
 WhoIs Idle Line
-XP_TE_WHOIS4
-pevt_whois4_help
+XP_TE_WHOIS_IDLE
+pevt_whois_idle_help
 %C22*%O$t%C28[%O$1%C28]%O idle%C26 $2
 2
 
 WhoIs Idle Line with Signon
-XP_TE_WHOIS4T
-pevt_whois4t_help
+XP_TE_WHOIS_IDLE_SIGNON
+pevt_whois_idle_signon_help
 %C22*%O$t%C28[%O$1%C28]%O idle%C26 $2%O, signon:%C26 $3
 3
 
 WhoIs Name Line
-XP_TE_WHOIS1
-pevt_whois1_help
+XP_TE_WHOIS_NAME
+pevt_whois_name_help
 %C22*%O$t%C28[%O$1%C28] %C30(%O$2@$3%C30)%O: $4
 4
 
@@ -659,8 +665,8 @@ pevt_whoisrealhost_help
 4
 
 WhoIs Server Line
-XP_TE_WHOIS3
-pevt_whois3_help
+XP_TE_WHOIS_SERVER
+pevt_whois_server_help
 %C22*%O$t%C28[%O$1%C28]%O $2
 2
 

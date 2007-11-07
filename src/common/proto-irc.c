@@ -418,7 +418,7 @@ process_numeric (session * sess, int n,
 		goto def;
 
 	case 312:
-		EMIT_SIGNAL (XP_TE_WHOIS3, whois_sess, word[4], word_eol[5], NULL, NULL, 0);
+		EMIT_SIGNAL (XP_TE_WHOIS_SERVER, whois_sess, word[4], word_eol[5], NULL, NULL, 0);
 		break;
 
 	case 311:
@@ -427,7 +427,7 @@ process_numeric (session * sess, int n,
 
 	case 314:
 		inbound_user_info_start (sess, word[4]);
-		EMIT_SIGNAL (XP_TE_WHOIS1, whois_sess, word[4], word[5],
+		EMIT_SIGNAL (XP_TE_WHOIS_NAME, whois_sess, word[4], word[5],
 						 word[6], word_eol[8] + 1, 0);
 		break;
 
@@ -442,13 +442,13 @@ process_numeric (session * sess, int n,
 						"%02ld:%02ld:%02ld", idle / 3600, (idle / 60) % 60,
 						idle % 60);
 			if (timestamp == 0)
-				EMIT_SIGNAL (XP_TE_WHOIS4, whois_sess, word[4],
+				EMIT_SIGNAL (XP_TE_WHOIS_IDLE, whois_sess, word[4],
 								 outbuf, NULL, NULL, 0);
 			else
 			{
 				tim = ctime (&timestamp);
 				tim[19] = 0; 	/* get rid of the \n */
-				EMIT_SIGNAL (XP_TE_WHOIS4T, whois_sess, word[4],
+				EMIT_SIGNAL (XP_TE_WHOIS_IDLE_SIGNON, whois_sess, word[4],
 								 outbuf, tim, NULL, 0);
 			}
 		}
@@ -456,13 +456,16 @@ process_numeric (session * sess, int n,
 
 	case 318:
 		serv->inside_whois = 0;
-		EMIT_SIGNAL (XP_TE_WHOIS6, whois_sess, word[4], NULL,
+		EMIT_SIGNAL (XP_TE_WHOIS_END, whois_sess, word[4], NULL,
 						 NULL, NULL, 0);
 		break;
 
-	case 313:
-	case 319:
-		EMIT_SIGNAL (XP_TE_WHOIS2, whois_sess, word[4],
+	case 313:	/* WHOIS server oper */
+		EMIT_SIGNAL (XP_TE_WHOIS_OPER, whois_sess, word[4], word_eol[5] + 1,
+		             NULL, NULL, 0);
+		break;
+	case 319:	/* WHOIS channels */
+		EMIT_SIGNAL (XP_TE_WHOIS_CHANNELS, whois_sess, word[4],
 						 word_eol[5] + 1, NULL, NULL, 0);
 		break;
 

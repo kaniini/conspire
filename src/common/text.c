@@ -1057,40 +1057,44 @@ static char * const pevt_chanmodegen_help[] = {
 	N_("The channel it's being set on"),
 };
 
-static char * const pevt_whois1_help[] = {
+static char * const pevt_whois_name_help[] = {
 	N_("Nickname"),
 	N_("Username"),
 	N_("Host"),
 	N_("Full name"),
 };
 
-static char * const pevt_whois2_help[] = {
+static char * const pevt_whois_channels_help[] = {
 	N_("Nickname"),
-	N_("Channel Membership/\"is an IRC operator\""),
+	N_("Channel Membership"),
+};
+static char * const pevt_whois_oper_help[] = {
+	N_("Nickname"),
+	N_("Server Operator string"),
 };
 
-static char * const pevt_whois3_help[] = {
+static char * const pevt_whois_server_help[] = {
 	N_("Nickname"),
 	N_("Server Information"),
 };
 
-static char * const pevt_whois4_help[] = {
+static char * const pevt_whois_idle_help[] = {
 	N_("Nickname"),
 	N_("Idle time"),
 };
 
-static char * const pevt_whois4t_help[] = {
+static char * const pevt_whois_idle_signon_help[] = {
 	N_("Nickname"),
 	N_("Idle time"),
 	N_("Signon time"),
 };
 
-static char * const pevt_whois5_help[] = {
+static char * const pevt_whois_away_help[] = {
 	N_("Nickname"),
 	N_("Away reason"),
 };
 
-static char * const pevt_whois6_help[] = {
+static char * const pevt_whois_end_help[] = {
 	N_("Nickname"),
 };
 
@@ -1100,7 +1104,7 @@ static char * const pevt_whoisid_help[] = {
 	"Numeric"
 };
 
-static char * const pevt_whoisauth_help[] = {
+static char * const pevt_whois_auth_help[] = {
 	N_("Nickname"),
 	N_("Message"),
 	N_("Account"),
@@ -1842,7 +1846,7 @@ pevt_build_string (const char *input, char **output, int *max_arg)
 /* also light/dark gray (14/15) */
 /* 5,7,8 are all shades of yellow which happen to look dman near the same */
 
-static char rcolors[] = { 19, 20, 22, 24, 25, 26, 27, 28, 29 };
+static char rcolors[] = { 2, 3, 4, 5, 6, 10, 12, 13, 19, 20, 22, 24, 25, 26, 27, 28, 29 };
 
 static int
 color_of (char *name)
@@ -1871,6 +1875,10 @@ text_emit (int index, session *sess, char *a, char *b, char *c, char *d)
 		snprintf (tbuf, sizeof (tbuf), "\003%d%s", color_of (a), a);
 		a = tbuf;
 		stripcolor_args &= ~ARG_FLAG(1);	/* don't strip color from this argument */
+	} else if (prefs.colorednicks && prefs.coloredhnicks && (index == XP_TE_HCHANACTION || index == XP_TE_HCHANMSG)) {
+		snprintf(tbuf, sizeof(tbuf), "\003%d%s", color_of(a), a);
+		a = tbuf;
+		stripcolor_args &= ~ARG_FLAG(1);
 	}
 
 	word[0] = te[index].name;
