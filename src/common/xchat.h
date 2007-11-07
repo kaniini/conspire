@@ -198,6 +198,7 @@ struct xchatprefs
 	unsigned int skipmotd;
 	unsigned int autorejoin;
 	unsigned int colorednicks;
+	unsigned int coloredhnicks;
 	unsigned int chanmodebuttons;
 	unsigned int userlistbuttons;
 	unsigned int showhostname_in_userlist;

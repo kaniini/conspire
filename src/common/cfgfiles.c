@@ -489,6 +489,7 @@ const struct prefs vars[] = {
 
 	{"text_background", P_OFFSET (background), TYPE_STR},
 	{"text_color_nicks", P_OFFINT (colorednicks), TYPE_BOOL},
+	{"text_color_nicks_hilighted", P_OFFINT (coloredhnicks), TYPE_BOOL},
 	{"text_font", P_OFFSET (font_normal), TYPE_STR},
 	{"text_indent", P_OFFINT (indent_nicks), TYPE_BOOL},
 	{"text_max_indent", P_OFFINT (max_auto_indent), TYPE_INT},
