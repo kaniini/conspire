@@ -10,3 +10,4 @@ TODO
   potential per-server/per-channel hilights support
 - Get rid of all "homebrew" tree/blahblahblah shit, replace with GLib/Mowgli
   primitives where appropriate.
+- replace OpenSSL with GnuTLS.
