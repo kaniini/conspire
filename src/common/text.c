@@ -1057,40 +1057,44 @@ static char * const pevt_chanmodegen_help[] = {
 	N_("The channel it's being set on"),
 };
 
-static char * const pevt_whois1_help[] = {
+static char * const pevt_whois_name_help[] = {
 	N_("Nickname"),
 	N_("Username"),
 	N_("Host"),
 	N_("Full name"),
 };
 
-static char * const pevt_whois2_help[] = {
+static char * const pevt_whois_channels_help[] = {
 	N_("Nickname"),
-	N_("Channel Membership/\"is an IRC operator\""),
+	N_("Channel Membership"),
+};
+static char * const pevt_whois_oper_help[] = {
+	N_("Nickname"),
+	N_("Server Operator string"),
 };
 
-static char * const pevt_whois3_help[] = {
+static char * const pevt_whois_server_help[] = {
 	N_("Nickname"),
 	N_("Server Information"),
 };
 
-static char * const pevt_whois4_help[] = {
+static char * const pevt_whois_idle_help[] = {
 	N_("Nickname"),
 	N_("Idle time"),
 };
 
-static char * const pevt_whois4t_help[] = {
+static char * const pevt_whois_idle_signon_help[] = {
 	N_("Nickname"),
 	N_("Idle time"),
 	N_("Signon time"),
 };
 
-static char * const pevt_whois5_help[] = {
+static char * const pevt_whois_away_help[] = {
 	N_("Nickname"),
 	N_("Away reason"),
 };
 
-static char * const pevt_whois6_help[] = {
+static char * const pevt_whois_end_help[] = {
 	N_("Nickname"),
 };
 
@@ -1100,7 +1104,7 @@ static char * const pevt_whoisid_help[] = {
 	"Numeric"
 };
 
-static char * const pevt_whoisauth_help[] = {
+static char * const pevt_whois_auth_help[] = {
 	N_("Nickname"),
 	N_("Message"),
 	N_("Account"),
