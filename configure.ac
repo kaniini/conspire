@@ -297,24 +297,13 @@ dnl ** PLUGIN ***********************************************************
 dnl *********************************************************************
 
 if test "$plugin" = yes; then
-	AC_CHECK_FUNCS(dlopen, have_dl=yes)
-	if test "$have_dl" != yes; then
-		AC_CHECK_LIB(dl, dlopen, have_dl=yes)
-		if test "$have_dl" = yes; then
-			LIBS="$LIBS -ldl"
-		fi
-	fi
-	if test "$have_dl" = yes; then
-		AC_DEFINE(USE_PLUGIN)
-		plugingui_c="plugingui.c"
-		AC_SUBST(plugingui_c)
-		AC_PATH_PROG(pkgconfigpath, pkg-config)
-		dnl we just need the -Wl,--export-dynamic, but not -lgmodule-2.0
-		RDYNAMIC_FLAGS="`$pkgconfigpath gmodule-2.0 --libs | $sedpath 's/ -lgmodule-2.0//'`"
-		LIBS="$LIBS $RDYNAMIC_FLAGS"
-	else
-		plugin=no
-	fi
+	AC_DEFINE(USE_PLUGIN)
+	plugingui_c="plugingui.c"
+	AC_SUBST(plugingui_c)
+	AC_PATH_PROG(pkgconfigpath, pkg-config)
+	dnl we just need the -Wl,--export-dynamic, but not -lgmodule-2.0
+	RDYNAMIC_FLAGS="`$pkgconfigpath gmodule-2.0 --libs`"
+	LIBS="$LIBS $RDYNAMIC_FLAGS"
 fi
 
 dnl #######################################################################

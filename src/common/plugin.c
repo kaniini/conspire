@@ -331,7 +331,6 @@ plugin_load (session *sess, char *filename, char *arg)
 	xchat_init_func *init_func;
 	xchat_deinit_func *deinit_func;
 
-#ifdef USE_GMODULE
 	/* load the plugin */
 	handle = g_module_open (filename, 0);
 	if (handle == NULL)
@@ -348,48 +347,6 @@ plugin_load (session *sess, char *filename, char *arg)
 	if (!g_module_symbol (handle, "xchat_plugin_deinit", (gpointer *)&deinit_func))
 		deinit_func = NULL;
 
-#else
-	char *error;
-	char *filepart;
-
-/* OpenBSD lacks this! */
-#ifndef RTLD_GLOBAL
-#define RTLD_GLOBAL 0
-#endif
-
-#ifndef RTLD_NOW
-#define RTLD_NOW 0
-#endif
-
-	/* get the filename without path */
-	filepart = file_part (filename);
-
-	/* load the plugin */
-	if (filepart &&
-		 /* xsys draws in libgtk-1.2, causing crashes, so force RTLD_LOCAL */
-		 (strstr (filepart, "local") || strncmp (filepart, "libxsys-1", 9) == 0)
-		)
-		handle = dlopen (filename, RTLD_NOW);
-	else
-		handle = dlopen (filename, RTLD_GLOBAL | RTLD_NOW);
-	if (handle == NULL)
-		return (char *)dlerror ();
-	dlerror ();		/* Clear any existing error */
-
-	/* find the init routine xchat_plugin_init */
-	init_func = dlsym (handle, "xchat_plugin_init");
-	error = (char *)dlerror ();
-	if (error != NULL)
-	{
-		dlclose (handle);
-		return _("No xchat_plugin_init symbol; is this really an xchat plugin?");
-	}
-
-	/* find the plugin's deinit routine, if any */
-	deinit_func = dlsym (handle, "xchat_plugin_deinit");
-	error = (char *)dlerror ();
-#endif
-
 	/* add it to our linked list */
 	plugin_add (sess, filename, handle, init_func, deinit_func, arg, FALSE);
 
@@ -403,16 +360,9 @@ plugin_auto_load_cb (char *filename)
 {
 	char *pMsg;
 
-	/* black listed */
-	if (!strcmp (file_part (filename), "dbus.so"))
-		return;
-
 	pMsg = plugin_load (ps, filename, NULL);
 	if (pMsg)
-	{
-		PrintTextf (ps, "AutoLoad failed for: %s\n", filename);
-		PrintText (ps, pMsg);
-	}
+		PrintTextf (ps, "AutoLoad failed for: %s (%s)\n", filename, pMsg);
 }
 
 void
