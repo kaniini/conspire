@@ -320,6 +320,8 @@ char *
 plugin_load (session *sess, char *filename, char *arg)
 {
 	void *handle;
+	gpointer init_f;
+	gpointer deinit_f;
 	xchat_init_func *init_func;
 	xchat_deinit_func *deinit_func;
 
@@ -329,15 +331,18 @@ plugin_load (session *sess, char *filename, char *arg)
 		return (char *)g_module_error ();
 
 	/* find the init routine xchat_plugin_init */
-	if (!g_module_symbol (handle, "xchat_plugin_init", (gpointer *)&init_func))
+	if (!g_module_symbol (handle, "xchat_plugin_init", &init_f))
 	{
 		g_module_close (handle);
 		return _("No xchat_plugin_init symbol; is this really an xchat plugin?");
 	}
 
 	/* find the plugin's deinit routine, if any */
-	if (!g_module_symbol (handle, "xchat_plugin_deinit", (gpointer *)&deinit_func))
-		deinit_func = NULL;
+	if (!g_module_symbol (handle, "xchat_plugin_deinit", &deinit_f))
+		deinit_f = NULL;
+
+	init_func = init_f;
+	deinit_func = deinit_f;
 
 	/* add it to our linked list */
 	plugin_add (sess, filename, handle, init_func, deinit_func, arg, FALSE);

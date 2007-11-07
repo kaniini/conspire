@@ -20,6 +20,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/utsname.h>
 
 #include "xchat.h"
 #include "cfgfiles.h"
@@ -130,8 +131,13 @@ ctcp_handle (session *sess, char *to, char *nick,
 
 	if (!strcasecmp (msg, "VERSION") && !prefs.hidever)
 	{
-		snprintf (outbuf, sizeof (outbuf), "VERSION conspire "PACKAGE_VERSION" %s",
-					 get_cpu_str ());
+		struct utsname un;
+
+		uname(&un);
+
+		snprintf (outbuf, sizeof (outbuf), "VERSION conspire "PACKAGE_VERSION" - running on %s %s %s",
+					 un.sysname, un.release, un.machine);
+
 		serv->p_nctcp (serv, nick, outbuf);
 	}
 
