@@ -293,6 +293,8 @@ struct xchatprefs
 		This is so that we continue using internal defaults (which can
 		change in the next release) until the user edits them. */
 	unsigned int save_pevents:1;
+
+	gboolean redundant_nickstamps;
 };
 
 /* Session types */

@@ -107,8 +107,20 @@ PrintTextLine (xtext_buffer *xtbuf, unsigned char *text, int len, int indent, ti
 	if (tab && tab < (text + len))
 	{
 		leftlen = tab - text;
-		gtk_xtext_append_indent (xtbuf,
-										 text, leftlen, tab + 1, len - (leftlen + 1), timet);
+
+		if (!prefs.redundant_nickstamps && !strncmp (xtbuf->laststamp, text, leftlen))
+		{
+			text = tab+1;
+			len -= leftlen;
+			gtk_xtext_append_indent (xtbuf, 0, 0, text, len, timet);
+		}
+		else
+		{
+			strncpy(xtbuf->laststamp, text, leftlen);
+			xtbuf->laststamp[leftlen] = '\0';
+
+			gtk_xtext_append_indent (xtbuf, text, leftlen, tab + 1, len - (leftlen + 1), timet);
+		}
 	} else
 		gtk_xtext_append_indent (xtbuf, 0, 0, text, len, timet);
 }

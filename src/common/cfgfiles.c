@@ -466,6 +466,8 @@ const struct prefs vars[] = {
 
 	{"perl_warnings", P_OFFINT (perlwarnings), TYPE_BOOL},
 
+	{"redundant_nickstamps", P_OFFINT (redundant_nickstamps), TYPE_BOOL},
+
 	{"sound_command", P_OFFSET (soundcmd), TYPE_STR},
 	{"sound_dir", P_OFFSET (sounddir), TYPE_STR},
 	{"stamp_log", P_OFFINT (timestamp_logs), TYPE_BOOL},
@@ -551,6 +553,7 @@ load_config (void)
 
 	/* put in default values, anything left out is automatically zero */
 	prefs.local_ip = 0xffffffff;
+	prefs.redundant_nickstamps = TRUE;
 	prefs.irc_join_delay = 3;
 	prefs.show_marker = 1;
 	prefs.newtabstofront = 2;

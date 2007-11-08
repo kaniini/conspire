@@ -17,6 +17,8 @@
 #define GTK_IS_XTEXT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), GTK_TYPE_XTEXT))
 #define GTK_XTEXT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_XTEXT, GtkXTextClass))
 
+#define NICKLEN			64
+
 #define ATTR_BOLD			'\002'
 #define ATTR_COLOR		'\003'
 #define ATTR_BLINK		'\006'
@@ -74,6 +76,8 @@ typedef struct {
 	unsigned int grid_dirty:1;
 	unsigned int marker_seen:1;
 	unsigned int reset_marker_pos:1;
+
+	gchar laststamp[NICKLEN];
 } xtext_buffer;
 
 struct _GtkXText
