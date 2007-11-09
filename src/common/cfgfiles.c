@@ -475,6 +475,8 @@ const struct prefs vars[] = {
 	{"stamp_text", P_OFFINT (timestamp), TYPE_BOOL},
 	{"stamp_text_format", P_OFFSET (stamp_format), TYPE_STR},
 
+	{"strip_quits", P_OFFINT (strip_quits), TYPE_BOOL},
+
 	{"tab_chans", P_OFFINT (tabchannels), TYPE_BOOL},
 	{"tab_dialogs", P_OFFINT (privmsgtab), TYPE_BOOL},
 	{"tab_icons", P_OFFINT (tab_icons), TYPE_BOOL},
@@ -554,6 +556,7 @@ load_config (void)
 	/* put in default values, anything left out is automatically zero */
 	prefs.local_ip = 0xffffffff;
 	prefs.redundant_nickstamps = TRUE;
+	prefs.strip_quits = TRUE;
 	prefs.irc_join_delay = 3;
 	prefs.show_marker = 1;
 	prefs.newtabstofront = 2;

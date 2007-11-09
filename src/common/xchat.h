@@ -295,6 +295,7 @@ struct xchatprefs
 	unsigned int save_pevents:1;
 
 	gboolean redundant_nickstamps;
+	gboolean strip_quits;
 };
 
 /* Session types */

@@ -922,7 +922,7 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 
 		serv->split_timer = g_timeout_add(500, (GSourceFunc) netsplit_display_victims, serv);
 	}
-	else
+	else if (prefs.strip_quits)
 	{
 		/* strip IRCd Quit: prefix */
 		char *tmp;

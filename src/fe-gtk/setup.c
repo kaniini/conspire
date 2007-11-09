@@ -340,6 +340,12 @@ static const setting general_settings[] =
 					N_("Announce your away messages to all channels"), 0, 0},
 	{ST_TOGGLE,	N_("Show away once"), P_OFFINTNL(show_away_once), N_("Show identical away messages only once"), 0, 0},
 	{ST_TOGGLE,	N_("Automatically unmark away"), P_OFFINTNL(auto_unmark_away), N_("Unmark yourself as away before sending messages"), 0, 0},
+
+	{ST_HEADER,	N_("Other Features"), 0, 0, 0},
+	{ST_TOGGLE,	N_("Strip IRCd quit messages"), P_OFFINTNL(strip_quits),
+					N_("Strip quit prefixes like \"Quit:\" on IRC systems which use them."), 0, 0},
+	{ST_TOGGLE,	N_("Display redundant nickstamps"), P_OFFINTNL(redundant_nickstamps),
+					N_("Displays the nickname associated with every line. Disabling this creates xchat-gnome like behaviour."), 0, 0},
 	{ST_END, 0, 0, 0, 0, 0}
 };
 
