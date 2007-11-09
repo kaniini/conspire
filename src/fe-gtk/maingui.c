@@ -850,6 +850,10 @@ mg_populate (session *sess)
 
 	plugin_emit_dummy_print (sess, "Focus Tab");
 
+	/* recalculate line widths... window size may have changed on us. --nenolod */
+	gtk_xtext_set_time_stamp (sess->res->buffer, prefs.timestamp);
+	((xtext_buffer *)sess->res->buffer)->needs_recalc = TRUE;
+
 	mg_update_xtext(sess->gui->xtext);
 }
 
