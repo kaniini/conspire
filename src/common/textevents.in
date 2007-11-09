@@ -727,5 +727,5 @@ pevt_uchangenick_help
 Netsplit
 XP_TE_NS_START
 pevt_netsplit1_help
-%C22*%O$t%C23Netsplit: $1 <-> $2: $3
+%C22*%O$t%C23Netsplit: $1 <-> $2, quits: $3
 3

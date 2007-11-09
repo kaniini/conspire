@@ -366,5 +366,5 @@ N_("%C22*%O$tYou've invited%C26 $1%O to%C26 $2%O (%C26$3%O)")},
 N_("%C22*%O$tYou are now known as $2")},
 
 {"Netsplit", pevt_netsplit1_help, 3, 
-N_("%C22*%O$t%C23Netsplit: $1 <-> $2: $3")},
+N_("%C22*%O$t%C23Netsplit: $1 <-> $2, quits: $3")},
 };
