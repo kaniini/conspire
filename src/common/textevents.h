@@ -315,7 +315,7 @@ N_("%C22*%O$t%C28[%O$1%C28] %Cis away %C30(%O$2%O%C30)")},
 N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
 
 {"WhoIs Oper Line", pevt_whois_oper_help, 2, 
-N_("%C22*%O$t%C28[%O$1%c28]%O $2")},
+N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
 
 {"WhoIs End", pevt_whois_end_help, 1, 
 N_("%C22*%O$t%C28[%O$1%C28] %OEnd of WHOIS list.")},

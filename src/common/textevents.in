@@ -625,7 +625,7 @@ pevt_whois_channels_help
 WhoIs Oper Line
 XP_TE_WHOIS_OPER
 pevt_whois_oper_help
-%C22*%O$t%C28[%O$1%c28]%O $2
+%C22*%O$t%C28[%O$1%C28]%O $2
 2
 
 WhoIs End
