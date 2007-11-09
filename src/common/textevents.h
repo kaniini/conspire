@@ -186,7 +186,7 @@ N_("%C19*%O$t%C19%B$1 %B($3) has joined $2")},
 N_("%C22*%O$tCannot join%C26 %B$1 %O(Requires keyword).")},
 
 {"Kick", pevt_kick_help, 4, 
-N_("%C21*%O$t%C21$1 has kicked $2 from $3 ($4%O%C21)")},
+N_("%C21*%O$t%C21$2 was kicked from $3 by $1: $4")},
 
 {"Killed", pevt_kill_help, 2, 
 N_("%C22*%O$tYou have been killed by $1 ($2%O%C22)")},
