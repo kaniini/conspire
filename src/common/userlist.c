@@ -136,7 +136,8 @@ free_user_cb(mowgli_dictionary_elem_t *elem, gpointer data)
 void
 userlist_free (session *sess)
 {
-	mowgli_dictionary_destroy(sess->userdict, free_user_cb, NULL);
+	if (sess->userdict != NULL)
+		mowgli_dictionary_destroy(sess->userdict, free_user_cb, NULL);
 
 	sess->userdict = NULL;
 	sess->me = NULL;
