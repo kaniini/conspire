@@ -51,7 +51,6 @@ AH_VERBATIM([USE_PLUGIN],[#undef USE_PLUGIN])
 AH_VERBATIM([USE_SIGACTION],[#undef USE_SIGACTION])
 AH_VERBATIM([USING_FREEBSD],[#undef USING_FREEBSD])
 AH_VERBATIM([USING_LINUX],[#undef USING_LINUX])
-AH_VERBATIM([socklen_t],[#undef socklen_t])
 AH_VERBATIM([USE_DBUS],[#undef USE_DBUS])
 
 AC_PATH_PROG(sedpath, sed)
@@ -542,21 +541,6 @@ AC_CHECK_FUNC(gethostname, , AC_CHECK_LIB(nsl, gethostname))
 
 dnl necessary for IRIX
 AC_CHECK_HEADERS(strings.h)
-
-dnl Check for type in sys/socket.h - from Squid source (GPL)
-AC_CACHE_CHECK(for socklen_t, ac_cv_type_socklen_t, [
-AC_EGREP_CPP([socklen_t[^a-zA-Z_0-9]], [#include <sys/types.h>
-#include <sys/socket.h>
-#if STDC_HEADERS
-#include <stdlib.h>
-#include <stddef.h>
-#endif],
-ac_cv_type_socklen_t=yes,
-ac_cv_type_socklen_t=no)
-])
-if test $ac_cv_type_socklen_t = no; then
-	AC_DEFINE(socklen_t, int)
-fi
 
 dnl Mac OS X and Darwin use lookupd, which caches DNS queries by default
 AC_EGREP_CPP(lookupd, dnl
