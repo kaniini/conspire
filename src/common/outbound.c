@@ -3405,6 +3405,7 @@ const struct commands xc_cmds[] = {
 	{"EXECSTOP", cmd_execs, 0, 0, 1, N_("EXECSTOP, sends the process SIGSTOP")},
 	{"EXECWRITE", cmd_execw, 0, 0, 1, N_("EXECWRITE, sends data to the processes stdin")},
 #endif
+	{"EXIT", cmd_killall, 0, 0, 1, N_("EXIT, exits conspire immediately")},
 	{"FLUSHQ", cmd_flushq, 0, 0, 1,
 	 N_("FLUSHQ, flushes the current server's send queue")},
 	{"GATE", cmd_gate, 0, 0, 1,
