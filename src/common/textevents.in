@@ -97,7 +97,7 @@ pevt_generic_none_help
 Channel Message
 XP_TE_CHANMSG
 pevt_chanmsg_help
-%C2<%O$1%C2>%O$t$2%O
+%C2%H<%H$1%H>%H%O$t$2%O
 4
 
 Channel Mode Generic
@@ -115,7 +115,7 @@ pevt_chanmodes_help
 Channel Msg Hilight
 XP_TE_HCHANMSG
 pevt_chanmsg_help
-%C2<%C8%B$1%B%C2>%O$t$2%O
+%C8%B%H<%H$1%H>%H%O$t$2%O
 4
 
 Channel Notice
@@ -601,7 +601,7 @@ pevt_privmsg_help
 Private Message to Dialog
 XP_TE_DPRIVMSG
 pevt_privmsg_help
-%C2<%O$1%C2>%O$t$2%O
+%C2%H<%H$1%H>%H%O$t$2%O
 3
 
 Process Already Running
@@ -817,7 +817,7 @@ pevt_uinvite_help
 Your Message
 XP_TE_UCHANMSG
 pevt_chanmsg_help
-%C6<%O$1%C6>%O$t$2%O
+%C6%H<%H$1%H>%H%O$t$2%O
 4
 
 Your Nick Changing
