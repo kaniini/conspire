@@ -1870,7 +1870,7 @@ text_emit (int index, session *sess, char *a, char *b, char *c, char *d)
 	unsigned int stripcolor_args = (prefs.stripcolor ? 0xFFFFFFFF : 0);
 	char tbuf[NICKLEN + 4];
 
-	if (prefs.colorednicks && (index == XP_TE_CHANACTION || index == XP_TE_CHANMSG))
+	if (prefs.colorednicks && (index == XP_TE_CHANACTION || index == XP_TE_CHANMSG || index == XP_TE_DPRIVMSG))
 	{
 		snprintf (tbuf, sizeof (tbuf), "\003%d%s", color_of (a), a);
 		a = tbuf;
