@@ -496,6 +496,8 @@ typedef struct server
 	int reconnect_away:1;		/* whether to reconnect in is_away state */
 	int dont_use_proxy:1;		/* to proxy or not to proxy */
 	int supports_watch:1;		/* supports the WATCH command */
+	int supports_monitor:1;		/* supports the MONITOR command */
+	int inside_monitor:1;	
 	int bad_prefix:1;				/* gave us a bad PREFIX= 005 number */
 	unsigned int have_namesx:1;	/* 005 tokens NAMESX and UHNAMES */
 	unsigned int have_uhnames:1;

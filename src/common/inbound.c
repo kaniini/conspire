@@ -1469,6 +1469,9 @@ inbound_login_end (session *sess, char *text)
 			check_willjoin_channels (serv);
 		if (serv->supports_watch)
 			notify_send_watches (serv);
+		else if(serv->supports_monitor)
+			notify_send_monitor (serv);
+			
 		serv->end_of_motd = TRUE;
 	}
 	if (prefs.skipmotd && !serv->motd_skipped)

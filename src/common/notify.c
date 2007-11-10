@@ -275,6 +275,80 @@ notify_set_online (server * serv, char *nick)
 }
 
 static void
+notify_monitor (server * serv, char *nick, int add)
+{
+	char tbuf[256];
+	char dir = '+';
+
+	if(!add)
+		dir = '-';
+ 
+	snprintf (tbuf, sizeof (tbuf), "MONITOR %c %s", dir, nick);
+	serv->p_raw (serv, tbuf);
+}
+
+static void
+notify_monitor_all (struct notify *notify, int add)
+{
+       server *serv;
+       GSList *list = serv_list;
+       while (list)
+       {
+               serv = list->data;
+               if (serv->connected && serv->end_of_motd && serv->supports_monitor &&
+			notify_do_network(notify, serv))
+                       notify_monitor (serv, notify->name, add);
+               list = list->next;
+       }
+}
+
+void
+notify_send_monitor (server * serv)
+{
+	char tbuf[512];	
+	GSList *list;  
+	GSList *point;
+	struct notify *notify;
+	strcpy (tbuf, "MONITOR + ");
+	int start = 1, count = 0;
+	serv->inside_monitor = TRUE;
+
+	list = point = notify_list;
+
+	serv->p_raw(serv, "MONITOR C");
+
+	while (list)
+	{
+		notify = list->data;
+
+		if (notify_do_network (notify, serv))
+		{
+			if((strlen (tbuf) + strlen (notify->name) + 1) > 500)
+			{
+				serv->p_raw (serv, tbuf);
+				strcpy (tbuf, "MONITOR + ");
+				start = 1;
+			}
+
+			if(start) 
+				start = 0;
+			else
+				strcat (tbuf, ",");
+
+			strcat (tbuf, notify->name);
+			count++;
+		}
+		list = list->next;
+	}
+
+	if(count > 0) 
+		serv->p_raw (serv, tbuf);
+
+	serv->p_raw (serv, "MONITOR L");
+}
+
+
+static void
 notify_watch (server * serv, char *nick, int add)
 {
 	char tbuf[256];
@@ -445,7 +519,7 @@ notify_checklist (void)	/* check ISON list */
 	while (list)
 	{
 		serv = list->data;
-		if (serv->connected && serv->end_of_motd && !serv->supports_watch)
+		if (serv->connected && serv->end_of_motd && !serv->supports_watch && !serv->supports_monitor)
 		{
 			notify_checklist_for_server (serv);
 		}
@@ -507,6 +581,7 @@ notify_deluser (char *name)
 			}
 			notify_list = g_slist_remove (notify_list, notify);
 			notify_watch_all (notify, FALSE);
+			notify_monitor_all (notify, FALSE);
 			if (notify->networks)
 				free (notify->networks);
 			free (notify->name);
@@ -542,6 +617,7 @@ notify_adduser (char *name, char *networks)
 		fe_notify_update (notify->name);
 		fe_notify_update (0);
 		notify_watch_all (notify, TRUE);
+		notify_monitor_all (notify, TRUE);
 	}
 }
 
