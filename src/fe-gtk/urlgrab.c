@@ -38,7 +38,6 @@
 #include "../common/cfgfiles.h"
 #include "../common/fe.h"
 #include "../common/url.h"
-#include "../common/tree.h"
 #include "gtkutil.h"
 #include "menu.h"
 #include "maingui.h"
