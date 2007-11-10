@@ -24,7 +24,6 @@
 #include "modes.h"
 #include "fe.h"
 #include "notify.h"
-#include "tree.h"
 #include "xchatc.h"
 #include "util.h"
 

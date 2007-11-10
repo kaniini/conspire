@@ -50,7 +50,6 @@
 #include "xchatc.h"
 #include "servlist.h"
 #include "server.h"
-#include "tree.h"
 #include "outbound.h"
 
 
