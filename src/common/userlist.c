@@ -1,5 +1,7 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/*
+ * libconspire: lightweight advanced irc client library
+ * Copyright (c) 2007 William Pitcock <nenolod@sacredspiral.co.uk>
+ * Portions copyright (C) 1998-2007 Peter Zelezny.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +29,8 @@
 #include "xchatc.h"
 #include "util.h"
 
-#if 0
 static int
-nick_cmp_az_ops (server *serv, struct User *user1, struct User *user2)
+nick_cmp_az_ops (server *serv, const struct User *user1, const struct User *user2)
 {
 	unsigned int access1 = user1->access;
 	unsigned int access2 = user2->access;
@@ -50,7 +51,50 @@ nick_cmp_az_ops (server *serv, struct User *user1, struct User *user2)
 
 	return serv->p_cmp (user1->nick, user2->nick);
 }
-#endif
+
+static int
+userlist_sort_normal(gconstpointer l, gconstpointer r, gpointer user_data)
+{
+	const struct User *left  = (const struct User *) l;
+	const struct User *right = (const struct User *) r;
+	session *sess            = (session *) user_data;
+
+	g_return_val_if_fail(sess != NULL, 0);
+	g_return_val_if_fail(left != NULL, 0);
+	g_return_val_if_fail(right != NULL, 0);
+
+	switch (prefs.userlist_sort)
+	{
+	case 0:
+		return nick_cmp_az_ops (sess->server, left, right);
+	case 1:
+		return sess->server->p_cmp (left->nick, right->nick);
+	case 2:
+		return -1 * nick_cmp_az_ops (sess->server, left, right);
+	case 3:
+		return -1 * sess->server->p_cmp (left->nick, right->nick);
+	default:
+		return -1;
+	}
+
+	return -1;
+}
+
+/*
+ * XXX: this could be tons more efficient, but it will do for now. --nenolod
+ */
+gint
+userlist_index(session *sess, GCompareDataFunc func, struct User *user)
+{
+	gint ret;
+	GList *list = userlist_double_list(sess);
+	list = g_list_sort_with_data(list, func, sess);
+
+	ret = g_list_index(list, user);
+	g_list_free(list);
+
+	return ret;
+}
 
 /*
  insert name in appropriate place in linked list. Returns row number or:
@@ -246,7 +290,7 @@ userlist_update_mode (session *sess, char *name, char mode, char sign)
 	/* update the various counts using the CHANGED prefix only */
 	update_counts (sess, user, prefix, level, offset);
 
-	fe_userlist_move (sess, user, 0);
+	fe_userlist_move (sess, user, userlist_index(sess, userlist_sort_normal, user));
 	fe_userlist_numbers (sess);
 }
 
@@ -263,7 +307,7 @@ userlist_change (struct session *sess, char *oldname, char *newname)
 
 		mowgli_dictionary_add(sess->userdict, user->nick, user);
 
-		fe_userlist_move (sess, user, 0);
+		fe_userlist_move (sess, user, userlist_index(sess, userlist_sort_normal, user));
 		fe_userlist_numbers (sess);
 
 		return 1;
@@ -350,7 +394,7 @@ userlist_add (struct session *sess, char *name, char *hostname)
 	if (user->me)
 		sess->me = user;
 
-	fe_userlist_insert (sess, user, 0, FALSE);
+	fe_userlist_insert (sess, user, userlist_index(sess, userlist_sort_normal, user), FALSE);
 	fe_userlist_numbers (sess);
 }
 
