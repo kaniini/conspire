@@ -23,6 +23,12 @@ AC_PROG_LN_S
 AM_PROG_AS
 AM_PROG_MKDIR_P
 
+AC_PATH_PROG(RM, rm)
+AC_PATH_PROG(MV, mv)
+AC_PATH_PROG(CP, cp)
+AC_PATH_PROG(AR, ar)
+AC_PATH_PROG(RANLIB, ranlib)
+
 dnl -----------------------------------------------------------
 dnl Language Support
 dnl -----------------------------------------------------------

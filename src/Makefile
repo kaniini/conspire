@@ -1,4 +1,4 @@
 include ../buildsys.mk
 include ../extra.mk
 
-SUBDIRS = common pixmaps fe-gtk fe-bot $(XCHATWRAP)
+SUBDIRS = common pixmaps libcontrast fe-gtk fe-bot $(XCHATWRAP)

@@ -15,5 +15,5 @@ include ../../buildsys.mk
 include ../../extra.mk
 
 CPPFLAGS += -I../../.. $(COMMON_CFLAGS) $(GUI_CFLAGS) -DG_DISABLE_CAST_CHECKS -DLOCALEDIR=\"$(localedir)\"
-LIBS += -L../common -lconspire $(COMMON_LIBS) $(GUI_LIBS)
+LIBS += -L../common -lconspire -L../libcontrast -lcontrast $(COMMON_LIBS) $(GUI_LIBS)
 
