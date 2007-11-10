@@ -721,6 +721,32 @@ process_numeric (session * sess, int n,
 		notify_set_online (serv, word[4]);
 		break;
 
+	case 730:
+	case 731:
+		{
+			char *nick, *p;
+			for(nick = strtok(word[4] +1, ","); nick != NULL; nick = strtok(NULL, ","))
+			{
+				p = strchr(nick, '!');
+				if(p != NULL)
+					*p = '\0';
+				if(n == 731) 
+					notify_set_offline(serv, nick, serv->inside_monitor);
+				else
+					notify_set_online(serv, nick);
+			}
+		}
+		break;
+              
+	case 732:
+			if(!serv->inside_monitor)
+				goto def;
+			break;
+	case 733:
+			if(serv->inside_monitor)
+				serv->inside_monitor = FALSE;
+			break;
+
 	default:
 
 		if (serv->inside_whois && word[4][0])

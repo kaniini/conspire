@@ -26,6 +26,9 @@ void notify_set_online (server * serv, char *nick);
 void notify_set_offline (server * serv, char *nick, int quiet);
 void notify_send_watches (server * serv);
 
+/* the MONITOR stuff */
+void notify_send_monitor (server * serv);
+
 /* the general stuff */
 void notify_adduser (char *name, char *networks);
 int notify_deluser (char *name);
