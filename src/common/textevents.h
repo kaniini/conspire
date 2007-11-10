@@ -39,7 +39,7 @@ N_("%C22*%O$t%C22Channel $1 modes: $2")},
 "$4%C21%B%H<%H$1%H>%H%O%C21$t$2"},
 
 {"Channel Notice", pevt_channotice_help, 131, 
-"%C28-%C29$1/$2%C28-%O$t$3"},
+"%C27-%C29$1/$2%C27-%O$t$3"},
 
 {"Connected", pevt_generic_none_help, 0, 
 N_("%C22*%O$t%C22Connected. Now logging in...")},
@@ -213,7 +213,7 @@ N_("%C22*%O$tNo such DCC.")},
 N_("%C22*%O$tNo process is currently running")},
 
 {"Notice", pevt_notice_help, 130, 
-"%C28-%C29$1%C28-%O$t$2"},
+"%C27-%C29$1%C27-%O$t$2"},
 
 {"Notice Send", pevt_ctcpsend_help, 130, 
 "%C19>%O$1%C19<%O$t$2"},
@@ -249,7 +249,7 @@ N_("%C22*%O$tPing reply from $1: $2 second(s)")},
 N_("%C22*%O$tNo ping reply for $1 seconds, disconnecting.")},
 
 {"Private Message", pevt_privmsg_help, 131, 
-"%C28*%C29$3$1%C28*$t%O$2"},
+"%C27*%C29$3$1%C27*$t%O$2"},
 
 {"Private Message to Dialog", pevt_privmsg_help, 131, 
 "%C18%H<%H$3$1%H>%H%O$t$2"},
@@ -264,7 +264,7 @@ N_("%C23*%O$t%C23$1 ($3) has quit: $2")},
 N_("%C19*%O$t%C19$1 sets mode: $2%O")},
 
 {"Receive Wallops", pevt_privmsg_help, 2, 
-N_("%C28-%C29$1/Wallops%C28-%O$t$2")},
+N_("%C27-%C29$1/Wallops%C27-%O$t$2")},
 
 {"Resolving User", pevt_resolvinguser_help, 2, 
 N_("%C22*%O$tLooking up IP number for%C26 $1%O...")},
@@ -306,40 +306,40 @@ N_("%C22*%O$tCannot join%C26 %B$1 %O(User limit reached).")},
 N_("%C22*%O$t%C26Users on $1:%C $2")},
 
 {"WhoIs Authenticated", pevt_whois_auth_help, 3, 
-N_("%C22*%O$t%C28[%O$1%C28] %O$2%C27 $3")},
+N_("%C22*%O$t%C27[%O$1%C27] %O$2%C27 $3")},
 
 {"WhoIs Away Line", pevt_whois_away_help, 2, 
-N_("%C22*%O$t%C28[%O$1%C28] %Cis away %C30(%O$2%O%C30)")},
+N_("%C22*%O$t%C27[%O$1%C27] %Cis away %C30(%O$2%O%C30)")},
 
 {"WhoIs Channel", pevt_whois_channels_help, 2, 
-N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
+N_("%C22*%O$t%C27[%O$1%C27]%O $2")},
 
 {"WhoIs Oper Line", pevt_whois_oper_help, 2, 
-N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
+N_("%C22*%O$t%C27[%O$1%C27]%O $2")},
 
 {"WhoIs End", pevt_whois_end_help, 1, 
-N_("%C22*%O$t%C28[%O$1%C28] %OEnd of WHOIS list.")},
+N_("%C22*%O$t%C27[%O$1%C27] %OEnd of WHOIS list.")},
 
 {"WhoIs Identified", pevt_whoisid_help, 2, 
-N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
+N_("%C22*%O$t%C27[%O$1%C27]%O $2")},
 
 {"WhoIs Idle Line", pevt_whois_idle_help, 2, 
-N_("%C22*%O$t%C28[%O$1%C28]%O idle%C26 $2")},
+N_("%C22*%O$t%C27[%O$1%C27]%O idle%C26 $2")},
 
 {"WhoIs Idle Line with Signon", pevt_whois_idle_signon_help, 3, 
-N_("%C22*%O$t%C28[%O$1%C28]%O idle%C26 $2%O, signon:%C26 $3")},
+N_("%C22*%O$t%C27[%O$1%C27]%O idle%C26 $2%O, signon:%C26 $3")},
 
 {"WhoIs Name Line", pevt_whois_name_help, 4, 
-N_("%C22*%O$t%C28[%O$1%C28] %C30(%O$2@$3%C30)%O: $4")},
+N_("%C22*%O$t%C27[%O$1%C27] %C30(%O$2@$3%C30)%O: $4")},
 
 {"WhoIs Real Host", pevt_whoisrealhost_help, 4, 
-N_("%C22*%O$t%C28[%O$1%C28] %Oreal user@host%C27 $2%O, real IP%C27 $3")},
+N_("%C22*%O$t%C27[%O$1%C27] %Oreal user@host%C27 $2%O, real IP%C27 $3")},
 
 {"WhoIs Server Line", pevt_whois_server_help, 2, 
-N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
+N_("%C22*%O$t%C27[%O$1%C27]%O $2")},
 
 {"WhoIs Special", pevt_whoisid_help, 3, 
-N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
+N_("%C22*%O$t%C27[%O$1%C27]%O $2")},
 
 {"You Join", pevt_join_help, 3, 
 N_("%C19*%O$t%C19Now talking on $2")},
