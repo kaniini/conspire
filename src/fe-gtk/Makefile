@@ -14,6 +14,6 @@ SRCS = about.c ascii.c banlist.c chanlist.c chanview.c custom-list.c \
 include ../../buildsys.mk
 include ../../extra.mk
 
-CPPFLAGS += -I../../.. $(GUI_CFLAGS) -DG_DISABLE_CAST_CHECKS -DLOCALEDIR=\"$(localedir)\"
+CPPFLAGS += -I../../.. $(COMMON_CFLAGS) $(GUI_CFLAGS) -DG_DISABLE_CAST_CHECKS -DLOCALEDIR=\"$(localedir)\"
 LIBS += -L../common -lconspire $(COMMON_LIBS) $(GUI_LIBS)
 

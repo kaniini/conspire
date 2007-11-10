@@ -166,16 +166,11 @@ fe_url_add (const char *urltext)
 	}
 }
 
-static int
-populate_cb (char *urltext, gpointer userdata)
-{
-	fe_url_add (urltext);
-	return TRUE;
-}
-
 void
 url_opengui ()
 {
+	mowgli_dictionary_iteration_state_t state;
+	char *urltext;
 	GtkWidget *vbox, *hbox, *view;
 
 	if (urlgrabberwindow)
@@ -206,5 +201,8 @@ url_opengui ()
 
 	gtk_widget_show (urlgrabberwindow);
 
-	tree_foreach (url_tree, (tree_traverse_func *)populate_cb, NULL);
+	MOWGLI_DICTIONARY_FOREACH(urltext, &state, url_dict)
+	{
+		fe_url_add(urltext);
+	}
 }

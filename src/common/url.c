@@ -1,5 +1,7 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/*
+ * libconspire: advanced lightweight irc client library
+ * Copyright (c) 2007 William Pitcock <nenolod@sacredspiral.co.uk>
+ * Portions copyright (c) 1998-2007 Peter Zelezny.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,40 +25,32 @@
 #include "xchat.h"
 #include "cfgfiles.h"
 #include "fe.h"
-#include "tree.h"
 #include "url.h"
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
 
-void *url_tree = NULL;
+mowgli_dictionary_t *url_dict = NULL;
 
-
-static int
-url_free (char *url, void *data)
+static void
+url_destroy_cb(mowgli_dictionary_elem_t *elem, void *privdata)
 {
-	free (url);
-	return TRUE;
+	g_return_if_fail(elem->data != NULL);
+	g_free(elem->data);
 }
 
 void
-url_clear (void)
+url_clear(void)
 {
-	tree_foreach (url_tree, (tree_traverse_func *)url_free, NULL);
-	tree_destroy (url_tree);
-	url_tree = NULL;
-}
-
-static int
-url_save_cb (char *url, FILE *fd)
-{
-	fprintf (fd, "%s\n", url);
-	return TRUE;
+	mowgli_dictionary_destroy(url_dict, url_destroy_cb, NULL);
+	url_dict = mowgli_dictionary_create(g_ascii_strcasecmp);
 }
 
 void
 url_save (const char *fname, const char *mode, gboolean fullpath)
 {
+	mowgli_dictionary_iteration_state_t state;
+	char *url;
 	FILE *fd;
 
 	if (fullpath)
@@ -66,7 +60,14 @@ url_save (const char *fname, const char *mode, gboolean fullpath)
 	if (fd == NULL)
 		return;
 
-	tree_foreach (url_tree, (tree_traverse_func *)url_save_cb, fd);
+	MOWGLI_DICTIONARY_FOREACH(url, &state, url_dict)
+	{
+		if (url == NULL)
+			continue;
+
+		fputs(url, fd);
+	}
+
 	fclose (fd);
 }
 
@@ -74,16 +75,6 @@ void
 url_autosave (void)
 {
 	url_save ("url.save", "a", FALSE);
-}
-
-static int
-url_find (char *urltext)
-{
-	int pos;
-
-	if (tree_find (url_tree, urltext, (tree_cmp_func *)strcasecmp, NULL, &pos))
-		return 1;
-	return 0;
 }
 
 static void
@@ -103,17 +94,17 @@ url_add (char *urltext, int len)
 	if (data[len - 1] == ')')	/* chop trailing ) */
 		data[len - 1] = 0;
 
-	if (url_find (data))
+	if (!url_dict)
+		url_dict = mowgli_dictionary_create(g_ascii_strcasecmp);
+
+	if (mowgli_dictionary_find(url_dict, data) != NULL)
 	{
 		free (data);
 		return;
 	}
 
-	if (!url_tree)
-		url_tree = tree_new ((tree_cmp_func *)strcasecmp, NULL);
-
-	tree_insert (url_tree, data);
-	fe_url_add (data);
+	mowgli_dictionary_add(url_dict, data, data);
+	fe_url_add(data);
 }
 
 /* check if a word is clickable. This is called on mouse motion events, so

@@ -82,6 +82,8 @@ void *xchat_realloc (char *old, int len, char *file, int line);
 #  define _(x) (x)
 #endif
 
+#include <mowgli.h>
+
 struct nbexec
 {
 	int myfd;

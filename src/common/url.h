@@ -1,7 +1,7 @@
 #ifndef XCHAT_URL_H
 #define XCHAT_URL_H
 
-extern void *url_tree;
+extern mowgli_dictionary_t *url_dict;
 
 #define WORD_URL     1
 #define WORD_NICK    2
