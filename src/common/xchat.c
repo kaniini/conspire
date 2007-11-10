@@ -970,6 +970,7 @@ main (int argc, char *argv[])
 	int ret;
 
 	g_thread_init(NULL);
+	mowgli_init();
 	
 	srand (time (0));	/* CL: do this only once! */
 
