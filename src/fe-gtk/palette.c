@@ -25,6 +25,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <gtk/gtk.h>
+
 #include "fe-gtk.h"
 #include "palette.h"
 
@@ -32,7 +34,9 @@
 #include "../common/util.h"
 #include "../common/cfgfiles.h"
 
+#include "../libcontrast/contrast.h"
 
+/* defaults: will probably be overridden from gtk theme. */
 GdkColor colors[] = {
 	/* colors for xtext */
 	{0, 0xFFFF, 0xFFFF, 0xFFFF}, /* 00 white */
@@ -83,7 +87,6 @@ GdkColor colors[] = {
 };
 #define MAX_COL 40
 
-
 void
 palette_alloc (GtkWidget * widget)
 {
@@ -98,6 +101,43 @@ palette_alloc (GtkWidget * widget)
 		for (i = MAX_COL; i >= 0; i--)
 			gdk_colormap_alloc_color (cmap, &colors[i], FALSE, TRUE);
 	}
+}
+
+static void
+optimize_palette(GdkColor background)
+{
+	colors[ 0] = colors[16] = contrast_render_foreground_color(background, CONTRAST_COLOR_WHITE);
+	colors[ 1] = colors[17] = contrast_render_foreground_color(background, CONTRAST_COLOR_BLACK);
+	colors[ 2] = colors[18] = contrast_render_foreground_color(background, CONTRAST_COLOR_BLUE);
+	colors[ 3] = colors[19] = contrast_render_foreground_color(background, CONTRAST_COLOR_GREEN);
+	colors[ 4] = colors[20] = contrast_render_foreground_color(background, CONTRAST_COLOR_BROWN);
+	colors[ 5] = colors[21] = contrast_render_foreground_color(background, CONTRAST_COLOR_RED);
+	colors[ 6] = colors[22] = contrast_render_foreground_color(background, CONTRAST_COLOR_PURPLE);
+	colors[ 7] = colors[23] = contrast_render_foreground_color(background, CONTRAST_COLOR_ORANGE);
+	colors[ 8] = colors[24] = contrast_render_foreground_color(background, CONTRAST_COLOR_YELLOW);
+	colors[ 9] = colors[25] = contrast_render_foreground_color(background, CONTRAST_COLOR_LIGHT_GREEN);
+	colors[10] = colors[26] = contrast_render_foreground_color(background, CONTRAST_COLOR_AQUA);
+	colors[11] = colors[27] = contrast_render_foreground_color(background, CONTRAST_COLOR_LIGHT_BLUE);
+	colors[12] = colors[28] = contrast_render_foreground_color(background, CONTRAST_COLOR_BLUE);
+	colors[13] = colors[29] = contrast_render_foreground_color(background, CONTRAST_COLOR_MAGENTA);
+	colors[14] = colors[30] = contrast_render_foreground_color(background, CONTRAST_COLOR_GREY);
+	colors[15] = colors[31] = contrast_render_foreground_color(background, CONTRAST_COLOR_LIGHT_GREY);
+}
+
+static void
+extract_theme_colors(void)
+{
+	GtkWidget *w = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_widget_ensure_style(w);
+
+	colors[32] = w->style->text[GTK_STATE_SELECTED];
+	colors[33] = w->style->base[GTK_STATE_SELECTED];
+	colors[34] = w->style->text[GTK_STATE_NORMAL];
+	colors[35] = w->style->base[GTK_STATE_NORMAL];
+	colors[36] = w->style->text[GTK_STATE_INSENSITIVE];
+
+	/* optimize mIRC colours for background */
+	optimize_palette(colors[33]);
 }
 
 /* maps XChat 2.0.x colors to current */
@@ -124,6 +164,9 @@ palette_load (void)
 	int red, green, blue;
 	int upgrade = FALSE;
 
+#if 1
+	extract_theme_colors();
+#else
 	fh = xchat_open_file ("colors.conf", O_RDONLY, 0, 0);
 	if (fh == -1)
 	{
@@ -198,6 +241,7 @@ palette_load (void)
 		}
 		close (fh);
 	}
+#endif
 }
 
 void
