@@ -28,7 +28,7 @@
 #include "xchatc.h"
 #include "util.h"
 
-
+#if 0
 static int
 nick_cmp_az_ops (server *serv, struct User *user1, struct User *user2)
 {
@@ -51,47 +51,23 @@ nick_cmp_az_ops (server *serv, struct User *user1, struct User *user2)
 
 	return serv->p_cmp (user1->nick, user2->nick);
 }
-
-static int
-nick_cmp_alpha (struct User *user1, struct User *user2, server *serv)
-{
-	return serv->p_cmp (user1->nick, user2->nick);
-}
-
-static int
-nick_cmp (struct User *user1, struct User *user2, server *serv)
-{
-	switch (prefs.userlist_sort)
-	{
-	case 0:
-		return nick_cmp_az_ops (serv, user1, user2);
-	case 1:
-		return serv->p_cmp (user1->nick, user2->nick);
-	case 2:
-		return -1 * nick_cmp_az_ops (serv, user1, user2);
-	case 3:
-		return -1 * serv->p_cmp (user1->nick, user2->nick);
-	default:
-		return -1;
-	}
-}
+#endif
 
 /*
  insert name in appropriate place in linked list. Returns row number or:
   -1: duplicate
 */
 
-static int
+static gboolean
 userlist_insertname (session *sess, struct User *newuser)
 {
-	if (!sess->usertree)
-	{
-		sess->usertree = tree_new ((tree_cmp_func *)nick_cmp, sess->server);
-		sess->usertree_alpha = tree_new ((tree_cmp_func *)nick_cmp_alpha, sess->server);
-	}
+	/* comparator may have changed due to CASEMAPPING, so set a new one. --nenolod */
+	if (!sess->userdict)
+		sess->userdict = mowgli_dictionary_create(sess->server->p_cmp);
+	else
+		mowgli_dictionary_set_comparator_func(sess->userdict, sess->server->p_cmp);
 
-	tree_insert (sess->usertree_alpha, newuser);
-	return tree_insert (sess->usertree, newuser);
+	return mowgli_dictionary_add(sess->userdict, newuser->nick, newuser) != NULL;
 }
 
 void
@@ -138,8 +114,8 @@ userlist_add_hostname (struct session *sess, char *nick, char *hostname,
 	return 0;
 }
 
-static int
-free_user (struct User *user, gpointer data)
+static void
+free_user(struct User *user)
 {
 	if (user->realname)
 		free (user->realname);
@@ -148,19 +124,22 @@ free_user (struct User *user, gpointer data)
 	if (user->servername)
 		free (user->servername);
 	free (user);
+}
 
-	return TRUE;
+static void
+free_user_cb(mowgli_dictionary_elem_t *elem, gpointer data)
+{
+	struct User *user = (struct User *) elem->data;
+
+	free_user(user);
 }
 
 void
 userlist_free (session *sess)
 {
-	tree_foreach (sess->usertree, (tree_traverse_func *)free_user, NULL);
-	tree_destroy (sess->usertree);
-	tree_destroy (sess->usertree_alpha);
+	mowgli_dictionary_destroy(sess->userdict, free_user_cb, NULL);
 
-	sess->usertree = NULL;
-	sess->usertree_alpha = NULL;
+	sess->userdict = NULL;
 	sess->me = NULL;
 
 	sess->ops = 0;
@@ -177,20 +156,11 @@ userlist_clear (session *sess)
 	fe_userlist_numbers (sess);
 }
 
-static int
-find_cmp (const char *name, struct User *user, server *serv)
-{
-	return serv->p_cmp ((char *)name, user->nick);
-}
-
 struct User *
 userlist_find (struct session *sess, char *name)
 {
-	int pos;
-
-	if (sess->usertree_alpha)
-		return tree_find (sess->usertree_alpha, name,
-								(tree_cmp_func *)find_cmp, sess->server, &pos);
+	if (sess->userdict)
+		return mowgli_dictionary_retrieve(sess->userdict, name);
 
 	return NULL;
 }
@@ -242,17 +212,12 @@ userlist_update_mode (session *sess, char *name, char mode, char sign)
 	int access;
 	int offset = 0;
 	int level;
-	int pos;
 	char prefix;
 	struct User *user;
 
 	user = userlist_find (sess, name);
 	if (!user)
 		return;
-
-	/* remove from binary trees, before we loose track of it */
-	tree_remove (sess->usertree, user, &pos);
-	tree_remove (sess->usertree_alpha, user, &pos);
 
 	/* which bit number is affected? */
 	access = mode_access (sess->server, mode, &prefix);
@@ -281,12 +246,7 @@ userlist_update_mode (session *sess, char *name, char mode, char sign)
 	/* update the various counts using the CHANGED prefix only */
 	update_counts (sess, user, prefix, level, offset);
 
-	/* insert it back into its new place */
-	tree_insert (sess->usertree_alpha, user);
-	pos = tree_insert (sess->usertree, user);
-
-	/* let GTK move it too */
-	fe_userlist_move (sess, user, pos);
+	fe_userlist_rehash (sess, user);
 	fe_userlist_numbers (sess);
 }
 
@@ -294,18 +254,16 @@ int
 userlist_change (struct session *sess, char *oldname, char *newname)
 {
 	struct User *user = userlist_find (sess, oldname);
-	int pos;
 
 	if (user)
 	{
-		tree_remove (sess->usertree, user, &pos);
-		tree_remove (sess->usertree_alpha, user, &pos);
+		mowgli_dictionary_delete(sess->userdict, oldname);
 
 		g_strlcpy (user->nick, newname, NICKLEN);
 
-		tree_insert (sess->usertree_alpha, user);
+		mowgli_dictionary_add(sess->userdict, user->nick, user);
 
-		fe_userlist_move (sess, user, tree_insert (sess->usertree, user));
+		fe_userlist_rehash (sess, user);
 		fe_userlist_numbers (sess);
 
 		return 1;
@@ -318,7 +276,6 @@ int
 userlist_remove (struct session *sess, char *name)
 {
 	struct User *user;
-	int pos;
 
 	user = userlist_find (sess, name);
 	if (!user)
@@ -337,9 +294,8 @@ userlist_remove (struct session *sess, char *name)
 	if (user == sess->me)
 		sess->me = NULL;
 
-	tree_remove (sess->usertree, user, &pos);
-	tree_remove (sess->usertree_alpha, user, &pos);
-	free_user (user, NULL);
+	mowgli_dictionary_delete(sess->userdict, name);
+	free_user (user);
 
 	return TRUE;
 }
@@ -348,7 +304,8 @@ void
 userlist_add (struct session *sess, char *name, char *hostname)
 {
 	struct User *user;
-	int row, prefix_chars;
+	int prefix_chars;
+	gboolean ret;
 	unsigned int acc;
 
 	acc = nick_access (sess->server, name, &prefix_chars);
@@ -371,16 +328,13 @@ userlist_add (struct session *sess, char *name, char *hostname)
 	/* is it me? */
 	if (!sess->server->p_cmp (user->nick, sess->server->nick))
 		user->me = TRUE;
-	row = userlist_insertname (sess, user);
 
-	/* duplicate? some broken servers trigger this */
-	if (row == -1)
+	ret = userlist_insertname(sess, user);
+	if (ret == FALSE)
 	{
-		if (user->hostname)
-			free (user->hostname);
-		free (user);
+		free_user(user);
 		return;
-	}
+	}	
 
 	sess->total++;
 
@@ -396,51 +350,42 @@ userlist_add (struct session *sess, char *name, char *hostname)
 	if (user->me)
 		sess->me = user;
 
-	fe_userlist_insert (sess, user, row, FALSE);
+	fe_userlist_insert (sess, user, 0, FALSE);
 	fe_userlist_numbers (sess);
-}
-
-static int
-rehash_cb (struct User *user, session *sess)
-{
-	fe_userlist_rehash (sess, user);
-	return TRUE;
 }
 
 void
 userlist_rehash (session *sess)
 {
-	tree_foreach (sess->usertree_alpha, (tree_traverse_func *)rehash_cb, sess);
-}
+	struct User *user;
+	mowgli_dictionary_iteration_state_t state;
 
-static int
-flat_cb (struct User *user, GSList **list)
-{
-	*list = g_slist_prepend (*list, user);
-	return TRUE;
+	MOWGLI_DICTIONARY_FOREACH(user, &state, sess->userdict)
+		fe_userlist_rehash(sess, user);
 }
 
 GSList *
 userlist_flat_list (session *sess)
 {
 	GSList *list = NULL;
+	struct User *user;
+	mowgli_dictionary_iteration_state_t state;
 
-	tree_foreach (sess->usertree_alpha, (tree_traverse_func *)flat_cb, &list);
-	return g_slist_reverse (list);
-}
+	MOWGLI_DICTIONARY_FOREACH(user, &state, sess->userdict)
+		list = g_slist_prepend(list, user);
 
-static int
-double_cb (struct User *user, GList **list)
-{
-	*list = g_list_prepend(*list, user);
-	return TRUE;
+	return g_slist_reverse(list);
 }
 
 GList *
 userlist_double_list(session *sess)
 {
 	GList *list = NULL;
+	struct User *user;
+	mowgli_dictionary_iteration_state_t state;
 
-	tree_foreach (sess->usertree_alpha, (tree_traverse_func *)double_cb, &list);
+	MOWGLI_DICTIONARY_FOREACH(user, &state, sess->userdict)
+		list = g_list_prepend(list, user);
+
 	return list;
 }
