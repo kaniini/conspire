@@ -246,7 +246,7 @@ userlist_update_mode (session *sess, char *name, char mode, char sign)
 	/* update the various counts using the CHANGED prefix only */
 	update_counts (sess, user, prefix, level, offset);
 
-	fe_userlist_rehash (sess, user);
+	fe_userlist_move (sess, user, 0);
 	fe_userlist_numbers (sess);
 }
 
@@ -263,7 +263,7 @@ userlist_change (struct session *sess, char *oldname, char *newname)
 
 		mowgli_dictionary_add(sess->userdict, user->nick, user);
 
-		fe_userlist_rehash (sess, user);
+		fe_userlist_move (sess, user, 0);
 		fe_userlist_numbers (sess);
 
 		return 1;
