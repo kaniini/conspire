@@ -204,6 +204,18 @@ gnome=no
 AC_PATH_PROG(GCONFTOOL, gconftool-2, no)
 
 dnl *********************************************************************
+dnl ** Mowgli ***********************************************************
+dnl *********************************************************************
+
+PKG_CHECK_MODULES(MOWGLI, [libmowgli >= 0.6.0], mowgli=yes, mowgli=no)
+if test "$mowgli" = no; then
+	AC_MSG_ERROR("Cannot find acceptable version of mowgli. http://atheme.org/projects/mowgli.shml")
+fi
+
+COMMON_CFLAGS="$GLIB_CFLAGS $MOWGLI_CFLAGS"
+COMMON_LIBS="$GLIB_LIBS $MOWGLI_LIBS"
+
+dnl *********************************************************************
 dnl ** IPv6 *************************************************************
 dnl *********************************************************************
 
