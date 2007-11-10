@@ -294,7 +294,7 @@ fi
 
 if test "$openssl" = "yes"; then
 	ssl_c="ssl.c"
-	COMMON_LIBS="$LIBS -lssl -lcrypto"
+	COMMON_LIBS="$COMMON_LIBS -lssl -lcrypto"
 fi
 
 AC_SUBST(ssl_c)
