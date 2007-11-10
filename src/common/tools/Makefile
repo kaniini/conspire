@@ -1,8 +1,8 @@
-include ../../../buildsys.mk
-
 SRCS = make-te.c
 
-PROG = make-te
+PROG_NOINST = make-te
+
+include ../../../buildsys.mk
 
 CFLAGS += $(COMMON_CFLAGS)
 
