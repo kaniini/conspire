@@ -136,6 +136,8 @@ extract_theme_colors(void)
 	colors[35] = w->style->base[GTK_STATE_NORMAL];
 	colors[36] = w->style->text[GTK_STATE_INSENSITIVE];
 
+	gtk_widget_destroy(w);
+
 	/* optimize mIRC colours for background */
 	optimize_palette(colors[33]);
 }
