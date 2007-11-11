@@ -89,16 +89,7 @@ userlist_index(session *sess, struct User *user)
 {
 	_ENTER;
 
-#ifdef NOTYET
 	gint ret = mowgli_dictionary_get_linear_index(sess->userdict, user->nick);
-#else
-	gint ret;
-	GList *list = userlist_double_list(sess);
-	list = g_list_sort_with_data(list, userlist_sort_normal, sess);
-
-	ret = g_list_index(list, user);
-	g_list_free(list);
-#endif
 
 	_LEAVE ret;
 }
@@ -117,16 +108,12 @@ userlist_insertname (session *sess, struct User *newuser)
 	if (!sess->userdict)
 	{
 		sess->userdict = mowgli_dictionary_create(sess->server->p_cmp);
-#ifdef NOTYET
 		mowgli_dictionary_set_linear_comparator_func(sess->userdict, userlist_sort_normal, sess);
-#endif
 	}
 	else
 	{
 		mowgli_dictionary_set_comparator_func(sess->userdict, sess->server->p_cmp);
-#ifdef NOTYET
 		mowgli_dictionary_set_linear_comparator_func(sess->userdict, userlist_sort_normal, sess);
-#endif
 	}
 
 	_LEAVE mowgli_dictionary_add(sess->userdict, newuser->nick, newuser) != NULL;
