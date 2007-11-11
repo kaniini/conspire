@@ -36,6 +36,8 @@ nick_cmp_az_ops (server *serv, const struct User *user1, const struct User *user
 	unsigned int access2 = user2->access;
 	int pos;
 
+	_ENTER;
+
 	if (access1 != access2)
 	{
 		for (pos = 0; pos < USERACCESS_SIZE; pos++)
@@ -43,13 +45,13 @@ nick_cmp_az_ops (server *serv, const struct User *user1, const struct User *user
 			if ((access1&(1<<pos)) && (access2&(1<<pos)))
 				break;
 			if ((access1&(1<<pos)) && !(access2&(1<<pos)))
-				return -1;
+				_LEAVE -1;
 			if (!(access1&(1<<pos)) && (access2&(1<<pos)))
-				return 1;
+				_LEAVE 1;
 		}
 	}
 
-	return serv->p_cmp (user1->nick, user2->nick);
+	_LEAVE serv->p_cmp (user1->nick, user2->nick);
 }
 
 static int
@@ -59,6 +61,8 @@ userlist_sort_normal(gconstpointer l, gconstpointer r, gpointer user_data)
 	const struct User *right = (const struct User *) r;
 	session *sess            = (session *) user_data;
 
+	_ENTER;
+
 	g_return_val_if_fail(sess != NULL, 0);
 	g_return_val_if_fail(left != NULL, 0);
 	g_return_val_if_fail(right != NULL, 0);
@@ -66,18 +70,18 @@ userlist_sort_normal(gconstpointer l, gconstpointer r, gpointer user_data)
 	switch (prefs.userlist_sort)
 	{
 	case 0:
-		return nick_cmp_az_ops (sess->server, left, right);
+		_LEAVE nick_cmp_az_ops (sess->server, left, right);
 	case 1:
-		return sess->server->p_cmp (left->nick, right->nick);
+		_LEAVE sess->server->p_cmp (left->nick, right->nick);
 	case 2:
-		return -1 * nick_cmp_az_ops (sess->server, left, right);
+		_LEAVE -1 * nick_cmp_az_ops (sess->server, left, right);
 	case 3:
-		return -1 * sess->server->p_cmp (left->nick, right->nick);
+		_LEAVE -1 * sess->server->p_cmp (left->nick, right->nick);
 	default:
-		return -1;
+		_LEAVE -1;
 	}
 
-	return -1;
+	_LEAVE -1;
 }
 
 /*
@@ -86,6 +90,8 @@ userlist_sort_normal(gconstpointer l, gconstpointer r, gpointer user_data)
 gint
 userlist_index(session *sess, GCompareDataFunc func, struct User *user)
 {
+	_ENTER;
+
 	gint ret;
 	GList *list = userlist_double_list(sess);
 	list = g_list_sort_with_data(list, func, sess);
@@ -93,7 +99,7 @@ userlist_index(session *sess, GCompareDataFunc func, struct User *user)
 	ret = g_list_index(list, user);
 	g_list_free(list);
 
-	return ret;
+	_LEAVE ret;
 }
 
 /*
@@ -104,19 +110,23 @@ userlist_index(session *sess, GCompareDataFunc func, struct User *user)
 static gboolean
 userlist_insertname (session *sess, struct User *newuser)
 {
+	_ENTER;
+
 	/* comparator may have changed due to CASEMAPPING, so set a new one. --nenolod */
 	if (!sess->userdict)
 		sess->userdict = mowgli_dictionary_create(sess->server->p_cmp);
 	else
 		mowgli_dictionary_set_comparator_func(sess->userdict, sess->server->p_cmp);
 
-	return mowgli_dictionary_add(sess->userdict, newuser->nick, newuser) != NULL;
+	_LEAVE mowgli_dictionary_add(sess->userdict, newuser->nick, newuser) != NULL;
 }
 
 void
 userlist_set_away (struct session *sess, char *nick, unsigned int away)
 {
 	struct User *user;
+
+	_ENTER;
 
 	user = userlist_find (sess, nick);
 	if (user)
@@ -128,6 +138,8 @@ userlist_set_away (struct session *sess, char *nick, unsigned int away)
 			fe_userlist_rehash (sess, user);
 		}
 	}
+
+	_LEAVE;
 }
 
 int
@@ -135,6 +147,8 @@ userlist_add_hostname (struct session *sess, char *nick, char *hostname,
 							  char *realname, char *servername, unsigned int away)
 {
 	struct User *user;
+
+	_ENTER;
 
 	user = userlist_find (sess, nick);
 	if (user)
@@ -152,14 +166,17 @@ userlist_add_hostname (struct session *sess, char *nick, char *hostname,
 			fe_userlist_rehash (sess, user);
 		}
 		user->away = away;
-		return 1;
+		_LEAVE 1;
 	}
-	return 0;
+
+	_LEAVE 0;
 }
 
 static void
 free_user(struct User *user)
 {
+	_ENTER;
+
 	if (user->realname)
 		free (user->realname);
 	if (user->hostname)
@@ -167,6 +184,8 @@ free_user(struct User *user)
 	if (user->servername)
 		free (user->servername);
 	free (user);
+
+	_LEAVE;
 }
 
 static void
@@ -174,12 +193,18 @@ free_user_cb(mowgli_dictionary_elem_t *elem, gpointer data)
 {
 	struct User *user = (struct User *) elem->data;
 
+	_ENTER;
+
 	free_user(user);
+
+	_LEAVE;
 }
 
 void
 userlist_free (session *sess)
 {
+	_ENTER;
+
 	if (sess->userdict != NULL)
 		mowgli_dictionary_destroy(sess->userdict, free_user_cb, NULL);
 
@@ -190,23 +215,31 @@ userlist_free (session *sess)
 	sess->hops = 0;
 	sess->voices = 0;
 	sess->total = 0;
+
+	_LEAVE;
 }
 
 void
 userlist_clear (session *sess)
 {
+	_ENTER;
+
 	fe_userlist_clear (sess);
 	userlist_free (sess);
 	fe_userlist_numbers (sess);
+
+	_LEAVE;
 }
 
 struct User *
 userlist_find (struct session *sess, char *name)
 {
-	if (sess->userdict)
-		return mowgli_dictionary_retrieve(sess->userdict, name);
+	_ENTER;
 
-	return NULL;
+	if (sess->userdict)
+		_LEAVE mowgli_dictionary_retrieve(sess->userdict, name);
+
+	_LEAVE NULL;
 }
 
 struct User *
@@ -215,24 +248,34 @@ userlist_find_global (struct server *serv, char *name)
 	struct User *user;
 	session *sess;
 	GSList *list = sess_list;
-	while (list)
+
+	_ENTER;
+
+	MOWGLI_LIST_FOREACH(list, sess_list)
 	{
 		sess = (session *) list->data;
+
 		if (sess->server == serv)
 		{
 			user = userlist_find (sess, name);
+
 			if (user)
-				return user;
+				_LEAVE user;
 		}
-		list = list->next;
 	}
-	return 0;
+
+	_LEAVE NULL;
 }
 
 static void
 update_counts (session *sess, struct User *user, char prefix,
 					int level, int offset)
 {
+	_ENTER;
+
+	_DEBUG("before: sess->ops = %d, sess->hops = %d, sess->voices = %d",
+		sess->ops, sess->hops, sess->voices);
+
 	switch (prefix)
 	{
 	case '@':
@@ -248,6 +291,11 @@ update_counts (session *sess, struct User *user, char prefix,
 		sess->voices += offset;
 		break;
 	}
+
+	_DEBUG("after : sess->ops = %d, sess->hops = %d, sess->voices = %d",
+		sess->ops, sess->hops, sess->voices);
+
+	_LEAVE;
 }
 
 void
@@ -259,9 +307,11 @@ userlist_update_mode (session *sess, char *name, char mode, char sign)
 	char prefix;
 	struct User *user;
 
+	_ENTER;
+
 	user = userlist_find (sess, name);
 	if (!user)
-		return;
+		_LEAVE;
 
 	/* which bit number is affected? */
 	access = mode_access (sess->server, mode, &prefix);
@@ -292,12 +342,16 @@ userlist_update_mode (session *sess, char *name, char mode, char sign)
 
 	fe_userlist_move (sess, user, userlist_index(sess, userlist_sort_normal, user));
 	fe_userlist_numbers (sess);
+
+	_LEAVE;
 }
 
 int
 userlist_change (struct session *sess, char *oldname, char *newname)
 {
 	struct User *user = userlist_find (sess, oldname);
+
+	_ENTER;
 
 	if (user)
 	{
@@ -310,10 +364,10 @@ userlist_change (struct session *sess, char *oldname, char *newname)
 		fe_userlist_move (sess, user, userlist_index(sess, userlist_sort_normal, user));
 		fe_userlist_numbers (sess);
 
-		return 1;
+		_LEAVE 1;
 	}
 
-	return 0;
+	_LEAVE 0;
 }
 
 int
@@ -321,9 +375,14 @@ userlist_remove (struct session *sess, char *name)
 {
 	struct User *user;
 
+	_ENTER;
+
 	user = userlist_find (sess, name);
 	if (!user)
-		return FALSE;
+		_LEAVE FALSE;
+
+	_DEBUG("before: sess->ops = %d, sess->hops = %d, sess->voices = %d",
+		sess->ops, sess->hops, sess->voices);
 
 	if (user->voice)
 		sess->voices--;
@@ -341,7 +400,10 @@ userlist_remove (struct session *sess, char *name)
 	mowgli_dictionary_delete(sess->userdict, name);
 	free_user (user);
 
-	return TRUE;
+	_DEBUG("after : sess->ops = %d, sess->hops = %d, sess->voices = %d",
+		sess->ops, sess->hops, sess->voices);
+
+	_LEAVE TRUE;
 }
 
 void
@@ -351,6 +413,11 @@ userlist_add (struct session *sess, char *name, char *hostname)
 	int prefix_chars;
 	gboolean ret;
 	unsigned int acc;
+
+	_ENTER;
+
+	_DEBUG("before: sess->ops = %d, sess->hops = %d, sess->voices = %d",
+		sess->ops, sess->hops, sess->voices);
 
 	acc = nick_access (sess->server, name, &prefix_chars);
 
@@ -363,11 +430,12 @@ userlist_add (struct session *sess, char *name, char *hostname)
 
 	/* assume first char is the highest level nick prefix */
 	if (prefix_chars)
-		user->prefix[0] = name[0];
+		user->prefix[0] = *name;
 
 	/* add it to our linked list */
 	if (hostname)
 		user->hostname = strdup (hostname);
+
 	g_strlcpy (user->nick, name + prefix_chars, NICKLEN);
 	/* is it me? */
 	if (!sess->server->p_cmp (user->nick, sess->server->nick))
@@ -377,17 +445,16 @@ userlist_add (struct session *sess, char *name, char *hostname)
 	if (ret == FALSE)
 	{
 		free_user(user);
-		return;
+		_LEAVE;
 	}	
 
 	sess->total++;
 
 	/* most ircds don't support multiple modechars infront of the nickname
-      for /NAMES - though they should. */
+	   for /NAMES - though they should. */
 	while (prefix_chars)
 	{
-		update_counts (sess, user, name[0], TRUE, 1);
-		name++;
+		update_counts (sess, user, *name++, TRUE, 1);
 		prefix_chars--;
 	}
 
@@ -396,6 +463,11 @@ userlist_add (struct session *sess, char *name, char *hostname)
 
 	fe_userlist_insert (sess, user, userlist_index(sess, userlist_sort_normal, user), FALSE);
 	fe_userlist_numbers (sess);
+
+	_DEBUG("after : sess->ops = %d, sess->hops = %d, sess->voices = %d",
+		sess->ops, sess->hops, sess->voices);
+
+	_LEAVE;
 }
 
 void
@@ -404,8 +476,12 @@ userlist_rehash (session *sess)
 	struct User *user;
 	mowgli_dictionary_iteration_state_t state;
 
+	_ENTER;
+
 	MOWGLI_DICTIONARY_FOREACH(user, &state, sess->userdict)
 		fe_userlist_rehash(sess, user);
+
+	_LEAVE;
 }
 
 GSList *
@@ -415,10 +491,12 @@ userlist_flat_list (session *sess)
 	struct User *user;
 	mowgli_dictionary_iteration_state_t state;
 
+	_ENTER;
+
 	MOWGLI_DICTIONARY_FOREACH(user, &state, sess->userdict)
 		list = g_slist_prepend(list, user);
 
-	return g_slist_reverse(list);
+	_LEAVE g_slist_reverse(list);
 }
 
 GList *
@@ -428,8 +506,10 @@ userlist_double_list(session *sess)
 	struct User *user;
 	mowgli_dictionary_iteration_state_t state;
 
+	_ENTER;
+
 	MOWGLI_DICTIONARY_FOREACH(user, &state, sess->userdict)
 		list = g_list_prepend(list, user);
 
-	return list;
+	_LEAVE list;
 }

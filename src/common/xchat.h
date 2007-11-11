@@ -11,6 +11,7 @@
 #ifndef XCHAT_H
 #define XCHAT_H
 
+#include "debug.h"
 #include "history.h"
 
 #ifndef HAVE_SNPRINTF
