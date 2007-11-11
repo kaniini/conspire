@@ -397,7 +397,7 @@ pevt_discon_help
 Found IP
 XP_TE_FOUNDIP
 pevt_foundip_help
-%C27*$t%C27Found your IP: [$1]
+%C27*$t%C27The IRC server is reporting your IP as $1.
 1
 
 Generic Message
@@ -409,13 +409,13 @@ $1$t$2
 Ignore Add
 XP_TE_IGNOREADD
 pevt_ignoreaddremove_help
-%O%C11$1%O added to ignore list.
+%C27*$t%C27$1 removed from ignore list.
 1
 
 Ignore Changed
 XP_TE_IGNORECHANGE
 pevt_ignoreaddremove_help
-Ignore on %C11$1%O changed.
+%C27*$t%C27Ignore on $1 has been changed.
 1
 
 Ignore Footer
@@ -433,7 +433,7 @@ pevt_generic_none_help
 Ignore Remove
 XP_TE_IGNOREREMOVE
 pevt_ignoreaddremove_help
-%O%C11$1%O removed from ignore list.
+%C27*$t%C27$1 removed from ignore list.
 1
 
 Ignorelist Empty
@@ -445,25 +445,25 @@ pevt_generic_none_help
 Invite
 XP_TE_INVITE
 pevt_generic_channel_help
-%C27*$t%C27Cannot join%C11 %B$1 %O(Channel is invite only).
+%C27*$t%C27Cannot join $1 (Channel is invite only).
 1
 
 Invited
 XP_TE_INVITED
 pevt_invited_help
-%C27*$t%C27You have been invited to %C11$1%C by %C11$2%C (%C11$3%C)
+%C27*$t%C27You have been invited to $1 by $2 ($3).
 3
 
 Join
 XP_TE_JOIN
 pevt_join_help
--%C10-%C11>%O$t%B$1%B %C14(%C10$3%C14)%C has joined $2
+%C27*$t%C27$1 ($3) has joined $2
 3
 
 Keyword
 XP_TE_KEYWORD
 pevt_generic_channel_help
-%C27*$t%C27Cannot join%C11 %B$1 %O(Requires keyword).
+%C27*$t%C27Cannot join $1 (Requires keyword).
 1
 
 Kick
@@ -673,19 +673,19 @@ pevt_sconnect_help
 Topic
 XP_TE_TOPIC
 pevt_topic_help
-%C27*$t%C27Topic for %C11$1%C is %C11$2%O
+%C27*$t%C27Topic for $1 is $2
 2
 
 Topic Change
 XP_TE_NEWTOPIC
 pevt_newtopic_help
-%C27*$t%C27$1 has changed the topic to: $2%O
+%C27*$t%C27$1 has changed the topic to: $2
 3
 
 Topic Creation
 XP_TE_TOPICDATE
 pevt_topicdate_help
-%C27*$t%C27Topic for %C11$1%C set by %C11$2%C at %C11$3%O
+%C27*$t%C27Topic for $1 set by $2 at $3
 3
 
 Unknown Host
