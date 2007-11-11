@@ -55,11 +55,11 @@ nick_cmp_az_ops (server *serv, const struct User *user1, const struct User *user
 }
 
 static int
-userlist_sort_normal(gconstpointer l, gconstpointer r, gpointer user_data)
+userlist_sort_normal(gpointer l, gpointer r, gpointer user_data)
 {
-	const struct User *left  = (const struct User *) l;
-	const struct User *right = (const struct User *) r;
-	session *sess            = (session *) user_data;
+	struct User *left  = (struct User *) l;
+	struct User *right = (struct User *) r;
+	session *sess      = (session *) user_data;
 
 	_ENTER;
 
@@ -84,20 +84,21 @@ userlist_sort_normal(gconstpointer l, gconstpointer r, gpointer user_data)
 	_LEAVE -1;
 }
 
-/*
- * XXX: this could be tons more efficient, but it will do for now. --nenolod
- */
 gint
-userlist_index(session *sess, GCompareDataFunc func, struct User *user)
+userlist_index(session *sess, struct User *user)
 {
 	_ENTER;
 
+#ifdef NOTYET
+	gint ret = mowgli_dictionary_get_linear_index(sess->userdict, user->nick);
+#else
 	gint ret;
 	GList *list = userlist_double_list(sess);
-	list = g_list_sort_with_data(list, func, sess);
+	list = g_list_sort_with_data(list, userlist_sort_normal, sess);
 
 	ret = g_list_index(list, user);
 	g_list_free(list);
+#endif
 
 	_LEAVE ret;
 }
@@ -114,9 +115,19 @@ userlist_insertname (session *sess, struct User *newuser)
 
 	/* comparator may have changed due to CASEMAPPING, so set a new one. --nenolod */
 	if (!sess->userdict)
+	{
 		sess->userdict = mowgli_dictionary_create(sess->server->p_cmp);
+#ifdef NOTYET
+		mowgli_dictionary_set_linear_comparator_func(sess->userdict, userlist_sort_normal, sess);
+#endif
+	}
 	else
+	{
 		mowgli_dictionary_set_comparator_func(sess->userdict, sess->server->p_cmp);
+#ifdef NOTYET
+		mowgli_dictionary_set_linear_comparator_func(sess->userdict, userlist_sort_normal, sess);
+#endif
+	}
 
 	_LEAVE mowgli_dictionary_add(sess->userdict, newuser->nick, newuser) != NULL;
 }
@@ -310,6 +321,7 @@ userlist_update_mode (session *sess, char *name, char mode, char sign)
 	int level;
 	char prefix;
 	struct User *u;
+	void *p;
 
 	_ENTER;
 
@@ -351,7 +363,14 @@ userlist_update_mode (session *sess, char *name, char mode, char sign)
 	/* update the various counts using the CHANGED prefix only */
 	update_counts (sess, u, prefix, level, offset);
 
-	fe_userlist_move (sess, u, userlist_index(sess, userlist_sort_normal, u));
+	/* criteria has changed: update the linear dictionary's node
+	   position for this user. */
+	p = mowgli_dictionary_delete(sess->userdict, u->nick);
+	_DEBUG("is null? [%p] [%p]", p, mowgli_dictionary_find(sess->userdict, u->nick));
+	p = mowgli_dictionary_add(sess->userdict, u->nick, u);
+	_DEBUG("is null? [%p]", p);
+
+	fe_userlist_move (sess, u, userlist_index(sess, u));
 	fe_userlist_numbers (sess);
 
 	_LEAVE;
@@ -372,7 +391,7 @@ userlist_change (struct session *sess, char *oldname, char *newname)
 
 		mowgli_dictionary_add(sess->userdict, user->nick, user);
 
-		fe_userlist_move (sess, user, userlist_index(sess, userlist_sort_normal, user));
+		fe_userlist_move (sess, user, userlist_index(sess, user));
 		fe_userlist_numbers (sess);
 
 		_LEAVE 1;
@@ -472,7 +491,7 @@ userlist_add (struct session *sess, char *name, char *hostname)
 	if (user->me)
 		sess->me = user;
 
-	fe_userlist_insert (sess, user, userlist_index(sess, userlist_sort_normal, user), FALSE);
+	fe_userlist_insert (sess, user, userlist_index(sess, user), FALSE);
 	fe_userlist_numbers (sess);
 
 	_DEBUG("after : sess->ops = %d, sess->hops = %d, sess->voices = %d",
