@@ -201,16 +201,16 @@ N_("%C27*$t%C27$1 deleted from notify list.")},
 N_("%C27*$t%C27Disconnected ($1).")},
 
 {"Found IP", pevt_foundip_help, 1, 
-N_("%C27*$t%C27Found your IP: [$1]")},
+N_("%C27*$t%C27The IRC server is reporting your IP as $1.")},
 
 {"Generic Message", pevt_genmsg_help, 2, 
 N_("$1$t$2")},
 
 {"Ignore Add", pevt_ignoreaddremove_help, 1, 
-N_("%O%C11$1%O added to ignore list.")},
+N_("%C27*$t%C27$1 removed from ignore list.")},
 
 {"Ignore Changed", pevt_ignoreaddremove_help, 1, 
-N_("Ignore on %C11$1%O changed.")},
+N_("%C27*$t%C27Ignore on $1 has been changed.")},
 
 {"Ignore Footer", pevt_generic_none_help, 0, 
 N_("%C24,18                                                              ")},
@@ -219,22 +219,22 @@ N_("%C24,18                                                              ")},
 N_("%C24,18 Hostmask                  PRIV NOTI CHAN CTCP DCC  INVI UNIG ")},
 
 {"Ignore Remove", pevt_ignoreaddremove_help, 1, 
-N_("%O%C11$1%O removed from ignore list.")},
+N_("%C27*$t%C27$1 removed from ignore list.")},
 
 {"Ignorelist Empty", pevt_generic_none_help, 0, 
 N_("  Ignore list is empty.")},
 
 {"Invite", pevt_generic_channel_help, 1, 
-N_("%C27*$t%C27Cannot join%C11 %B$1 %O(Channel is invite only).")},
+N_("%C27*$t%C27Cannot join $1 (Channel is invite only).")},
 
 {"Invited", pevt_invited_help, 3, 
-N_("%C27*$t%C27You have been invited to %C11$1%C by %C11$2%C (%C11$3%C)")},
+N_("%C27*$t%C27You have been invited to $1 by $2 ($3).")},
 
 {"Join", pevt_join_help, 3, 
-N_("-%C10-%C11>%O$t%B$1%B %C14(%C10$3%C14)%C has joined $2")},
+N_("%C27*$t%C27$1 ($3) has joined $2")},
 
 {"Keyword", pevt_generic_channel_help, 1, 
-N_("%C27*$t%C27Cannot join%C11 %B$1 %O(Requires keyword).")},
+N_("%C27*$t%C27Cannot join $1 (Requires keyword).")},
 
 {"Kick", pevt_kick_help, 4, 
 N_("%C27*$t%C27$1 has kicked $2 from $3: $4")},
@@ -339,13 +339,13 @@ N_("%C27*$t%O$1%O")},
 N_("%C27*$t%C27Stopped previous connection attempt (pid=$1)")},
 
 {"Topic", pevt_topic_help, 2, 
-N_("%C27*$t%C27Topic for %C11$1%C is %C11$2%O")},
+N_("%C27*$t%C27Topic for $1 is $2")},
 
 {"Topic Change", pevt_newtopic_help, 3, 
-N_("%C27*$t%C27$1 has changed the topic to: $2%O")},
+N_("%C27*$t%C27$1 has changed the topic to: $2")},
 
 {"Topic Creation", pevt_topicdate_help, 3, 
-N_("%C27*$t%C27Topic for %C11$1%C set by %C11$2%C at %C11$3%O")},
+N_("%C27*$t%C27Topic for $1 set by $2 at $3")},
 
 {"Unknown Host", pevt_generic_none_help, 0, 
 N_("%C27*$t%C27Unknown host. Maybe you misspelled it?")},
