@@ -102,6 +102,7 @@ get_user_icon (server *serv, struct User *user)
 void
 fe_userlist_numbers (session *sess)
 {
+	fe_set_title(sess);
 }
 
 static void

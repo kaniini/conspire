@@ -234,12 +234,16 @@ userlist_clear (session *sess)
 struct User *
 userlist_find (struct session *sess, char *name)
 {
+	struct User *user = NULL;
+
 	_ENTER;
 
-	if (sess->userdict)
-		_LEAVE mowgli_dictionary_retrieve(sess->userdict, name);
+	if (sess->userdict != NULL)
+		user = mowgli_dictionary_retrieve(sess->userdict, name);
 
-	_LEAVE NULL;
+	_DEBUG("user = %p", user);
+
+	_LEAVE user;
 }
 
 struct User *
@@ -255,7 +259,7 @@ userlist_find_global (struct server *serv, char *name)
 	{
 		sess = (session *) list->data;
 
-		if (sess->server == serv)
+		if (sess->server == serv && sess->userdict != NULL)
 		{
 			user = userlist_find (sess, name);
 
@@ -305,13 +309,19 @@ userlist_update_mode (session *sess, char *name, char mode, char sign)
 	int offset = 0;
 	int level;
 	char prefix;
-	struct User *user;
+	struct User *u;
 
 	_ENTER;
 
-	user = userlist_find (sess, name);
-	if (!user)
+	_DEBUG("looking up <%s>", name);
+
+	if ((u = userlist_find(sess, name)) == NULL)
+	{
+		_DEBUG("unknown user <%s>", name);
 		_LEAVE;
+	}
+
+	_DEBUG("found <%s> in tree as [%p]", name, u);
 
 	/* which bit number is affected? */
 	access = mode_access (sess->server, mode, &prefix);
@@ -319,28 +329,29 @@ userlist_update_mode (session *sess, char *name, char mode, char sign)
 	if (sign == '+')
 	{
 		level = TRUE;
-		if (!(user->access & (1 << access)))
+		if (!(u->access & (1 << access)))
 		{
 			offset = 1;
-			user->access |= (1 << access);
+			u->access |= (1 << access);
 		}
-	} else
+	}
+	else
 	{
 		level = FALSE;
-		if (user->access & (1 << access))
+		if (u->access & (1 << access))
 		{
 			offset = -1;
-			user->access &= ~(1 << access);
+			u->access &= ~(1 << access);
 		}
 	}
 
 	/* now what is this users highest prefix? e.g. @ for ops */
-	user->prefix[0] = get_nick_prefix (sess->server, user->access);
+	u->prefix[0] = get_nick_prefix (sess->server, u->access);
 
 	/* update the various counts using the CHANGED prefix only */
-	update_counts (sess, user, prefix, level, offset);
+	update_counts (sess, u, prefix, level, offset);
 
-	fe_userlist_move (sess, user, userlist_index(sess, userlist_sort_normal, user));
+	fe_userlist_move (sess, u, userlist_index(sess, userlist_sort_normal, u));
 	fe_userlist_numbers (sess);
 
 	_LEAVE;

@@ -26,7 +26,7 @@
 #define _ENTER _DEBUG("enter")
 #define _LEAVE _DEBUG("leave"); return 
 #define _MESSAGE(tag, string, ...) do { fprintf(stderr, "conspire: %s: %s:%d (%s): " string "\n", \
-    tag, __FILE__, __LINE__, __PRETTY_FUNCTION__, ##__VA_ARGS__); } while(0)
+    tag, __FILE__, __LINE__, __PRETTY_FUNCTION__, ##__VA_ARGS__); fflush(stderr); } while(0)
 
 #define _ERROR(...) _MESSAGE("ERROR", __VA_ARGS__)
 #define _WARN(...)  _MESSAGE("WARN", __VA_ARGS__)
