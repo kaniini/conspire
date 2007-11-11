@@ -396,7 +396,7 @@ N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
 N_("%C27*$t%C27Now talking on %C11$2%O")},
 
 {"You Kicked", pevt_ukick_help, 4, 
-N_("%C27*$t%C27You have been kicked from $2 by $3 ($4%O)")},
+N_("%C27*$t%C27You have been kicked from $2 by $3: $4")},
 
 {"You Part", pevt_part_help, 3, 
 N_("%C27*$t%C27You have left channel $3")},
@@ -411,7 +411,7 @@ N_("%C27*$t%C27You have left channel $3: $4")},
 N_("%C27*$t%C27You've invited %C11$1%C to %C11$2%C (%C11$3%C)")},
 
 {"Your Message", pevt_chanmsg_help, 4, 
-N_("%C6%H<%H$1%H>%H%O$t$2%O")},
+N_("%C31%H<%H$1%H>%H%O$t$2%O")},
 
 {"Your Nick Changing", pevt_uchangenick_help, 2, 
 N_("%C27*$t%C27You are now known as $2")},
