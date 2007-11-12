@@ -366,6 +366,7 @@ const struct prefs vars[] = {
 	{"gui_auto_open_dialog", P_OFFINT (autodialog), TYPE_BOOL},
 	{"gui_auto_open_recv", P_OFFINT (autoopendccrecvwindow), TYPE_BOOL},
 	{"gui_auto_open_send", P_OFFINT (autoopendccsendwindow), TYPE_BOOL},
+	{"gui_colors_from_gtk", P_OFFINT (gtk_colors), TYPE_BOOL},
 	{"gui_dialog_height", P_OFFINT (dialog_height), TYPE_INT},
 	{"gui_dialog_left", P_OFFINT (dialog_left), TYPE_INT},
 	{"gui_dialog_top", P_OFFINT (dialog_top), TYPE_INT},
@@ -575,6 +576,7 @@ load_config (void)
 	prefs.wordwrap = 1;
 	prefs.autosave = 1;
 	prefs.autodialog = 1;
+	prefs.gtk_colors = 1;
 	prefs.gui_input_spell = 1;
 	prefs.autoreconnect = 1;
 	prefs.recon_delay = 10;

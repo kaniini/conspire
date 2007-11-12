@@ -192,6 +192,7 @@ struct xchatprefs
 	unsigned int perc_ascii;
 	unsigned int autosave;
 	unsigned int autodialog;
+	unsigned int gtk_colors;
 	unsigned int autosave_url;
 	unsigned int autoreconnect;
 	unsigned int autoreconnectonfail;
