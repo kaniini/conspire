@@ -50,6 +50,7 @@
 #include "xchatc.h"
 #include "servlist.h"
 #include "server.h"
+#include "tree.h"
 #include "outbound.h"
 
 
@@ -3194,6 +3195,22 @@ cmd_url (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static int
+userlist_cb (struct User *user, session *sess)
+{
+	time_t lt;
+
+	if (!user->lasttalk)
+		lt = 0;
+	else
+		lt = time (0) - user->lasttalk;
+	PrintTextf (sess,
+				"\00306%s\t\00314[\00310%-38s\00314] \017ov\0033=\017%d%d away=%u lt\0033=\017%d\n",
+				user->nick, user->hostname, user->op, user->voice, user->away, lt);
+
+	return TRUE;
+}
+
+static int
 cmd_uselect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int idx = 2;
@@ -3219,21 +3236,27 @@ static int
 cmd_userlist (struct session *sess, char *tbuf, char *word[],
 				  char *word_eol[])
 {
-	mowgli_dictionary_iteration_state_t state;
-	struct User *user;
+	tree_foreach (sess->usertree, (tree_traverse_func *)userlist_cb, sess);
+	return TRUE;
+}
 
-	MOWGLI_DICTIONARY_FOREACH(user, &state, sess->userdict)
+static int
+wallchop_cb (struct User *user, multidata *data)
+{
+	if (user->op)
 	{
-		time_t lt;
-
-		if (!user->lasttalk)
-			lt = 0;
-		else
-			lt = time (0) - user->lasttalk;
-
-		PrintTextf (sess,
-				"\00306%s\t\00314[\00310%-38s\00314] \017ov\0033=\017%d%d away=%u lt\0033=\017%d\n",
-				user->nick, user->hostname, user->op, user->voice, user->away, lt);
+		if (data->i)
+			strcat (data->tbuf, ",");
+		strcat (data->tbuf, user->nick);
+		data->i++;
+	}
+	if (data->i == 5)
+	{
+		data->i = 0;
+		sprintf (data->tbuf + strlen (data->tbuf),
+					" :[@%s] %s", data->sess->channel, data->reason);
+		data->sess->server->p_raw (data->sess->server, data->tbuf);
+		strcpy (data->tbuf, "NOTICE ");
 	}
 
 	return TRUE;
@@ -3243,37 +3266,23 @@ static int
 cmd_wallchop (struct session *sess, char *tbuf, char *word[],
 				  char *word_eol[])
 {
-	struct User *user;
-	mowgli_dictionary_iteration_state_t state;
-	int i = 0;
+	multidata data;
 
 	if (!(*word_eol[2]))
 		return FALSE;
 
 	strcpy (tbuf, "NOTICE ");
 
-	MOWGLI_DICTIONARY_FOREACH(user, &state, sess->userdict)
-	{
-		if (user->op)
-		{
-			if (i != 0)
-				strcat (tbuf, ",");
-			strcat (tbuf, user->nick);
-			i++;
-		}
+	data.reason = word_eol[2];
+	data.tbuf = tbuf;
+	data.i = 0;
+	data.sess = sess;
+	tree_foreach (sess->usertree, (tree_traverse_func*)wallchop_cb, &data);
 
-		if (i == 5)
-		{
-			i = 0;
-			sprintf (tbuf + strlen (tbuf), " :[@%s] %s", sess->channel, word_eol[2]);
-			sess->server->p_raw (sess->server, tbuf);
-			strcpy (tbuf, "NOTICE ");
-		}
-	}
-
-	if (i != 0)
+	if (data.i)
 	{
-		sprintf (tbuf + strlen (tbuf), " :[@%s] %s", sess->channel, word_eol[2]);
+		sprintf (tbuf + strlen (tbuf),
+					" :[@%s] %s", sess->channel, word_eol[2]);
 		sess->server->p_raw (sess->server, tbuf);
 	}
 
@@ -3405,7 +3414,6 @@ const struct commands xc_cmds[] = {
 	{"EXECSTOP", cmd_execs, 0, 0, 1, N_("EXECSTOP, sends the process SIGSTOP")},
 	{"EXECWRITE", cmd_execw, 0, 0, 1, N_("EXECWRITE, sends data to the processes stdin")},
 #endif
-	{"EXIT", cmd_killall, 0, 0, 1, N_("EXIT, exits conspire immediately")},
 	{"FLUSHQ", cmd_flushq, 0, 0, 1,
 	 N_("FLUSHQ, flushes the current server's send queue")},
 	{"GATE", cmd_gate, 0, 0, 1,
@@ -3829,14 +3837,34 @@ typedef struct
 	char *tbuf;
 } nickdata;
 
+static int
+nick_comp_cb (struct User *user, nickdata *data)
+{
+	int lenu;
+
+	if (!rfc_ncasecmp (user->nick, data->nick, data->len))
+	{
+		lenu = strlen (user->nick);
+		if (lenu == data->len)
+		{
+			snprintf (data->tbuf, TBUFSIZE, "%s%s", user->nick, data->space);
+			data->len = -1;
+			return FALSE;
+		} else if (lenu < data->bestlen)
+		{
+			data->bestlen = lenu;
+			data->best = user;
+		}
+	}
+
+	return TRUE;
+}
+
 static void
 perform_nick_completion (struct session *sess, char *cmd, char *tbuf)
 {
 	int len;
 	char *space = strchr (cmd, ' ');
-	mowgli_dictionary_iteration_state_t state;
-	struct User *user;
-
 	if (space && space != cmd)
 	{
 		if (space[-1] == prefs.nick_suffix[0] && space - 1 != cmd)
@@ -3856,26 +3884,7 @@ perform_nick_completion (struct session *sess, char *cmd, char *tbuf)
 				data.best = NULL;
 				data.tbuf = tbuf;
 				data.space = space - 1;
-
-				MOWGLI_DICTIONARY_FOREACH(user, &state, sess->userdict)
-				{
-					int lenu;
-
-					if (!rfc_ncasecmp (user->nick, data.nick, data.len))
-					{
-						lenu = strlen (user->nick);
-						if (lenu == data.len)
-						{
-							snprintf (data.tbuf, TBUFSIZE, "%s%s", user->nick, data.space);
-							data.len = -1;
-							break;
-						} else if (lenu < data.bestlen)
-						{
-							data.bestlen = lenu;
-							data.best = user;
-						}
-					}
-				}
+				tree_foreach (sess->usertree, (tree_traverse_func *)nick_comp_cb, &data);
 
 				if (data.len == -1)
 					return;

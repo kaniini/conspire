@@ -311,7 +311,8 @@ struct xchatprefs
 typedef struct session
 {
 	struct server *server;
-	mowgli_dictionary_t *userdict;		/* dictionary of users (do bsort to sort the data here) */
+	void *usertree;
+	void *usertree_alpha;
 	struct User *me;					/* points to myself in the usertree */
 	char channel[CHANLEN];
 	char waitchannel[CHANLEN];		  /* waiting to join channel (/join sent) */
