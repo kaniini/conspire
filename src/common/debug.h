@@ -21,7 +21,7 @@
 #ifndef _CONSPIRE_DEBUG_H__GUARD
 #define _CONSPIRE_DEBUG_H__GUARD
 
-#define CONSPIRE_DEBUG
+#undef CONSPIRE_DEBUG
 
 #define _ENTER _DEBUG("enter")
 #define _LEAVE _DEBUG("leave"); return 
