@@ -3414,6 +3414,7 @@ const struct commands xc_cmds[] = {
 	{"EXECSTOP", cmd_execs, 0, 0, 1, N_("EXECSTOP, sends the process SIGSTOP")},
 	{"EXECWRITE", cmd_execw, 0, 0, 1, N_("EXECWRITE, sends data to the processes stdin")},
 #endif
+	{"EXIT", cmd_killall, 0, 0, 1, N_("EXIT terminates all connections and closes Conspire.")},
 	{"FLUSHQ", cmd_flushq, 0, 0, 1,
 	 N_("FLUSHQ, flushes the current server's send queue")},
 	{"GATE", cmd_gate, 0, 0, 1,
@@ -3444,7 +3445,6 @@ const struct commands xc_cmds[] = {
 	 N_("KICK <nick>, kicks the nick from the current channel (needs chanop)")},
 	{"KICKBAN", cmd_kickban, 1, 1, 1,
 	 N_("KICKBAN <nick>, bans then kicks the nick from the current channel (needs chanop)")},
-	{"KILLALL", cmd_killall, 0, 0, 1, "KILLALL, immediately exit"},
 	{"LAGCHECK", cmd_lagcheck, 0, 0, 1,
 	 N_("LAGCHECK, forces a new lag check")},
 	{"LASTLOG", cmd_lastlog, 0, 0, 1,
