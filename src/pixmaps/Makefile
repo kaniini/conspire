@@ -4,4 +4,4 @@ include ../../buildsys.mk
 
 PACKAGE = conspire/pixmaps
 
-x
+
