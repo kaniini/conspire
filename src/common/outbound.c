@@ -1807,7 +1807,7 @@ cmd_gate (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (*server_name)
 	{
 		char *port = word[3];
-#ifdef USE_OPENSSL
+#if defined (USE_OPENSSL) || defined (GNUTLS)
 		serv->use_ssl = FALSE;
 #endif
 		server_fill_her_up (serv);
@@ -2706,7 +2706,7 @@ cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	else if (*word[2])
 	{
 		int offset = 0;
-#ifdef USE_OPENSSL
+#if defined (GNUTLS) || defined (USE_OPENSSL)
 		int use_ssl = FALSE;
 
 		if (strcmp (word[2], "-ssl") == 0)
@@ -2844,7 +2844,7 @@ static int
 parse_irc_url (char *url, char *server_name[], char *port[], char *channel[], int *use_ssl)
 {
 	char *co;
-#ifdef USE_OPENSSL
+#if defined (USE_OPENSSL) || defined (GNUTLS)
 	if (strncasecmp ("ircs://", url, 7) == 0)
 	{
 		*use_ssl = TRUE;
@@ -2856,7 +2856,7 @@ parse_irc_url (char *url, char *server_name[], char *port[], char *channel[], in
 	if (strncasecmp ("irc://", url, 6) == 0)
 	{
 		*server_name = url + 6;
-#ifdef USE_OPENSSL
+#if defined (USE_OPENSSL) || defined (GNUTLS)
 urlserv:
 #endif
 		/* check for port */
@@ -2896,7 +2896,7 @@ cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	int is_url = TRUE;
 	server *serv = sess->server;
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(GNUTLS)
 	/* BitchX uses -ssl, mIRC uses -e, let's support both */
 	if (strcmp (word[2], "-ssl") == 0 || strcmp (word[2], "-e") == 0)
 	{
@@ -2937,7 +2937,7 @@ cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (port[0] == '+')
 	{
 		port++;
-#ifdef USE_OPENSSL
+#if defined (USE_OPENSSL) || defined (GNUTLS)
 		use_ssl = TRUE;
 #endif
 	}
@@ -2946,7 +2946,7 @@ cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	{
 		g_strlcpy (serv->password, pass, sizeof (serv->password));
 	}
-#ifdef USE_OPENSSL
+#if defined (USE_OPENSSL) || defined (GNUTLS)
 	serv->use_ssl = use_ssl;
 	serv->accept_invalid_cert = TRUE;
 #endif
@@ -2979,7 +2979,7 @@ cmd_servchan (struct session *sess, char *tbuf, char *word[],
 {
 	int offset = 0;
 
-#ifdef USE_OPENSSL
+#if defined (USE_OPENSSL) || defined (GNUTLS)
 	if (strcmp (word[2], "-ssl") == 0)
 		offset++;
 #endif
@@ -3482,7 +3482,7 @@ const struct commands xc_cmds[] = {
 	 N_("QUIT [<reason>], disconnects from the current server")},
 	{"QUOTE", cmd_quote, 1, 0, 1,
 	 N_("QUOTE <text>, sends the text in raw form to the server")},
-#ifdef USE_OPENSSL
+#if defined (USE_OPENSSL) || defined (GNUTLS)
 	{"RECONNECT", cmd_reconnect, 0, 0, 1,
 	 N_("RECONNECT [-ssl] [<host>] [<port>] [<password>], Can be called just as /RECONNECT to reconnect to the current server or with /RECONNECT ALL to reconnect to all the open servers")},
 #else
@@ -3494,14 +3494,14 @@ const struct commands xc_cmds[] = {
 	{"SAY", cmd_say, 0, 0, 1,
 	 N_("SAY <text>, sends the text to the object in the current window")},
 	{"SEND", cmd_send, 0, 0, 1, N_("SEND <nick> [<file>]")},
-#ifdef USE_OPENSSL
+#if defined (USE_OPENSSL) || defined (GNUTLS)
 	{"SERVCHAN", cmd_servchan, 0, 0, 1,
 	 N_("SERVCHAN [-ssl] <host> <port> <channel>, connects and joins a channel")},
 #else
 	{"SERVCHAN", cmd_servchan, 0, 0, 1,
 	 N_("SERVCHAN <host> <port> <channel>, connects and joins a channel")},
 #endif
-#ifdef USE_OPENSSL
+#if defined (USE_OPENSSL) || defined (GNUTLS)
 	{"SERVER", cmd_server, 0, 0, 1,
 	 N_("SERVER [-ssl] <host> [<port>] [<password>], connects to a server, the default port is 6667 for normal connections, and 9999 for ssl connections")},
 #else

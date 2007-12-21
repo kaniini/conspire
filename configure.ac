@@ -119,12 +119,17 @@ AC_ARG_ENABLE(socks,
         socks=$enableval, socks=no)
 
 AC_ARG_ENABLE(ipv6,
-[  --enable-ipv6           enable IPv6 (default: no)],
+[  --disable-ipv6            disable IPv6 (default: enabled)],
         ipv6=$enableval, ipv6=yes)
 
 AC_ARG_ENABLE(openssl,
 [  --enable-openssl[=PATH]   enable use of openSSL],
         openssl=$enableval, openssl=yes)
+
+AC_ARG_ENABLE(gnutls,
+[  --enable-gnutls           enable use of GnuTLS],
+        gnutls=$enableval, [gnutls=yes
+	openssl=no])
 
 AC_ARG_ENABLE(gtkfe,
 [  --disable-gtkfe         disable building gtk frontend],
@@ -303,10 +308,22 @@ if test "$openssl" = "yes"; then
 	COMMON_LIBS="$COMMON_LIBS -lssl -lcrypto"
 fi
 
-AC_SUBST(ssl_c)
-
 BUILDSYS_PROG_IMPLIB
 BUILDSYS_SHARED_LIB
+
+dnl ** GnuTLS
+
+if test "$gnutls" = "yes"; then
+	PKG_CHECK_MODULES(GNUTLS, [gnutls], , [gnutls=no])
+fi
+
+if test "$gnutls" = "yes"; then
+	ssl_c=""
+	COMMON_LIBS="$COMMON_LIBS $GNUTLS_LIBS"
+	CPPFLAGS="$CPPFLAGS -DGNUTLS $GNUTLS_CFLAGS"
+fi
+
+AC_SUBST(ssl_c)
 
 dnl *********************************************************************
 dnl ** PLUGIN ***********************************************************

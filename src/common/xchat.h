@@ -22,6 +22,11 @@
 #define vsnprintf g_vsnprintf
 #endif
 
+#ifdef GNUTLS
+#undef USE_OPENSSL
+#include <gnutls/gnutls.h>
+#endif
+
 #ifdef USE_DEBUG
 #define malloc(n) xchat_malloc(n, __FILE__, __LINE__)
 #define realloc(n, m) xchat_realloc(n, m, __FILE__, __LINE__)
@@ -429,6 +434,10 @@ typedef struct server
 #else
 	void *ssl;
 #endif
+#ifdef GNUTLS
+	gnutls_session_t gnutls_session;
+	gnutls_certificate_credentials_t gnutls_x509cred;
+#endif
 	int childread;
 	int childwrite;
 	int childpid;
@@ -511,7 +520,7 @@ typedef struct server
 	unsigned int using_cp1255:1;	/* encoding is CP1255/WINDOWS-1255? */
 	unsigned int using_irc:1;		/* encoding is "IRC" (CP1252/UTF-8 hybrid)? */
 	int use_who:1;				/* whether to use WHO command to get dcc_ip */
-#ifdef USE_OPENSSL
+#if defined (USE_OPENSSL) || defined(GNUTLS)
 	int use_ssl:1;					  /* is server SSL capable? */
 	int accept_invalid_cert:1;	  /* ignore result of server's cert. verify */
 #endif

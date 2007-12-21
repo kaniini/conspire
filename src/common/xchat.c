@@ -970,6 +970,10 @@ main (int argc, char *argv[])
 
 	g_thread_init(NULL);
 	mowgli_init();
+
+#ifdef GNUTLS
+	gnutls_global_init ();
+#endif
 	
 	srand (time (0));	/* CL: do this only once! */
 
@@ -996,6 +1000,10 @@ main (int argc, char *argv[])
 #ifdef USE_OPENSSL
 	if (ctx)
 		_SSL_context_free (ctx);
+#endif
+
+#ifdef GNUTLS
+	gnutls_global_deinit ();
 #endif
 
 #ifdef USE_DEBUG

@@ -70,7 +70,7 @@ static void server_connect (server *serv, char *hostname, int port, int no_login
    send via SSL. server/dcc both use this function. */
 
 int
-tcp_send_real (void *ssl, int sok, char *encoding, int using_irc, char *buf, int len)
+tcp_send_real (server *serv, int sok, char *encoding, int using_irc, char *buf, int len)
 {
 	int ret;
 	char *locale;
@@ -101,24 +101,39 @@ tcp_send_real (void *ssl, int sok, char *encoding, int using_irc, char *buf, int
 	if (locale)
 	{
 		len = loc_len;
+
+#ifdef GNUTLS
+		if (serv && serv->gnutls_session)
+			ret = gnutls_record_send(serv->gnutls_session, buf, len);
+		else
+			ret = send(sok, buf, len, 0);
+#else
 #ifdef USE_OPENSSL
-		if (!ssl)
+		if (!serv || !serv->ssl)
 			ret = send (sok, locale, len, 0);
 		else
-			ret = _SSL_send (ssl, locale, len);
+			ret = _SSL_send (serv->ssl, locale, len);
 #else
 		ret = send (sok, locale, len, 0);
+#endif
 #endif
 		g_free (locale);
 	} else
 	{
+#ifdef GNUTLS
+		if (serv && serv->gnutls_session)
+			ret = gnutls_record_send(serv->gnutls_session, buf, len);
+		else
+			ret = send(sok, buf, len, 0);
+#else
 #ifdef USE_OPENSSL
-		if (!ssl)
+		if (!serv || !serv->ssl)
 			ret = send (sok, buf, len, 0);
 		else
-			ret = _SSL_send (ssl, buf, len);
+			ret = _SSL_send (serv->ssl, buf, len);
 #else
 		ret = send (sok, buf, len, 0);
+#endif
 #endif
 	}
 
@@ -130,8 +145,7 @@ server_send_real (server *serv, char *buf, int len)
 {
 	fe_add_rawlog (serv, buf, len, TRUE);
 
-	return tcp_send_real (serv->ssl, serv->sok, serv->encoding, serv->using_irc,
-								 buf, len);
+	return tcp_send_real (serv, serv->sok, serv->encoding, serv->using_irc, buf, len);
 }
 
 /* new throttling system, uses the same method as the Undernet
@@ -391,14 +405,22 @@ server_read (GIOChannel *source, GIOCondition condition, server *serv)
 
 	while (1)
 	{
-#ifdef USE_OPENSSL
+#ifndef GNUTLS
 		if (!serv->ssl)
-#endif
 			len = recv (sok, lbuf, sizeof (lbuf) - 2, 0);
 #ifdef USE_OPENSSL
 		else
 			len = _SSL_recv (serv->ssl, lbuf, sizeof (lbuf) - 2);
 #endif
+#endif
+
+#ifdef GNUTLS
+		if (serv->gnutls_session)
+			len = gnutls_record_recv(serv->gnutls_session, lbuf, sizeof(lbuf) - 2);
+		else
+			len = recv(sok, lbuf, sizeof(lbuf) - 2, 0);
+#endif
+
 		if (len < 1)
 		{
 			error = 0;
@@ -515,7 +537,7 @@ server_stopconnecting (server * serv)
 	close (serv->childwrite);
 	close (serv->childread);
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) && !defined(GNUTLS)
 	if (serv->ssl_do_connect_tag)
 	{
 		g_source_remove (serv->ssl_do_connect_tag);
@@ -529,7 +551,7 @@ server_stopconnecting (server * serv)
 	fe_server_event (serv, FE_SE_DISCONNECT, 0);
 }
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) && !defined(GNUTLS)
 #define	SSLTMOUT	90				  /* seconds */
 static void
 ssl_cb_info (SSL * s, int where, int ret)
@@ -786,7 +808,7 @@ server_flush_queue (server *serv)
 static void
 server_connect_success (server *serv)
 {
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) && !defined(GNUTLS)
 #define	SSLDOCONNTMOUT	300
 	if (serv->use_ssl)
 	{
@@ -810,6 +832,37 @@ server_connect_success (server *serv)
 	}
 
 	serv->ssl = NULL;
+#endif
+
+#ifdef GNUTLS
+	/* XXX: we need to use the asynchronous GNUTLS handshake API. --nenolod */
+	if (serv->use_ssl)
+	{
+		gint ret;
+		static const gint cert_type_priority[2] = { GNUTLS_CRT_X509, 0 };
+
+		gnutls_init (&serv->gnutls_session, GNUTLS_CLIENT);
+		gnutls_set_default_priority(serv->gnutls_session);
+		gnutls_certificate_type_set_priority(serv->gnutls_session, cert_type_priority);
+		gnutls_certificate_allocate_credentials(&serv->gnutls_x509cred);
+		gnutls_credentials_set (serv->gnutls_session, GNUTLS_CRD_CERTIFICATE, serv->gnutls_x509cred);
+		gnutls_transport_set_ptr (serv->gnutls_session, GINT_TO_POINTER(serv->sok));
+
+		ret = gnutls_handshake (serv->gnutls_session);
+		if (ret < 0)
+		{
+			char *err = g_strdup(gnutls_strerror(ret));
+
+			EMIT_SIGNAL (XP_TE_CONNFAIL, serv->server_session, err, NULL,
+							 NULL, NULL, 0);
+
+			g_free(err);
+			server_cleanup (serv);	/* ->connecting = FALSE */
+			return;
+		}
+
+		set_nonblocking (serv->sok);
+	}
 #endif
 	server_stopconnecting (serv);	/* ->connecting = FALSE */
 	/* activate glib poll */
@@ -944,6 +997,15 @@ server_cleanup (server * serv)
 		g_source_remove (serv->joindelay_tag);
 		serv->joindelay_tag = 0;
 	}
+
+#ifdef GNUTLS
+	if (serv->use_ssl && serv->gnutls_session)
+	{
+		gnutls_bye (serv->gnutls_session, GNUTLS_SHUT_RDWR);
+		gnutls_deinit (serv->gnutls_session);
+		gnutls_certificate_free_credentials (serv->gnutls_x509cred);
+	}
+#endif
 
 #ifdef USE_OPENSSL
 	if (serv->ssl)
@@ -1486,7 +1548,7 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 	int pid, read_des[2];
 	session *sess = serv->server_session;
 
-#ifdef USE_OPENSSL
+#if defined (USE_OPENSSL) && !defined(GNUTLS)
 	if (!ctx && serv->use_ssl)
 	{
 		if (!(ctx = _SSL_context_init (ssl_cb_info, FALSE)))
@@ -1504,7 +1566,7 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 	{
 		/* use default port for this server type */
 		port = 6667;
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(GNUTLS)
 		if (serv->use_ssl)
 			port = 9999;
 #endif
