@@ -30,8 +30,6 @@
 #include <gdk-pixbuf/gdk-pixdata.h>
 #include <gtk/gtkstock.h>
 
-#include "../pixmaps/inline_pngs.h"
-
 GdkPixbuf *pix_conspire;
 GdkPixbuf *pix_book;
 
@@ -87,37 +85,24 @@ pixmap_load_from_file (char *filename)
 	return pix;
 }
 
-#define LOADPIX(vv,pp,ff) \
-	vv = gdk_pixbuf_new_from_file (XCHATSHAREDIR"/xchat/"ff, 0); \
-	if (!vv) \
-		vv = gdk_pixbuf_new_from_inline (-1, pp, FALSE, 0);
-
-#define LOADPIX_DISKONLY(vv,ff) \
-	vv = gdk_pixbuf_new_from_file (XCHATSHAREDIR"/xchat/"ff, 0);
-
-#define EXT ".png"
-
 void
 pixmaps_init (void)
 {
-	pix_book = gdk_pixbuf_new_from_inline (-1, bookpng, FALSE, 0);
-	pix_conspire = gdk_pixbuf_new_from_inline (-1, conspire, FALSE, 0);
+	pix_book = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/book.png", NULL);
+	pix_conspire = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/conspire.png", NULL);
 
-	/* userlist icons, with inlined defaults */
-	LOADPIX (pix_hop, hoppng, "hop"EXT);
-	LOADPIX (pix_purple, purplepng, "purple"EXT);
-	LOADPIX (pix_red, redpng, "red"EXT);
-	LOADPIX (pix_op, oppng, "op"EXT);
-	LOADPIX (pix_voice, voicepng, "voice"EXT);
+	pix_hop = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/hop.png", NULL);
+	pix_purple = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/purple.png", NULL);
+	pix_red = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/red.png", NULL);
+	pix_op = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/op.png", NULL);
+	pix_voice = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/voice.png", NULL);
 
-	/* tray icons, with inlined defaults */
-	LOADPIX (pix_tray_msg, traymsgpng, "message"EXT);
-	LOADPIX (pix_tray_hilight, trayhilightpng, "highlight"EXT);
-	LOADPIX (pix_tray_file, trayfilepng, "fileoffer"EXT);
+	pix_tray_msg = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/message.png", NULL);
+	pix_tray_hilight = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/highlight.png", NULL);
+	pix_tray_file = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/fileoffer.png", NULL);
 
-	/* treeview icons, no defaults, load from disk only */
-	LOADPIX_DISKONLY (pix_channel,	"channel"EXT);
-	LOADPIX_DISKONLY (pix_dialog,		"dialog"EXT);
-	LOADPIX_DISKONLY (pix_server,		"server"EXT);
-	LOADPIX_DISKONLY (pix_util,		"util"EXT);
+	pix_channel = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/channel.png", NULL);
+	pix_dialog = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/dialog.png", NULL);
+	pix_server = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/server.png", NULL);
+	pix_util = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/util.png", NULL);
 }

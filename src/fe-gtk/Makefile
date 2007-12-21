@@ -14,6 +14,6 @@ SRCS = about.c ascii.c banlist.c chanlist.c chanview.c custom-list.c \
 include ../../buildsys.mk
 include ../../extra.mk
 
-CPPFLAGS += -I../../.. $(COMMON_CFLAGS) $(GUI_CFLAGS) -DG_DISABLE_CAST_CHECKS -DLOCALEDIR=\"$(localedir)\"
+CPPFLAGS += -I../../.. $(COMMON_CFLAGS) $(GUI_CFLAGS) -DG_DISABLE_CAST_CHECKS -DLOCALEDIR=\"$(localedir)\" -DSHAREDIR=\"$(prefix)/share\"
 LIBS += -L../common -lconspire -L../libcontrast -lcontrast $(COMMON_LIBS) $(GUI_LIBS)
 
