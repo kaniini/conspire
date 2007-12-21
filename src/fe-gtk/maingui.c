@@ -663,6 +663,17 @@ mg_userlist_showhide (session *sess, int show)
 	mg_hide_empty_boxes (gui);
 }
 
+static void
+mg_topicbar_showhide (session *sess, gboolean show)
+{
+	session_gui *gui = sess->gui;
+
+	if (show)
+		gtk_widget_show(gui->topic_entry);
+	else
+		gtk_widget_hide(gui->topic_entry);
+}
+
 static gboolean
 mg_is_userlist_and_tree_combined (void)
 {
@@ -697,6 +708,9 @@ mg_decide_userlist (session *sess, gboolean switch_to_current)
 	switch (sess->type)
 	{
 	case SESS_SERVER:
+		mg_topicbar_showhide (sess, FALSE);
+		mg_userlist_showhide (sess, FALSE);	/* hide */
+		break;
 	case SESS_DIALOG:
 	case SESS_NOTICES:
 	case SESS_SNOTICES:
@@ -704,6 +718,7 @@ mg_decide_userlist (session *sess, gboolean switch_to_current)
 		break;
 	default:		
 		mg_userlist_showhide (sess, TRUE);	/* show */
+		mg_topicbar_showhide (sess, TRUE);
 	}
 }
 
