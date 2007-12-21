@@ -708,12 +708,12 @@ mg_decide_userlist (session *sess, gboolean switch_to_current)
 	switch (sess->type)
 	{
 	case SESS_SERVER:
+	case SESS_NOTICES:
+	case SESS_SNOTICES:
 		mg_topicbar_showhide (sess, FALSE);
 		mg_userlist_showhide (sess, FALSE);	/* hide */
 		break;
 	case SESS_DIALOG:
-	case SESS_NOTICES:
-	case SESS_SNOTICES:
 		mg_userlist_showhide (sess, FALSE);	/* hide */
 		break;
 	default:		
