@@ -35,9 +35,9 @@ typedef GdkPixbuf* TrayIcon;
 #define tray_icon_from_file(f) gdk_pixbuf_new_from_file(f,NULL)
 #define tray_icon_free(i) g_object_unref(i)
 
-#define ICON_NORMAL pix_conspire /* XXX */
-#define ICON_MSG pix_tray_msg
-#define ICON_HILIGHT pix_tray_hilight
+#define ICON_NORMAL pix_conspire
+#define ICON_MSG pix_tray_blank
+#define ICON_HILIGHT pix_tray_blank
 #define ICON_FILE pix_tray_file
 #define TIMEOUT 500
 
@@ -256,12 +256,19 @@ tray_timeout_cb (TrayIcon icon)
 			gtk_status_icon_set_from_pixbuf (sticon, custom_icon1);
 		}
 	}
-	else
+	else if (icon != ICON_FILE)
 	{
 		if (gtk_status_icon_get_pixbuf (sticon) == ICON_NORMAL)
 			gtk_status_icon_set_from_pixbuf (sticon, icon);
 		else
 			gtk_status_icon_set_from_pixbuf (sticon, ICON_NORMAL);
+	}
+	else if (icon == ICON_FILE)
+	{
+		if (gtk_status_icon_get_pixbuf (sticon) == ICON_FILE)
+			gtk_status_icon_set_from_pixbuf (sticon, ICON_MSG);
+		else
+			gtk_status_icon_set_from_pixbuf (sticon, icon);
 	}
 	return 1;
 }

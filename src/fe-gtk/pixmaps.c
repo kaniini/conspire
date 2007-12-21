@@ -39,8 +39,7 @@ GdkPixbuf *pix_op;
 GdkPixbuf *pix_hop;
 GdkPixbuf *pix_voice;
 
-GdkPixbuf *pix_tray_msg;
-GdkPixbuf *pix_tray_hilight;
+GdkPixbuf *pix_tray_blank;
 GdkPixbuf *pix_tray_file;
 
 GdkPixbuf *pix_channel;
@@ -97,8 +96,7 @@ pixmaps_init (void)
 	pix_op = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/op.png", NULL);
 	pix_voice = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/voice.png", NULL);
 
-	pix_tray_msg = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/message.png", NULL);
-	pix_tray_hilight = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/highlight.png", NULL);
+	pix_tray_blank = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/balloon.png", NULL);
 	pix_tray_file = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/fileoffer.png", NULL);
 
 	pix_channel = gdk_pixbuf_new_from_file (SHAREDIR "/conspire/pixmaps/channel.png", NULL);
