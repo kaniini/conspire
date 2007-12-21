@@ -1,4 +1,8 @@
 TODO
+- Replace OpenSSL with GnuTLS.
+- Implement support for SASL over IRC protocol.
+
+IDEAS
 - Implement a sane theme engine
 - Rewrite the ignore system so that it's actually worth using
 - Add irssi-style tabcompletion alongside the bash-style implementation and
@@ -9,5 +13,4 @@ TODO
 - Rewrite hilights to be more powerful than the current implementation, with
   potential per-server/per-channel hilights support
 - Get rid of all "homebrew" tree/blahblahblah shit, replace with GLib/Mowgli
-  primitives where appropriate.
-- replace OpenSSL with GnuTLS.
+  primitives where appropriate. [mostly done]
