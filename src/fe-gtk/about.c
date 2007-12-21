@@ -36,6 +36,7 @@
 static const gchar *authors[] = {
 	"William Pitcock <nenolod@sacredspiral.co.uk>",
 	"Kiyoshi Aman <kiyoshi.aman@gmail.com>",
+	"Chris Fuente <zimmy@zimmy.ca> (graphics)",
 	"Based on XChat by Peter Zelezny <zed@xchat.org>",
 	NULL
 };
