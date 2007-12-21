@@ -2824,6 +2824,8 @@ mg_create_tabwindow (session *sess)
 	g_signal_connect (G_OBJECT (win), "window_state_event",
 							G_CALLBACK (mg_windowstate_cb), NULL);
 
+	gtk_window_set_icon(GTK_WINDOW(win), pix_conspire);
+
 	palette_alloc (win);
 
 	sess->gui->main_table = table = gtk_table_new (4, 3, FALSE);
