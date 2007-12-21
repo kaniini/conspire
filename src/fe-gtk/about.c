@@ -55,6 +55,7 @@ about_close (void)
 void
 menu_about (GtkWidget * wid, gpointer sess)
 {
+	GdkPixbuf *about_pix;
 	GtkWidget *vbox, *label, *hbox;
 	char buf[512];
 	const char *locale = NULL;
@@ -77,8 +78,10 @@ menu_about (GtkWidget * wid, gpointer sess)
 
 	vbox = GTK_DIALOG (about)->vbox;
 
-	wid = gtk_image_new_from_pixbuf (pix_conspire);
+	about_pix = gdk_pixbuf_scale_simple(pix_conspire, 128, 128, GDK_INTERP_BILINEAR);
+	wid = gtk_image_new_from_pixbuf (about_pix);
 	gtk_container_add (GTK_CONTAINER (vbox), wid);
+	g_object_unref(about_pix);
 
 	label = gtk_label_new (NULL);
 	gtk_label_set_selectable (GTK_LABEL (label), TRUE);

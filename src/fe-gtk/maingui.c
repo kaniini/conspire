@@ -1531,7 +1531,11 @@ mg_add_chan (session *sess)
 	switch (sess->type)
 	{
 	case SESS_CHANNEL:
+#if 0
+		icon = get_user_icon(sess->server, sess->user);
+#else
 		icon = pix_channel;
+#endif
 		break;
 	case SESS_SERVER:
 		icon = pix_server;
