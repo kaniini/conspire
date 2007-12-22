@@ -52,7 +52,6 @@ AH_VERBATIM([USE_GTKSPELL],[#undef USE_GTKSPELL])
 AH_VERBATIM([USE_LIBSEXY],[#undef USE_LIBSEXY])
 AH_VERBATIM([USE_IPV6],[#undef USE_IPV6])
 AH_VERBATIM([USE_MMX],[#undef USE_MMX])
-AH_VERBATIM([USE_OPENSSL],[#undef USE_OPENSSL])
 AH_VERBATIM([USE_PLUGIN],[#undef USE_PLUGIN])
 AH_VERBATIM([USE_SIGACTION],[#undef USE_SIGACTION])
 AH_VERBATIM([USING_FREEBSD],[#undef USING_FREEBSD])
@@ -122,14 +121,9 @@ AC_ARG_ENABLE(ipv6,
 [  --disable-ipv6            disable IPv6 (default: enabled)],
         ipv6=$enableval, ipv6=yes)
 
-AC_ARG_ENABLE(openssl,
-[  --enable-openssl[=PATH]   enable use of openSSL],
-        openssl=$enableval, openssl=yes)
-
 AC_ARG_ENABLE(gnutls,
 [  --enable-gnutls           enable use of GnuTLS],
-        gnutls=$enableval, [gnutls=yes
-	openssl=no])
+        gnutls=$enableval, [gnutls=yes])
 
 AC_ARG_ENABLE(gtkfe,
 [  --disable-gtkfe         disable building gtk frontend],
@@ -251,79 +245,17 @@ if test "$ipv6" = yes; then
 	fi
 fi
 
-dnl *********************************************************************
-dnl ** OPENSSL **********************************************************
-dnl *********************************************************************
-
-retry=no
-if test "$openssl" != no; then
-	AC_PATH_PROG(pkgconfigpath, pkg-config)
-	AC_MSG_CHECKING(for openssl through pkg-config)
-	if $pkgconfigpath openssl --exists; then
-		CPPFLAGS="$CPPFLAGS `$pkgconfigpath openssl --cflags`"
-		LIBS="$LIBS `$pkgconfigpath openssl --libs`"
-		AC_DEFINE(USE_OPENSSL)
-		AC_MSG_RESULT(yes)
-		openssl=yes
-	else
-		AC_MSG_RESULT(no)
-		retry=yes
-	fi
-fi
-
-if test "$retry" = "yes"; then
-	unset openssl_path ac_cv_lib_ssl_SSL_new ac_cv_header_openssl_ssl_h
-	if test "$openssl" != yes; then
-		openssl_path=$openssl
-	fi
-	openssl=no
-	SAVED_LIBS=$LIBS
-	LIBS="$LIBS -lcrypto"
-	if test -n "$openssl_path"; then
-		LIBS="-L$openssl_path/lib $LIBS"
-	fi
-	AC_CHECK_LIB(ssl, SSL_new, have_openssl=yes)
-	LIBS=$SAVED_LIBS
-	if test "$have_openssl" = yes; then
-		SAVED_CPPFLAGS=$CPPFLAGS
-		if test -n "$openssl_path"; then
-			CPPFLAGS="-I$openssl_path/include $CPPFLAGS"
-		fi
-		AC_CHECK_HEADERS(openssl/ssl.h, have_openssl_h=yes)
-		if test "$have_openssl_h" = yes; then
-			openssl=yes
-			AC_DEFINE(USE_OPENSSL)
-			LIBS="$LIBS -lssl -lcrypto"
-			if test -n "$openssl_path"; then
-				LIBS="-L$openssl_path/lib $LIBS"
-			fi
-		else
-			CPPFLAGS=$SAVED_CPPFLAGS
-		fi
-	fi
-fi
-
-if test "$openssl" = "yes"; then
-	ssl_c="ssl.c"
-	COMMON_LIBS="$COMMON_LIBS -lssl -lcrypto"
-fi
-
 BUILDSYS_PROG_IMPLIB
 BUILDSYS_SHARED_LIB
 
 dnl ** GnuTLS
 
 if test "$gnutls" = "yes"; then
-	PKG_CHECK_MODULES(GNUTLS, [gnutls], , [gnutls=no])
+	PKG_CHECK_MODULES(GNUTLS, [gnutls], [
+		COMMON_LIBS="$COMMON_LIBS $GNUTLS_LIBS"
+		CPPFLAGS"$CPPFLAGS -DGNUTLS $GNUTLS_CFLAGS"
+	], [gnutls=no])
 fi
-
-if test "$gnutls" = "yes"; then
-	ssl_c=""
-	COMMON_LIBS="$COMMON_LIBS $GNUTLS_LIBS"
-	CPPFLAGS="$CPPFLAGS -DGNUTLS $GNUTLS_CFLAGS"
-fi
-
-AC_SUBST(ssl_c)
 
 dnl *********************************************************************
 dnl ** PLUGIN ***********************************************************
@@ -416,7 +348,6 @@ dnl *********************************************************************
 dnl ** CONDITIONALS *****************************************************
 dnl *********************************************************************
 
-AM_CONDITIONAL(USE_OPENSSL, test "x$openssl" = "xyes")
 AM_CONDITIONAL(USE_LIBSEXY, test "x$spell" = "xstatic")
 AM_CONDITIONAL(DO_GTK, test "x$gtkfe" = "xyes")
 AM_CONDITIONAL(DO_PLUGIN, test "x$plugin" = "xyes")
@@ -620,7 +551,8 @@ echo
 echo "Configuration:"
 echo
 echo "  Install path:                           ${prefix}"
-echo "  OpenSSL support:                        ${openssl}"
+echo
+echo "  GnuTLS support:                         ${gnutls}"
 echo "  DBus support:                           ${dbus}"
 echo "  IPv6 support:                           ${ipv6}"
 echo "  Plugin loader:                          ${plugin}"
