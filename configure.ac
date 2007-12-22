@@ -46,7 +46,6 @@ AH_VERBATIM([PREFIX],[#undef PREFIX])
 AH_VERBATIM([XCHATLIBDIR],[#undef XCHATLIBDIR])
 AH_VERBATIM([XCHATSHAREDIR],[#undef XCHATSHAREDIR])
 AH_VERBATIM([SOCKS],[#undef SOCKS])
-dnl AH_VERBATIM([USE_GNOME],[#undef USE_GNOME])
 AH_VERBATIM([USE_SHM],[#undef USE_SHM])
 AH_VERBATIM([USE_GTKSPELL],[#undef USE_GTKSPELL])
 AH_VERBATIM([USE_LIBSEXY],[#undef USE_LIBSEXY])
@@ -133,10 +132,6 @@ AC_ARG_ENABLE(python,
 [  --disable-python        don't build the python plugin],
         python=$enableval, python=yes)
 
-dnl AC_ARG_ENABLE(gnome,
-dnl [  --disable-gnome         disable use of gnome],
-dnl        gnome=$enableval, gnome=yes)
-
 AC_ARG_ENABLE(plugin,
 [  --disable-plugin        disable plugin support],
         plugin=$enableval, plugin=yes)
@@ -175,37 +170,9 @@ if test "$havegtk" = no; then
 fi
 
 if test "$gtkfe" != yes; then
-	gnome=no
 	COMMON_LIBS="$GLIB_LIBS"
 	COMMON_CFLAGS="$GLIB_CFLAGS"
 fi
-
-dnl *********************************************************************
-dnl ** GNOME ************************************************************
-dnl *********************************************************************
-
-GUI_LIBS="$GUI_LIBS $GTK_LIBS"
-GUI_CFLAGS="$GUI_CFLAGS $GTK_CFLAGS"
-
-gnome=no
-#if test "$gnome" = yes; then
-#	AC_PATH_PROG(pkgconfigpath, pkg-config)
-#	AC_MSG_CHECKING(Gnome2 compile flags)
-#	GNOME_CFLAGS="`$pkgconfigpath libgnome-2.0 --cflags 2>/dev/null`"
-#	if test "_$GNOME_CFLAGS" = _ ; then
-#		gnome=no
-#		AC_MSG_RESULT([Gnome not found, building without it.])
-#	else
-#		GNOME_VER="`$pkgconfigpath libgnome-2.0 --modversion`"
-#		GUI_LIBS="$GUI_LIBS `$pkgconfigpath libgnome-2.0 --libs`"
-#		GUI_CFLAGS="$GUI_CFLAGS $GNOME_CFLAGS"
-#		AC_DEFINE(USE_GNOME)
-#		AC_MSG_RESULT(ok)
-#	fi
-#fi
-
-# GConf
-AC_PATH_PROG(GCONFTOOL, gconftool-2, no)
 
 dnl *********************************************************************
 dnl ** Mowgli ***********************************************************
