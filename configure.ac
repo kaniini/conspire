@@ -253,7 +253,7 @@ dnl ** GnuTLS
 if test "$gnutls" = "yes"; then
 	PKG_CHECK_MODULES(GNUTLS, [gnutls], [
 		COMMON_LIBS="$COMMON_LIBS $GNUTLS_LIBS"
-		CPPFLAGS"$CPPFLAGS -DGNUTLS $GNUTLS_CFLAGS"
+		CPPFLAGS="$CPPFLAGS -DGNUTLS $GNUTLS_CFLAGS"
 	], [gnutls=no])
 fi
 
