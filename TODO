@@ -1,5 +1,4 @@
 TODO
-- Replace OpenSSL with GnuTLS.
 - Implement support for SASL over IRC protocol.
 
 IDEAS
