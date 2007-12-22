@@ -473,6 +473,7 @@ dnl freebsd needs this
 LIBS="$LIBS $INTLLIBS"
 CFLAGS="$CFLAGS $CPPFLAGS"
 
+GUI_CFLAGS="$GTK_CFLAGS $COMMON_CFLAGS"
 GUI_LIBS="$GUI_LIBS $COMMON_LIBS"
 
 dnl make these visible to all Makefiles
