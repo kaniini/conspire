@@ -1,0 +1,15 @@
+conspire 0.10.0 (01-??-2008):
+
+  * OpenSSL support has been removed in favour of GnuTLS.
+    As GnuTLS is 100% definitely licensed in compatibility with
+    the GPL, this means that distributions will be able to enable
+    the SSL support.
+  * Add support for extracting colours from your system's GTK+ theme.
+  * New icons care of Chris Fuenty.
+  * Add support for the MONITOR command on charybdis and ircd-ratbox
+    daemons (thanks to AndroSyn!)
+  * Fix a bug where the colourmap didn't match up with mIRC's colours.
+  * Remove inline pixbufs, reducing the binary size by a large amount.
+    Now pixbufs are loaded from disk, and can be replaced by editing
+    the PNG files in ${datadir}/conspire/pixmaps.
+  * Start to move some various aspects of the code to Mowgli.
