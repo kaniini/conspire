@@ -1023,50 +1023,6 @@ traverse_wingate (int print_fd, int sok, char *serverAddr, int port)
 }
 
 /* stuff for HTTP auth is here */
-
-static void
-three_to_four (char *from, char *to)
-{
-	static const char tab64[64]=
-	{
-		'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
-		'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
-		'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v',
-		'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/'
-	};
-
-	to[0] = tab64 [ (from[0] >> 2) & 63 ];
-	to[1] = tab64 [ ((from[0] << 4) | (from[1] >> 4)) & 63 ];
-	to[2] = tab64 [ ((from[1] << 2) | (from[2] >> 6)) & 63 ];
-	to[3] = tab64 [ from[2] & 63 ];
-};
-
-void
-base64_encode (char *to, char *from, unsigned int len)
-{
-	while (len >= 3)
-	{
-		three_to_four (from, to);
-		len -= 3;
-		from += 3;
-		to += 4;
-	}
-	if (len)
-	{
-		char three[3]={0,0,0};
-		int i=0;
-		for (i=0;i<len;i++)
-			three[i] = *from++;
-		three_to_four (three, to);
-		if (len == 1)
-			to[2] = to[3] = '=';
-		else if (len == 2)
-			to[3] = '=';
-		to += 4;
-	};
-	to[0] = 0;
-}
-
 static int
 http_read_line (int print_fd, int sok, char *buf, int len)
 {
