@@ -83,7 +83,7 @@ servlist_connect (session *sess, ircnet *net, gboolean join)
 
 	serv->dont_use_proxy = (net->flags & FLAG_USE_PROXY) ? FALSE : TRUE;
 
-#if defined (USE_OPENSSL) || defined (GNUTLS)
+#ifdef GNUTLS
 	serv->use_ssl = (net->flags & FLAG_USE_SSL) ? TRUE : FALSE;
 	serv->accept_invalid_cert =
 		(net->flags & FLAG_ALLOW_INVALID) ? TRUE : FALSE;
@@ -99,7 +99,7 @@ servlist_connect (session *sess, ircnet *net, gboolean join)
 		/* support "+port" to indicate SSL (like mIRC does) */
 		if (port[1] == '+')
 		{
-#if defined (USE_OPENSSL) || defined (GNUTLS)
+#ifdef GNUTLS
 			serv->use_ssl = TRUE;
 			serv->accept_invalid_cert =
 				(net->flags & FLAG_ALLOW_INVALID) ? TRUE : FALSE;

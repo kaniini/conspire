@@ -46,11 +46,6 @@
 #include "url.h"
 #include "xchatc.h"
 
-#ifdef USE_OPENSSL
-#include <openssl/ssl.h>		  /* SSL_() */
-#include "ssl.h"
-#endif
-
 GSList *popup_list = 0;
 GSList *button_list = 0;
 GSList *dlgbutton_list = 0;
@@ -82,11 +77,6 @@ gint arg_existing = FALSE;
 struct session *current_tab;
 struct session *current_sess = 0;
 struct xchatprefs prefs;
-
-#ifdef USE_OPENSSL
-SSL_CTX *ctx = NULL;
-#endif
-
 
 int
 is_session (session * sess)
@@ -996,11 +986,6 @@ main (int argc, char *argv[])
 	xchat_init ();
 
 	fe_main ();
-
-#ifdef USE_OPENSSL
-	if (ctx)
-		_SSL_context_free (ctx);
-#endif
 
 #ifdef GNUTLS
 	gnutls_global_deinit ();

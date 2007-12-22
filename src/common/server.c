@@ -45,18 +45,6 @@
 #include "servlist.h"
 #include "server.h"
 
-#ifdef USE_OPENSSL
-#include <openssl/ssl.h>		  /* SSL_() */
-#include <openssl/err.h>		  /* ERR_() */
-#include "ssl.h"
-#endif
-
-#ifdef USE_OPENSSL
-extern SSL_CTX *ctx;				  /* xchat.c */
-/* local variables */
-static struct session *g_sess = NULL;
-#endif
-
 static GSList *away_list = NULL;
 GSList *serv_list = NULL;
 
@@ -106,17 +94,8 @@ tcp_send_real (server *serv, int sok, char *encoding, int using_irc, char *buf, 
 		if (serv && serv->gnutls_session)
 			ret = gnutls_record_send(serv->gnutls_session, buf, len);
 		else
+#endif
 			ret = send(sok, buf, len, 0);
-#else
-#ifdef USE_OPENSSL
-		if (!serv || !serv->ssl)
-			ret = send (sok, locale, len, 0);
-		else
-			ret = _SSL_send (serv->ssl, locale, len);
-#else
-		ret = send (sok, locale, len, 0);
-#endif
-#endif
 		g_free (locale);
 	} else
 	{
@@ -124,17 +103,8 @@ tcp_send_real (server *serv, int sok, char *encoding, int using_irc, char *buf, 
 		if (serv && serv->gnutls_session)
 			ret = gnutls_record_send(serv->gnutls_session, buf, len);
 		else
+#endif
 			ret = send(sok, buf, len, 0);
-#else
-#ifdef USE_OPENSSL
-		if (!serv || !serv->ssl)
-			ret = send (sok, buf, len, 0);
-		else
-			ret = _SSL_send (serv->ssl, buf, len);
-#else
-		ret = send (sok, buf, len, 0);
-#endif
-#endif
 	}
 
 	return ret;
@@ -405,21 +375,12 @@ server_read (GIOChannel *source, GIOCondition condition, server *serv)
 
 	while (1)
 	{
-#ifndef GNUTLS
-		if (!serv->ssl)
-			len = recv (sok, lbuf, sizeof (lbuf) - 2, 0);
-#ifdef USE_OPENSSL
-		else
-			len = _SSL_recv (serv->ssl, lbuf, sizeof (lbuf) - 2);
-#endif
-#endif
-
 #ifdef GNUTLS
 		if (serv->gnutls_session)
 			len = gnutls_record_recv(serv->gnutls_session, lbuf, sizeof(lbuf) - 2);
 		else
-			len = recv(sok, lbuf, sizeof(lbuf) - 2, 0);
 #endif
+			len = recv(sok, lbuf, sizeof(lbuf) - 2, 0);
 
 		if (len < 1)
 		{
@@ -537,204 +498,11 @@ server_stopconnecting (server * serv)
 	close (serv->childwrite);
 	close (serv->childread);
 
-#if defined(USE_OPENSSL) && !defined(GNUTLS)
-	if (serv->ssl_do_connect_tag)
-	{
-		g_source_remove (serv->ssl_do_connect_tag);
-		serv->ssl_do_connect_tag = 0;
-	}
-#endif
-
 	fe_progressbar_end (serv);
 
 	serv->connecting = FALSE;
 	fe_server_event (serv, FE_SE_DISCONNECT, 0);
 }
-
-#if defined(USE_OPENSSL) && !defined(GNUTLS)
-#define	SSLTMOUT	90				  /* seconds */
-static void
-ssl_cb_info (SSL * s, int where, int ret)
-{
-/*	char buf[128];*/
-
-
-	return;							  /* FIXME: make debug level adjustable in serverlist or settings */
-
-/*	snprintf (buf, sizeof (buf), "%s (%d)", SSL_state_string_long (s), where);
-	if (g_sess)
-		EMIT_SIGNAL (XP_TE_SERVTEXT, g_sess, buf, NULL, NULL, NULL, 0);
-	else
-		fprintf (stderr, "%s\n", buf);*/
-}
-
-static int
-ssl_cb_verify (int ok, X509_STORE_CTX * ctx)
-{
-	char subject[256];
-	char issuer[256];
-	char buf[512];
-
-
-	X509_NAME_oneline (X509_get_subject_name (ctx->current_cert), subject,
-							 sizeof (subject));
-	X509_NAME_oneline (X509_get_issuer_name (ctx->current_cert), issuer,
-							 sizeof (issuer));
-
-	snprintf (buf, sizeof (buf), "* Subject: %s", subject);
-	EMIT_SIGNAL (XP_TE_SERVTEXT, g_sess, buf, NULL, NULL, NULL, 0);
-	snprintf (buf, sizeof (buf), "* Issuer: %s", issuer);
-	EMIT_SIGNAL (XP_TE_SERVTEXT, g_sess, buf, NULL, NULL, NULL, 0);
-
-	return (TRUE);					  /* always ok */
-}
-
-static int
-ssl_do_connect (server * serv)
-{
-	char buf[128];
-
-	g_sess = serv->server_session;
-	if (SSL_connect (serv->ssl) <= 0)
-	{
-		char err_buf[128];
-		int err;
-
-		g_sess = NULL;
-		if ((err = ERR_get_error ()) > 0)
-		{
-			ERR_error_string (err, err_buf);
-			snprintf (buf, sizeof (buf), "(%d) %s", err, err_buf);
-			EMIT_SIGNAL (XP_TE_CONNFAIL, serv->server_session, buf, NULL,
-							 NULL, NULL, 0);
-
-			if (ERR_GET_REASON (err) == SSL_R_WRONG_VERSION_NUMBER)
-				PrintText (serv->server_session, _("Are you sure this is a SSL capable server and port?\n"));
-
-			server_cleanup (serv);
-
-			if (prefs.autoreconnectonfail)
-				auto_reconnect (serv, FALSE, -1);
-
-			return (0);				  /* remove it (0) */
-		}
-	}
-	g_sess = NULL;
-
-	if (SSL_is_init_finished (serv->ssl))
-	{
-		struct cert_info cert_info;
-		struct chiper_info *chiper_info;
-		int verify_error;
-		int i;
-
-		if (!_SSL_get_cert_info (&cert_info, serv->ssl))
-		{
-			snprintf (buf, sizeof (buf), "* Certification info:");
-			EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-							 NULL, 0);
-			snprintf (buf, sizeof (buf), "  Subject:");
-			EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-							 NULL, 0);
-			for (i = 0; cert_info.subject_word[i]; i++)
-			{
-				snprintf (buf, sizeof (buf), "    %s", cert_info.subject_word[i]);
-				EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-								 NULL, 0);
-			}
-			snprintf (buf, sizeof (buf), "  Issuer:");
-			EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-							 NULL, 0);
-			for (i = 0; cert_info.issuer_word[i]; i++)
-			{
-				snprintf (buf, sizeof (buf), "    %s", cert_info.issuer_word[i]);
-				EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-								 NULL, 0);
-			}
-			snprintf (buf, sizeof (buf), "  Public key algorithm: %s (%d bits)",
-						 cert_info.algorithm, cert_info.algorithm_bits);
-			EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-							 NULL, 0);
-			/*if (cert_info.rsa_tmp_bits)
-			{
-				snprintf (buf, sizeof (buf),
-							 "  Public key algorithm uses ephemeral key with %d bits",
-							 cert_info.rsa_tmp_bits);
-				EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-								 NULL, 0);
-			}*/
-			snprintf (buf, sizeof (buf), "  Sign algorithm %s",
-						 cert_info.sign_algorithm/*, cert_info.sign_algorithm_bits*/);
-			EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-							 NULL, 0);
-			snprintf (buf, sizeof (buf), "  Valid since %s to %s",
-						 cert_info.notbefore, cert_info.notafter);
-			EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-							 NULL, 0);
-		} else
-		{
-			snprintf (buf, sizeof (buf), " * No Certificate");
-			EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-							 NULL, 0);
-		}
-
-		chiper_info = _SSL_get_cipher_info (serv->ssl);	/* static buffer */
-		snprintf (buf, sizeof (buf), "* Cipher info:");
-		EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL, NULL,
-						 0);
-		snprintf (buf, sizeof (buf), "  Version: %s, cipher %s (%u bits)",
-					 chiper_info->version, chiper_info->chiper,
-					 chiper_info->chiper_bits);
-		EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL, NULL,
-						 0);
-
-		verify_error = SSL_get_verify_result (serv->ssl);
-		switch (verify_error)
-		{
-		case X509_V_OK:
-			/* snprintf (buf, sizeof (buf), "* Verify OK (?)"); */
-			/* EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL, NULL, 0); */
-			break;
-		case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
-		case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
-		case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-		case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
-		case X509_V_ERR_CERT_HAS_EXPIRED:
-		default:
-			snprintf (buf, sizeof (buf), "* WARNING - COULD NOT VERIFY CERTIFICATE: %s.? (%d)",
-						 X509_verify_cert_error_string (verify_error),
-						 verify_error);
-			EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, buf, NULL, NULL,
-							 NULL, 0);
-			break;
-			return (0);
-		}
-
-		server_stopconnecting (serv);
-
-		/* activate gtk poll */
-		server_connected (serv);
-
-		return (0);					  /* remove it (0) */
-	} else
-	{
-		if (serv->ssl->session && serv->ssl->session->time + SSLTMOUT < time (NULL))
-		{
-			snprintf (buf, sizeof (buf), "SSL handshake timed out");
-			EMIT_SIGNAL (XP_TE_CONNFAIL, serv->server_session, buf, NULL,
-							 NULL, NULL, 0);
-			server_cleanup (serv); /* ->connecting = FALSE */
-
-			if (prefs.autoreconnectonfail)
-				auto_reconnect (serv, FALSE, -1);
-
-			return (0);				  /* remove it (0) */
-		}
-
-		return (1);					  /* call it more (1) */
-	}
-}
-#endif
 
 static int
 timeout_auto_reconnect (server *serv)
@@ -808,34 +576,7 @@ server_flush_queue (server *serv)
 static void
 server_connect_success (server *serv)
 {
-#if defined(USE_OPENSSL) && !defined(GNUTLS)
-#define	SSLDOCONNTMOUT	300
-	if (serv->use_ssl)
-	{
-		char *err;
-
-		/* it'll be a memory leak, if connection isn't terminated by
-		   server_cleanup() */
-		serv->ssl = _SSL_socket (ctx, serv->sok);
-		if ((err = _SSL_set_verify (ctx, ssl_cb_verify, NULL)))
-		{
-			EMIT_SIGNAL (XP_TE_CONNFAIL, serv->server_session, err, NULL,
-							 NULL, NULL, 0);
-			server_cleanup (serv);	/* ->connecting = FALSE */
-			return;
-		}
-		/* FIXME: it'll be needed by new servers */
-		/* send(serv->sok, "STLS\r\n", 6, 0); sleep(1); */
-		set_nonblocking (serv->sok);
-		serv->ssl_do_connect_tag = g_timeout_add (SSLDOCONNTMOUT, (GSourceFunc) ssl_do_connect, serv);
-		return;
-	}
-
-	serv->ssl = NULL;
-#endif
-
 #ifdef GNUTLS
-	/* XXX: we need to use the asynchronous GNUTLS handshake API. --nenolod */
 	if (serv->use_ssl)
 	{
 		gint ret;
@@ -864,6 +605,7 @@ server_connect_success (server *serv)
 		set_nonblocking (serv->sok);
 	}
 #endif
+
 	server_stopconnecting (serv);	/* ->connecting = FALSE */
 	/* activate glib poll */
 	server_connected (serv);
@@ -1004,14 +746,6 @@ server_cleanup (server * serv)
 		gnutls_bye (serv->gnutls_session, GNUTLS_SHUT_RDWR);
 		gnutls_deinit (serv->gnutls_session);
 		gnutls_certificate_free_credentials (serv->gnutls_x509cred);
-	}
-#endif
-
-#ifdef USE_OPENSSL
-	if (serv->ssl)
-	{
-		_SSL_close (serv->ssl);
-		serv->ssl = NULL;
 	}
 #endif
 
@@ -1548,17 +1282,6 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 	int pid, read_des[2];
 	session *sess = serv->server_session;
 
-#if defined (USE_OPENSSL) && !defined(GNUTLS)
-	if (!ctx && serv->use_ssl)
-	{
-		if (!(ctx = _SSL_context_init (ssl_cb_info, FALSE)))
-		{
-			fprintf (stderr, "_SSL_context_init failed\n");
-			exit (1);
-		}
-	}
-#endif
-
 	if (!hostname[0])
 		return;
 
@@ -1566,7 +1289,7 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 	{
 		/* use default port for this server type */
 		port = 6667;
-#if defined(USE_OPENSSL) || defined(GNUTLS)
+#ifdef GNUTLS
 		if (serv->use_ssl)
 			port = 9999;
 #endif
@@ -1585,7 +1308,7 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 	if (hostname != serv->hostname)
 		g_strlcpy (serv->hostname, hostname, sizeof (serv->hostname));
 
-#ifdef USE_OPENSSL
+#if 0
 	if (serv->use_ssl)
 	{
 		char cert_file[256];

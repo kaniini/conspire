@@ -23,7 +23,6 @@
 #endif
 
 #ifdef GNUTLS
-#undef USE_OPENSSL
 #include <gnutls/gnutls.h>
 #endif
 
@@ -44,10 +43,6 @@ void *xchat_realloc (char *old, int len, char *file, int line);
 #define INCLUDE_PROTOTYPES 1
 #endif
 #include <socks.h>
-#endif
-
-#ifdef USE_OPENSSL
-#include <openssl/ssl.h>		  /* SSL_() */
 #endif
 
 #ifdef __EMX__						  /* for o/s 2 */
@@ -428,12 +423,6 @@ typedef struct server
 	int proxy_sok6;
 	struct msproxy_state_t msp_state;
 	int id;					/* unique ID number (for plugin API) */
-#ifdef USE_OPENSSL
-	SSL *ssl;
-	int ssl_do_connect_tag;
-#else
-	void *ssl;
-#endif
 #ifdef GNUTLS
 	gnutls_session_t gnutls_session;
 	gnutls_certificate_credentials_t gnutls_x509cred;
@@ -520,7 +509,7 @@ typedef struct server
 	unsigned int using_cp1255:1;	/* encoding is CP1255/WINDOWS-1255? */
 	unsigned int using_irc:1;		/* encoding is "IRC" (CP1252/UTF-8 hybrid)? */
 	int use_who:1;				/* whether to use WHO command to get dcc_ip */
-#if defined (USE_OPENSSL) || defined(GNUTLS)
+#ifdef GNUTLS
 	int use_ssl:1;					  /* is server SSL capable? */
 	int accept_invalid_cert:1;	  /* ignore result of server's cert. verify */
 #endif
