@@ -22,6 +22,8 @@ typedef struct ircnet
 	GSList *servlist;
 	int selected;
 	guint32 flags;
+	char *sasl_user;
+	char *sasl_pass;
 } ircnet;
 
 extern GSList *network_list;

@@ -367,8 +367,13 @@ servlist_net_remove (ircnet *net)
 		free (net->comment);
 	if (net->encoding)
 		free (net->encoding);
-	free (net->name);
-	free (net);
+	if (net->sasl_user)
+		free (net->sasl_user)
+	if (net->sasl_pass)
+		free (net->sasl_pass)
+
+	g_free (net->name);
+	g_free (net);
 
 	/* for safety */
 	list = serv_list;
@@ -386,9 +391,8 @@ servlist_net_add (char *name, char *comment, int prepend)
 {
 	ircnet *net;
 
-	net = malloc (sizeof (ircnet));
-	memset (net, 0, sizeof (ircnet));
-	net->name = strdup (name);
+	net = g_new0(sizeof(ircnet));
+	net->name = g_strdup (name);
 /*	net->comment = strdup (comment);*/
 	net->flags = FLAG_CYCLE | FLAG_USE_GLOBAL | FLAG_USE_PROXY;
 
@@ -422,6 +426,12 @@ servlist_load (void)
 		{
 			switch (buf[0])
 			{
+			case 'a':
+				net->sasl_user = strdup (buf + 2);
+				break;
+			case 'A':
+				net->sasl_pass = strdup (buf + 2);
+				break;
 			case 'I':
 				net->nick = strdup (buf + 2);
 				break;
@@ -554,6 +564,10 @@ servlist_save (void)
 		net = list->data;
 
 		fprintf (fp, "N=%s\n", net->name);
+		if (net->sasl_user)
+			fprintf (fp, "a=%s\n", net->sasl_user);
+		if (net->sasl_pass)
+			fprintf (fp, "A=%s\n", net->sasl_pass);
 		if (net->nick)
 			fprintf (fp, "I=%s\n", net->nick);
 		if (net->nick2)
