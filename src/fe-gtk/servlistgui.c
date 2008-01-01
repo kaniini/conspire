@@ -1073,7 +1073,7 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 
 	label34 = gtk_label_new (_("Character set:"));
 	gtk_widget_show (label34);
-	gtk_table_attach (GTK_TABLE (table3), label34, 1, 2, 19, 20,
+	gtk_table_attach (GTK_TABLE (table3), label34, 1, 2, 21, 22,
 							(GtkAttachOptions) (GTK_FILL),
 							(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (label34), 0, 0.5);
@@ -1083,7 +1083,7 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 	gtk_entry_set_text (GTK_ENTRY (GTK_BIN (comboboxentry_charset)->child), net->encoding ? net->encoding : "System default");
 	ignore_changed = FALSE;
 	gtk_widget_show (comboboxentry_charset);
-	gtk_table_attach (GTK_TABLE (table3), comboboxentry_charset, 2, 3, 19, 20,
+	gtk_table_attach (GTK_TABLE (table3), comboboxentry_charset, 2, 3, 21, 22,
 							(GtkAttachOptions) (GTK_FILL),
 							(GtkAttachOptions) (GTK_FILL), 0, 0);
 

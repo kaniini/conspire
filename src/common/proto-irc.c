@@ -827,9 +827,20 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 		{
 		case WORDL('C','A','P', 0 ):
 			{
-				PrintTextf(sess, "CAP: %s %s", word[4], word_eol[5]);
+				if (serv->sasl_user && serv->sasl_pass && serv->sasl_state != SASL_COMPLETE)
+				{
+					if (!strstr(word_eol[5], "sasl"))
+					{
+						tcp_sendf(serv, "CAP END\r\n");
+						serv->sasl_state = SASL_COMPLETE;
 
-				if (serv->sasl_state != SASL_COMPLETE)
+						return;
+					}
+
+					/* request SASL authentication from IRCd. todo: other mechanisms */
+					tcp_sendf(serv, "AUTHENTICATE PLAIN\r\n");
+				}
+				else if (serv->sasl_state != SASL_COMPLETE)
 				{
 					tcp_sendf(serv, "CAP END\r\n");
 					serv->sasl_state = SASL_COMPLETE;
@@ -1024,8 +1035,17 @@ garbage:
 static void
 process_named_servermsg (session *sess, char *buf, char *word_eol[])
 {
-	sess = sess->server->server_session;
+	server *serv = sess->server;
+	sess = serv->server_session;
 
+	if (!strncmp (buf, "AUTHENTICATE ", 5))
+	{
+		PrintTextf(sess, "SASL inbound packet: %s", word_eol[1]);
+		tcp_sendf(serv, "AUTHENTICATE *\r\n");
+		tcp_sendf(serv, "CAP END\r\n");
+		serv->sasl_state = SASL_COMPLETE;
+		return;
+	}
 	if (!strncmp (buf, "PING ", 5))
 	{
 		tcp_sendf (sess->server, "PONG %s\r\n", buf + 5);
