@@ -74,6 +74,9 @@ static GtkWidget *edit_label_real;
 static GtkWidget *edit_label_user;
 static GtkWidget *edit_tree;
 
+static GtkWidget *edit_entry_sasl_user;
+static GtkWidget *edit_entry_sasl_pass;
+
 static ircnet *selected_net = NULL;
 static ircserver *selected_serv = NULL;
 static session *servlist_sess;
@@ -488,6 +491,9 @@ servlist_edit_close_cb (GtkWidget *button, gpointer userdata)
 	servlist_update_from_entry (&net->command, edit_entry_cmd);
 	servlist_update_from_entry (&net->nickserv, edit_entry_nickserv);
 	servlist_update_from_entry (&net->pass, edit_entry_pass);
+
+	servlist_update_from_entry (&net->sasl_user, edit_entry_sasl_user);
+	servlist_update_from_entry (&net->sasl_pass, edit_entry_sasl_pass);
 
 	gtk_widget_destroy (edit_win);
 	edit_win = NULL;
@@ -1053,6 +1059,17 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 									  net->pass, 0,
 					_("Password for the server, if in doubt, leave blank."));
 	gtk_entry_set_visibility (GTK_ENTRY (edit_entry_pass), FALSE);
+
+	edit_entry_sasl_user =
+		servlist_create_entry (table3, _("SASL account username:"), 19,
+									  net->sasl_user, 0,
+					_("If your network uses SASL, put your username here."));
+
+	edit_entry_sasl_pass =
+		servlist_create_entry (table3, _("SASL account password:"), 20,
+									  net->sasl_pass, 0,
+					_("If your network uses SASL, put your password here."));
+	gtk_entry_set_visibility (GTK_ENTRY (edit_entry_sasl_pass), FALSE);
 
 	label34 = gtk_label_new (_("Character set:"));
 	gtk_widget_show (label34);
