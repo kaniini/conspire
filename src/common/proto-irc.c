@@ -796,6 +796,19 @@ process_numeric (session * sess, int n,
 	}
 }
 
+/* stop SASL authentication after a 5 second timeout. */
+static gboolean
+sasl_timeout_cb(gpointer data)
+{
+	server *serv = (server *) data;
+
+	tcp_sendf(serv, "AUTHENTICATE *\r\n");
+	tcp_sendf(serv, "CAP END\r\n");
+	serv->sasl_status = SASL_COMPLETE;
+
+	return FALSE;
+}
+
 /* handle named messages that starts with a ':' */
 
 static void
@@ -842,6 +855,7 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 
 					/* request SASL authentication from IRCd. todo: other mechanisms */
 					tcp_sendf(serv, "AUTHENTICATE PLAIN\r\n");
+					g_timeout_add(5000, sasl_timeout_cb, serv);
 				}
 				else if (serv->sasl_state != SASL_COMPLETE)
 				{
