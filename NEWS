@@ -14,3 +14,5 @@ conspire 0.10.0 (01-??-2008):
     the PNG files in ${datadir}/conspire/pixmaps.
   * Start to move some various aspects of the code to Mowgli.
   * Add rudimentary launcher.
+  * Make /part accept "/part reason" syntax; where it parts from the
+    current channel.
