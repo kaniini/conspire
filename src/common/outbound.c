@@ -2623,7 +2623,7 @@ cmd_part (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		server_sendpart (sess->server, chan, reason);
 		return TRUE;
 	}
-	else if (*chan)
+	else if (*chan && sess->channel != NULL)
 	{
 		chan = sess->channel;
 		reason = word_eol[2];
