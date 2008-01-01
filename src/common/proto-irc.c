@@ -38,7 +38,7 @@
 #include "outbound.h"
 #include "util.h"
 #include "xchatc.h"
-
+#include "base64.h"
 
 static void
 irc_login (server *serv, char *user, char *realname)
@@ -1038,12 +1038,36 @@ process_named_servermsg (session *sess, char *buf, char *word_eol[])
 	server *serv = sess->server;
 	sess = serv->server_session;
 
-	if (!strncmp (buf, "AUTHENTICATE ", 5))
+	if (!strncmp (buf, "AUTHENTICATE ", 13))
 	{
 		PrintTextf(sess, "SASL inbound packet: %s", word_eol[1]);
-		tcp_sendf(serv, "AUTHENTICATE *\r\n");
-		tcp_sendf(serv, "CAP END\r\n");
-		serv->sasl_state = SASL_COMPLETE;
+
+		if (*word_eol[2] == '+')
+		{
+			char buf[1024];
+			char b64buf[1024];
+			char *iter_p = buf;
+			gsize ret;
+
+			ret = g_strlcpy(iter_p, serv->sasl_user, 1024 - (iter_p - buf));
+			iter_p += ret + 1;
+			ret = g_strlcpy(iter_p, serv->sasl_user, 1024 - (iter_p - buf));
+			iter_p += ret + 1;
+			ret = g_strlcpy(iter_p, serv->sasl_pass, 1024 - (iter_p - buf));
+			
+			base64_encode(buf, (strlen(serv->sasl_user) * 2) + strlen(serv->sasl_pass) + 2, b64buf, 1024);
+
+			/* TODO: chunk into 400 byte segments */
+			tcp_sendf(serv, "AUTHENTICATE %s\r\n", b64buf);
+		}
+		else if (!word_eol[2])
+		{
+			tcp_sendf(serv, "AUTHENTICATE *\r\n");
+			tcp_sendf(serv, "CAP END\r\n");
+			serv->sasl_state = SASL_COMPLETE;
+			return;
+		}
+
 		return;
 	}
 	if (!strncmp (buf, "PING ", 5))

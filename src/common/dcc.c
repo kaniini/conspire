@@ -50,6 +50,7 @@
 #include "text.h"
 #include "url.h"
 #include "xchatc.h"
+#include "base64.h"
 
 #ifdef USE_DCC64
 #define BIG_STR_TO_INT(x) strtoull(x,NULL,10)
@@ -1259,7 +1260,7 @@ dcc_http_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DCC 
 		{
 			n2 = snprintf (auth_data2, sizeof (auth_data2), "%s:%s",
 							prefs.proxy_user, prefs.proxy_pass);
-			base64_encode (auth_data, auth_data2, n2);
+			base64_encode (auth_data2, n2, auth_data, 128);
 			n += snprintf (buf+n, sizeof (buf)-n, "Proxy-Authorization: Basic %s\r\n", auth_data);
 		}
 		n += snprintf (buf+n, sizeof (buf)-n, "\r\n");

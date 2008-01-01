@@ -44,6 +44,7 @@
 #include "proto-irc.h"
 #include "servlist.h"
 #include "server.h"
+#include "base64.h"
 
 static GSList *away_list = NULL;
 GSList *serv_list = NULL;
@@ -1060,7 +1061,7 @@ traverse_http (int print_fd, int sok, char *serverAddr, int port)
 	{
 		n2 = snprintf (auth_data2, sizeof (auth_data2), "%s:%s",
 							prefs.proxy_user, prefs.proxy_pass);
-		base64_encode (auth_data, auth_data2, n2);
+		base64_encode (auth_data2, n2, auth_data, 256);
 		n += snprintf (buf+n, sizeof (buf)-n, "Proxy-Authorization: Basic %s\r\n", auth_data);
 	}
 	n += snprintf (buf+n, sizeof (buf)-n, "\r\n");
