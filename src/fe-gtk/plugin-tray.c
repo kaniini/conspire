@@ -118,6 +118,7 @@ fe_tray_set_tooltip (const char *text)
 void
 fe_tray_set_balloon (const char *title, const char *text)
 {
+	char *stext;
 	const char *argv[8];
 	const char *path;
 	WinStatus ws;
@@ -146,11 +147,11 @@ fe_tray_set_balloon (const char *title, const char *text)
 		argv[3] = "-t";
 		argv[4] = "20000";
 		argv[5] = title;
-		argv[6] = text = strip_color (text, -1, STRIP_ALL);
+		argv[6] = stext = strip_color (text, -1, STRIP_ALL);
 		argv[7] = NULL;
 		xchat_execv (argv);
 		g_free ((char *)path);
-		free ((char *)text);
+		free (stext);
 	}
 	else
 	{

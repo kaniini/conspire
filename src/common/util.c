@@ -352,7 +352,7 @@ expand_homedir (char *file)
 }
 
 char *
-strip_color (char *text, int len, int flags)
+strip_color (const char *text, int len, int flags)
 {
 	char *new_str;
 
@@ -367,7 +367,7 @@ strip_color (char *text, int len, int flags)
 /* CL: strip_color2 strips src and writes the output at dst; pass the same pointer
 	in both arguments to strip in place. */
 int
-strip_color2 (char *src, int len, char *dst, int flags)
+strip_color2 (const char *src, int len, char *dst, int flags)
 {
 	int rcol = 0, bgcol = 0;
 	char *start = dst;
@@ -1140,7 +1140,7 @@ util_exec (const char *cmd)
 }
 
 int
-util_execv (char * const argv[])
+util_execv (const char * const argv[])
 {
 	int pid, fd;
 
@@ -1151,7 +1151,7 @@ util_execv (char * const argv[])
 	{
 		/* Now close all open file descriptors except stdin, stdout and stderr */
 		for (fd = 3; fd < 1024; fd++) close(fd);
-		execv (argv[0], argv);
+		execv (argv[0], (char * const *) argv);
 		_exit (0);
 	} else
 	{

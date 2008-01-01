@@ -48,6 +48,7 @@
 #include "menu.h"
 #include "pixmaps.h"
 #include "userlistgui.h"
+#include "../common/fe.h"
 
 #ifdef USE_GTKSPELL
 #include <gtk/gtktextview.h>

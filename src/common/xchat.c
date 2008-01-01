@@ -944,7 +944,7 @@ xchat_exec (const char *cmd)
 }
 
 void
-xchat_execv (char * const argv[])
+xchat_execv (const char * const argv[])
 {
 	int pid = util_execv (argv);
 	if (pid != -1)
