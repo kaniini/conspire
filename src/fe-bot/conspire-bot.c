@@ -17,6 +17,7 @@
  */
 
 #include <glib.h>
+#include <glib-object.h>
 
 #include "../common/xchat.h"
 #include "../common/fe.h"
