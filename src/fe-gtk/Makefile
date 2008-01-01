@@ -3,7 +3,7 @@ include ../../extra.mk
 localedir = $(datadir)/locale
 
 PROG = conspire-gtk
-
+MAN = conspire-gtk.1
 SRCS = about.c ascii.c banlist.c chanlist.c chanview.c custom-list.c \
 	dccgui.c editlist.c fe-gtk.c fkeys.c gtkutil.c ignoregui.c menu.c \
 	maingui.c notifygui.c palette.c pixmaps.c plugin-tray.c $(plugingui_c) \
