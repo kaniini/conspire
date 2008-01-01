@@ -2629,6 +2629,7 @@ cmd_part (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		reason = word_eol[2];
 
 		server_sendpart(sess->server, chan, reason);
+		return TRUE;
 	}
 
 	return FALSE;
