@@ -2,6 +2,8 @@ SRCS = conspire-xchatwrap.c
 
 PROG = conspire-xchatwrap
 
+MAN  = conspire-xchatwrap.1
+
 include ../../buildsys.mk
 include ../../extra.mk
 
