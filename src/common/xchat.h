@@ -523,6 +523,7 @@ typedef struct server
 	char *sasl_user;
 	char *sasl_pass;
 	SaslState sasl_state;
+	int sasl_timeout_tag;
 } server;
 
 typedef int (*cmd_callback) (struct session * sess, char *tbuf, char *word[],

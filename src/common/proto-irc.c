@@ -764,6 +764,7 @@ process_numeric (session * sess, int n,
 		/* sasl didn't work. we're boned. lets get out of here. --nenolod */
 		if (serv->sasl_state != SASL_COMPLETE)
 		{
+			g_source_remove(serv->sasl_timeout_tag);
 			tcp_sendf (serv, "CAP END\r\n");
 			serv->sasl_state = SASL_COMPLETE;
 		}
@@ -804,7 +805,7 @@ sasl_timeout_cb(gpointer data)
 
 	tcp_sendf(serv, "AUTHENTICATE *\r\n");
 	tcp_sendf(serv, "CAP END\r\n");
-	serv->sasl_status = SASL_COMPLETE;
+	serv->sasl_state = SASL_COMPLETE;
 
 	return FALSE;
 }
@@ -855,7 +856,7 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 
 					/* request SASL authentication from IRCd. todo: other mechanisms */
 					tcp_sendf(serv, "AUTHENTICATE PLAIN\r\n");
-					g_timeout_add(5000, sasl_timeout_cb, serv);
+					serv->sasl_timeout_tag = g_timeout_add(5000, sasl_timeout_cb, serv);
 				}
 				else if (serv->sasl_state != SASL_COMPLETE)
 				{
@@ -1077,6 +1078,7 @@ process_named_servermsg (session *sess, char *buf, char *word_eol[])
 		}
 		else if (!word_eol[2])
 		{
+			g_source_remove(serv->sasl_timeout_tag);
 			tcp_sendf(serv, "AUTHENTICATE *\r\n");
 			tcp_sendf(serv, "CAP END\r\n");
 			serv->sasl_state = SASL_COMPLETE;
