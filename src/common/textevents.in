@@ -832,3 +832,8 @@ pevt_netsplit1_help
 %C23*%O$t%C23Netsplit: $1 <-> $2, quits: $3
 3
 
+Authenticated to Account
+XP_TE_SASL_AUTH
+pevt_saslauth_help
+%C23*%O$t%C23You have successfully authenticated to account '$1'.
+1

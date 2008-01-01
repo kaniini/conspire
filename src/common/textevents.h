@@ -418,4 +418,7 @@ N_("%C27*$t%C27You are now known as $2")},
 
 {"Netsplit", pevt_netsplit1_help, 3, 
 N_("%C23*%O$t%C23Netsplit: $1 <-> $2, quits: $3")},
+
+{"Authenticated to Account", pevt_saslauth_help, 1, 
+N_("%C23*%O$t%C23You have successfully authenticated to account '$1'.")},
 };

@@ -1332,6 +1332,10 @@ static char * const pevt_discon_help[] = {
 	N_("Error"),
 };
 
+static char * const pevt_saslauth_help[] = {
+	N_("SASL account name"),
+};
+
 #include "textevents.h"
 
 static void
