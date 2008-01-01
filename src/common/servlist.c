@@ -72,6 +72,12 @@ servlist_connect (session *sess, ircnet *net, gboolean join)
 	if (net->pass)
 		g_strlcpy (serv->password, net->pass, sizeof (serv->password));
 
+	if (net->sasl_user && net->sasl_pass)
+	{
+		serv->sasl_user = g_strdup(net->sasl_user);
+		serv->sasl_pass = g_strdup(net->sasl_pass);
+	}
+
 	if (net->flags & FLAG_USE_GLOBAL)
 	{
 		strcpy(serv->nick, prefs.nick1);
@@ -368,9 +374,9 @@ servlist_net_remove (ircnet *net)
 	if (net->encoding)
 		free (net->encoding);
 	if (net->sasl_user)
-		free (net->sasl_user)
+		free (net->sasl_user);
 	if (net->sasl_pass)
-		free (net->sasl_pass)
+		free (net->sasl_pass);
 
 	g_free (net->name);
 	g_free (net);
@@ -391,7 +397,7 @@ servlist_net_add (char *name, char *comment, int prepend)
 {
 	ircnet *net;
 
-	net = g_new0(sizeof(ircnet));
+	net = g_new0(ircnet, 1);
 	net->name = g_strdup (name);
 /*	net->comment = strdup (comment);*/
 	net->flags = FLAG_CYCLE | FLAG_USE_GLOBAL | FLAG_USE_PROXY;

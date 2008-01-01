@@ -372,6 +372,12 @@ struct msproxy_state_t
 	unsigned char		seq_sent;		/* seq number of last packet sent.	*/
 };
 
+typedef enum {
+	SASL_INITIALIZED,
+	SASL_AUTHENTICATING,
+	SASL_COMPLETE
+} SaslState;
+
 typedef struct server
 {
 	/*  server control operations (in server*.c) */
@@ -513,6 +519,10 @@ typedef struct server
 	int use_ssl:1;					  /* is server SSL capable? */
 	int accept_invalid_cert:1;	  /* ignore result of server's cert. verify */
 #endif
+
+	char *sasl_user;
+	char *sasl_pass;
+	SaslState sasl_state;
 } server;
 
 typedef int (*cmd_callback) (struct session * sess, char *tbuf, char *word[],

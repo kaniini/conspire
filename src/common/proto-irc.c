@@ -46,6 +46,12 @@ irc_login (server *serv, char *user, char *realname)
 	if (serv->password[0])
 		tcp_sendf (serv, "PASS %s\r\n", serv->password);
 
+	/* redo this in conspire 0.11 ;) --nenolod */
+	if (serv->sasl_user && serv->sasl_pass)
+		tcp_sendf (serv, "CAP REQ :sasl multi-prefix\r\n");
+	else
+		tcp_sendf (serv, "CAP REQ :multi-prefix\r\n");
+
 	tcp_sendf (serv,
 				  "NICK %s\r\n"
 				  "USER %s %s %s :%s\r\n",
@@ -747,6 +753,20 @@ process_numeric (session * sess, int n,
 				serv->inside_monitor = FALSE;
 			break;
 
+	case 903:
+	case 904:
+	case 905:
+	case 906:
+	case 907:
+		/* sasl didn't work. we're boned. lets get out of here. --nenolod */
+		if (serv->sasl_state != SASL_COMPLETE)
+		{
+			tcp_sendf (serv, "CAP END\r\n");
+			serv->sasl_state = SASL_COMPLETE;
+		}
+
+		break;
+
 	default:
 
 		if (serv->inside_whois && word[4][0])
@@ -797,7 +817,7 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 		ex[0] = '!';
 	}
 
-	if (len == 4)
+	if (len <= 4)
 	{
 		guint32 t;
 
@@ -805,6 +825,17 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 		/* this should compile to a bunch of: CMP.L, JE ... nice & fast */
 		switch (t)
 		{
+		case WORDL('C','A','P', 0 ):
+			{
+				PrintTextf(sess, "CAP: %s %s", word[4], word_eol[5]);
+
+				if (serv->sasl_state != SASL_COMPLETE)
+				{
+					tcp_sendf(serv, "CAP END\r\n");
+					serv->sasl_state = SASL_COMPLETE;
+				}
+			}
+			return;
 		case WORDL('J','O','I','N'):
 			{
 				char *chan = word[3];
