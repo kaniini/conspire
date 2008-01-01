@@ -754,7 +754,7 @@ process_numeric (session * sess, int n,
 			break;
 
 	case 900:
-		EMIT_SIGNAL(XP_TE_SASL_AUTH, serv->server_session, word[4]);
+		EMIT_SIGNAL(XP_TE_SASL_AUTH, serv->server_session, word[4], NULL, NULL, NULL, NULL);
 		break;
 	case 903:
 	case 904:
