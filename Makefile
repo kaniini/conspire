@@ -1,5 +1,6 @@
 include buildsys.mk
 
+PROG      = conspire
 SUBDIRS   = po pixmaps src
 
 install-extra:
