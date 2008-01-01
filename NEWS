@@ -16,3 +16,7 @@ conspire 0.10.0 (01-??-2008):
   * Add rudimentary launcher.
   * Make /part accept "/part reason" syntax; where it parts from the
     current channel.
+  * Add support for SASL. At the moment, SASL passwords are stored in
+    plain text. Eventually, they will be MD5'd or something. Additionally,
+    only the PLAIN mechanism is supported. Some servers support DH-BLOWFISH,
+    but that requires more work and will wait until 0.11.
