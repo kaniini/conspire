@@ -27,10 +27,13 @@
 #define __XCHATEMU_H
 
 extern void xchatemu_init(void);
+
+#ifndef XCHAT_PLUGIN_H
 extern gpointer xchat_plugingui_add(gpointer unused, const gchar *filename,
         const gchar *name,
         const gchar *desc,
         const gchar *version,
         gchar *reserved);
+#endif
 
 #endif

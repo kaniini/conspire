@@ -35,6 +35,8 @@
 #include <glib.h>
 #include <gmodule.h>
 
+#include "../libconspire-xchatemu/xchatemu.h"
+
 #define DBUS_SERVICE "org.atheme.conspire"
 #define DBUS_REMOTE "/org/atheme/conspire"
 #define DBUS_REMOTE_INTERFACE "org.atheme.conspire"

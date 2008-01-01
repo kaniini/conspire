@@ -63,6 +63,8 @@
 #include "structmember.h"
 #include "pythread.h"
 
+#include "../libconspire-xchatemu/xchatemu.h"
+
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
 
