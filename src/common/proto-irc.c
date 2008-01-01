@@ -753,6 +753,9 @@ process_numeric (session * sess, int n,
 				serv->inside_monitor = FALSE;
 			break;
 
+	case 900:
+		EMIT_SIGNAL(XP_TE_SASL_AUTH, serv->server_session, word[4]);
+		break;
 	case 903:
 	case 904:
 	case 905:
@@ -1040,8 +1043,6 @@ process_named_servermsg (session *sess, char *buf, char *word_eol[])
 
 	if (!strncmp (buf, "AUTHENTICATE ", 13))
 	{
-		PrintTextf(sess, "SASL inbound packet: %s", word_eol[1]);
-
 		if (*word_eol[2] == '+')
 		{
 			char buf[1024];
