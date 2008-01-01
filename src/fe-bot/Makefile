@@ -1,5 +1,6 @@
 PROG = conspire-bot
 SRCS = conspire-bot.c
+MAN  = conspire-bot.1
 
 include ../../buildsys.mk
 include ../../extra.mk

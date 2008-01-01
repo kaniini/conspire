@@ -2,6 +2,7 @@ include buildsys.mk
 
 PROG      = conspire
 SUBDIRS   = po pixmaps src
+MAN	  = conspire.1
 
 install-extra:
 	for i in conspire.desktop; do \
