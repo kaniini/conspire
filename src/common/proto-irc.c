@@ -56,6 +56,8 @@ irc_login (server *serv, char *user, char *realname)
 				  "NICK %s\r\n"
 				  "USER %s %s %s :%s\r\n",
 				  serv->nick, user, user, serv->servername, realname);
+
+	serv->sasl_state = SASL_INITIALIZED;
 }
 
 static void
