@@ -139,10 +139,10 @@ inbound_make_idtext (server *serv, char *idtext, int max, int id)
 	idtext[0] = 0;
 	if (serv->have_idmsg)
 	{
-		if (id)
+		if (id && prefs.irc_id_ytext)
 		{
 			g_strlcpy (idtext, prefs.irc_id_ytext, max);
-		} else
+		} else if (prefs.irc_id_ntext)
 		{
 			g_strlcpy (idtext, prefs.irc_id_ntext, max);
 		}
