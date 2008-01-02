@@ -839,7 +839,7 @@ set_showval (session *sess, const PrefsEntry *var, char *tbuf)
 	{
 	case PREFS_TYPE_STR:
 		sprintf (tbuf + len, "\0033:\017 %s\n",
-					*((char **) var->ptr));
+					*((char **) var->ptr) ? *((char **) var->ptr) : "");
 		break;
 	case PREFS_TYPE_INT:
 		sprintf (tbuf + len, "\0033:\017 %d\n",
