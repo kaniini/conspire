@@ -61,7 +61,6 @@ GtkStyle *create_input_style (GtkStyle *);
 static int last_selected_page = 0;
 static int last_selected_row = 0; /* sound row */
 static gboolean color_change;
-static struct xchatprefs setup_prefs;
 static GtkWidget *cancel_button;
 
 enum
@@ -544,23 +543,6 @@ setup_create_toggleL (GtkWidget *tab, int row, const setting *set)
 	return wid;
 }
 
-#if 0
-static void
-setup_create_toggle (GtkWidget *box, int row, const setting *set)
-{
-	GtkWidget *wid;
-
-	wid = gtk_check_button_new_with_label (_(set->label));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (wid),
-											setup_get_int (&setup_prefs, set));
-	g_signal_connect (G_OBJECT (wid), "toggled",
-							G_CALLBACK (setup_toggle_cb), (gpointer)set);
-	if (set->tooltip)
-		add_tip (wid, _(set->tooltip));
-	gtk_box_pack_start (GTK_BOX (box), wid, 0, 0, 0);
-}
-#endif
-
 static GtkWidget *
 setup_create_italic_label (char *text)
 {
@@ -620,25 +602,10 @@ setup_create_spin (GtkWidget *table, int row, const setting *set)
 	return wid;
 }
 
-static gint
-setup_apply_tint (int *tag)
-{
-	prefs.tint_red = setup_prefs.tint_red;
-	prefs.tint_green = setup_prefs.tint_green;
-	prefs.tint_blue = setup_prefs.tint_blue;
-	mg_update_xtext (current_sess->gui->xtext);
-	*tag = 0;
-	return 0;
-}
-
 static void
 setup_hscale_cb (GtkHScale *wid, const setting *set)
 {
-	static int tag = 0;
-
 	*((int *) set->ptr) = gtk_range_get_value(GTK_RANGE(wid));
-	if(tag == 0)
-		tag = g_idle_add ((GSourceFunc)setup_apply_tint, &tag);
 }
 
 static void
@@ -1113,16 +1080,6 @@ setup_create_page (const setting *set)
 		row++;
 	}
 
-#if 0
-	if (set == general_settings)
-	{
-		setup_create_id_menu (tab, _("Mark identified users with:"),	
-									 row, setup_prefs.irc_id_ytext);
-		setup_create_id_menu (tab, _("Mark not-identified users with:"),	
-									 row + 1, setup_prefs.irc_id_ntext);
-	}
-#endif
-
 	if (set == logging_settings)
 	{
 		GtkWidget *but = gtk_button_new_with_label (_("Open Data Folder"));
@@ -1309,8 +1266,8 @@ extern char *sound_files[];
 static void
 setup_snd_apply (void)
 {
-	strcpy (setup_prefs.sounddir, GTK_ENTRY (snddir_entry)->text);
-	strcpy (setup_prefs.soundcmd, GTK_ENTRY (sndprog_entry)->text);
+	strcpy (prefs.sounddir, GTK_ENTRY (snddir_entry)->text);
+	strcpy (prefs.soundcmd, GTK_ENTRY (sndprog_entry)->text);
 }
 
 static void
@@ -1406,7 +1363,7 @@ setup_autotoggle_cb (GtkToggleButton *but, GtkToggleButton *ext)
 {
 	if (but->active)
 	{
-		setup_prefs.soundcmd[0] = 0;
+		prefs.soundcmd[0] = 0;
 		gtk_entry_set_text (GTK_ENTRY (sndprog_entry), "");
 		gtk_widget_set_sensitive (sndprog_entry, FALSE);
 	} else
@@ -1516,10 +1473,10 @@ setup_create_sound_page (void)
 	gtk_misc_set_alignment (GTK_MISC (label3), 0, 0.5);
 
 	sndprog_entry = gtk_entry_new ();
-	if (setup_prefs.soundcmd[0] == 0)
+	if (prefs.soundcmd[0] == 0)
 		gtk_widget_set_sensitive (sndprog_entry, FALSE);
 	else
-		gtk_entry_set_text (GTK_ENTRY (sndprog_entry), setup_prefs.soundcmd);
+		gtk_entry_set_text (GTK_ENTRY (sndprog_entry), prefs.soundcmd);
 	gtk_widget_show (sndprog_entry);
 	gtk_table_attach (GTK_TABLE (table2), sndprog_entry, 1, 3, 2, 3,
 							(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -1547,7 +1504,7 @@ setup_create_sound_page (void)
 										 radio_group);
 	radio_group =
 		gtk_radio_button_get_group (GTK_RADIO_BUTTON (radio_auto));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_auto), setup_prefs.soundcmd[0] == 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_auto), prefs.soundcmd[0] == 0);
 
 	label4 = gtk_label_new_with_mnemonic (_("Sound files _directory:"));
 	gtk_widget_show (label4);
@@ -1557,7 +1514,7 @@ setup_create_sound_page (void)
 	gtk_misc_set_alignment (GTK_MISC (label4), 0, 0.5);
 
 	snddir_entry = entry3 = gtk_entry_new ();
-	gtk_entry_set_text (GTK_ENTRY (entry3), setup_prefs.sounddir);
+	gtk_entry_set_text (GTK_ENTRY (entry3), prefs.sounddir);
 	gtk_widget_show (entry3);
 	gtk_table_attach (GTK_TABLE (table2), entry3, 1, 3, 3, 4,
 							(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -1990,21 +1947,12 @@ setup_apply (struct xchatprefs *pr)
 	}
 }
 
-#if 0
-static void
-setup_apply_cb (GtkWidget *but, GtkWidget *win)
-{
-	/* setup_prefs -> xchat */
-	setup_apply (&setup_prefs);
-}
-#endif
-
 static void
 setup_ok_cb (GtkWidget *but, GtkWidget *win)
 {
 	setup_snd_apply ();
 	gtk_widget_destroy (win);
-	setup_apply (&setup_prefs);
+	setup_apply (&prefs);
 	save_config ();
 	palette_save ();
 }
@@ -2076,8 +2024,6 @@ setup_open (void)
 		gtk_window_present (GTK_WINDOW (setup_window));
 		return;
 	}
-
-	memcpy (&setup_prefs, &prefs, sizeof (prefs));
 
 	color_change = FALSE;
 	setup_window = setup_window_open ();
