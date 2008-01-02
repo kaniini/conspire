@@ -900,7 +900,7 @@ traverse_socks5 (int print_fd, int sok, char *serverAddr, int port)
 	unsigned char *sc2;
 	unsigned int packetlen, addrlen;
 	unsigned char buf[260];
-	int auth = prefs.proxy_auth && prefs.proxy_user[0] && prefs.proxy_pass[0];
+	int auth = prefs.proxy_auth && prefs.proxy_user && prefs.proxy_pass;
 
 	sc1.version = 5;
 	sc1.nmethods = 1;
@@ -1124,7 +1124,7 @@ server_child (server * serv)
 	ns_server = net_store_new ();
 
 	/* is a hostname set? - bind to it */
-	if (prefs.hostname[0])
+	if (prefs.hostname != NULL)
 	{
 		ns_local = net_store_new ();
 		local_ip = net_resolve (ns_local, prefs.hostname, 0, &real_hostname);
@@ -1143,7 +1143,7 @@ server_child (server * serv)
 
 	/* first resolve where we want to connect to */
 	if (!serv->dont_use_proxy && /* blocked in serverlist? */
-		prefs.proxy_host[0] &&
+		prefs.proxy_host &&
 		prefs.proxy_type > 0 &&
 		prefs.proxy_use != 2)	/* proxy is NOT dcc-only */
 	{

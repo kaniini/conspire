@@ -311,7 +311,7 @@ dcc_lookup_proxy (char *host, struct sockaddr_in *addr)
 	return FALSE;
 }
 
-#define DCC_USE_PROXY() (prefs.proxy_host[0] && prefs.proxy_type>0 && prefs.proxy_type<5 && prefs.proxy_use!=1)
+#define DCC_USE_PROXY() (prefs.proxy_host != NULL && prefs.proxy_type>0 && prefs.proxy_type<5 && prefs.proxy_use!=1)
 
 static int
 dcc_connect_sok (struct DCC *dcc)
@@ -1045,7 +1045,7 @@ static gboolean
 dcc_socks5_proxy_traverse (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 {
 	struct proxy_state *proxy = dcc->proxy;
-	int auth = prefs.proxy_auth && prefs.proxy_user[0] && prefs.proxy_pass[0];
+	int auth = prefs.proxy_auth && prefs.proxy_user && prefs.proxy_pass;
 
 	if (proxy->phase == 0)
 	{
@@ -1623,7 +1623,7 @@ dcc_get_my_address (void)	/* the address we'll tell the other person */
 
 	if (prefs.ip_from_server && prefs.dcc_ip)
 		addr = prefs.dcc_ip;
-	else if (prefs.dcc_ip_str[0])
+	else if (prefs.dcc_ip_str)
 	{
 	   dns_query = gethostbyname ((const char *) prefs.dcc_ip_str);
 
