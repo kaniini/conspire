@@ -2282,7 +2282,11 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 	}
 
 #ifdef USE_DB
-	pix = gdk_pixmap_new (xtext->draw_buf, str_width, xtext->fontsize, xtext->depth);
+	if (str_width)
+		pix = gdk_pixmap_new (xtext->draw_buf, str_width, xtext->fontsize, xtext->depth);
+	else
+		pix = NULL;
+
 	if (pix)
 	{
 		dest_x = x;
