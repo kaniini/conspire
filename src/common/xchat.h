@@ -98,41 +98,41 @@ struct nbexec
 
 struct xchatprefs
 {
-	char nick1[NICKLEN];
-	char nick2[NICKLEN];
-	char nick3[NICKLEN];
-	char realname[127];
-	char username[127];
-	char nick_suffix[4];			/* Only ever holds a one-character string. */
-	char awayreason[256];
-	char quitreason[256];
-	char partreason[256];
-	char font_normal[FONTNAMELEN + 1];
-	char doubleclickuser[256];
-	char sounddir[PATHLEN + 1];
-	char soundcmd[PATHLEN + 1];
-	char background[PATHLEN + 1];
-	char dccdir[PATHLEN + 1];
-	char dcc_completed_dir[PATHLEN + 1];
-	char irc_extra_hilight[300];
-	char irc_no_hilight[300];
-	char irc_nick_hilight[300];
-	char dnsprogram[72];
-	char hostname[127];
-	char cmdchar[4];
-	char logmask[256];
-	char stamp_format[64];
-	char timestamp_log_format[64];
-	char irc_id_ytext[64];
-	char irc_id_ntext[64];
+	char *nick1;
+	char *nick2;
+	char *nick3;
+	char *realname;
+	char *username;
+	char *nick_suffix;			/* Only ever holds a one-character string. */
+	char *awayreason;
+	char *quitreason;
+	char *partreason;
+	char *font_normal;
+	char *doubleclickuser;
+	char *sounddir;
+	char *soundcmd;
+	char *background;
+	char *dccdir;
+	char *dcc_completed_dir;
+	char *irc_extra_hilight;
+	char *irc_no_hilight;
+	char *irc_nick_hilight;
+	char *dnsprogram;
+	char *hostname;
+	char *cmdchar;
+	char *logmask;
+	char *stamp_format;
+	char *timestamp_log_format;
+	char *irc_id_ytext;
+	char *irc_id_ntext;
 
-	char proxy_host[64];
+	char *proxy_host;
 	int proxy_port;
 	int proxy_type; /* 0=disabled, 1=wingate 2=socks4, 3=socks5, 4=http */
 	int proxy_use; /* 0=all 1=IRC_ONLY 2=DCC_ONLY */
 	unsigned int proxy_auth;
-	char proxy_user[32];
-	char proxy_pass[32];
+	char *proxy_user;
+	char *proxy_pass;
 
 	int first_dcc_send_port;
 	int last_dcc_send_port;
@@ -182,7 +182,7 @@ struct xchatprefs
 	int userlist_sort;
 	guint32 local_ip;
 	guint32 dcc_ip;
-	char dcc_ip_str[DOMAINLEN + 1];
+	char *dcc_ip_str;
 
 	unsigned int tab_small;
 	unsigned int tab_sort;
