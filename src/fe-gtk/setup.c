@@ -97,8 +97,8 @@ typedef struct
 static const setting textbox_settings[] =
 {
 	{ST_HEADER,	N_("Text Box Appearance"),0,0,0},
-	{ST_EFONT,  N_("Font:"), &prefs.font_normal, 0, 0, sizeof prefs.font_normal},
-	{ST_EFILE,  N_("Background image:"), &prefs.background, 0, 0, sizeof prefs.background},
+	{ST_EFONT,  N_("Font:"), &prefs.font_normal, 0, 0},
+	{ST_EFILE,  N_("Background image:"), &prefs.background, 0, 0},
 	{ST_NUMBER,	N_("Scrollback lines:"), &prefs.max_lines,0,0,100000},
 	{ST_TOGGLE, N_("Colored nick names"), &prefs.colorednicks,
 					N_("Give each person on IRC a different color"),0,0},
@@ -112,7 +112,7 @@ static const setting textbox_settings[] =
 	{ST_HEADER,	N_("Time Stamps"),0,0,0},
 	{ST_TOGGLE, N_("Enable time stamps"), &prefs.timestamp,0,0,2},
 	{ST_ENTRY,  N_("Time stamp format:"), &prefs.stamp_format,
-					N_("See strftime manpage for details."),0,sizeof prefs.stamp_format},
+					N_("See strftime manpage for details."),0},
 
 	{ST_END, 0, 0, 0, 0, 0}
 };
@@ -133,7 +133,7 @@ static const setting inputbox_settings[] =
 	{ST_HEADER, N_("Nick Completion"),0,0,0},
 	{ST_TOGGLE, N_("Automatic nick completion (without TAB key)"), &prefs.nickcompletion,
 					0,0,0},
-	{ST_ENTRY,	N_("Nick completion suffix:"), &prefs.nick_suffix,0,0,sizeof prefs.nick_suffix},
+	{ST_ENTRY,	N_("Nick completion suffix:"), &prefs.nick_suffix,0,0},
 	{ST_MENU,	N_("Nick completion sorted:"), &prefs.completion_sort, 0, tabcompmenu, 0},
 	{ST_NUMBER,	N_("Nick completion minimum length:"), &prefs.completion_amount, 0, 0,30},
 
@@ -200,7 +200,7 @@ static const setting userlist_settings[] =
 	{ST_NUMBER, N_("On channels smaller than:"), &prefs.away_size_max,0,0,10000},
 
 	{ST_HEADER,	N_("Action Upon Double Click"),0,0,0},
-	{ST_ENTRY,	N_("Execute command:"), &prefs.doubleclickuser, 0, 0, sizeof prefs.doubleclickuser},
+	{ST_ENTRY,	N_("Execute command:"), &prefs.doubleclickuser, 0, 0},
 
 /*	{ST_HEADER,	N_("Extra Gadgets"),0,0,0},
 	{ST_MENU,	N_("Lag meter:"), &prefs.lagometer, 0, lagmenutext, 0},
@@ -260,15 +260,15 @@ static const setting filexfer_settings[] =
 {
 	{ST_HEADER, N_("Files and Directories"), 0, 0, 0},
 	{ST_MENU,	N_("Auto accept file offers:"), &prefs.autodccsend, 0, dccaccept, 0},
-	{ST_EFOLDER,N_("Download files to:"), &prefs.dccdir, 0, 0, sizeof prefs.dccdir},
-	{ST_EFOLDER,N_("Move completed files to:"), &prefs.dcc_completed_dir, 0, 0, sizeof prefs.dcc_completed_dir},
+	{ST_EFOLDER,N_("Download files to:"), &prefs.dccdir, 0, 0},
+	{ST_EFOLDER,N_("Move completed files to:"), &prefs.dcc_completed_dir, 0, 0},
 	{ST_TOGGLE, N_("Save nick name in filenames"), &prefs.dccwithnick, 0, 0, 0},
 
 	{ST_HEADER, N_("Network Settings"), 0, 0, 0},
 	{ST_TOGGLE, N_("Get my address from the IRC server"), &prefs.ip_from_server,
 					N_("Asks the IRC server for your real address. Use this if you have a 192.168.*.* address!"), 0, 0},
 	{ST_ENTRY,	N_("DCC IP address:"), &prefs.dcc_ip_str,
-					N_("Claim you are at this address when offering files."), 0, sizeof prefs.dcc_ip_str},
+					N_("Claim you are at this address when offering files."), 0},
 	{ST_NUMBER,	N_("First DCC send port:"), &prefs.first_dcc_send_port, 0, 0, 65535},
 	{ST_NUMBER,	N_("Last DCC send port:"), &prefs.last_dcc_send_port, 0, 
 		(const char **)N_("!Leave ports at zero for full range."), 65535},
@@ -321,9 +321,9 @@ static const setting alert_settings[] =
 	{ST_HEADER,	N_("Highlighted Messages"),0,0,0},
 	{ST_LABEL,	N_("Highlighted messages are ones where your nickname is mentioned, but also:"), 0, 0, 0, 1},
 
-	{ST_ENTRY,	N_("Extra words to highlight:"), &prefs.irc_extra_hilight, 0, 0, sizeof prefs.irc_extra_hilight},
-	{ST_ENTRY,	N_("Nick names not to highlight:"), &prefs.irc_no_hilight, 0, 0, sizeof prefs.irc_no_hilight},
-	{ST_ENTRY,	N_("Nick names to always highlight:"), &prefs.irc_nick_hilight, 0, 0, sizeof prefs.irc_nick_hilight},
+	{ST_ENTRY,	N_("Extra words to highlight:"), &prefs.irc_extra_hilight, 0, 0},
+	{ST_ENTRY,	N_("Nick names not to highlight:"), &prefs.irc_no_hilight, 0, 0},
+	{ST_ENTRY,	N_("Nick names to always highlight:"), &prefs.irc_nick_hilight, 0, 0},
 	{ST_LABEL,	N_("Separate multiple words with commas.")},
 	{ST_END, 0, 0, 0, 0, 0}
 };
@@ -331,9 +331,9 @@ static const setting alert_settings[] =
 static const setting general_settings[] =
 {
 	{ST_HEADER,	N_("Default Messages"),0,0,0},
-	{ST_ENTRY,	N_("Quit:"), &prefs.quitreason, 0, 0, sizeof prefs.quitreason},
-	{ST_ENTRY,	N_("Leave channel:"), &prefs.partreason, 0, 0, sizeof prefs.partreason},
-	{ST_ENTRY,	N_("Away:"), &prefs.awayreason, 0, 0, sizeof prefs.awayreason},
+	{ST_ENTRY,	N_("Quit:"), &prefs.quitreason, 0, 0},
+	{ST_ENTRY,	N_("Leave channel:"), &prefs.partreason, 0, 0},
+	{ST_ENTRY,	N_("Away:"), &prefs.awayreason, 0, 0},
 
 	{ST_HEADER,	N_("Away"),0,0,0},
 	{ST_TOGGLE,	N_("Announce away messages"), &prefs.show_away_message,
@@ -370,12 +370,12 @@ static const setting logging_settings[] =
 {
 	{ST_HEADER,	N_("Logging"),0,0,0},
 	{ST_TOGGLE,	N_("Enable logging of conversations"), &prefs.logging, 0, 0, 2},
-	{ST_ENTRY,	N_("Log filename:"), &prefs.logmask, 0, 0, sizeof prefs.logmask},
+	{ST_ENTRY,	N_("Log filename:"), &prefs.logmask, 0, 0},
 	{ST_LABEL,	N_("%s=Server %c=Channel %n=Network.")},
 
 	{ST_HEADER,	N_("Time Stamps"),0,0,0},
 	{ST_TOGGLE,	N_("Insert timestamps in logs"), &prefs.timestamp_logs, 0, 0, 2},
-	{ST_ENTRY,	N_("Log timestamp format:"), &prefs.timestamp_log_format, 0, 0, sizeof prefs.timestamp_log_format},
+	{ST_ENTRY,	N_("Log timestamp format:"), &prefs.timestamp_log_format, 0, 0},
 	{ST_LABEL,	N_("See strftime manpage for details.")},
 
 	{ST_END, 0, 0, 0, 0, 0}
@@ -405,11 +405,11 @@ static const char *const proxyuse[] =
 static const setting network_settings[] =
 {
 	{ST_HEADER,	N_("Your Address"), 0, 0, 0, 0},
-	{ST_ENTRY,	N_("Bind to:"), &prefs.hostname, 0, 0, sizeof prefs.hostname},
+	{ST_ENTRY,	N_("Bind to:"), &prefs.hostname, 0, 0},
 	{ST_LABEL,	N_("Only useful for computers with multiple addresses.")},
 
 	{ST_HEADER,	N_("Proxy Server"), 0, 0, 0, 0},
-	{ST_ENTRY,	N_("Hostname:"), &prefs.proxy_host, 0, 0, sizeof prefs.proxy_host},
+	{ST_ENTRY,	N_("Hostname:"), &prefs.proxy_host, 0, 0},
 	{ST_NUMBER,	N_("Port:"), &prefs.proxy_port, 0, 0, 65535},
 	{ST_MENU,	N_("Type:"), &prefs.proxy_type, 0, proxytypes, 0},
 	{ST_MENU,	N_("Use proxy for:"), &prefs.proxy_use, 0, proxyuse, 0},
@@ -420,8 +420,8 @@ static const setting network_settings[] =
 #else
 	{ST_TOGGLE,	N_("Use Authentication (HTTP or Socks5 only)"), &prefs.proxy_auth, 0, 0, 0},
 #endif
-	{ST_ENTRY,	N_("Username:"), &prefs.proxy_user, 0, 0, sizeof prefs.proxy_user},
-	{ST_ENTRY,	N_("Password:"), &prefs.proxy_pass, 0, GINT_TO_POINTER(1), sizeof prefs.proxy_pass},
+	{ST_ENTRY,	N_("Username:"), &prefs.proxy_user, 0, 0},
+	{ST_ENTRY,	N_("Password:"), &prefs.proxy_pass, 0, GINT_TO_POINTER(1)},
 
 	{ST_END, 0, 0, 0, 0, 0}
 };
