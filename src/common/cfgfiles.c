@@ -782,6 +782,12 @@ save_config (void)
 		switch (vars[i].type)
 		{
 		case PREFS_TYPE_STR:
+			if (*((char **) vars[i].ptr) == NULL)
+			{
+				i++;
+				continue;
+			}
+
 			if (!cfg_put_str (fh, vars[i].name, *((char **) vars[i].ptr)))
 			{
 				free (new_config);
