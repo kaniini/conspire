@@ -1467,6 +1467,9 @@ mkdir_utf8 (char *dir)
 {
 	int ret;
 
+	if (!dir)
+		return -1;
+
 	dir = xchat_filename_from_utf8 (dir, -1, 0, 0, 0);
 	if (!dir)
 		return -1;
