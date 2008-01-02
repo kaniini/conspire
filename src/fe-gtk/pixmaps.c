@@ -69,7 +69,7 @@ pixmap_load_from_file (char *filename)
 	char buf[256];
 	GdkPixmap *pix;
 
-	if (filename[0] == '\0')
+	if (!filename)
 		return NULL;
 
 	pix = pixmap_load_from_file_real (filename);
