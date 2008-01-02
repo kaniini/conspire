@@ -1,4 +1,7 @@
-/* X-Chat
+/* Conspire
+ * Copyright (C) 2008 William Pitcock
+ *
+ * XChat
  * Copyright (C) 1998 Peter Zelezny.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,7 +35,7 @@
 #include "xchatc.h"
 
 #define XCHAT_DIR ".conspire"
-#define DEF_FONT "Monospace 9"
+#define DEF_FONT "Sans 9"
 
 void
 list_addentry (GSList ** list, char *cmd, char *name)
@@ -778,7 +781,7 @@ save_config (void)
 		switch (vars[i].type)
 		{
 		case PREFS_TYPE_STR:
-			if (!cfg_put_str (fh, vars[i].name, (char *) vars[i].ptr))
+			if (!cfg_put_str (fh, vars[i].name, *((char **) vars[i].ptr)))
 			{
 				free (new_config);
 				return 0;
@@ -786,7 +789,7 @@ save_config (void)
 			break;
 		case PREFS_TYPE_INT:
 		case PREFS_TYPE_BOOL:
-			if (!cfg_put_int (fh, GPOINTER_TO_INT(vars[i].ptr), vars[i].name))
+			if (!cfg_put_int (fh, *((int *) vars[i].ptr), vars[i].name))
 			{
 				free (new_config);
 				return 0;
@@ -832,14 +835,14 @@ set_showval (session *sess, const PrefsEntry *var, char *tbuf)
 	{
 	case PREFS_TYPE_STR:
 		sprintf (tbuf + len, "\0033:\017 %s\n",
-					(char *) var->ptr);
+					*((char **) var->ptr));
 		break;
 	case PREFS_TYPE_INT:
 		sprintf (tbuf + len, "\0033:\017 %d\n",
-					GPOINTER_TO_INT(var->ptr));
+					*((int *) var->ptr));
 		break;
 	case PREFS_TYPE_BOOL:
-		sprintf (tbuf + len, "\0033:\017 %s\n", offon[GPOINTER_TO_INT(var->ptr)]);
+		sprintf (tbuf + len, "\0033:\017 %s\n", offon[*((int *) var->ptr)]);
 		break;
 	}
 	PrintText (sess, tbuf);
@@ -868,7 +871,7 @@ cfg_get_bool (char *var)
 	{
 		if (!strcasecmp (var, vars[i].name))
 		{
-			return GPOINTER_TO_INT(vars[i].ptr);
+			return *((int *) vars[i].ptr);
 		}
 		i++;
 	}
@@ -939,7 +942,7 @@ cmd_set (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 					g_free(vars[i].ptr);
 					vars[i].ptr = g_strdup(val);
 					if (!quiet)
-						PrintTextf (sess, "%s set to: %s\n", var, (char *) vars[i].ptr);
+						PrintTextf (sess, "%s set to: %s\n", var, *((char **) vars[i].ptr));
 				} else
 				{
 					set_showval (sess, &vars[i], tbuf);
@@ -952,25 +955,25 @@ cmd_set (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 					if (vars[i].type == PREFS_TYPE_BOOL)
 					{
 						if (atoi (val))
-							vars[i].ptr = GINT_TO_POINTER(1);
+							*((int *) vars[i].ptr) = 1;
 						else
-							vars[i].ptr = GINT_TO_POINTER(0);
+							*((int *) vars[i].ptr) = 0;
 						if (!strcasecmp (val, "YES") || !strcasecmp (val, "ON"))
-							vars[i].ptr = GINT_TO_POINTER(1);
+							*((int *) vars[i].ptr) = 1;
 						if (!strcasecmp (val, "NO") || !strcasecmp (val, "OFF"))
-							vars[i].ptr = GINT_TO_POINTER(0);
+							*((int *) vars[i].ptr) = 0;
 					} else
 					{
 						if (or) {
-							int tmp = GPOINTER_TO_INT(vars[i].ptr);
+							int tmp = *((int *) vars[i].ptr);
 							tmp |= atoi (val);
-							vars[i].ptr = GINT_TO_POINTER(tmp);
+							*((int *) vars[i].ptr) = tmp;
 						} else
-							vars[i].ptr = GINT_TO_POINTER(atoi(val));
+							*((int *) vars[i].ptr) = atoi(val);
 					}
 
 					if (!quiet)
-						PrintTextf (sess, "%s set to: %d\n", var, GPOINTER_TO_INT(vars[i].ptr));
+						PrintTextf (sess, "%s set to: %d\n", var, *((int *) vars[i].ptr));
 				} else
 				{
 					set_showval (sess, &vars[i], tbuf);
