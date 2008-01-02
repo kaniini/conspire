@@ -1266,8 +1266,10 @@ extern char *sound_files[];
 static void
 setup_snd_apply (void)
 {
-	strcpy (prefs.sounddir, GTK_ENTRY (snddir_entry)->text);
-	strcpy (prefs.soundcmd, GTK_ENTRY (sndprog_entry)->text);
+	g_free(prefs.sounddir);
+	g_free(prefs.soundcmd);
+	prefs.sounddir = g_strdup(GTK_ENTRY (snddir_entry)->text);
+	prefs.soundcmd = g_strdup(GTK_ENTRY (sndprog_entry)->text);
 }
 
 static void
@@ -1363,7 +1365,8 @@ setup_autotoggle_cb (GtkToggleButton *but, GtkToggleButton *ext)
 {
 	if (but->active)
 	{
-		prefs.soundcmd[0] = 0;
+		g_free(prefs.soundcmd);
+		prefs.soundcmd = NULL;
 		gtk_entry_set_text (GTK_ENTRY (sndprog_entry), "");
 		gtk_widget_set_sensitive (sndprog_entry, FALSE);
 	} else
@@ -1473,7 +1476,7 @@ setup_create_sound_page (void)
 	gtk_misc_set_alignment (GTK_MISC (label3), 0, 0.5);
 
 	sndprog_entry = gtk_entry_new ();
-	if (prefs.soundcmd[0] == 0)
+	if (prefs.soundcmd == NULL)
 		gtk_widget_set_sensitive (sndprog_entry, FALSE);
 	else
 		gtk_entry_set_text (GTK_ENTRY (sndprog_entry), prefs.soundcmd);
@@ -1504,7 +1507,7 @@ setup_create_sound_page (void)
 										 radio_group);
 	radio_group =
 		gtk_radio_button_get_group (GTK_RADIO_BUTTON (radio_auto));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_auto), prefs.soundcmd[0] == 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_auto), prefs.soundcmd == NULL);
 
 	label4 = gtk_label_new_with_mnemonic (_("Sound files _directory:"));
 	gtk_widget_show (label4);
@@ -1820,7 +1823,7 @@ setup_apply_to_sess (session_gui *gui)
 static void
 unslash (char *dir)
 {
-	if (dir[0])
+	if (dir && dir[0])
 	{
 		int len = strlen (dir) - 1;
 		if (dir[len] == '/')
