@@ -160,7 +160,7 @@ list_delentry (GSList ** list, char *name)
 }
 
 char *
-cfg_get_str (char *cfg, char *var, char *dest, int dest_len)
+cfg_get_str (char *cfg, const char *var, char **dest)
 {
 	while (1)
 	{
@@ -181,7 +181,7 @@ cfg_get_str (char *cfg, char *var, char *dest, int dest_len)
 				cfg++;
 			t = *cfg;
 			*cfg = 0;
-			g_strlcpy (dest, value, dest_len);
+			*dest = g_strdup(value);
 			*cfg = t;
 			return cfg;
 		}
@@ -196,7 +196,7 @@ cfg_get_str (char *cfg, char *var, char *dest, int dest_len)
 }
 
 static int
-cfg_put_str (int fh, char *var, char *value)
+cfg_put_str (int fh, const char *var, const char *value)
 {
 	char buf[512];
 	int len;
@@ -218,7 +218,7 @@ cfg_put_color (int fh, int r, int g, int b, char *var)
 }
 
 int
-cfg_put_int (int fh, int value, char *var)
+cfg_put_int (int fh, int value, const char *var)
 {
 	char buf[400];
 	int len;
@@ -234,39 +234,49 @@ cfg_put_int (int fh, int value, char *var)
 int
 cfg_get_color (char *cfg, char *var, int *r, int *g, int *b)
 {
-	char str[128];
+	char *str;
 
-	if (!cfg_get_str (cfg, var, str, sizeof (str)))
+	if (!cfg_get_str (cfg, var, &str))
 		return 0;
 
 	sscanf (str, "%04x %04x %04x", r, g, b);
+	g_free(str);
+
 	return 1;
 }
 
 int
-cfg_get_int_with_result (char *cfg, char *var, int *result)
+cfg_get_int_with_result (char *cfg, const char *var, int *result)
 {
-	char str[128];
+	char *str;
+	int ret;
 
-	if (!cfg_get_str (cfg, var, str, sizeof (str)))
+	if (!cfg_get_str (cfg, var, &str))
 	{
 		*result = 0;
 		return 0;
 	}
 
 	*result = 1;
-	return atoi (str);
+	ret = atoi(str);
+	g_free(str);
+
+	return ret;
 }
 
 int
-cfg_get_int (char *cfg, char *var)
+cfg_get_int (char *cfg, const char *var)
 {
-	char str[128];
+	char *str;
+	int ret;
 
-	if (!cfg_get_str (cfg, var, str, sizeof (str)))
+	if (!cfg_get_str (cfg, var, &str))
 		return 0;
 
-	return atoi (str);
+	ret = atoi(str);
+	g_free(str);
+
+	return ret;
 }
 
 char *xdir_fs = NULL;	/* file system encoding */
@@ -316,199 +326,199 @@ default_file (void)
 
 /* Keep these sorted!! */
 
-const struct prefs vars[] = {
-	{"auto_save", P_OFFINT (autosave), TYPE_BOOL},
-	{"auto_save_url", P_OFFINT (autosave_url), TYPE_BOOL},
+PrefsEntry vars[] = {
+	{"auto_save", PREFS_TYPE_BOOL, &prefs.autosave},
+	{"auto_save_url", PREFS_TYPE_BOOL, &prefs.autosave_url},
 
-	{"away_auto_unmark", P_OFFINT (auto_unmark_away), TYPE_BOOL},
-	{"away_reason", P_OFFSET (awayreason), TYPE_STR},
-	{"away_show_message", P_OFFINT (show_away_message), TYPE_BOOL},
-	{"away_show_once", P_OFFINT (show_away_once), TYPE_BOOL},
-	{"away_size_max", P_OFFINT (away_size_max), TYPE_INT},
-	{"away_timeout", P_OFFINT (away_timeout), TYPE_INT},
-	{"away_track", P_OFFINT (away_track), TYPE_BOOL},
+	{"away_auto_unmark", PREFS_TYPE_BOOL, &prefs.auto_unmark_away},
+	{"away_reason", PREFS_TYPE_STR, &prefs.awayreason},
+	{"away_show_message", PREFS_TYPE_BOOL, &prefs.show_away_message},
+	{"away_show_once", PREFS_TYPE_BOOL, &prefs.show_away_once},
+	{"away_size_max", PREFS_TYPE_INT, &prefs.away_size_max},
+	{"away_timeout", PREFS_TYPE_INT, &prefs.away_timeout},
+	{"away_track", PREFS_TYPE_BOOL, &prefs.away_track},
 
-	{"completion_amount", P_OFFINT (completion_amount), TYPE_INT},
-	{"completion_auto", P_OFFINT (nickcompletion), TYPE_BOOL},
-	{"completion_sort", P_OFFINT (completion_sort), TYPE_INT},
-	{"completion_suffix", P_OFFSET (nick_suffix), TYPE_STR},
+	{"completion_amount", PREFS_TYPE_INT, &prefs.completion_amount},
+	{"completion_auto", PREFS_TYPE_BOOL, &prefs.nickcompletion},
+	{"completion_sort", PREFS_TYPE_INT, &prefs.completion_sort},
+	{"completion_suffix", PREFS_TYPE_STR, &prefs.nick_suffix},
 
-	{"dcc_auto_chat", P_OFFINT (autodccchat), TYPE_INT},
-	{"dcc_auto_resume", P_OFFINT (autoresume), TYPE_BOOL},
-	{"dcc_auto_send", P_OFFINT (autodccsend), TYPE_INT},
-	{"dcc_blocksize", P_OFFINT (dcc_blocksize), TYPE_INT},
-	{"dcc_completed_dir", P_OFFSET (dcc_completed_dir), TYPE_STR},
-	{"dcc_dir", P_OFFSET (dccdir), TYPE_STR},
-	{"dcc_fast_send", P_OFFINT (fastdccsend), TYPE_BOOL},
-	{"dcc_global_max_get_cps", P_OFFINT (dcc_global_max_get_cps), TYPE_INT},
-	{"dcc_global_max_send_cps", P_OFFINT (dcc_global_max_send_cps), TYPE_INT},
-	{"dcc_ip", P_OFFSET (dcc_ip_str), TYPE_STR},
-	{"dcc_ip_from_server", P_OFFINT (ip_from_server), TYPE_BOOL},
-	{"dcc_max_get_cps", P_OFFINT (dcc_max_get_cps), TYPE_INT},
-	{"dcc_max_send_cps", P_OFFINT (dcc_max_send_cps), TYPE_INT},
-	{"dcc_permissions", P_OFFINT (dccpermissions), TYPE_INT},
-	{"dcc_port_first", P_OFFINT (first_dcc_send_port), TYPE_INT},
-	{"dcc_port_last", P_OFFINT (last_dcc_send_port), TYPE_INT},
-	{"dcc_remove", P_OFFINT (dcc_remove), TYPE_BOOL},
-	{"dcc_save_nick", P_OFFINT (dccwithnick), TYPE_BOOL},
-	{"dcc_send_fillspaces", P_OFFINT (dcc_send_fillspaces), TYPE_BOOL},
-	{"dcc_stall_timeout", P_OFFINT (dccstalltimeout), TYPE_INT},
-	{"dcc_timeout", P_OFFINT (dcctimeout), TYPE_INT},
+	{"dcc_auto_chat", PREFS_TYPE_INT, &prefs.autodccchat},
+	{"dcc_auto_resume", PREFS_TYPE_BOOL, &prefs.autoresume},
+	{"dcc_auto_send", PREFS_TYPE_INT, &prefs.autodccsend},
+	{"dcc_blocksize", PREFS_TYPE_INT, &prefs.dcc_blocksize},
+	{"dcc_completed_dir", PREFS_TYPE_STR, &prefs.dcc_completed_dir},
+	{"dcc_dir", PREFS_TYPE_STR, &prefs.dccdir},
+	{"dcc_fast_send", PREFS_TYPE_BOOL, &prefs.fastdccsend},
+	{"dcc_global_max_get_cps", PREFS_TYPE_INT, &prefs.dcc_global_max_get_cps},
+	{"dcc_global_max_send_cps", PREFS_TYPE_INT, &prefs.dcc_global_max_send_cps},
+	{"dcc_ip", PREFS_TYPE_STR, &prefs.dcc_ip_str},
+	{"dcc_ip_from_server", PREFS_TYPE_BOOL, &prefs.ip_from_server},
+	{"dcc_max_get_cps", PREFS_TYPE_INT, &prefs.dcc_max_get_cps},
+	{"dcc_max_send_cps", PREFS_TYPE_INT, &prefs.dcc_max_send_cps},
+	{"dcc_permissions", PREFS_TYPE_INT, &prefs.dccpermissions},
+	{"dcc_port_first", PREFS_TYPE_INT, &prefs.first_dcc_send_port},
+	{"dcc_port_last", PREFS_TYPE_INT, &prefs.last_dcc_send_port},
+	{"dcc_remove", PREFS_TYPE_BOOL, &prefs.dcc_remove},
+	{"dcc_save_nick", PREFS_TYPE_BOOL, &prefs.dccwithnick},
+	{"dcc_send_fillspaces", PREFS_TYPE_BOOL, &prefs.dcc_send_fillspaces},
+	{"dcc_stall_timeout", PREFS_TYPE_INT, &prefs.dccstalltimeout},
+	{"dcc_timeout", PREFS_TYPE_INT, &prefs.dcctimeout},
 
-	{"dnsprogram", P_OFFSET (dnsprogram), TYPE_STR},
+	{"dnsprogram", PREFS_TYPE_STR, &prefs.dnsprogram},
 
-	{"flood_ctcp_num", P_OFFINT (ctcp_number_limit), TYPE_INT},
-	{"flood_ctcp_time", P_OFFINT (ctcp_time_limit), TYPE_INT},
-	{"flood_msg_num", P_OFFINT (msg_number_limit), TYPE_INT},
-	{"flood_msg_time", P_OFFINT (msg_time_limit), TYPE_INT},
+	{"flood_ctcp_num", PREFS_TYPE_INT, &prefs.ctcp_number_limit},
+	{"flood_ctcp_time", PREFS_TYPE_INT, &prefs.ctcp_time_limit},
+	{"flood_msg_num", PREFS_TYPE_INT, &prefs.msg_number_limit},
+	{"flood_msg_time", PREFS_TYPE_INT, &prefs.msg_time_limit},
 
-	{"gui_auto_open_chat", P_OFFINT (autoopendccchatwindow), TYPE_BOOL},
-	{"gui_auto_open_dialog", P_OFFINT (autodialog), TYPE_BOOL},
-	{"gui_auto_open_recv", P_OFFINT (autoopendccrecvwindow), TYPE_BOOL},
-	{"gui_auto_open_send", P_OFFINT (autoopendccsendwindow), TYPE_BOOL},
-	{"gui_colors_from_gtk", P_OFFINT (gtk_colors), TYPE_BOOL},
-	{"gui_dialog_height", P_OFFINT (dialog_height), TYPE_INT},
-	{"gui_dialog_left", P_OFFINT (dialog_left), TYPE_INT},
-	{"gui_dialog_top", P_OFFINT (dialog_top), TYPE_INT},
-	{"gui_dialog_width", P_OFFINT (dialog_width), TYPE_INT},
-	{"gui_hide_menu", P_OFFINT (hidemenu), TYPE_BOOL},
-	{"gui_input_spell", P_OFFINT (gui_input_spell), TYPE_BOOL},
-	{"gui_input_style", P_OFFINT (style_inputbox), TYPE_BOOL},
-	{"gui_join_dialog", P_OFFINT (gui_join_dialog), TYPE_BOOL},
-	{"gui_lagometer", P_OFFINT (lagometer), TYPE_INT},
-	{"gui_mode_buttons", P_OFFINT (chanmodebuttons), TYPE_BOOL},
-	{"gui_pane_left_size", P_OFFINT (gui_pane_left_size), TYPE_INT},
-	{"gui_pane_right_size", P_OFFINT (gui_pane_right_size), TYPE_INT},
-	{"gui_quit_dialog", P_OFFINT (gui_quit_dialog), TYPE_BOOL},
-	{"gui_slist_select", P_OFFINT (slist_select), TYPE_INT},
-	{"gui_slist_skio", P_OFFINT (skip_serverlist), TYPE_BOOL},
-	{"gui_throttlemeter", P_OFFINT (throttlemeter), TYPE_INT},
-	{"gui_topicbar", P_OFFINT (topicbar), TYPE_BOOL},
-	{"gui_tray", P_OFFINT (gui_tray), TYPE_BOOL},
-	{"gui_tray_flags", P_OFFINT (gui_tray_flags), TYPE_INT},
-	{"gui_tweaks", P_OFFINT (gui_tweaks), TYPE_INT},
-	{"gui_ulist_buttons", P_OFFINT (userlistbuttons), TYPE_BOOL},
-	{"gui_ulist_doubleclick", P_OFFSET (doubleclickuser), TYPE_STR},
-	{"gui_ulist_hide", P_OFFINT (hideuserlist), TYPE_BOOL},
-	{"gui_ulist_left", P_OFFINT (_gui_ulist_left), TYPE_BOOL},	/* obsolete */
-	{"gui_ulist_pos", P_OFFINT (gui_ulist_pos), TYPE_INT},
-	{"gui_ulist_resizable", P_OFFINT (paned_userlist), TYPE_BOOL},
-	{"gui_ulist_show_hosts", P_OFFINT(showhostname_in_userlist), TYPE_BOOL},
-	{"gui_ulist_sort", P_OFFINT (userlist_sort), TYPE_INT},
-	{"gui_ulist_style", P_OFFINT (style_namelistgad), TYPE_BOOL},
-	{"gui_url_mod", P_OFFINT (gui_url_mod), TYPE_INT},
-	{"gui_usermenu", P_OFFINT (gui_usermenu), TYPE_BOOL},
-	{"gui_win_height", P_OFFINT (mainwindow_height), TYPE_INT},
-	{"gui_win_left", P_OFFINT (mainwindow_left), TYPE_INT},
-	{"gui_win_save", P_OFFINT (mainwindow_save), TYPE_BOOL},
-	{"gui_win_state", P_OFFINT (gui_win_state), TYPE_INT},
-	{"gui_win_top", P_OFFINT (mainwindow_top), TYPE_INT},
-	{"gui_win_width", P_OFFINT (mainwindow_width), TYPE_INT},
+	{"gui_auto_open_chat", PREFS_TYPE_BOOL, &prefs.autoopendccchatwindow},
+	{"gui_auto_open_dialog", PREFS_TYPE_BOOL, &prefs.autodialog},
+	{"gui_auto_open_recv", PREFS_TYPE_BOOL, &prefs.autoopendccrecvwindow},
+	{"gui_auto_open_send", PREFS_TYPE_BOOL, &prefs.autoopendccsendwindow},
+	{"gui_colors_from_gtk", PREFS_TYPE_BOOL, &prefs.gtk_colors},
+	{"gui_dialog_height", PREFS_TYPE_INT, &prefs.dialog_height},
+	{"gui_dialog_left", PREFS_TYPE_INT, &prefs.dialog_left},
+	{"gui_dialog_top", PREFS_TYPE_INT, &prefs.dialog_top},
+	{"gui_dialog_width", PREFS_TYPE_INT, &prefs.dialog_width},
+	{"gui_hide_menu", PREFS_TYPE_BOOL, &prefs.hidemenu},
+	{"gui_input_spell", PREFS_TYPE_BOOL, &prefs.gui_input_spell},
+	{"gui_input_style", PREFS_TYPE_BOOL, &prefs.style_inputbox},
+	{"gui_join_dialog", PREFS_TYPE_BOOL, &prefs.gui_join_dialog},
+	{"gui_lagometer", PREFS_TYPE_INT, &prefs.lagometer},
+	{"gui_mode_buttons", PREFS_TYPE_BOOL, &prefs.chanmodebuttons},
+	{"gui_pane_left_size", PREFS_TYPE_INT, &prefs.gui_pane_left_size},
+	{"gui_pane_right_size", PREFS_TYPE_INT, &prefs.gui_pane_right_size},
+	{"gui_quit_dialog", PREFS_TYPE_BOOL, &prefs.gui_quit_dialog},
+	{"gui_slist_select", PREFS_TYPE_INT, &prefs.slist_select},
+	{"gui_slist_skio", PREFS_TYPE_BOOL, &prefs.skip_serverlist},
+	{"gui_throttlemeter", PREFS_TYPE_INT, &prefs.throttlemeter},
+	{"gui_topicbar", PREFS_TYPE_BOOL, &prefs.topicbar},
+	{"gui_tray", PREFS_TYPE_BOOL, &prefs.gui_tray},
+	{"gui_tray_flags", PREFS_TYPE_INT, &prefs.gui_tray_flags},
+	{"gui_tweaks", PREFS_TYPE_INT, &prefs.gui_tweaks},
+	{"gui_ulist_buttons", PREFS_TYPE_BOOL, &prefs.userlistbuttons},
+	{"gui_ulist_doubleclick", PREFS_TYPE_STR, &prefs.doubleclickuser},
+	{"gui_ulist_hide", PREFS_TYPE_BOOL, &prefs.hideuserlist},
+	{"gui_ulist_left", PREFS_TYPE_BOOL, &prefs._gui_ulist_left},	/* obsolete */
+	{"gui_ulist_pos", PREFS_TYPE_INT, &prefs.gui_ulist_pos},
+	{"gui_ulist_resizable", PREFS_TYPE_BOOL, &prefs.paned_userlist},
+	{"gui_ulist_show_hosts", PREFS_TYPE_BOOL, &prefs.showhostname_in_userlist},
+	{"gui_ulist_sort", PREFS_TYPE_INT, &prefs.userlist_sort},
+	{"gui_ulist_style", PREFS_TYPE_BOOL, &prefs.style_namelistgad},
+	{"gui_url_mod", PREFS_TYPE_INT, &prefs.gui_url_mod},
+	{"gui_usermenu", PREFS_TYPE_BOOL, &prefs.gui_usermenu},
+	{"gui_win_height", PREFS_TYPE_INT, &prefs.mainwindow_height},
+	{"gui_win_left", PREFS_TYPE_INT, &prefs.mainwindow_left},
+	{"gui_win_save", PREFS_TYPE_BOOL, &prefs.mainwindow_save},
+	{"gui_win_state", PREFS_TYPE_INT, &prefs.gui_win_state},
+	{"gui_win_top", PREFS_TYPE_INT, &prefs.mainwindow_top},
+	{"gui_win_width", PREFS_TYPE_INT, &prefs.mainwindow_width},
 
-	{"input_balloon_chans", P_OFFINT (input_balloon_chans), TYPE_BOOL},
-	{"input_balloon_hilight", P_OFFINT (input_balloon_hilight), TYPE_BOOL},
-	{"input_balloon_priv", P_OFFINT (input_balloon_priv), TYPE_BOOL},
-	{"input_beep_chans", P_OFFINT (input_beep_chans), TYPE_BOOL},
-	{"input_beep_hilight", P_OFFINT (input_beep_hilight), TYPE_BOOL},
-	{"input_beep_msg", P_OFFINT (input_beep_priv), TYPE_BOOL},
-	{"input_command_char", P_OFFSET (cmdchar), TYPE_STR},
-	{"input_filter_beep", P_OFFINT (filterbeep), TYPE_BOOL},
-	{"input_flash_chans", P_OFFINT (input_flash_chans), TYPE_BOOL},
-	{"input_flash_hilight", P_OFFINT (input_flash_hilight), TYPE_BOOL},
-	{"input_flash_priv", P_OFFINT (input_flash_priv), TYPE_BOOL},
-	{"input_perc_ascii", P_OFFINT (perc_ascii), TYPE_BOOL},
-	{"input_perc_color", P_OFFINT (perc_color), TYPE_BOOL},
-	{"input_tray_chans", P_OFFINT (input_tray_chans), TYPE_BOOL},
-	{"input_tray_hilight", P_OFFINT (input_tray_hilight), TYPE_BOOL},
-	{"input_tray_priv", P_OFFINT (input_tray_priv), TYPE_BOOL},
+	{"input_balloon_chans", PREFS_TYPE_BOOL, &prefs.input_balloon_chans},
+	{"input_balloon_hilight", PREFS_TYPE_BOOL, &prefs.input_balloon_hilight},
+	{"input_balloon_priv", PREFS_TYPE_BOOL, &prefs.input_balloon_priv},
+	{"input_beep_chans", PREFS_TYPE_BOOL, &prefs.input_beep_chans},
+	{"input_beep_hilight", PREFS_TYPE_BOOL, &prefs.input_beep_hilight},
+	{"input_beep_msg", PREFS_TYPE_BOOL, &prefs.input_beep_priv},
+	{"input_command_char", PREFS_TYPE_STR, &prefs.cmdchar},
+	{"input_filter_beep", PREFS_TYPE_BOOL, &prefs.filterbeep},
+	{"input_flash_chans", PREFS_TYPE_BOOL, &prefs.input_flash_chans},
+	{"input_flash_hilight", PREFS_TYPE_BOOL, &prefs.input_flash_hilight},
+	{"input_flash_priv", PREFS_TYPE_BOOL, &prefs.input_flash_priv},
+	{"input_perc_ascii", PREFS_TYPE_BOOL, &prefs.perc_ascii},
+	{"input_perc_color", PREFS_TYPE_BOOL, &prefs.perc_color},
+	{"input_tray_chans", PREFS_TYPE_BOOL, &prefs.input_tray_chans},
+	{"input_tray_hilight", PREFS_TYPE_BOOL, &prefs.input_tray_hilight},
+	{"input_tray_priv", PREFS_TYPE_BOOL, &prefs.input_tray_priv},
 
-	{"irc_auto_rejoin", P_OFFINT (autorejoin), TYPE_BOOL},
-	{"irc_ban_type", P_OFFINT (bantype), TYPE_INT},
-	{"irc_conf_mode", P_OFFINT (confmode), TYPE_BOOL},
-	{"irc_extra_hilight", P_OFFSET (irc_extra_hilight), TYPE_STR},
-	{"irc_hide_version", P_OFFINT (hidever), TYPE_BOOL},
-	{"irc_id_ntext", P_OFFSET (irc_id_ntext), TYPE_STR},
-	{"irc_id_ytext", P_OFFSET (irc_id_ytext), TYPE_STR},
-	{"irc_invisible", P_OFFINT (invisible), TYPE_BOOL},
-	{"irc_join_delay", P_OFFINT (irc_join_delay), TYPE_INT},
-	{"irc_logging", P_OFFINT (logging), TYPE_BOOL},
-	{"irc_logmask", P_OFFSET (logmask), TYPE_STR},
-	{"irc_nick1", P_OFFSET (nick1), TYPE_STR},
-	{"irc_nick2", P_OFFSET (nick2), TYPE_STR},
-	{"irc_nick3", P_OFFSET (nick3), TYPE_STR},
-	{"irc_nick_hilight", P_OFFSET (irc_nick_hilight), TYPE_STR},
-	{"irc_no_hilight", P_OFFSET (irc_no_hilight), TYPE_STR},
-	{"irc_part_reason", P_OFFSET (partreason), TYPE_STR},
-	{"irc_quit_reason", P_OFFSET (quitreason), TYPE_STR},
-	{"irc_real_name", P_OFFSET (realname), TYPE_STR},
-	{"irc_servernotice", P_OFFINT (servernotice), TYPE_BOOL},
-	{"irc_skip_motd", P_OFFINT (skipmotd), TYPE_BOOL},
-	{"irc_user_name", P_OFFSET (username), TYPE_STR},
-	{"irc_wallops", P_OFFINT (wallops), TYPE_BOOL},
-	{"irc_who_join", P_OFFINT (userhost), TYPE_BOOL},
+	{"irc_auto_rejoin", PREFS_TYPE_BOOL, &prefs.autorejoin},
+	{"irc_ban_type", PREFS_TYPE_INT, &prefs.bantype},
+	{"irc_conf_mode", PREFS_TYPE_BOOL, &prefs.confmode},
+	{"irc_extra_hilight", PREFS_TYPE_STR, &prefs.irc_extra_hilight},
+	{"irc_hide_version", PREFS_TYPE_BOOL, &prefs.hidever},
+	{"irc_id_ntext", PREFS_TYPE_STR, &prefs.irc_id_ntext},
+	{"irc_id_ytext", PREFS_TYPE_STR, &prefs.irc_id_ytext},
+	{"irc_invisible", PREFS_TYPE_BOOL, &prefs.invisible},
+	{"irc_join_delay", PREFS_TYPE_INT, &prefs.irc_join_delay},
+	{"irc_logging", PREFS_TYPE_BOOL, &prefs.logging},
+	{"irc_logmask", PREFS_TYPE_STR, &prefs.logmask},
+	{"irc_nick1", PREFS_TYPE_STR, &prefs.nick1},
+	{"irc_nick2", PREFS_TYPE_STR, &prefs.nick2},
+	{"irc_nick3", PREFS_TYPE_STR, &prefs.nick3},
+	{"irc_nick_hilight", PREFS_TYPE_STR, &prefs.irc_nick_hilight},
+	{"irc_no_hilight", PREFS_TYPE_STR, &prefs.irc_no_hilight},
+	{"irc_part_reason", PREFS_TYPE_STR, &prefs.partreason},
+	{"irc_quit_reason", PREFS_TYPE_STR, &prefs.quitreason},
+	{"irc_real_name", PREFS_TYPE_STR, &prefs.realname},
+	{"irc_servernotice", PREFS_TYPE_BOOL, &prefs.servernotice},
+	{"irc_skip_motd", PREFS_TYPE_BOOL, &prefs.skipmotd},
+	{"irc_user_name", PREFS_TYPE_STR, &prefs.username},
+	{"irc_wallops", PREFS_TYPE_BOOL, &prefs.wallops},
+	{"irc_who_join", PREFS_TYPE_BOOL, &prefs.userhost},
 
-	{"net_auto_reconnect", P_OFFINT (autoreconnect), TYPE_BOOL},
-	{"net_auto_reconnectonfail", P_OFFINT (autoreconnectonfail), TYPE_BOOL},
-	{"net_bind_host", P_OFFSET (hostname), TYPE_STR},
-	{"net_ping_timeout", P_OFFINT (pingtimeout), TYPE_INT},
-	{"net_proxy_auth", P_OFFINT (proxy_auth), TYPE_BOOL},
-	{"net_proxy_host", P_OFFSET (proxy_host), TYPE_STR},
-	{"net_proxy_pass", P_OFFSET (proxy_pass), TYPE_STR},
-	{"net_proxy_port", P_OFFINT (proxy_port), TYPE_INT},
-	{"net_proxy_type", P_OFFINT (proxy_type), TYPE_INT},
-	{"net_proxy_use", P_OFFINT (proxy_use), TYPE_INT},
-	{"net_proxy_user", P_OFFSET (proxy_user), TYPE_STR},
+	{"net_auto_reconnect", PREFS_TYPE_BOOL, &prefs.autoreconnect},
+	{"net_auto_reconnectonfail", PREFS_TYPE_BOOL, &prefs.autoreconnectonfail},
+	{"net_bind_host", PREFS_TYPE_STR, &prefs.hostname},
+	{"net_ping_timeout", PREFS_TYPE_INT, &prefs.pingtimeout},
+	{"net_proxy_auth", PREFS_TYPE_BOOL, &prefs.proxy_auth},
+	{"net_proxy_host", PREFS_TYPE_STR, &prefs.proxy_host},
+	{"net_proxy_pass", PREFS_TYPE_STR, &prefs.proxy_pass},
+	{"net_proxy_port", PREFS_TYPE_INT, &prefs.proxy_port},
+	{"net_proxy_type", PREFS_TYPE_INT, &prefs.proxy_type},
+	{"net_proxy_use", PREFS_TYPE_INT, &prefs.proxy_use},
+	{"net_proxy_user", PREFS_TYPE_STR, &prefs.proxy_user},
 
-	{"net_reconnect_delay", P_OFFINT (recon_delay), TYPE_INT},
-	{"net_throttle", P_OFFINT (throttle), TYPE_BOOL},
+	{"net_reconnect_delay", PREFS_TYPE_INT, &prefs.recon_delay},
+	{"net_throttle", PREFS_TYPE_BOOL, &prefs.throttle},
 
-	{"notify_timeout", P_OFFINT (notify_timeout), TYPE_INT},
-	{"notify_whois_online", P_OFFINT (whois_on_notifyonline), TYPE_BOOL},
+	{"notify_timeout", PREFS_TYPE_INT, &prefs.notify_timeout},
+	{"notify_whois_online", PREFS_TYPE_BOOL, &prefs.whois_on_notifyonline},
 
-	{"perl_warnings", P_OFFINT (perlwarnings), TYPE_BOOL},
+	{"perl_warnings", PREFS_TYPE_BOOL, &prefs.perlwarnings},
 
-	{"redundant_nickstamps", P_OFFINT (redundant_nickstamps), TYPE_BOOL},
+	{"redundant_nickstamps", PREFS_TYPE_BOOL, &prefs.redundant_nickstamps},
 
-	{"sound_command", P_OFFSET (soundcmd), TYPE_STR},
-	{"sound_dir", P_OFFSET (sounddir), TYPE_STR},
-	{"stamp_log", P_OFFINT (timestamp_logs), TYPE_BOOL},
-	{"stamp_log_format", P_OFFSET (timestamp_log_format), TYPE_STR},
-	{"stamp_text", P_OFFINT (timestamp), TYPE_BOOL},
-	{"stamp_text_format", P_OFFSET (stamp_format), TYPE_STR},
+	{"sound_command", PREFS_TYPE_STR, &prefs.soundcmd},
+	{"sound_dir", PREFS_TYPE_STR, &prefs.sounddir},
+	{"stamp_log", PREFS_TYPE_BOOL, &prefs.timestamp_logs},
+	{"stamp_log_format", PREFS_TYPE_STR, &prefs.timestamp_log_format},
+	{"stamp_text", PREFS_TYPE_BOOL, &prefs.timestamp},
+	{"stamp_text_format", PREFS_TYPE_STR, &prefs.stamp_format},
 
-	{"strip_quits", P_OFFINT (strip_quits), TYPE_BOOL},
+	{"strip_quits", PREFS_TYPE_BOOL, &prefs.strip_quits},
 
-	{"tab_chans", P_OFFINT (tabchannels), TYPE_BOOL},
-	{"tab_dialogs", P_OFFINT (privmsgtab), TYPE_BOOL},
-	{"tab_icons", P_OFFINT (tab_icons), TYPE_BOOL},
-	{"tab_layout", P_OFFINT (tab_layout), TYPE_INT},
-	{"tab_new_to_front", P_OFFINT (newtabstofront), TYPE_INT},
-	{"tab_notices", P_OFFINT (notices_tabs), TYPE_BOOL},
-	{"tab_pos", P_OFFINT (tab_pos), TYPE_INT},
-	{"tab_position", P_OFFINT (_tabs_position), TYPE_INT}, /* obsolete */
-	{"tab_server", P_OFFINT (use_server_tab), TYPE_BOOL},
-	{"tab_small", P_OFFINT (tab_small), TYPE_INT},
-	{"tab_sort", P_OFFINT (tab_sort), TYPE_BOOL},
-	{"tab_trunc", P_OFFINT (truncchans), TYPE_INT},
-	{"tab_utils", P_OFFINT (windows_as_tabs), TYPE_BOOL},
+	{"tab_chans", PREFS_TYPE_BOOL, &prefs.tabchannels},
+	{"tab_dialogs", PREFS_TYPE_BOOL, &prefs.privmsgtab},
+	{"tab_icons", PREFS_TYPE_BOOL, &prefs.tab_icons},
+	{"tab_layout", PREFS_TYPE_INT, &prefs.tab_layout},
+	{"tab_new_to_front", PREFS_TYPE_INT, &prefs.newtabstofront},
+	{"tab_notices", PREFS_TYPE_BOOL, &prefs.notices_tabs},
+	{"tab_pos", PREFS_TYPE_INT, &prefs.tab_pos},
+	{"tab_position", PREFS_TYPE_INT, &prefs._tabs_position}, /* obsolete */
+	{"tab_server", PREFS_TYPE_BOOL, &prefs.use_server_tab},
+	{"tab_small", PREFS_TYPE_INT, &prefs.tab_small},
+	{"tab_sort", PREFS_TYPE_BOOL, &prefs.tab_sort},
+	{"tab_trunc", PREFS_TYPE_INT, &prefs.truncchans},
+	{"tab_utils", PREFS_TYPE_BOOL, &prefs.windows_as_tabs},
 
-	{"text_background", P_OFFSET (background), TYPE_STR},
-	{"text_color_nicks", P_OFFINT (colorednicks), TYPE_BOOL},
-	{"text_color_nicks_hilighted", P_OFFINT (coloredhnicks), TYPE_BOOL},
-	{"text_font", P_OFFSET (font_normal), TYPE_STR},
-	{"text_indent", P_OFFINT (indent_nicks), TYPE_BOOL},
-	{"text_max_indent", P_OFFINT (max_auto_indent), TYPE_INT},
-	{"text_max_lines", P_OFFINT (max_lines), TYPE_INT},
-	{"text_replay", P_OFFINT (text_replay), TYPE_BOOL},
-	{"text_show_marker", P_OFFINT (show_marker), TYPE_BOOL},
-	{"text_show_sep", P_OFFINT (show_separator), TYPE_BOOL},
-	{"text_stripcolor", P_OFFINT (stripcolor), TYPE_BOOL},
-	{"text_thin_sep", P_OFFINT (thin_separator), TYPE_BOOL},
-	{"text_tint_blue", P_OFFINT (tint_blue), TYPE_INT},
-	{"text_tint_green", P_OFFINT (tint_green), TYPE_INT},
-	{"text_tint_red", P_OFFINT (tint_red), TYPE_INT},
-	{"text_transparent", P_OFFINT (transparent), TYPE_BOOL},
-	{"text_wordwrap", P_OFFINT (wordwrap), TYPE_BOOL},
+	{"text_background", PREFS_TYPE_STR, &prefs.background},
+	{"text_color_nicks", PREFS_TYPE_BOOL, &prefs.colorednicks},
+	{"text_color_nicks_hilighted", PREFS_TYPE_BOOL, &prefs.coloredhnicks},
+	{"text_font", PREFS_TYPE_STR, &prefs.font_normal},
+	{"text_indent", PREFS_TYPE_BOOL, &prefs.indent_nicks},
+	{"text_max_indent", PREFS_TYPE_INT, &prefs.max_auto_indent},
+	{"text_max_lines", PREFS_TYPE_INT, &prefs.max_lines},
+	{"text_replay", PREFS_TYPE_BOOL, &prefs.text_replay},
+	{"text_show_marker", PREFS_TYPE_BOOL, &prefs.show_marker},
+	{"text_show_sep", PREFS_TYPE_BOOL, &prefs.show_separator},
+	{"text_stripcolor", PREFS_TYPE_BOOL, &prefs.stripcolor},
+	{"text_thin_sep", PREFS_TYPE_BOOL, &prefs.thin_separator},
+	{"text_tint_blue", PREFS_TYPE_INT, &prefs.tint_blue},
+	{"text_tint_green", PREFS_TYPE_INT, &prefs.tint_green},
+	{"text_tint_red", PREFS_TYPE_INT, &prefs.tint_red},
+	{"text_transparent", PREFS_TYPE_BOOL, &prefs.transparent},
+	{"text_wordwrap", PREFS_TYPE_BOOL, &prefs.wordwrap},
 
 	{0, 0, 0},
 };
@@ -668,15 +678,14 @@ load_config (void)
 		{
 			switch (vars[i].type)
 			{
-			case TYPE_STR:
-				cfg_get_str (cfg, vars[i].name, (char *) &prefs + vars[i].offset,
-								 vars[i].len);
+			case PREFS_TYPE_STR:
+				cfg_get_str (cfg, vars[i].name, vars[i].ptr);
 				break;
-			case TYPE_BOOL:
-			case TYPE_INT:
+			case PREFS_TYPE_BOOL:
+			case PREFS_TYPE_INT:
 				val = cfg_get_int_with_result (cfg, vars[i].name, &res);
 				if (res)
-					*((int *) &prefs + vars[i].offset) = val;
+					*((int *) vars[i].ptr) = val;
 				break;
 			}
 			i++;
@@ -770,16 +779,16 @@ save_config (void)
 	{
 		switch (vars[i].type)
 		{
-		case TYPE_STR:
-			if (!cfg_put_str (fh, vars[i].name, (char *) &prefs + vars[i].offset))
+		case PREFS_TYPE_STR:
+			if (!cfg_put_str (fh, vars[i].name, (char *) vars[i].ptr))
 			{
 				free (new_config);
 				return 0;
 			}
 			break;
-		case TYPE_INT:
-		case TYPE_BOOL:
-			if (!cfg_put_int (fh, *((int *) &prefs + vars[i].offset), vars[i].name))
+		case PREFS_TYPE_INT:
+		case PREFS_TYPE_BOOL:
+			if (!cfg_put_int (fh, GPOINTER_TO_INT(vars[i].ptr), vars[i].name))
 			{
 				free (new_config);
 				return 0;
@@ -806,7 +815,7 @@ save_config (void)
 }
 
 static void
-set_showval (session *sess, const struct prefs *var, char *tbuf)
+set_showval (session *sess, const PrefsEntry *var, char *tbuf)
 {
 	int len, dots, j;
 	static const char *offon[] = { "OFF", "ON" };
@@ -823,17 +832,16 @@ set_showval (session *sess, const struct prefs *var, char *tbuf)
 	len += j;
 	switch (var->type)
 	{
-	case TYPE_STR:
+	case PREFS_TYPE_STR:
 		sprintf (tbuf + len, "\0033:\017 %s\n",
-					(char *) &prefs + var->offset);
+					(char *) var->ptr);
 		break;
-	case TYPE_INT:
+	case PREFS_TYPE_INT:
 		sprintf (tbuf + len, "\0033:\017 %d\n",
-					*((int *) &prefs + var->offset));
+					GPOINTER_TO_INT(var->ptr));
 		break;
-	case TYPE_BOOL:
-		sprintf (tbuf + len, "\0033:\017 %s\n", offon[
-					*((int *) &prefs + var->offset)]);
+	case PREFS_TYPE_BOOL:
+		sprintf (tbuf + len, "\0033:\017 %s\n", offon[GPOINTER_TO_INT(var->ptr)]);
 		break;
 	}
 	PrintText (sess, tbuf);
@@ -862,7 +870,7 @@ cfg_get_bool (char *var)
 	{
 		if (!strcasecmp (var, vars[i].name))
 		{
-			return *((int *) &prefs + vars[i].offset);
+			return GPOINTER_TO_INT(vars[i].ptr);
 		}
 		i++;
 	}
@@ -927,42 +935,44 @@ cmd_set (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			finds++;
 			switch (vars[i].type)
 			{
-			case TYPE_STR:
+			case PREFS_TYPE_STR:
 				if (erase || *val)
 				{
-					strncpy ((char *) &prefs + vars[i].offset, val, vars[i].len);
-					((char *) &prefs)[vars[i].offset + vars[i].len - 1] = 0;
+					g_free(vars[i].ptr);
+					vars[i].ptr = g_strdup(val);
 					if (!quiet)
-						PrintTextf (sess, "%s set to: %s\n", var, (char *) &prefs + vars[i].offset);
+						PrintTextf (sess, "%s set to: %s\n", var, (char *) vars[i].ptr);
 				} else
 				{
 					set_showval (sess, &vars[i], tbuf);
 				}
 				break;
-			case TYPE_INT:
-			case TYPE_BOOL:
+			case PREFS_TYPE_INT:
+			case PREFS_TYPE_BOOL:
 				if (*val)
 				{
-					if (vars[i].type == TYPE_BOOL)
+					if (vars[i].type == PREFS_TYPE_BOOL)
 					{
 						if (atoi (val))
-							*((int *) &prefs + vars[i].offset) = 1;
+							vars[i].ptr = GINT_TO_POINTER(1);
 						else
-							*((int *) &prefs + vars[i].offset) = 0;
+							vars[i].ptr = GINT_TO_POINTER(0);
 						if (!strcasecmp (val, "YES") || !strcasecmp (val, "ON"))
-							*((int *) &prefs + vars[i].offset) = 1;
+							vars[i].ptr = GINT_TO_POINTER(1);
 						if (!strcasecmp (val, "NO") || !strcasecmp (val, "OFF"))
-							*((int *) &prefs + vars[i].offset) = 0;
+							vars[i].ptr = GINT_TO_POINTER(0);
 					} else
 					{
-						if (or)
-							*((int *) &prefs + vars[i].offset) |= atoi (val);
-						else
-							*((int *) &prefs + vars[i].offset) = atoi (val);
+						if (or) {
+							int tmp = GPOINTER_TO_INT(vars[i].ptr);
+							tmp |= atoi (val);
+							vars[i].ptr = GINT_TO_POINTER(tmp);
+						} else
+							vars[i].ptr = GINT_TO_POINTER(atoi(val));
 					}
+
 					if (!quiet)
-						PrintTextf (sess, "%s set to: %d\n", var,
-										*((int *) &prefs + vars[i].offset));
+						PrintTextf (sess, "%s set to: %d\n", var, GPOINTER_TO_INT(vars[i].ptr));
 				} else
 				{
 					set_showval (sess, &vars[i], tbuf);

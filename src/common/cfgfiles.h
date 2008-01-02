@@ -9,11 +9,11 @@
 extern char *xdir_fs;
 extern char *xdir_utf;
 
-char *cfg_get_str (char *cfg, char *var, char *dest, int dest_len);
+char *cfg_get_str (char *cfg, const char *var, char **dest);
 int cfg_get_bool (char *var);
-int cfg_get_int_with_result (char *cfg, char *var, int *result);
-int cfg_get_int (char *cfg, char *var);
-int cfg_put_int (int fh, int value, char *var);
+int cfg_get_int_with_result (char *cfg, const char *var, int *result);
+int cfg_get_int (char *cfg, const char *var);
+int cfg_put_int (int fh, int value, const char *var);
 int cfg_get_color (char *cfg, char *var, int *r, int *g, int *b);
 int cfg_put_color (int fh, int r, int g, int b, char *var);
 char *get_xdir_fs (void);
@@ -30,27 +30,22 @@ FILE *xchat_fopen_file (const char *file, const char *mode, int xof_flags);
 #define XOF_DOMODE 1
 #define XOF_FULLPATH 2
 
-#define STRUCT_OFFSET_STR(type,field) \
-( (unsigned int) (((char *) (&(((type *) NULL)->field)))- ((char *) NULL)) )
+typedef struct _PrefsEntry PrefsEntry;
 
-#define STRUCT_OFFSET_INT(type,field) \
-( (unsigned int) (((int *) (&(((type *) NULL)->field)))- ((int *) NULL)) )
+typedef enum {
+	PREFS_TYPE_STR,
+	PREFS_TYPE_INT,
+	PREFS_TYPE_BOOL
+} PrefsType;
 
-#define P_OFFSET(field) STRUCT_OFFSET_STR(struct xchatprefs, field),sizeof(prefs.field)
-#define P_OFFSETNL(field) STRUCT_OFFSET_STR(struct xchatprefs, field)
-#define P_OFFINT(field) STRUCT_OFFSET_INT(struct xchatprefs, field),0
-#define P_OFFINTNL(field) STRUCT_OFFSET_INT(struct xchatprefs, field)
+/* to set int/boolean use G_INT_TO_POINTER() */
+typedef void (*PrefsSetter)(PrefsEntry *, void *);
 
-struct prefs
-{
-	char *name;
-	unsigned short offset;
-	unsigned short len;
-	unsigned short type;
+struct _PrefsEntry {
+	const char *name;
+	PrefsType type;
+	void *ptr;
+	PrefsSetter set;
 };
-
-#define TYPE_STR 0
-#define TYPE_INT 1
-#define TYPE_BOOL 2
 
 #endif

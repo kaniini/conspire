@@ -246,22 +246,16 @@ ignore_check (char *host, int type)
 static char *
 ignore_read_next_entry (char *my_cfg, struct ignore *ignore)
 {
-	char tbuf[1024];
-
-	/* Casting to char * done below just to satisfy compiler */
-
 	if (my_cfg)
 	{
-		my_cfg = cfg_get_str (my_cfg, "mask", tbuf, sizeof (tbuf));
+		my_cfg = cfg_get_str (my_cfg, "mask", &ignore->mask);
+
 		if (!my_cfg)
 			return NULL;
-		ignore->mask = strdup (tbuf);
+
+		ignore->type = cfg_get_int (my_cfg, "type");
 	}
-	if (my_cfg)
-	{
-		my_cfg = cfg_get_str (my_cfg, "type", tbuf, sizeof (tbuf));
-		ignore->type = atoi (tbuf);
-	}
+
 	return my_cfg;
 }
 

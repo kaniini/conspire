@@ -100,7 +100,7 @@ enum
 GSList *plugin_list = NULL;	/* export for plugingui.c */
 static GSList *hook_list = NULL;
 
-extern const struct prefs vars[];	/* cfgfiles.c */
+extern PrefsEntry vars[];	/* cfgfiles.c */
 
 
 /* unload a plugin and remove it from our linked list */
@@ -1030,17 +1030,17 @@ xchat_get_prefs (xchat_plugin *ph, const char *name, const char **string, int *i
 		{
 			switch (vars[i].type)
 			{
-			case TYPE_STR:
-				*string = ((char *) &prefs + vars[i].offset);
+			case PREFS_TYPE_STR:
+				*string = (char *) *((char **) vars[i].ptr);
 				return 1;
 
-			case TYPE_INT:
-				*integer = *((int *) &prefs + vars[i].offset);
+			case PREFS_TYPE_INT:
+				*integer = *((int *) vars[i].ptr);
 				return 2;
 
 			default:
 			/*case TYPE_BOOL:*/
-				if (*((int *) &prefs + vars[i].offset))
+				if (*((int *) vars[i].ptr))
 					*integer = 1;
 				else
 					*integer = 0;
