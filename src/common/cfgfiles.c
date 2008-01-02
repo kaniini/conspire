@@ -204,7 +204,11 @@ cfg_put_str (int fh, const char *var, const char *value)
 	char buf[512];
 	int len;
 
-	snprintf (buf, sizeof buf, "%s = %s\n", var, value);
+	if (value)
+		snprintf (buf, sizeof buf, "%s = %s\n", var, value);
+	else
+		return 0;
+
 	len = strlen (buf);
 	return (write (fh, buf, len) == len);
 }
