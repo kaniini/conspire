@@ -64,6 +64,25 @@ list_addentry (GSList ** list, char *cmd, char *name)
 	*list = g_slist_append (*list, pop);
 }
 
+void
+regex_list_addentry (GSList **list, char *cmd, GRegex *regex, char *name)
+{
+	struct regex_entry *pop;
+	int cmd_len, regex_sz, name_len;
+
+	cmd_len  = strlen(cmd) + 1;
+	regex_sz = sizeof(regex);
+	name_len = strlen(name) + 1;
+	
+	pop = malloc(sizeof(struct regex_entry) + cmd_len + regex_sz + name_len);
+
+	pop->regex = regex;
+	pop->cmd   = g_strdup(cmd);
+	pop->name  = g_strdup(name);
+
+	*list = g_slist_append(*list, pop);
+}
+
 /* read it in from a buffer to our linked list */
 
 static void
@@ -97,6 +116,70 @@ list_load_from_data (GSList ** list, char *ibuf, int size)
 			}
 		}
 	}
+}
+
+static void
+regex_list_load_from_data (GSList **list, char *ibuf, int size)
+{
+	char cmd[384];
+	char name[128];
+	char *buf;
+	int pnt = 0;
+	GError *error = NULL;
+
+	cmd[0] = name[0] = 0;
+
+	while (buf_get_line(ibuf, &buf, &pnt, size))
+	{
+		if (*buf != '#')
+		{
+			if (!strncasecmp(buf, "NAME ", 5))
+			{
+				g_strlcpy(name, buf + 5, sizeof(name));
+			} else if (!strncasecmp(buf, "CMD ", 4))
+			{
+				g_strlcpy(cmd, buf + 4, sizeof(cmd));
+				if (*name)
+				{
+					regex_list_addentry(list, cmd, g_regex_new(name, G_REGEX_CASELESS, 0, &error), name);
+					if (error) {
+						g_print("cfgfiles.c: regex_list_load_from_data: Error in regex compilation: %s", error->message);
+					}
+					cmd[0] = name[0] = 0;
+				}
+			}
+		}
+	}
+}
+
+void
+regex_list_loadconf (char *file, GSList **list, char *defaultconf)
+{
+	char filebuf[256];
+	char *ibuf;
+	int fh;
+	struct stat st;
+
+	snprintf (filebuf, sizeof(filebuf), "%s/%s", get_xdir_fs(), file);
+	fh = open(filebuf, O_RDONLY | OFLAGS);
+	if (fh == -1)
+	{
+		if (defaultconf)
+			regex_list_load_from_data(list, defaultconf, strlen(defaultconf));
+		return;
+	}
+	if (fstat(fh, &st) != 0)
+	{
+		perror("fstat");
+		abort();
+	}
+	ibuf = malloc(st.st_size);
+	read(fh, ibuf, st.st_size);
+	close(fh);
+
+	regex_list_load_from_data(list, ibuf, st.st_size);
+
+	free(ibuf);
 }
 
 void
@@ -140,6 +223,26 @@ list_free (GSList ** list)
 		free (data);
 		*list = g_slist_remove (*list, data);
 	}
+}
+
+int
+regex_list_delentry (GSList **list, char *name)
+{
+	struct regex_entry *pop;
+	GSList *alist = *list;
+	
+	while (alist)
+	{
+		pop = (struct regex_entry *) alist->data;
+		if (!strcasecmp(name, pop->name))
+		{
+			*list = g_slist_remove(*list, pop);
+			free (pop);
+			return 1;
+		}
+		alist = alist->next;
+	}
+	return 0;
 }
 
 int
@@ -311,7 +414,7 @@ check_prefs_dir (void)
 	if (access (dir, F_OK) != 0)
 	{
 		if (mkdir (dir, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
-			fe_message (_("Cannot create ~/.xchat2"), FE_MSG_ERROR);
+			fe_message (_("Cannot create ~/.conspire"), FE_MSG_ERROR);
 	}
 }
 
@@ -514,6 +617,7 @@ PrefsEntry vars[] = {
 	{"text_max_indent", PREFS_TYPE_INT, &prefs.max_auto_indent},
 	{"text_max_lines", PREFS_TYPE_INT, &prefs.max_lines},
 	{"text_replay", PREFS_TYPE_BOOL, &prefs.text_replay},
+	{"text_regex_replace", PREFS_TYPE_BOOL, &prefs.text_regex_replace},
 	{"text_show_marker", PREFS_TYPE_BOOL, &prefs.show_marker},
 	{"text_show_sep", PREFS_TYPE_BOOL, &prefs.show_separator},
 	{"text_stripcolor", PREFS_TYPE_BOOL, &prefs.stripcolor},

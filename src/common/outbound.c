@@ -84,12 +84,11 @@ random_line (char *file_name)
 	int lines, ran;
 
 	if (!file_name[0])
-		goto nofile;
+		return strdup (file_name);
 
 	fh = xchat_fopen_file (file_name, "r", 0);
 	if (!fh)
 	{
-	 nofile:
 		/* reason is not a file, an actual reason! */
 		return strdup (file_name);
 	}
@@ -100,7 +99,7 @@ random_line (char *file_name)
 		lines++;
 
 	if (lines < 1)
-		goto nofile;
+		return strdup (file_name);
 
 	/* go down a random number */
 	rewind (fh);
@@ -3918,7 +3917,7 @@ user_command (session * sess, char *tbuf, char *cmd, char *word[],
 							server_get_network (sess->server, TRUE), "",
 							sess->server->nick, ""))
 	{
-		PrintText (sess, _("Bad arguments for user command.\n"));
+		PrintText (sess, _("Bad arguments for alias.\n"));
 		return;
 	}
 
@@ -4074,7 +4073,7 @@ handle_command (session *sess, char *cmd, int check_spch)
 
 	if (command_level > 99)
 	{
-		fe_message (_("Too many recursive usercommands, aborting."), FE_MSG_ERROR);
+		fe_message (_("Too many recursive aliases, aborting."), FE_MSG_ERROR);
 		return TRUE;
 	}
 	command_level++;
@@ -4151,7 +4150,7 @@ handle_command (session *sess, char *cmd, int check_spch)
 	{
 		/* unknown command, just send it to the server and hope */
 		if (!sess->server->connected)
-			PrintText (sess, _("Unknown Command. Try /help\n"));
+			PrintText (sess, _("Unknown command. Try /help\n"));
 		else
 			sess->server->p_raw (sess->server, cmd);
 	}
@@ -4173,11 +4172,27 @@ xit:
 static int
 handle_user_input (session *sess, char *text, int history, int nocommand)
 {
+	GSList *list = regex_replace_list;
+	struct regex_entry *pop;
+	GError *error = NULL;
+
 	if (*text == '\0')
 		return 1;
 
 	if (history)
 		history_add (&sess->history, text);
+
+	if (prefs.text_regex_replace) {
+		while (list)
+		{
+			pop = (struct regex_entry *) list->data;
+			text = g_regex_replace_literal(pop->regex, text, strlen(text), 0, pop->cmd, 0, &error);
+			if (error) {
+				g_print("outbound.c: handle_user_input: %s", error->message);
+			}
+			list = list->next;
+		}
+	}
 
 	/* is it NOT a command, just text? */
 	if (nocommand || text[0] != prefs.cmdchar[0])
@@ -4197,12 +4212,9 @@ handle_user_input (session *sess, char *text, int history, int nocommand)
 	{
 		int i;
 		const char *unix_dirs [] = {
-			"/bin/", "/boot/", "/dev/",
-			"/etc/", "/home/", "/lib/",
-			"/lost+found/", "/mnt/", "/opt/",
-			"/proc/", "/root/", "/sbin/",
-			"/tmp/", "/usr/", "/var/",
-			"/gnome/", NULL};
+			"/bin",        "/boot",  "/dev", "/etc", "/home",  "/lib",
+			"/lost+found", "/media", "/mnt", "/opt", "/proc",  "/root",
+			"/sbin",       "/tmp",   "/usr", "/var", "/gnome", NULL};
 		for (i = 0; unix_dirs[i] != NULL; i++)
 			if (strncmp (text, unix_dirs[i], strlen (unix_dirs[i]))==0)
 			{

@@ -57,12 +57,19 @@ editlist_gui_load (GtkWidget * listgad)
 	gchar *nnew[2];
 	GSList *list = editlist_list;
 	struct popup *pop;
+	struct regex_entry *regent;
 
 	while (list)
 	{
-		pop = (struct popup *) list->data;
-		nnew[0] = pop->name;
-		nnew[1] = pop->cmd;
+		if (editlist_list == regex_replace_list) {
+			regent = (struct regex_entry *) list->data;
+			nnew[0] = regent->name;
+			nnew[1] = regent->cmd;
+		} else {
+			pop = (struct popup *) list->data;
+			nnew[0] = pop->name;
+			nnew[1] = pop->cmd;
+		}
 		gtk_clist_append (GTK_CLIST (listgad), nnew);
 		list = list->next;
 	}
@@ -182,6 +189,10 @@ editlist_gui_save (GtkWidget * igad)
 		{
 			list_free (&replace_list);
 			list_loadconf (editlist_file, &replace_list, 0);
+		} else if (editlist_list == regex_replace_list)
+		{
+			list_free (&replace_list);
+			regex_list_loadconf (editlist_file, &regex_replace_list, 0);
 		} else if (editlist_list == popup_list)
 		{
 			list_free (&popup_list);

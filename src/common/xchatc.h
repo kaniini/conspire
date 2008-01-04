@@ -18,6 +18,7 @@ extern GSList *dlgbutton_list;
 extern GSList *command_list;
 extern GSList *ctcp_list;
 extern GSList *replace_list;
+extern GSList *regex_replace_list;
 extern GSList *sess_list;
 extern GSList *dcc_list;
 extern GSList *ignore_list;

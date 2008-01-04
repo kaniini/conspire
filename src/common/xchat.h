@@ -287,6 +287,8 @@ struct xchatprefs
 	unsigned int identd;
 	unsigned int skip_serverlist;
 
+	unsigned int text_regex_replace;
+
 	unsigned int ctcp_number_limit;	/*flood */
 	unsigned int ctcp_time_limit;	/*seconds of floods */
 
@@ -553,6 +555,13 @@ struct popup
 {
 	char *cmd;
 	char *name;
+};
+
+struct regex_entry
+{
+	char *cmd;
+	char *name;
+	GRegex *regex;
 };
 
 /* CL: get a random int in the range [0..n-1]. DON'T use rand() % n, it gives terrible results. */

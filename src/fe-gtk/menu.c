@@ -1238,6 +1238,13 @@ menu_rpopup (void)
 }
 
 static void
+menu_regex (void)
+{
+	editlist_gui_open (_("Search for"), _("Replace with"), regex_replace_list, _("conspire: Regex Replace"), "regex_replace",
+			"regex_replace.conf", 0);
+}
+
+static void
 menu_urlhandlers (void)
 {
 	editlist_gui_open (NULL, NULL, urlhandler_list, _("conspire: URL Handlers"), "urlhandlers",
@@ -1380,6 +1387,7 @@ static struct mymenu mymenu[] = {
 	{N_("S_ettings"), 0, 0, M_MENUSUB, 0, 0, 1},
 		{N_("_Preferences"), menu_settings, GTK_STOCK_PREFERENCES, M_MENUSTOCK, 0, 0, 1},
 		{N_("Auto Replace..."), menu_rpopup, 0, M_MENUITEM, 0, 0, 1},
+		{N_("Regular Expression Replace..."), menu_regex, 0, M_MENUITEM, 0, 0, 1},
 		{N_("CTCP Replies..."), menu_ctcpguiopen, 0, M_MENUITEM, 0, 0, 1},
 		{N_("Dialog Buttons..."), menu_dlgbuttons, 0, M_MENUITEM, 0, 0, 1},
 		{N_("Keyboard Shortcuts..."), menu_keypopup, 0, M_MENUITEM, 0, 0, 1},
