@@ -49,8 +49,6 @@ static GSList *editlist_list;
 static char *editlist_file;
 static char *editlist_help;
 
-
-
 static void
 editlist_gui_load (GtkWidget * listgad)
 {
@@ -58,7 +56,6 @@ editlist_gui_load (GtkWidget * listgad)
 	GSList *list = editlist_list;
 	struct popup *pop;
 	struct regex_entry *regent;
-
 	while (list)
 	{
 		if (editlist_list == regex_replace_list) {
@@ -191,7 +188,7 @@ editlist_gui_save (GtkWidget * igad)
 			list_loadconf (editlist_file, &replace_list, 0);
 		} else if (editlist_list == regex_replace_list)
 		{
-			list_free (&replace_list);
+			list_free (&regex_replace_list);
 			regex_list_loadconf (editlist_file, &regex_replace_list, 0);
 		} else if (editlist_list == popup_list)
 		{
