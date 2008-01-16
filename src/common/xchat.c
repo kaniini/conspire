@@ -642,6 +642,7 @@ xchat_init (void)
 {
 	char buf[3068];
 	const char *cs = NULL;
+	session *sess;
 
 #ifdef USE_SIGACTION
 	struct sigaction act;
@@ -780,7 +781,8 @@ xchat_init (void)
 
 	servlist_init ();							/* load server list */
 
-	new_ircwindow (NULL, _("Event Console"), SESS_SERVER, 0);
+	sess = new_ircwindow (NULL, _("Event Console"), SESS_SERVER, 0);
+	sess->immutable = TRUE;
 
 	/* turned OFF via -a arg */
 	if (!arg_dont_autoconnect && servlist_have_auto())

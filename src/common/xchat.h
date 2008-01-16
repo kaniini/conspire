@@ -364,6 +364,7 @@ typedef struct session
 	unsigned int color_paste:1;
 	int done_away_check:1;	/* done checking for away status changes */
 	unsigned int lastlog_regexp:1;	/* this is a lastlog and using regexp */
+	gboolean immutable;	/* don't close me. */
 } session;
 
 struct msproxy_state_t
