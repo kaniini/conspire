@@ -565,7 +565,7 @@ chan_remove (chan *ch, gboolean force)
 	session *sess = (session *) ch->userdata; /* DO NOT USE THIS WITHOUT CHECKING ch->family != NULL. --nenolod */
 
 	if (ch->family != NULL && sess->immutable == TRUE)
-		return FALSE;
+		return TRUE;
 
 	if (xchat_is_quitting)	/* avoid lots of looping on exit */
 		return TRUE;
