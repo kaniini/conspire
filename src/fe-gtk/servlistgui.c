@@ -541,7 +541,7 @@ servlist_deletenet_cb (GtkWidget *item, ircnet *net)
 		return;
 
 	net = selected_net;
-	dialog = gtk_message_dialog_new (GTK_WINDOW (serverlist_win),
+	dialog = gtk_message_dialog_new (NULL,
 												GTK_DIALOG_DESTROY_WITH_PARENT |
 												GTK_DIALOG_MODAL,
 												GTK_MESSAGE_QUESTION,
