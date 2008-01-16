@@ -1,4 +1,12 @@
-conspire 0.10.0 (01-??-2008):
+conspire 0.11.0 (01-16-2008):
+
+  * Fix several bugs in the SASL (IAL) implementation.
+  * Add regexp search and replace options.
+  * Implement support for immutable windows.
+  * Fix some SSL bugs.
+  * Rewrite the lowlevel configuration manager.
+
+conspire 0.10.0 (01-01-2008):
 
   * OpenSSL support has been removed in favour of GnuTLS.
     As GnuTLS is 100% definitely licensed in compatibility with
