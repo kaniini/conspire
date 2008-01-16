@@ -1391,6 +1391,8 @@ static struct mymenu mymenu[] = {
 		{N_("Auto Replace..."), menu_rpopup, 0, M_MENUITEM, 0, 0, 1},
 #ifdef REGEX_SUBSTITUTION
 		{N_("Regular Expression Replace..."), menu_regex, 0, M_MENUITEM, 0, 0, 1},
+#else
+		{N_("Regular Expression Replace..."), NULL, 0, M_MENUITEM, 0, 0, 1},
 #endif
 		{N_("CTCP Replies..."), menu_ctcpguiopen, 0, M_MENUITEM, 0, 0, 1},
 		{N_("Dialog Buttons..."), menu_dlgbuttons, 0, M_MENUITEM, 0, 0, 1},
@@ -1402,15 +1404,15 @@ static struct mymenu mymenu[] = {
 		{N_("Userlist Popup..."), menu_ulpopup, 0, M_MENUITEM, 0, 0, 1},
 		{0, 0, 0, M_END, 0, 0, 0},		/* 52 */
 
-#define DETACH_OFFSET (24)
+#define DETACH_OFFSET (25)
 	{0, menu_detach, GTK_STOCK_REDO, M_MENUSTOCK, 0, 0, 1, GDK_I},	/* 12 */
-#define CLOSE_OFFSET (25)
+#define CLOSE_OFFSET (26)
 	{0, menu_close, GTK_STOCK_CLOSE, M_MENUSTOCK, 0, 0, 1, GDK_w},
 	{0, 0, 0, M_SEP, 0, 0, 0},
 	{N_("_Quit"), menu_quit, GTK_STOCK_QUIT, M_MENUSTOCK, 0, 0, 1, GDK_q},	/* 15 */
 
 	{N_("_View"), 0, 0, M_NEWMENU, 0, 0, 1},
-#define MENUBAR_OFFSET (29)
+#define MENUBAR_OFFSET (30)
 	{N_("_Menu Bar"), menu_bar_toggle_cb, 0, M_MENUTOG, MENU_ID_MENUBAR, 0, 1, GDK_F9},
 	{N_("_Topic Bar"), menu_topicbar_toggle, 0, M_MENUTOG, MENU_ID_TOPICBAR, 0, 1},
 	{N_("_User List"), menu_userlist_toggle, 0, M_MENUTOG, MENU_ID_USERLIST, 0, 1, GDK_F7},
@@ -1418,7 +1420,7 @@ static struct mymenu mymenu[] = {
 	{N_("M_ode Buttons"), menu_cmbuttons_toggle, 0, M_MENUTOG, MENU_ID_MODEBUTTONS, 0, 1},
 	{0, 0, 0, M_SEP, 0, 0, 0},
 	{N_("_Network Meters"), 0, 0, M_MENUSUB, 0, 0, 1},	/* 24 */
-#define METRE_OFFSET (36)
+#define METRE_OFFSET (37)
 		{N_("Off"), menu_metres_off, 0, M_MENURADIO, 0, 0, 1},
 		{N_("Graph"), menu_metres_graph, 0, M_MENURADIO, 0, 0, 1},
 		{N_("Text"), menu_metres_text, 0, M_MENURADIO, 0, 0, 1},
@@ -1430,7 +1432,7 @@ static struct mymenu mymenu[] = {
 	{N_("_Reconnect"), menu_reconnect, GTK_STOCK_CONNECT, M_MENUSTOCK, MENU_ID_RECONNECT, 0, 1},
 	{N_("Join Channel..."), menu_join, GTK_STOCK_JUMP_TO, M_MENUSTOCK, MENU_ID_JOIN, 0, 1},
 	{0, 0, 0, M_SEP, 0, 0, 0},
-#define AWAY_OFFSET (47)
+#define AWAY_OFFSET (48)
 	{N_("Marked Away"), menu_away, 0, M_MENUTOG, MENU_ID_AWAY, 0, 1, GDK_a},
 
 	{N_("_Usermenu"), 0, 0, M_NEWMENU, MENU_ID_USERMENU, 0, 1},	/* 37 */
@@ -1449,7 +1451,7 @@ static struct mymenu mymenu[] = {
 	{0, 0, 0, M_SEP, 0, 0, 0},
 	{N_("Reset Marker Line"), menu_resetmarker, 0, M_MENUITEM, 0, 0, 1, GDK_m},
 	{N_("C_lear Text"), menu_flushbuffer, GTK_STOCK_CLEAR, M_MENUSTOCK, 0, 0, 1, GDK_l},
-#define SEARCH_OFFSET 63
+#define SEARCH_OFFSET 64
 	{N_("Search Text..."), menu_search, GTK_STOCK_FIND, M_MENUSTOCK, 0, 0, 1, GDK_f},
 	{N_("Save Text..."), menu_savebuffer, GTK_STOCK_SAVE, M_MENUSTOCK, 0, 0, 1},
 
