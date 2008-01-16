@@ -5,6 +5,7 @@ conspire 0.11.0 (01-16-2008):
   * Implement support for immutable windows.
   * Fix some SSL bugs.
   * Rewrite the lowlevel configuration manager.
+  * Fix a long standing bug in the network editor: Remove didn't work.
 
 conspire 0.10.0 (01-01-2008):
 

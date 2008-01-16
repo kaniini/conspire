@@ -4,9 +4,12 @@
 # This launches conspire's backend (the IRC client), and any user-installed
 # servers. In this case, it's installed to `@libdir@/@PACKAGE@'.
 #
+# Additionally, it tries to load any XChat plugins.
+#
 
 exec_prefix=@exec_prefix@
 libdir=@libdir@/@PACKAGE@
+xchatplugindir=@libdir@/xchat/plugins
 
 CONSPIRE_INTERFACE=gtk
 
@@ -41,3 +44,13 @@ done
 
 echo "I: Plugin load complete."
 
+if [ -d $xchatplugindir ]; then
+	echo "I: Attempting to load xchat plugins."
+
+	for plugin in $xchatplugindir/*.so; do
+		echo "I: Launching xchat plugin $plugin."
+		conspire-xchatwrap $plugin &> /dev/null &
+	done
+
+	echo "I: XChat plugin load complete."
+fi
