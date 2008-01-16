@@ -1053,7 +1053,7 @@ menu_savebuffer (GtkWidget * wid, gpointer none)
 static void
 menu_disconnect (GtkWidget * wid, gpointer none)
 {
-	handle_command (current_sess, "DISCON", FALSE);
+	handle_command (current_sess, "DISCONNECT", FALSE);
 }
 
 static void
@@ -1237,12 +1237,14 @@ menu_rpopup (void)
 							 "replace.conf", 0);
 }
 
+#ifdef REGEX_SUBSTITUTION
 static void
 menu_regex (void)
 {
 	editlist_gui_open (_("Search for"), _("Replace with"), regex_replace_list, _("conspire: Regex Replace"), "regex_replace",
 			"regex_replace.conf", 0);
 }
+#endif
 
 static void
 menu_urlhandlers (void)
@@ -1387,7 +1389,9 @@ static struct mymenu mymenu[] = {
 	{N_("S_ettings"), 0, 0, M_MENUSUB, 0, 0, 1},
 		{N_("_Preferences"), menu_settings, GTK_STOCK_PREFERENCES, M_MENUSTOCK, 0, 0, 1},
 		{N_("Auto Replace..."), menu_rpopup, 0, M_MENUITEM, 0, 0, 1},
+#ifdef REGEX_SUBSTITUTION
 		{N_("Regular Expression Replace..."), menu_regex, 0, M_MENUITEM, 0, 0, 1},
+#endif
 		{N_("CTCP Replies..."), menu_ctcpguiopen, 0, M_MENUITEM, 0, 0, 1},
 		{N_("Dialog Buttons..."), menu_dlgbuttons, 0, M_MENUITEM, 0, 0, 1},
 		{N_("Keyboard Shortcuts..."), menu_keypopup, 0, M_MENUITEM, 0, 0, 1},

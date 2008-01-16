@@ -64,25 +64,6 @@ list_addentry (GSList ** list, char *cmd, char *name)
 	*list = g_slist_append (*list, pop);
 }
 
-void
-regex_list_addentry (GSList **list, char *cmd, GRegex *regex, char *name)
-{
-	struct regex_entry *pop;
-	int cmd_len, regex_sz, name_len;
-
-	cmd_len  = strlen(cmd) + 1;
-	regex_sz = sizeof(regex);
-	name_len = strlen(name) + 1;
-	
-	pop = malloc(sizeof(struct regex_entry) + cmd_len + regex_sz + name_len);
-
-	pop->regex = regex;
-	pop->cmd   = g_strdup(cmd);
-	pop->name  = g_strdup(name);
-
-	*list = g_slist_append(*list, pop);
-}
-
 /* read it in from a buffer to our linked list */
 
 static void
@@ -116,6 +97,26 @@ list_load_from_data (GSList ** list, char *ibuf, int size)
 			}
 		}
 	}
+}
+
+#ifdef REGEX_SUBSTITUTION
+void
+regex_list_addentry (GSList **list, char *cmd, GRegex *regex, char *name)
+{
+	struct regex_entry *pop;
+	int cmd_len, regex_sz, name_len;
+
+	cmd_len  = strlen(cmd) + 1;
+	regex_sz = sizeof(regex);
+	name_len = strlen(name) + 1;
+	
+	pop = malloc(sizeof(struct regex_entry) + cmd_len + regex_sz + name_len);
+
+	pop->regex = regex;
+	pop->cmd   = g_strdup(cmd);
+	pop->name  = g_strdup(name);
+
+	*list = g_slist_append(*list, pop);
 }
 
 static void
@@ -182,6 +183,27 @@ regex_list_loadconf (char *file, GSList **list, char *defaultconf)
 	free(ibuf);
 }
 
+int
+regex_list_delentry (GSList **list, char *name)
+{
+	struct regex_entry *pop;
+	GSList *alist = *list;
+	
+	while (alist)
+	{
+		pop = (struct regex_entry *) alist->data;
+		if (!strcasecmp(name, pop->name))
+		{
+			*list = g_slist_remove(*list, pop);
+			free (pop);
+			return 1;
+		}
+		alist = alist->next;
+	}
+	return 0;
+}
+#endif
+
 void
 list_loadconf (char *file, GSList ** list, char *defaultconf)
 {
@@ -223,26 +245,6 @@ list_free (GSList ** list)
 		free (data);
 		*list = g_slist_remove (*list, data);
 	}
-}
-
-int
-regex_list_delentry (GSList **list, char *name)
-{
-	struct regex_entry *pop;
-	GSList *alist = *list;
-	
-	while (alist)
-	{
-		pop = (struct regex_entry *) alist->data;
-		if (!strcasecmp(name, pop->name))
-		{
-			*list = g_slist_remove(*list, pop);
-			free (pop);
-			return 1;
-		}
-		alist = alist->next;
-	}
-	return 0;
 }
 
 int
@@ -617,7 +619,9 @@ PrefsEntry vars[] = {
 	{"text_max_indent", PREFS_TYPE_INT, &prefs.max_auto_indent},
 	{"text_max_lines", PREFS_TYPE_INT, &prefs.max_lines},
 	{"text_replay", PREFS_TYPE_BOOL, &prefs.text_replay},
+#ifdef REGEX_SUBSTITUTION
 	{"text_regex_replace", PREFS_TYPE_BOOL, &prefs.text_regex_replace},
+#endif
 	{"text_show_marker", PREFS_TYPE_BOOL, &prefs.show_marker},
 	{"text_show_sep", PREFS_TYPE_BOOL, &prefs.show_separator},
 	{"text_stripcolor", PREFS_TYPE_BOOL, &prefs.stripcolor},

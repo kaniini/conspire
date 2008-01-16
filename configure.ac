@@ -144,11 +144,26 @@ AC_ARG_ENABLE(spell,
 [  --enable-spell=type     enable spelling type: none static libsexy gtkspell],
 		  spell=$enableval, spell=libsexy)
 
+AC_ARG_ENABLE(regex,
+[  --disable-regex          enable regex substitution support based on GRegex],
+		regex=$enableval, regex=yes)
+
 dnl *********************************************************************
 dnl ** GLIB *************************************************************
 dnl *********************************************************************
 
-AM_PATH_GLIB_2_0(2.0.3, glib=yes, glib=no)
+if test "$regex" = yes; then
+	AM_PATH_GLIB_2_0(2.14.0, glib=yes, glib=no)
+	if test "$glib" = no; then
+		regex=no
+		AM_PATH_GLIB_2_0(2.0.3, glib=yes, glib=no)
+	else
+		AC_DEFINE(REGEX_SUBSTITUTION, [], [Enables support for regex substitution])
+	fi
+else
+	AM_PATH_GLIB_2_0(2.0.3, glib=yes, glib=no)
+fi
+AM_CONDITIONAL(REGEX_SUBSTITUTION, test "$regex" = "yes")
 if test "$glib" = no; then
 	AC_MSG_ERROR("Cannot find glib")
 fi
@@ -525,4 +540,5 @@ echo "  GnuTLS support:                         ${gnutls}"
 echo "  DBus support:                           ${dbus}"
 echo "  IPv6 support:                           ${ipv6}"
 echo "  Plugin loader:                          ${plugin}"
+echo "  Regex substitution support:             ${regex}"
 echo

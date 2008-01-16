@@ -4172,9 +4172,11 @@ xit:
 static int
 handle_user_input (session *sess, char *text, int history, int nocommand)
 {
+#ifdef REGEX_SUBSTITUTION
 	GSList *list = regex_replace_list;
 	struct regex_entry *pop;
 	GError *error = NULL;
+#endif
 
 	if (*text == '\0')
 		return 1;
@@ -4182,17 +4184,19 @@ handle_user_input (session *sess, char *text, int history, int nocommand)
 	if (history)
 		history_add (&sess->history, text);
 
+#ifdef REGEX_SUBSTITUTION
 	if (prefs.text_regex_replace) {
 		while (list)
 		{
 			pop = (struct regex_entry *) list->data;
-			text = g_regex_replace_literal(pop->regex, text, strlen(text), 0, pop->cmd, 0, &error);
+			text = g_regex_replace(pop->regex, text, strlen(text), 0, pop->cmd, 0, &error);
 			if (error) {
 				g_print("outbound.c: handle_user_input: %s", error->message);
 			}
 			list = list->next;
 		}
 	}
+#endif
 
 	/* is it NOT a command, just text? */
 	if (nocommand || text[0] != prefs.cmdchar[0])
