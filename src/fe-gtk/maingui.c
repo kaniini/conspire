@@ -1213,6 +1213,9 @@ mg_open_quit_dialog (gboolean minimize_button)
 void
 mg_close_sess (session *sess)
 {
+	if (sess->immutable == TRUE)
+		return;
+
 	if (sess_list->next == NULL)
 	{
 		mg_open_quit_dialog (FALSE);
