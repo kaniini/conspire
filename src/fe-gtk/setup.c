@@ -863,38 +863,12 @@ setup_browsefont_cb (GtkWidget *button, GtkWidget *entry)
 static void
 setup_entry_cb (GtkEntry *entry, setting *set)
 {
-	int size;
-	int pos;
-	int len = strlen (entry->text);
-	unsigned char *p = entry->text;
+	/* atomically set the new setting, so that it's thread safe. --nenolod */
+	char *p = g_strdup(entry->text);
+	char *pp = *((char **) set->ptr);
 
-	/* need to truncate? */
-	if (len >= set->extra)
-	{
-		len = pos = 0;
-		while (1)
-		{
-			size = g_utf8_skip [*p];
-			len += size;
-			p += size;
-			/* truncate to "set->extra" BYTES */
-			if (len >= set->extra)
-			{
-				gtk_editable_delete_text (GTK_EDITABLE (entry), pos, -1);
-				break;
-			}
-			pos++;
-		}
-	}
-	else
-	{
-		/* atomically set the new setting, so that it's thread safe. --nenolod */
-		char *p = g_strdup(entry->text);
-		char *pp = *((char **) set->ptr);
-
-		*((char **) set->ptr) = p;
-		g_free(pp);
-	}
+	*((char **) set->ptr) = p;
+	g_free(pp);
 }
 
 static void
