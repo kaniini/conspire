@@ -18,7 +18,9 @@ extern GSList *dlgbutton_list;
 extern GSList *command_list;
 extern GSList *ctcp_list;
 extern GSList *replace_list;
+#ifdef REGEX_SUBSTITUTION
 extern GSList *regex_replace_list;
+#endif
 extern GSList *sess_list;
 extern GSList *dcc_list;
 extern GSList *ignore_list;

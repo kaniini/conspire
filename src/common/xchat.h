@@ -286,9 +286,9 @@ struct xchatprefs
 	unsigned int utf8_locale;
 	unsigned int identd;
 	unsigned int skip_serverlist;
-
+#ifdef REGEX_SUBSTITUTION
 	unsigned int text_regex_replace;
-
+#endif
 	unsigned int ctcp_number_limit;	/*flood */
 	unsigned int ctcp_time_limit;	/*seconds of floods */
 
@@ -558,12 +558,19 @@ struct popup
 	char *name;
 };
 
+/*
+ * Regular expressions-driven substitution support, currently only for
+ * outbound messages
+ */
+
+#ifdef REGEX_SUBSTITUTION
 struct regex_entry
 {
 	char *cmd;
 	char *name;
 	GRegex *regex;
 };
+#endif
 
 /* CL: get a random int in the range [0..n-1]. DON'T use rand() % n, it gives terrible results. */
 #define RAND_INT(n) ((int)(rand() / (RAND_MAX + 1.0) * (n)))

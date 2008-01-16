@@ -526,8 +526,10 @@ static char defaultconf_ctcp[] =
 static char defaultconf_replace[] =
 	"NAME teh\n"                    "CMD the\n\n";
 
+#ifdef REGEX_SUBSTITUTION
 static char defaultconf_regex_replace[] =
 	"NAME foo\n"                       "CMD bar\n\n";
+#endif
 
 static char defaultconf_commands[] =
 	"NAME ACTION\n"         "CMD me &2\n\n"\
@@ -775,7 +777,9 @@ xchat_init (void)
 	list_loadconf ("ctcpreply.conf", &ctcp_list, defaultconf_ctcp);
 	list_loadconf ("commands.conf", &command_list, defaultconf_commands);
 	list_loadconf ("replace.conf", &replace_list, defaultconf_replace);
+#ifdef REGEX_SUBSTITUTION
 	regex_list_loadconf("regex_replace.conf", &regex_replace_list, defaultconf_regex_replace);
+#endif
 	list_loadconf ("urlhandlers.conf", &urlhandler_list,
 						defaultconf_urlhandlers);
 
