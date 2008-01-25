@@ -141,6 +141,13 @@ ctcp_handle (session *sess, char *to, char *nick,
 		serv->p_nctcp (serv, nick, outbuf);
 	}
 
+	if (!strcasecmp(msg, "CLIENTINFO"))
+	{
+		snprintf(outbuf, sizeof(outbuf), "CLIENTINFO PING VERSION SOUND CLIENTINFO");
+
+		serv->p_nctcp(serv, nick, outbuf);
+	}
+
 	if (!ctcp_check (sess, nick, word, word_eol, word[4] + 2))
 	{
 		if (!strncasecmp (msg, "SOUND", 5))
