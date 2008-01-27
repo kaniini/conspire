@@ -40,52 +40,10 @@ pevt_chanaction_help
 %C13*%O$t%C8%B$1%B%O $2%O
 2
 
-Channel Ban
-XP_TE_CHANBAN
-pevt_chanban_help
-%C27*$t%C27$1 sets ban on $2
-2
-
 Channel Creation
 XP_TE_CHANDATE
 pevt_chandate_help
 %C27*$t%C27Channel $1 created on $2
-2
-
-Channel DeHalfOp
-XP_TE_CHAN
-pevt_chandehop_help
-%C27*$t%C27$1 removes channel half-operator status from $2
-2
-
-Channel DeOp
-XP_TE_CHANDEOP
-pevt_chandeop_help
-%C27*$t%C27$1 removes channel operator status from $2
-2
-
-Channel DeVoice
-XP_TE_CHANDEVOICE
-pevt_chandevoice_help
-%C27*$t%C27$1 removes voice from $2
-2
-
-Channel Exempt
-XP_TE_CHANEXCEMPT
-pevt_chanexempt_help
-%C27*$t%C27$1 sets exempt on $2
-2
-
-Channel Half-Operator
-XP_TE_CHANHOP
-pevt_chanhop_help
-%C27*$t%C27$1 gives channel half-operator status to $2
-2
-
-Channel INVITE
-XP_TE_CHANINVITE
-pevt_chaninvite_help
-%C27*$t%C27$1 sets invite on $2
 2
 
 Channel List
@@ -124,60 +82,6 @@ pevt_channotice_help
 %C12-%C13$1/$2%C12-%O$t$3%O
 3
 
-Channel Operator
-XP_TE_CHANOP
-pevt_chanop_help
-%C27*$t%C27$1 gives channel operator status to $2
-2
-
-Channel Remove Exempt
-XP_TE_CHANRMEXEMPT
-pevt_chanrmexempt_help
-%C27*$t%C27$1 removes exempt on $2
-2
-
-Channel Remove Invite
-XP_TE_CHANRMINVITE
-pevt_chanrminvite_help
-%C27*$t%C27$1 removes invite on $2
-2
-
-Channel Remove Keyword
-XP_TE_CHANRMKEY
-pevt_chanrmkey_help
-%C27*$t%C27$1 removes channel keyword
-1
-
-Channel Remove Limit
-XP_TE_CHANRMLIMIT
-pevt_chanrmlimit_help
-%C27*$t%C27$1 removes user limit
-1
-
-Channel Set Key
-XP_TE_CHANSETKEY
-pevt_chansetkey_help
-%C27*$t%C27$1 sets channel keyword to $2
-2
-
-Channel Set Limit
-XP_TE_CHANSETLIMIT
-pevt_chansetlimit_help
-%C27*$t%C27$1 sets channel limit to $2
-2
-
-Channel UnBan
-XP_TE_CHANUNBAN
-pevt_chanunban_help
-%C27*$t%C27$1 removes ban on $2
-2
-
-Channel Voice
-XP_TE_CHANVOICE
-pevt_chanvoice_help
-%C27*$t%C27$1 gives voice to $2
-2
-
 Connected
 XP_TE_CONNECTED
 pevt_generic_none_help
@@ -206,6 +110,12 @@ CTCP Generic to Channel
 XP_TE_CTCPGENC
 pevt_ctcpgenc_help
 %C27*$t%C27Received a CTCP $1 from $2 (to $3)
+3
+
+CTCP Reply Generic
+XP_TE_CTCP_REPLY
+pevt_ctcpreply_help
+%C27*$t%C27Received a CTCP reply $2 from $1: $3
 3
 
 CTCP Send

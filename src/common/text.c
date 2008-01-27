@@ -1057,6 +1057,12 @@ static char * const pevt_chanmodegen_help[] = {
 	N_("The channel it's being set on"),
 };
 
+static char * const pevt_ctcpreply_help[] = {
+	N_("Nickname"),
+	N_("CTCP Type"),
+	N_("Contents of CTCP Reply"),
+};
+
 static char * const pevt_whois_name_help[] = {
 	N_("Nickname"),
 	N_("Username"),

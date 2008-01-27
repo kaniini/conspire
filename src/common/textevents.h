@@ -23,29 +23,8 @@ N_("%C13*%O$t$1 $2%O")},
 {"Channel Action Hilight", pevt_chanaction_help, 2, 
 N_("%C13*%O$t%C8%B$1%B%O $2%O")},
 
-{"Channel Ban", pevt_chanban_help, 2, 
-N_("%C27*$t%C27$1 sets ban on $2")},
-
 {"Channel Creation", pevt_chandate_help, 2, 
 N_("%C27*$t%C27Channel $1 created on $2")},
-
-{"Channel DeHalfOp", pevt_chandehop_help, 2, 
-N_("%C27*$t%C27$1 removes channel half-operator status from $2")},
-
-{"Channel DeOp", pevt_chandeop_help, 2, 
-N_("%C27*$t%C27$1 removes channel operator status from $2")},
-
-{"Channel DeVoice", pevt_chandevoice_help, 2, 
-N_("%C27*$t%C27$1 removes voice from $2")},
-
-{"Channel Exempt", pevt_chanexempt_help, 2, 
-N_("%C27*$t%C27$1 sets exempt on $2")},
-
-{"Channel Half-Operator", pevt_chanhop_help, 2, 
-N_("%C27*$t%C27$1 gives channel half-operator status to $2")},
-
-{"Channel INVITE", pevt_chaninvite_help, 2, 
-N_("%C27*$t%C27$1 sets invite on $2")},
 
 {"Channel List", pevt_generic_none_help, 0, 
 N_("%UChannel          Users   Topic%O")},
@@ -65,33 +44,6 @@ N_("%C8%B%H<%H$1%H>%H%O$t$2%O")},
 {"Channel Notice", pevt_channotice_help, 3, 
 N_("%C12-%C13$1/$2%C12-%O$t$3%O")},
 
-{"Channel Operator", pevt_chanop_help, 2, 
-N_("%C27*$t%C27$1 gives channel operator status to $2")},
-
-{"Channel Remove Exempt", pevt_chanrmexempt_help, 2, 
-N_("%C27*$t%C27$1 removes exempt on $2")},
-
-{"Channel Remove Invite", pevt_chanrminvite_help, 2, 
-N_("%C27*$t%C27$1 removes invite on $2")},
-
-{"Channel Remove Keyword", pevt_chanrmkey_help, 1, 
-N_("%C27*$t%C27$1 removes channel keyword")},
-
-{"Channel Remove Limit", pevt_chanrmlimit_help, 1, 
-N_("%C27*$t%C27$1 removes user limit")},
-
-{"Channel Set Key", pevt_chansetkey_help, 2, 
-N_("%C27*$t%C27$1 sets channel keyword to $2")},
-
-{"Channel Set Limit", pevt_chansetlimit_help, 2, 
-N_("%C27*$t%C27$1 sets channel limit to $2")},
-
-{"Channel UnBan", pevt_chanunban_help, 2, 
-N_("%C27*$t%C27$1 removes ban on $2")},
-
-{"Channel Voice", pevt_chanvoice_help, 2, 
-N_("%C27*$t%C27$1 gives voice to $2")},
-
 {"Connected", pevt_generic_none_help, 0, 
 N_("%C27*$t%C27Connected. Now logging in..")},
 
@@ -106,6 +58,9 @@ N_("%C27*$t%C27Received a CTCP $1 from $2")},
 
 {"CTCP Generic to Channel", pevt_ctcpgenc_help, 3, 
 N_("%C27*$t%C27Received a CTCP $1 from $2 (to $3)")},
+
+{"CTCP Reply Generic", pevt_ctcpreply_help, 3, 
+N_("%C27*$t%C27Received a CTCP reply $2 from $1: $3")},
 
 {"CTCP Send", pevt_ctcpsend_help, 2, 
 N_("%C3>%O$1%C3<%O$tCTCP $2%O")},

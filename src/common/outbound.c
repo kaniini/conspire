@@ -1800,6 +1800,7 @@ cmd_quit (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	list = serv_list;
 	while (list) {
 		serv = list->data;
+		sess = serv->server_session;
 		if (serv->connected)
 			serv->disconnect (sess, TRUE, -1);
 		list = list->next;
