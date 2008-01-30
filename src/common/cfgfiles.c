@@ -588,8 +588,6 @@ PrefsEntry vars[] = {
 
 	{"redundant_nickstamps", PREFS_TYPE_BOOL, &prefs.redundant_nickstamps},
 
-	{"sound_command", PREFS_TYPE_STR, &prefs.soundcmd},
-	{"sound_dir", PREFS_TYPE_STR, &prefs.sounddir},
 	{"stamp_log", PREFS_TYPE_BOOL, &prefs.timestamp_logs},
 	{"stamp_log_format", PREFS_TYPE_STR, &prefs.timestamp_log_format},
 	{"stamp_text", PREFS_TYPE_BOOL, &prefs.timestamp},
@@ -760,7 +758,6 @@ load_config (void)
 	prefs.nick3 = g_strdup_printf("%s__", username);
 	prefs.realname = strdup(realname);
 	prefs.username = strdup(username);
-	prefs.sounddir = g_strdup_printf("%s/sounds", get_xdir_utf8());
 	prefs.dccdir = g_strdup_printf("%s/downloads", get_xdir_utf8());
 	prefs.doubleclickuser = strdup("QUOTE WHOIS %s %s");
 	prefs.awayreason = strdup(_("I'm busy"));

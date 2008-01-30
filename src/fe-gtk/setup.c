@@ -59,7 +59,6 @@ GtkStyle *create_input_style (GtkStyle *);
 #define LABEL_INDENT 12
 
 static int last_selected_page = 0;
-static int last_selected_row = 0; /* sound row */
 static gboolean color_change;
 static GtkWidget *cancel_button;
 
@@ -1591,7 +1590,6 @@ setup_apply (struct xchatprefs *pr)
 static void
 setup_ok_cb (GtkWidget *but, GtkWidget *win)
 {
-	setup_snd_apply ();
 	gtk_widget_destroy (win);
 	setup_apply (&prefs);
 	save_config ();

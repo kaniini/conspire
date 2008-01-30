@@ -148,35 +148,6 @@ ctcp_handle (session *sess, char *to, char *nick,
 		serv->p_nctcp(serv, nick, outbuf);
 	}
 
-	if (!ctcp_check (sess, nick, word, word_eol, word[4] + 2))
-	{
-		if (!strncasecmp (msg, "SOUND", 5))
-		{
-			po = strchr (word[5], '\001');
-			if (po)
-				po[0] = 0;
-
-			if (is_channel (sess->server, to))
-			{
-				chansess = find_channel (sess->server, to);
-				if (!chansess)
-					chansess = sess;
-
-				EMIT_SIGNAL (XP_TE_CTCPSNDC, chansess, word[5],
-								 nick, to, NULL, 0);
-			} else
-			{
-				EMIT_SIGNAL (XP_TE_CTCPSND, sess->server->front_session, word[5],
-								 nick, NULL, NULL, 0);
-			}
-
-			/* don't let IRCers specify path */
-			if (strchr (word[5], '/') == NULL)
-				sound_play (word[5], TRUE);
-			return;
-		}
-	}
-
 generic:
 	po = strchr (msg, '\001');
 	if (po)
