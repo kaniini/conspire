@@ -1,3 +1,11 @@
+conspire 0.12.0 (01-30-2008):
+
+  * Remove CTCP sound support; it's worthless.
+  * Handle CTCP replies in a better way.
+  * /quit now disconnects from all servers; to disconnect from one, use /disconnect instead.
+  * Improve coloured nicks support.
+  * Add support for CTCP CLIENTINFO.
+
 conspire 0.11.0 (01-16-2008):
 
   * Fix several bugs in the SASL (IAL) implementation.
