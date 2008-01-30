@@ -674,7 +674,6 @@ xchat_init (void)
 		prefs.utf8_locale = TRUE;
 
 	load_text_events ();
-	sound_load ();
 	notify_load ();
 	ignore_load ();
 
@@ -812,7 +811,6 @@ xchat_exit (void)
 	}
 	if (prefs.autosave_url)
 		url_autosave ();
-	sound_save ();
 	notify_save ();
 	ignore_save ();
 	free_sessions ();

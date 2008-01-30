@@ -2837,18 +2837,6 @@ cmd_settext (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static int
-cmd_splay (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	if (*word[2])
-	{
-		sound_play (word[2], FALSE);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-static int
 parse_irc_url (char *url, char *server_name[], char *port[], char *channel[], int *use_ssl)
 {
 	char *co;
@@ -3520,7 +3508,6 @@ const struct commands xc_cmds[] = {
 	{"SETCURSOR", cmd_setcursor, 0, 0, 1, N_("SETCURSOR [-|+]<position>")},
 	{"SETTAB", cmd_settab, 0, 0, 1, 0},
 	{"SETTEXT", cmd_settext, 0, 0, 1, 0},
-	{"SPLAY", cmd_splay, 0, 0, 1, "SPLAY <soundfile>"},
 	{"TOPIC", cmd_topic, 1, 1, 1,
 	 N_("TOPIC [<topic>], sets the topic if one is given, else shows the current topic")},
 	{"TRAY", cmd_tray, 0, 0, 1,

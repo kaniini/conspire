@@ -956,12 +956,6 @@ static char * const pevt_partreason_help[] = {
 	N_("The reason"),
 };
 
-static char * const pevt_ctcpsnd_help[] = {
-	N_("The sound"),
-	N_("The nick of the person"),
-	N_("The channel"),
-};
-
 static char * const pevt_ctcpgen_help[] = {
 	N_("The CTCP event"),
 	N_("The nick of the person"),
@@ -1524,13 +1518,7 @@ pevent_load (char *filename)
 #endif
 
 			continue;
-		}/* else if (strcmp (buf, "event_sound") == 0)
-		{
-			if (snd)
-				free (snd);
-			snd = strdup (ofs);
-			continue;
-		}*/
+		}
 
 		continue;
 	}
@@ -1896,8 +1884,6 @@ text_emit (int index, session *sess, char *a, char *b, char *c, char *d)
 	if (plugin_emit_print (sess, word))
 		return;
 
-	sound_play_event (index);
-
 	/* If a plugin's callback executes "/close", 'sess' may be invalid */
 	if (is_session (sess))
 		display_event (sess, index, word, stripcolor_args);
@@ -1969,157 +1955,9 @@ pevent_save (char *fn)
 /* ========== SOUND ========== */
 /* =========================== */
 
-char *sound_files[NUM_XP];
-
 void
 sound_beep (session *sess)
 {
-	if (sound_files[XP_TE_BEEP] && sound_files[XP_TE_BEEP][0])
-		/* user defined beep _file_ */
-		sound_play_event (XP_TE_BEEP);
-	else
-		/* system beep */
-		fe_beep ();
+	fe_beep ();
 }
 
-static char *
-sound_find_command (void)
-{
-	gchar *cmd = g_find_program_in_path(prefs.soundcmd);
-	if (cmd[0])
-		return cmd;
-	else
-		return NULL;
-}
-
-void
-sound_play (const char *file, gboolean quiet)
-{
-	char buf[512];
-	char wavfile[512];
-	char *file_fs;
-	char *cmd;
-
-	/* the pevents GUI editor triggers this after removing a soundfile */
-	if (!file[0])
-		return;
-
-	if (file[0] != '/')
-	{
-		snprintf (wavfile, sizeof (wavfile), "%s/%s", prefs.sounddir, file);
-	} else
-	{
-		strncpy (wavfile, file, sizeof (wavfile));
-	}
-	wavfile[sizeof (wavfile) - 1] = 0;	/* ensure termination */
-
-	file_fs = xchat_filename_from_utf8 (wavfile, -1, 0, 0, 0);
-	if (!file_fs)
-		return;
-
-	if (access (file_fs, R_OK) == 0)
-	{
-		cmd = sound_find_command ();
-		
-		if (cmd)
-		{
-			if (strchr (file_fs, ' '))
-				snprintf (buf, sizeof (buf), "%s \"%s\"", cmd, file_fs);
-			else
-				snprintf (buf, sizeof (buf), "%s %s", cmd, file_fs);
-			buf[sizeof (buf) - 1] = '\0';
-			xchat_exec (buf);
-		}
-		
-		if (cmd)
-			g_free (cmd);
-
-	} else
-	{
-		if (!quiet)
-		{
-			snprintf (buf, sizeof (buf), _("Cannot read sound file:\n%s"), wavfile);
-			fe_message (buf, FE_MSG_ERROR);
-		}
-	}
-
-	g_free (file_fs);
-}
-
-void
-sound_play_event (int i)
-{
-	if (sound_files[i])
-		sound_play (sound_files[i], FALSE);
-}
-
-static void
-sound_load_event (char *evt, char *file)
-{
-	int i = 0;
-
-	if (file[0] && pevent_find (evt, &i) != -1)
-	{
-		if (sound_files[i])
-			free (sound_files[i]);
-		sound_files[i] = strdup (file);
-	}
-}
-
-void
-sound_load ()
-{
-	int fd;
-	char buf[512];
-	char evt[128];
-
-	memset (&sound_files, 0, sizeof (char *) * (NUM_XP));
-
-	fd = xchat_open_file ("sound.conf", O_RDONLY, 0, 0);
-	if (fd == -1)
-		return;
-
-	evt[0] = 0;
-	while (waitline (fd, buf, sizeof buf, FALSE) != -1)
-	{
-		if (strncmp (buf, "event=", 6) == 0)
-		{
-			g_strlcpy (evt, buf + 6, sizeof (evt));
-		}
-		else if (strncmp (buf, "sound=", 6) == 0)
-		{
-			if (evt[0] != 0)
-			{
-				sound_load_event (evt, buf + 6);
-				evt[0] = 0;
-			}
-		}
-	}
-
-	close (fd);
-}
-
-void
-sound_save ()
-{
-	int fd, i;
-	char buf[512];
-
-	fd = xchat_open_file ("sound.conf", O_CREAT | O_TRUNC | O_WRONLY, 0x180,
-								 XOF_DOMODE);
-	if (fd == -1)
-		return;
-
-	for (i = 0; i < NUM_XP; i++)
-	{
-		if (sound_files[i] && sound_files[i][0])
-		{
-			write (fd, buf, snprintf (buf, sizeof (buf),
-											  "event=%s\n", te[i].name));
-			write (fd, buf, snprintf (buf, sizeof (buf),
-											  "sound=%s\n\n", sound_files[i]));
-		}
-	}
-
-	close (fd);
-}

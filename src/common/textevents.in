@@ -214,18 +214,6 @@ pevt_ctcpsend_help
 %C3>%O$1%C3<%O$tCTCP $2%O
 2
 
-CTCP Sound
-XP_TE_CTCPSND
-pevt_ctcpsnd_help
-%C27*$t%C27Received a CTCP Sound $1 from $2
-2
-
-CTCP Sound to Channel
-XP_TE_CTCPSNDC
-pevt_ctcpsnd_help
-%C22*%O$tReceived a CTCP Sound $1 from $2 (to $3)
-3
-
 DCC CHAT Abort
 XP_TE_DCCCHATABORT
 pevt_dccchatabort_help

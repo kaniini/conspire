@@ -109,8 +109,6 @@ struct xchatprefs
 	char *partreason;
 	char *font_normal;
 	char *doubleclickuser;
-	char *sounddir;
-	char *soundcmd;
 	char *background;
 	char *dccdir;
 	char *dcc_completed_dir;
