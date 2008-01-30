@@ -1791,10 +1791,20 @@ cmd_flushq (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 static int
 cmd_quit (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
+	GSList *list;
+	server *serv;
+	
 	if (*word_eol[2])
 		sess->quitreason = word_eol[2];
-	sess->server->disconnect (sess, TRUE, -1);
-	sess->quitreason = NULL;
+
+	list = serv_list;
+	while (list) {
+		serv = list->data;
+		sess = serv->server_session;
+		if (serv->connected)
+			serv->disconnect (sess, TRUE, -1);
+		list = list->next;
+	}
 	return 2;
 }
 

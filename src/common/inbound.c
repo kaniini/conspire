@@ -1008,6 +1008,17 @@ find_session_from_type (int type, server *serv)
 }
 
 void
+inbound_ctcp_reply (struct session *sess, char *msg, char *nick)
+{
+	char *temp = g_strdup(msg);
+	char *type = strtok(temp, " ");
+	short len = strlen(type);
+	msg[strlen(msg)-1] = 0;
+	EMIT_SIGNAL (XP_TE_CTCP_REPLY, sess, nick, type, msg+(len+1), NULL, 0);
+	g_free(temp);
+}
+
+void
 inbound_notice (server *serv, char *to, char *nick, char *msg, char *ip, int id)
 {
 	char *po,*ptr=to;
@@ -1097,6 +1108,9 @@ inbound_notice (server *serv, char *to, char *nick, char *msg, char *ip, int id)
 		if (!strncmp (msg, "PING", 4))
 		{
 			inbound_ping_reply (sess, msg + 5, nick);
+			return;
+		} else {
+			inbound_ctcp_reply(sess, msg, nick);
 			return;
 		}
 	}
