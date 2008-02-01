@@ -424,6 +424,12 @@ static const setting network_settings[] =
 	{ST_END, 0, 0, 0, 0, 0}
 };
 
+static const setting gui_colors_gtk[] =
+{
+	{ST_TOGGLE, N_("Use colors derived from GTK theme"), &prefs.gtk_colors, 0, 0, 0},
+	{ST_END, 0, 0, 0, 0, 0}
+};
+
 #define setup_get_int(pr,set) *(((int *)pr)+set->offset)
 #define setup_get_int3(pr,off) *(((int *)pr)+off) 
 
@@ -1180,7 +1186,7 @@ setup_create_other_color (char *text, int num, int row, GtkWidget *tab)
 static GtkWidget *
 setup_create_color_page (void)
 {
-	GtkWidget *tab, *box, *label;
+	GtkWidget *tab, *box, *label, *wid;
 	int i;
 
 	box = gtk_vbox_new (FALSE, 0);
@@ -1225,6 +1231,15 @@ setup_create_color_page (void)
 	setup_create_other_color (_("New message:"), COL_NEW_MSG, 10, tab);
 	setup_create_other_colorR (_("Away user:"), COL_AWAY, 10, tab);
 	setup_create_other_color (_("Highlight:"), COL_HILIGHT, 11, tab);
+
+	setup_create_header(tab, 15, N_("Color options:"));
+
+	wid = gtk_check_button_new_with_label (_(gui_colors_gtk[0].label));
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (wid), *((int *) gui_colors_gtk[0].ptr));
+	g_signal_connect (G_OBJECT (wid), "toggled",
+							G_CALLBACK (setup_toggle_cb), (gpointer)&gui_colors_gtk[0]);
+	gtk_table_attach (GTK_TABLE (tab), wid, 2, 9, 16, 16 + 1,
+							GTK_SHRINK | GTK_FILL, GTK_SHRINK | GTK_FILL, LABEL_INDENT, 0);
 
 	return box;
 }
@@ -1297,8 +1312,8 @@ setup_create_pages (GtkWidget *box)
 	setup_add_page (cata[8], book, setup_create_page (alert_settings));
 	setup_add_page (cata[9], book, setup_create_page (general_settings));
 	setup_add_page (cata[10], book, setup_create_page (logging_settings));
-	setup_add_page (cata[14], book, setup_create_page (network_settings));
-	setup_add_page (cata[15], book, setup_create_page (filexfer_settings));
+	setup_add_page (cata[13], book, setup_create_page (network_settings));
+	setup_add_page (cata[14], book, setup_create_page (filexfer_settings));
 
 	gtk_notebook_set_show_tabs (GTK_NOTEBOOK (book), FALSE);
 	gtk_notebook_set_show_border (GTK_NOTEBOOK (book), FALSE);
