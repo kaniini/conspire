@@ -106,7 +106,9 @@ static const setting textbox_settings[] =
 					N_("Make nick names right-justified"),0,0},
 	{ST_TOGGLR, N_("Show marker line"), &prefs.show_marker,
 					N_("Insert a red line after the last read text."),0,0},
-	{ST_TOGGLE, N_("Automatically replay logged chats"), &prefs.text_replay,
+	{ST_TOGGLE, N_("Show redundant nicks"), &prefs.redundant_nickstamps,
+		N_("Show nicks when users enter multiple lines of text in a row"), 0, 0},
+	{ST_TOGGLR, N_("Automatically replay logged chats"), &prefs.text_replay,
 					N_("Automatically replays logs for channels and queries."),0,0},
 
 	{ST_HEADER,	N_("Time Stamps"),0,0,0},
@@ -129,6 +131,9 @@ static const setting inputbox_settings[] =
 	{ST_HEADER, N_("Input box"),0,0,0},
 	{ST_TOGGLE, N_("Use the Text box font and colors"), &prefs.style_inputbox,0,0,0},
 	{ST_TOGGLE, N_("Spell checking"), &prefs.gui_input_spell,0,0,0},
+#ifdef REGEX_SUBSTITUTION
+	{ST_TOGGLE, N_("Enable regex substitution"), &prefs.text_regex_replace, N_("Use regular expressions on outbound text"), 0, 0},
+#endif
 
 	{ST_HEADER, N_("Nick Completion"),0,0,0},
 	{ST_TOGGLE, N_("Automatic nick completion (without TAB key)"), &prefs.nickcompletion,
@@ -137,23 +142,21 @@ static const setting inputbox_settings[] =
 	{ST_MENU,	N_("Nick completion sorted:"), &prefs.completion_sort, 0, tabcompmenu, 0},
 	{ST_NUMBER,	N_("Nick completion minimum length:"), &prefs.completion_amount, 0, 0,30},
 
-#if 0	/* obsolete */
 	{ST_HEADER, N_("Input Box Codes"),0,0,0},
 	{ST_TOGGLE, N_("Interpret %nnn as an ASCII value"), &prefs.perc_ascii,0,0,0},
 	{ST_TOGGLE, N_("Interpret %C, %B as Color, Bold etc"), &prefs.perc_color,0,0,0},
-#endif
 
 	{ST_END, 0, 0, 0, 0, 0}
 };
 
-/*static const char *const lagmenutext[] = 
+static const char *const lagmenutext[] = 
 {
 	N_("Off"),
 	N_("Graph"),
 	N_("Info text"),
 	N_("Both"),
 	NULL
-};*/
+};
 
 static const char *const ulmenutext[] = 
 {
@@ -202,9 +205,9 @@ static const setting userlist_settings[] =
 	{ST_HEADER,	N_("Action Upon Double Click"),0,0,0},
 	{ST_ENTRY,	N_("Execute command:"), &prefs.doubleclickuser, 0, 0},
 
-/*	{ST_HEADER,	N_("Extra Gadgets"),0,0,0},
+	{ST_HEADER,	N_("Extra Gadgets"),0,0,0},
 	{ST_MENU,	N_("Lag meter:"), &prefs.lagometer, 0, lagmenutext, 0},
-	{ST_MENU,	N_("Throttle meter:"), &prefs.throttlemeter, 0, lagmenutext, 0},*/
+	{ST_MENU,	N_("Throttle meter:"), &prefs.throttlemeter, 0, lagmenutext, 0},
 
 	{ST_END, 0, 0, 0, 0, 0}
 };
@@ -263,6 +266,11 @@ static const setting filexfer_settings[] =
 	{ST_EFOLDER,N_("Download files to:"), &prefs.dccdir, 0, 0},
 	{ST_EFOLDER,N_("Move completed files to:"), &prefs.dcc_completed_dir, 0, 0},
 	{ST_TOGGLE, N_("Save nick name in filenames"), &prefs.dccwithnick, 0, 0, 0},
+
+	{ST_HEADER,	N_("Auto Open DCC Windows"),0,0,0},
+	{ST_TOGGLE, N_("Send window"), &prefs.autoopendccsendwindow, 0, 0, 0},
+	{ST_TOGGLE, N_("Receive window"), &prefs.autoopendccrecvwindow, 0, 0, 0},
+	{ST_TOGGLE, N_("Chat window"), &prefs.autoopendccchatwindow, 0, 0, 0},
 
 	{ST_HEADER, N_("Network Settings"), 0, 0, 0},
 	{ST_TOGGLE, N_("Get my address from the IRC server"), &prefs.ip_from_server,
@@ -349,22 +357,15 @@ static const setting general_settings[] =
 	{ST_END, 0, 0, 0, 0, 0}
 };
 
-#if 0
 static const setting advanced_settings[] =
 {
 	{ST_HEADER,	N_("Advanced Settings"),0,0,0},
 	{ST_NUMBER,	N_("Auto reconnect delay:"), &prefs.recon_delay, 0, 0, 9999},
-	{ST_TOGGLE,	N_("Display MODEs in raw form"), &prefs.raw_modes, 0, 0, 0},
 	{ST_TOGGLE,	N_("Whois on notify"), &prefs.whois_on_notifyonline, N_("Sends a /WHOIS when a user comes online in your notify list"), 0, 0},
 	{ST_TOGGLE,	N_("Hide join and part messages"), &prefs.confmode, N_("Hide channel join/part messages by default"), 0, 0},
-	{ST_HEADER,	N_("Auto Open DCC Windows"),0,0,0},
-	{ST_TOGGLE, N_("Send window"), &prefs.autoopendccsendwindow, 0, 0, 0},
-	{ST_TOGGLE, N_("Receive window"), &prefs.autoopendccrecvwindow, 0, 0, 0},
-	{ST_TOGGLE, N_("Chat window"), &prefs.autoopendccchatwindow, 0, 0, 0},
 
 	{ST_END, 0, 0, 0, 0, 0}
 };
-#endif
 
 static const setting logging_settings[] =
 {
@@ -1290,7 +1291,7 @@ static const char *const cata[] =
 		N_("Alerts"),
 		N_("General"),
 		N_("Logging"),
-/*		N_("Advanced"),*/
+		N_("Advanced"),
 		NULL,
 	N_("Network"),
 		N_("Network setup"),
@@ -1314,8 +1315,9 @@ setup_create_pages (GtkWidget *box)
 	setup_add_page (cata[8], book, setup_create_page (alert_settings));
 	setup_add_page (cata[9], book, setup_create_page (general_settings));
 	setup_add_page (cata[10], book, setup_create_page (logging_settings));
-	setup_add_page (cata[13], book, setup_create_page (network_settings));
-	setup_add_page (cata[14], book, setup_create_page (filexfer_settings));
+	setup_add_page (cata[11], book, setup_create_page(advanced_settings));
+	setup_add_page (cata[14], book, setup_create_page (network_settings));
+	setup_add_page (cata[15], book, setup_create_page (filexfer_settings));
 
 	gtk_notebook_set_show_tabs (GTK_NOTEBOOK (book), FALSE);
 	gtk_notebook_set_show_border (GTK_NOTEBOOK (book), FALSE);
