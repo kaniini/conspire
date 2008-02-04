@@ -562,6 +562,7 @@ PrefsEntry vars[] = {
 	{"irc_real_name", PREFS_TYPE_STR, &prefs.realname},
 	{"irc_servernotice", PREFS_TYPE_BOOL, &prefs.servernotice},
 	{"irc_skip_motd", PREFS_TYPE_BOOL, &prefs.skipmotd},
+	{"irc_time_format", PREFS_TYPE_STR, &prefs.irc_time_format},
 	{"irc_user_name", PREFS_TYPE_STR, &prefs.username},
 	{"irc_wallops", PREFS_TYPE_BOOL, &prefs.wallops},
 	{"irc_who_join", PREFS_TYPE_BOOL, &prefs.userhost},
@@ -766,6 +767,7 @@ load_config (void)
 	prefs.font_normal = strdup(DEF_FONT);
 	prefs.dnsprogram = strdup("host");
 	prefs.irc_no_hilight = strdup("NickServ,ChanServ");
+	prefs.irc_time_format = strdup("%a %b %e %T %Z %Y");
 
 	g_free ((char *)username);
 	g_free ((char *)realname);

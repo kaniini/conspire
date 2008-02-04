@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/utsname.h>
+#include <time.h>
 
 #include "xchat.h"
 #include "cfgfiles.h"
@@ -143,7 +144,17 @@ ctcp_handle (session *sess, char *to, char *nick,
 
 	if (!strcasecmp(msg, "CLIENTINFO"))
 	{
-		snprintf(outbuf, sizeof(outbuf), "CLIENTINFO PING VERSION SOUND CLIENTINFO");
+		snprintf(outbuf, sizeof(outbuf), "CLIENTINFO CLIENTINFO PING TIME VERSION");
+
+		serv->p_nctcp(serv, nick, outbuf);
+	}
+
+	if (!strcasecmp(msg, "TIME")) {
+		time_t time_val = time(NULL);
+		struct tm *tval = localtime(&time_val);
+		char tbuf[200];
+		strftime(tbuf, sizeof(tbuf), prefs.irc_time_format, tval); //Sun Feb  3 18:33:27 CST 2008
+		snprintf(outbuf, sizeof(outbuf), "TIME %s", tbuf);
 
 		serv->p_nctcp(serv, nick, outbuf);
 	}

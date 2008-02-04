@@ -123,6 +123,7 @@ struct xchatprefs
 	char *timestamp_log_format;
 	char *irc_id_ytext;
 	char *irc_id_ntext;
+	char *irc_time_format;
 
 	char *proxy_host;
 	int proxy_port;
