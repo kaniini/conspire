@@ -257,68 +257,49 @@ cmd_addbutton (struct session *sess, char *tbuf, char *word[],
 }
 
 static int
-cmd_allchannels (session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	GSList *list = sess_list;
-
-	if (!*word_eol[2])
-		return FALSE;
-
-	while (list)
-	{
-		sess = list->data;
-		if (sess->type == SESS_CHANNEL && sess->channel[0] && sess->server->connected)
-		{
-			handle_command (sess, word_eol[2], FALSE);
-		}
-		list = list->next;
-	}
-
-	return TRUE;
-}
-
-static int
-cmd_allchannelslocal (session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	GSList *list = sess_list;
-	server *serv = sess->server;
-
-	if (!*word_eol[2])
-		return FALSE;
-
-	while (list)
-	{
-		sess = list->data;
-		if (sess->type == SESS_CHANNEL && sess->channel[0] &&
-			 sess->server->connected && sess->server == serv)
-		{
-			handle_command (sess, word_eol[2], FALSE);
-		}
-		list = list->next;
-	}
-
-	return TRUE;
-}
-
-static int
-cmd_allservers (struct session *sess, char *tbuf, char *word[],
-					 char *word_eol[])
-{
-	GSList *list;
 	server *serv;
 
-	if (!*word_eol[2])
+	if (!*word_eol[3])
 		return FALSE;
 
-	list = serv_list;
-	while (list)
+	if (!strcasecmp(word[2], "channel"))
 	{
-		serv = list->data;
-		if (serv->connected)
-			handle_command (serv->front_session, word_eol[2], FALSE);
-		list = list->next;
+		while (list)
+		{
+			sess = list->data;
+			if (sess->type == SESS_CHANNEL && sess->channel[0] && sess->server->connected)
+				handle_command(sess, word_eol[3], FALSE);
+			list = list->next;
+		}
 	}
-
+	else if (!strcasecmp(word[2], "local-channel"))
+	{
+		serv = sess->server;
+		while (list)
+		{
+			sess = list->data;
+			if (sess->type == SESS_CHANNEL && sess->channel[0] && sess->server->connected && (sess->server == serv))
+				handle_command(sess, word_eol[3], FALSE);
+			list = list->next;
+		}
+	}
+	else if (!strcasecmp(word[2], "server"))
+	{
+		list = serv_list;
+		while (list)
+		{
+			serv = list->data;
+			if (serv->connected)
+				handle_command(serv->front_session, word_eol[3], FALSE);
+			list = list->next;
+		}
+	}
+	else {
+		PrintText(sess, "Invalid parameter for foreach");
+	}
 	return TRUE;
 }
 
@@ -1791,20 +1772,9 @@ cmd_flushq (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 static int
 cmd_quit (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	GSList *list;
-	server *serv;
-	
 	if (*word_eol[2])
 		sess->quitreason = word_eol[2];
-
-	list = serv_list;
-	while (list) {
-		serv = list->data;
-		sess = serv->server_session;
-		if (serv->connected)
-			serv->disconnect (sess, TRUE, -1);
-		list = list->next;
-	}
+	sess->server->disconnect (sess, TRUE, -1);
 	return 2;
 }
 
@@ -2276,6 +2246,20 @@ cmd_kickban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 static int
 cmd_killall (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
+	GSList *list;
+	server *serv;
+
+	if (*word_eol[2])
+		sess->quitreason = word_eol[2];
+
+	list = serv_list;
+	while (list) {
+		serv = list->data;
+		sess = serv->server_session;
+		if (serv->connected)
+			serv->disconnect (sess, TRUE, -1);
+		list = list->next;
+	}
 	xchat_exit();
 	return 2;
 }
@@ -3360,12 +3344,6 @@ cmd_voice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 const struct commands xc_cmds[] = {
 	{"ADDBUTTON", cmd_addbutton, 0, 0, 1,
 	 N_("ADDBUTTON <name> <action>, adds a button under the user-list")},
-	{"ALLCHAN", cmd_allchannels, 0, 0, 1,
-	 N_("ALLCHAN <cmd>, sends a command to all channels you're in")},
-	{"ALLCHANL", cmd_allchannelslocal, 0, 0, 1,
-	 N_("ALLCHANL <cmd>, sends a command to all channels you're in")},
-	{"ALLSERV", cmd_allservers, 0, 0, 1,
-	 N_("ALLSERV <cmd>, sends a command to all servers you're in")},
 	{"AWAY", cmd_away, 1, 0, 1, N_("AWAY [<reason>], toggles away status")},
 	{"BAN", cmd_ban, 1, 1, 1,
 	 N_("BAN <mask> [<bantype>], bans everyone matching the mask from the current channel. If they are already on the channel this doesn't kick them (needs chanop)")},
@@ -3421,8 +3399,8 @@ const struct commands xc_cmds[] = {
 	{"EXECWRITE", cmd_execw, 0, 0, 1, N_("EXECWRITE, sends data to the processes stdin")},
 #endif
 	{"EXIT", cmd_killall, 0, 0, 1, N_("EXIT terminates all connections and closes Conspire.")},
-	{"FLUSHQ", cmd_flushq, 0, 0, 1,
-	 N_("FLUSHQ, flushes the current server's send queue")},
+	{"FLUSHQ", cmd_flushq, 0, 0, 1, N_("FLUSHQ, flushes the current server's send queue")},
+	{"FOREACH", cmd_foreach, 0, 0, 1, N_("FOREACH <[local-]channel|server> performs a given command for all items of the specified type.")},
 	{"GATE", cmd_gate, 0, 0, 1,
 	 N_("GATE <host> [<port>], proxies through a host, port defaults to 23")},
 	{"GETFILE", cmd_getfile, 0, 0, 1, "GETFILE [-folder] [-multi] [-save] <command> <title> [<initial>]"},
