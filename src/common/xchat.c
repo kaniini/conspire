@@ -673,6 +673,7 @@ xchat_init (void)
 	if (g_get_charset (&cs))
 		prefs.utf8_locale = TRUE;
 
+	command_init ();
 	load_text_events ();
 	notify_load ();
 	ignore_load ();

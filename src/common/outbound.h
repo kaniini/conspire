@@ -1,7 +1,7 @@
 #ifndef XCHAT_OUTBOUND_H
 #define XCHAT_OUTBOUND_H
 
-extern const struct commands xc_cmds[];
+extern struct commands xc_cmds[];
 extern GSList *menu_list;
 
 int auto_insert (char *dest, int destlen, unsigned char *src, char *word[], char *word_eol[],
@@ -15,5 +15,6 @@ void server_sendpart (server * serv, char *channel, char *reason);
 void server_sendquit (session * sess);
 int menu_streq (const char *s1, const char *s2, int def);
 void open_query (server *serv, char *nick, gboolean focus_existing);
+void command_init(void);
 
 #endif
