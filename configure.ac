@@ -84,10 +84,10 @@ case "$target" in
         *-apple-*)
                 AC_MSG_RESULT([Mac OS X: -fPIC -bundle -fno-common -flat_namespace -undefined suppress, .dylib])
                 PICFLAGS="-fPIC -DPIC"
-                PICLDFLAGS="-fPIC -DPIC -bundle -fno-common -flat_namespace -undefined suppress"
-                LIBLDFLAGS="-dynamiclib -flat_namespace -undefined suppress -single_module"
+                PICLDFLAGS="-fPIC -DPIC -bundle -fno-common -flat_namespace -undefined suppress -Wl,-single_module"
+                LIBLDFLAGS="-dynamiclib -flat_namespace -undefined suppress -single_module -Wl,-single_module"
                 AUDLDFLAGS=""
-		GUI_LIBS="$GUI_LIBS -framework Carbon"
+                GUI_LIBS="$GUI_LIBS -framework Carbon"
                 SHARED_SUFFIX=".dylib"
                 ;;
         *)
@@ -195,7 +195,7 @@ dnl *********************************************************************
 
 PKG_CHECK_MODULES(MOWGLI, [libmowgli >= 0.6.0], mowgli=yes, mowgli=no)
 if test "$mowgli" = no; then
-	AC_MSG_ERROR("Cannot find acceptable version of mowgli. http://atheme.org/projects/mowgli.shml")
+	AC_MSG_ERROR("Cannot find acceptable version of mowgli. http://atheme.org/projects/mowgli.shtml")
 fi
 
 COMMON_CFLAGS="$GLIB_CFLAGS $MOWGLI_CFLAGS"
@@ -311,7 +311,14 @@ if test "$python" = yes; then
                         PY_PREFIX=`$pythonpath -c 'import sys; print sys.prefix'`
                         PY_EXEC_PREFIX=`$pythonpath -c 'import sys; print sys.exec_prefix'`
                         if test -f $PY_INC/Python.h; then
-                                PY_LIBS="-L$PY_LIB/config -lpython$PY_VER -lpthread -lutil"
+								case "$target" in
+									*-apple*)
+										PY_LIBS="-L$PY_LIB/config -lpython$PY_VER -lpthread"
+										;;
+									*)
+										PY_LIBS="-L$PY_LIB/config -lpython$PY_VER -lpthread -lutil"
+										;;
+								esac
                                 PY_CFLAGS="-I$PY_INC"
 				XCHATWRAP="$XCHATWRAP conspire-python"
                                 AC_MSG_RESULT(ok)
