@@ -85,8 +85,7 @@ case "$target" in
                 AC_MSG_RESULT([Mac OS X: -fPIC -bundle -fno-common -flat_namespace -undefined suppress, .dylib])
                 PICFLAGS="-fPIC -DPIC"
                 PICLDFLAGS="-fPIC -DPIC -bundle -fno-common -flat_namespace -undefined suppress"
-                LIBLDFLAGS="-dynamiclib -flat_namespace -undefined suppress -single_module"
-				LIB_LDFLAGS="$LIB_LDFLAGS  -Wl,-single_module"
+                LIB_LDFLAGS="-dynamiclib -flat_namespace -undefined suppress -single_module"
                 AUDLDFLAGS=""
                 GUI_LIBS="$GUI_LIBS -framework Carbon"
                 SHARED_SUFFIX=".dylib"
@@ -95,14 +94,14 @@ case "$target" in
                 AC_MSG_RESULT([libdl-compatible: -fPIC -DPIC -shared, .so])
                 PICFLAGS="-fPIC -DPIC"
                 PICLDFLAGS="-fPIC -DPIC -shared"
-                LIBLDFLAGS="-fPIC -DPIC -shared"
+                LIB_LDFLAGS="-fPIC -DPIC -shared"
                 AUDLDFLAGS="-Wl,-export-dynamic"
                 SHARED_SUFFIX=".so"
                 ;;
 esac
 AC_SUBST(PICFLAGS)
 AC_SUBST(PICLDFLAGS)
-AC_SUBST(LIBLDFLAGS)
+AC_SUBST(LIB_LDFLAGS)
 AC_SUBST(AUDLDFLAGS)
 AC_SUBST(SHARED_SUFFIX)
 AC_DEFINE_UNQUOTED(SHARED_SUFFIX, "${SHARED_SUFFIX}",
