@@ -84,8 +84,9 @@ case "$target" in
         *-apple-*)
                 AC_MSG_RESULT([Mac OS X: -fPIC -bundle -fno-common -flat_namespace -undefined suppress, .dylib])
                 PICFLAGS="-fPIC -DPIC"
-                PICLDFLAGS="-fPIC -DPIC -bundle -fno-common -flat_namespace -undefined suppress -Wl,-single_module"
-                LIBLDFLAGS="-dynamiclib -flat_namespace -undefined suppress -single_module -Wl,-single_module"
+                PICLDFLAGS="-fPIC -DPIC -bundle -fno-common -flat_namespace -undefined suppress"
+                LIBLDFLAGS="-dynamiclib -flat_namespace -undefined suppress -single_module"
+				LIB_LDFLAGS="$LIB_LDFLAGS  -Wl,-single_module"
                 AUDLDFLAGS=""
                 GUI_LIBS="$GUI_LIBS -framework Carbon"
                 SHARED_SUFFIX=".dylib"
