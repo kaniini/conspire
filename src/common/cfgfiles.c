@@ -769,8 +769,8 @@ load_config (void)
 	prefs.irc_no_hilight = strdup("NickServ,ChanServ");
 	prefs.irc_time_format = strdup("%a %b %e %T %Z %Y");
 
-	prefs.text_overflow_start = g_strdup("--more--");
-	prefs.text_overflow_stop  = g_strdup("--more--");
+	prefs.text_overflow_start = strdup("--more--");
+	prefs.text_overflow_stop  = strdup("--more--");
 
 	g_free ((char *)username);
 	g_free ((char *)realname);

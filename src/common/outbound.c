@@ -2397,7 +2397,6 @@ GSList *split_message(const struct session *sess, const gchar *text, const gchar
 	gchar *tempstr = "\0";
 	gchar *temp;
 	const gchar *space = g_strdup(" ");
-	/* these will be moved into prefs later */
 	gchar *note_start   = g_strdup(prefs.text_overflow_start);
 	gchar *note_end     = g_strdup(prefs.text_overflow_stop);
 	gint note_start_len = strlen(note_start);
@@ -2412,7 +2411,7 @@ GSList *split_message(const struct session *sess, const gchar *text, const gchar
 		 * it's a maximum of 64 chars
 		 */
 		temp = g_strdup_printf(":%s!%s@%s %s %s :", nick, prefs.username, "", event, target);
-		len = count = strlen(temp) + 9 + 65; /* this is for CTCP ACTION */
+		len = count = strlen(temp) + 9 + 64; /* this is for CTCP ACTION */
 	}
 
 	while (str[i]) {
