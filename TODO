@@ -1,5 +1,5 @@
 TODO
-- Implement support for SASL over IRC protocol.
+- Implement an awaylog for storing hilighted messages.
 
 IDEAS
 - Implement a sane theme engine
