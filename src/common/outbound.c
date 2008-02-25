@@ -2391,32 +2391,44 @@ GSList *split_message(const struct session *sess, const gchar *text, const gchar
 	gchar *target = g_strdup(sess->channel);
 	gchar **str   = g_strsplit(text, " ", 0);
 	gint i        = 0;
-	gint len      = 9;
+	gint j        = 0;
+	gint len      = 0;
 	gchar *host;
 	gchar *tempstr = "\0";
 	gchar *temp;
+	const gchar *space = g_strdup(" ");
 	/* these will be moved into prefs later */
-	gchar *note_start   = g_strdup("--more--");
-	gchar *note_end     = g_strdup("--more--");
+	gchar *note_start   = g_strdup(prefs.text_overflow_start);
+	gchar *note_end     = g_strdup(prefs.text_overflow_stop);
 	gint note_start_len = strlen(note_start);
 	gint note_end_len   = strlen(note_end);
 
 	if (sess->me && sess->me->hostname) {
-		host = g_strdup(sess->me_hostname);
+		host = g_strdup(sess->me->hostname);
+		temp = g_strdup_printf(":%s!%s@%s %s %s :", nick, prefs.username, host, event, target);
+		len = count = strlen(temp) + 9; /* this is for CTCP ACTION */
+	} else {
+		/* we don't have a hostname, for some reason, so just assume
+		 * it's a maximum of 64 chars
+		 */
+		temp = g_strdup_printf(":%s!%s@%s %s %s :", nick, prefs.username, "", event, target);
+		len = count = strlen(temp) + 9 + 65; /* this is for CTCP ACTION */
 	}
-	temp = g_strdup_printf(":%s!%s@%s %s %s :", nick, prefs.username, host, event, target);
 
-	len = count = strlen(temp) + 9; /* this is for CTCP ACTION */
 	while (str[i]) {
 		j = strlen(str[i]);
-		if ((count + j + note_end_len) > max) {
-			tempstr = g_strconcat(str[i], note_end, NULL);
-			g_slist_prepend(list, g_strdup(tempstr));
+		if ((count + j + note_end_len + 2) > max) {
+			tempstr = g_strconcat(tempstr, space, str[i], space, note_end, NULL);
+			list = g_slist_prepend(list, g_strchug(g_strdup(tempstr)));
 			count = len + j + note_start_len; /* start of next string */
-			tempstr = g_strconcat(note_start, str[i], NULL);
+			tempstr = g_strconcat(note_start, space, str[i], NULL);
+		} else if (str[i+1] != NULL) {
+			count += j + 1;
+			tempstr = g_strconcat(tempstr, space, str[i], NULL);
 		} else {
-			count += j;
-			tempstr = g_strconcat(tempstr, str[i], NULL);
+			tempstr = g_strconcat(tempstr, space, str[i], NULL);
+			list = g_slist_prepend(list, g_strchug(g_strdup(tempstr)));
+			break;
 		}
 		i++;
 	}
@@ -2425,7 +2437,6 @@ GSList *split_message(const struct session *sess, const gchar *text, const gchar
 	g_strfreev(str);
 	g_free(nick);
 	g_free(target);
-	g_free(host);
 	g_free(temp);
 	g_free(note_start);
 	g_free(note_end);
@@ -2436,8 +2447,8 @@ GSList *split_message(const struct session *sess, const gchar *text, const gchar
 static int
 cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	GSList *acts = split_message(sess, act, sess->channel, 512);
 	char *act = word_eol[2];
+	GSList *acts = split_message(sess, act, "PRIVMSG", 512);
 
 	if (!(*act))
 		return FALSE;
@@ -2466,6 +2477,7 @@ cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				inbound_action (sess, sess->channel, sess->server->nick, act, TRUE, FALSE);
 				acts = acts->next;
 			}
+			g_slist_free(acts);
 		} else
 		{
 			notc_msg (sess);
@@ -2499,6 +2511,7 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	char *msg = word_eol[3];
 	struct session *newsess;
 	GSList *msgs = split_message(sess, msg, word[2], 512);
+	GSList *mcopy = g_slist_copy(msgs);
 
 	if (*nick)
 	{
@@ -2533,6 +2546,7 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 					sess->server->p_message (sess->server, nick, msg);
 					msgs = msgs->next;
 				}
+				msgs = g_slist_copy(mcopy);
 			}
 			newsess = find_dialog (sess->server, nick);
 			if (!newsess)
@@ -2543,8 +2557,17 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 					inbound_chanmsg (newsess->server, NULL, newsess->channel, newsess->server->nick, msg, TRUE, FALSE);
 					msgs = msgs->next;
 				}
-			else
-				EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
+				msgs = g_slist_copy(mcopy);
+			} else {
+				while (msgs) {
+					msg = (gchar *)msgs->data;
+					EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
+					msgs = msgs->next;
+				}
+			}
+
+			g_slist_free(msgs);
+			g_slist_free(mcopy);
 
 			return TRUE;
 		}
@@ -4041,6 +4064,7 @@ handle_say (session *sess, char *text, int check_spch)
 			sess->server->p_message (sess->server, sess->channel, text);
 			msgs = msgs->next;
 		}
+		g_slist_free(msgs);
 	} else
 	{
 		notc_msg (sess);

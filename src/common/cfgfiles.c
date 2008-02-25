@@ -630,6 +630,8 @@ PrefsEntry vars[] = {
 	{"text_tint_red", PREFS_TYPE_INT, &prefs.tint_red},
 	{"text_transparent", PREFS_TYPE_BOOL, &prefs.transparent},
 	{"text_wordwrap", PREFS_TYPE_BOOL, &prefs.wordwrap},
+	{"text_overflow_start", PREFS_TYPE_STR, &prefs.text_overflow_start},
+	{"text_overflow_stop", PREFS_TYPE_STR, &prefs.text_overflow_start},
 
 	{0, 0, 0},
 };
@@ -721,9 +723,7 @@ load_config (void)
 	prefs.dcctimeout = 180;
 	prefs.dccstalltimeout = 60;
 	prefs.notify_timeout = 15;
-	prefs.tint_red =
-		prefs.tint_green =
-		prefs.tint_blue = 195;
+	prefs.tint_red = prefs.tint_green = prefs.tint_blue = 195;
 	prefs.auto_indent = 1;
 	prefs.max_auto_indent = 256;
 	prefs.show_separator = 1;
@@ -768,6 +768,9 @@ load_config (void)
 	prefs.dnsprogram = strdup("host");
 	prefs.irc_no_hilight = strdup("NickServ,ChanServ");
 	prefs.irc_time_format = strdup("%a %b %e %T %Z %Y");
+
+	prefs.text_overflow_start = g_strdup("--more--");
+	prefs.text_overflow_stop  = g_strdup("--more--");
 
 	g_free ((char *)username);
 	g_free ((char *)realname);

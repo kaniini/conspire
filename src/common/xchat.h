@@ -125,6 +125,9 @@ struct xchatprefs
 	char *irc_id_ntext;
 	char *irc_time_format;
 
+	char *text_overflow_start;
+	char *text_overflow_stop;
+
 	char *proxy_host;
 	int proxy_port;
 	int proxy_type; /* 0=disabled, 1=wingate 2=socks4, 3=socks5, 4=http */
