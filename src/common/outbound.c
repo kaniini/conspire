@@ -3403,8 +3403,9 @@ cmd_voice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 }
 
-/* *MUST* be kept perfectly sorted for the bsearch to work */
-const struct commands xc_cmds[] = {
+/* this is now a table used to fill the command dictionary now with our builtins.
+   it doesn't matter if it's properly sorted or not. --nenolod */
+struct commands xc_cmds[] = {
 	{"ADDBUTTON", cmd_addbutton, 0, 0, 1,
 	 N_("ADDBUTTON <name> <action>, adds a button under the user-list")},
 	{"AWAY", cmd_away, 1, 0, 1, N_("AWAY [<reason>], toggles away status")},
@@ -3585,19 +3586,18 @@ const struct commands xc_cmds[] = {
 	{0, 0, 0, 0, 0, 0}
 };
 
+mowgli_dictionary_t *command_dict_ = NULL;
 
-static int
-command_compare (const void *a, const void *b)
+void
+command_init(void)
 {
-	return strcasecmp (a, ((struct commands *)b)->name);
-}
+	struct commands *command;
+	int i = 0;
 
-static struct commands *
-find_internal_command (char *name)
-{
-	/* the "-1" is to skip the NULL terminator */
-	return bsearch (name, xc_cmds, (sizeof (xc_cmds) /
-				sizeof (xc_cmds[0])) - 1, sizeof (xc_cmds[0]), command_compare);
+	command_dict_ = mowgli_dictionary_create(g_ascii_strcasecmp);
+
+	for (command = &xc_cmds[i]; command->name != NULL; i++, command = &xc_cmds[i])
+		mowgli_dictionary_add(command_dict_, xc_cmds[i].name, command);
 }
 
 static void
@@ -3608,7 +3608,9 @@ help (session *sess, char *tbuf, char *helpcmd, int quiet)
 	if (plugin_show_help (sess, helpcmd))
 		return;
 
-	cmd = find_internal_command (helpcmd);
+	g_return_if_fail(command_dict_ != NULL);
+
+	cmd = mowgli_dictionary_retrieve(command_dict_, helpcmd);
 
 	if (cmd)
 	{
@@ -4071,6 +4073,8 @@ handle_command (session *sess, char *cmd, int check_spch)
 	int len;
 	int ret = TRUE;
 
+	g_return_val_if_fail(command_dict_ != NULL, TRUE);
+
 	if (command_level > 99)
 	{
 		fe_message (_("Too many recursive aliases, aborting."), FE_MSG_ERROR);
@@ -4092,7 +4096,7 @@ handle_command (session *sess, char *cmd, int check_spch)
 
 	/* split the text into words and word_eol */
 	process_data_init (pdibuf, cmd, word, word_eol, TRUE, TRUE);
-	int_cmd = find_internal_command (word[1]);
+	int_cmd = mowgli_dictionary_retrieve(command_dict_, word[1]);
 	/* redo it without quotes processing, for some commands like /JOIN */
 	if (int_cmd && !int_cmd->handle_quotes)
 		process_data_init (pdibuf, cmd, word, word_eol, FALSE, FALSE);
@@ -4124,7 +4128,7 @@ handle_command (session *sess, char *cmd, int check_spch)
 		goto xit;
 
 	/* now check internal commands */
-	int_cmd = find_internal_command (word[1]);
+	int_cmd = mowgli_dictionary_retrieve(command_dict_, word[1]);
 
 	if (int_cmd)
 	{
