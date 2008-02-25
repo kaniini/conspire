@@ -2383,9 +2383,60 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	return FALSE;
 }
 
+static
+GSList *split_message(const struct session *sess, const gchar *text, const gchar *event, const gsize max) {
+	GSList *list  = NULL;
+	gshort count  = 0;
+	gchar *nick   = g_strdup(sess->server->nick);
+	gchar *target = g_strdup(sess->channel);
+	gchar **str   = g_strsplit(text, " ", 0);
+	gint i        = 0;
+	gint len      = 9;
+	gchar *host;
+	gchar *tempstr = "\0";
+	gchar *temp;
+	/* these will be moved into prefs later */
+	gchar *note_start   = g_strdup("--more--");
+	gchar *note_end     = g_strdup("--more--");
+	gint note_start_len = strlen(note_start);
+	gint note_end_len   = strlen(note_end);
+
+	if (sess->me && sess->me->hostname) {
+		host = g_strdup(sess->me_hostname);
+	}
+	temp = g_strdup_printf(":%s!%s@%s %s %s :", nick, prefs.username, host, event, target);
+
+	len = count = strlen(temp) + 9; /* this is for CTCP ACTION */
+	while (str[i]) {
+		j = strlen(str[i]);
+		if ((count + j + note_end_len) > max) {
+			tempstr = g_strconcat(str[i], note_end, NULL);
+			g_slist_prepend(list, g_strdup(tempstr));
+			count = len + j + note_start_len; /* start of next string */
+			tempstr = g_strconcat(note_start, str[i], NULL);
+		} else {
+			count += j;
+			tempstr = g_strconcat(tempstr, str[i], NULL);
+		}
+		i++;
+	}
+	list = g_slist_reverse(list);
+
+	g_strfreev(str);
+	g_free(nick);
+	g_free(target);
+	g_free(host);
+	g_free(temp);
+	g_free(note_start);
+	g_free(note_end);
+	
+	return list;
+}
+
 static int
 cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
+	GSList *acts = split_message(sess, act, sess->channel, 512);
 	char *act = word_eol[2];
 
 	if (!(*act))
@@ -2408,9 +2459,13 @@ cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		/* DCC CHAT failed, try through server */
 		if (sess->server->connected)
 		{
-			sess->server->p_action (sess->server, sess->channel, act);
-			/* print it to screen */
-			inbound_action (sess, sess->channel, sess->server->nick, act, TRUE, FALSE);
+			while (acts) {
+				act = (gchar *)acts->data;
+				sess->server->p_action (sess->server, sess->channel, act);
+				/* print it to screen */
+				inbound_action (sess, sess->channel, sess->server->nick, act, TRUE, FALSE);
+				acts = acts->next;
+			}
 		} else
 		{
 			notc_msg (sess);
@@ -2443,6 +2498,7 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	char *nick = word[2];
 	char *msg = word_eol[3];
 	struct session *newsess;
+	GSList *msgs = split_message(sess, msg, word[2], 512);
 
 	if (*nick)
 	{
@@ -2472,14 +2528,21 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 					notc_msg (sess);
 					return TRUE;
 				}
-				sess->server->p_message (sess->server, nick, msg);
+				while (msgs) {
+					msg = (gchar *)msgs->data;
+					sess->server->p_message (sess->server, nick, msg);
+					msgs = msgs->next;
+				}
 			}
 			newsess = find_dialog (sess->server, nick);
 			if (!newsess)
 				newsess = find_channel (sess->server, nick);
-			if (newsess)
-				inbound_chanmsg (newsess->server, NULL, newsess->channel,
-									  newsess->server->nick, msg, TRUE, FALSE);
+			if (newsess) {
+				while (msgs) {
+					msg = (gchar *)msgs->data;
+					inbound_chanmsg (newsess->server, NULL, newsess->channel, newsess->server->nick, msg, TRUE, FALSE);
+					msgs = msgs->next;
+				}
 			else
 				EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
 
@@ -3969,51 +4032,13 @@ handle_say (session *sess, char *text, int check_spch)
 
 	if (sess->server->connected)
 	{
-		unsigned int max;
-		unsigned char t = 0;
-
-		/* maximum allowed message text */
-		/* :nickname!username@host.com PRIVMSG #channel :text\r\n */
-		max = 512;
-		max -= 16;	/* :, !, @, " PRIVMSG ", " ", :, \r, \n */
-		max -= strlen (sess->server->nick);
-		max -= strlen (sess->channel);
-		if (sess->me && sess->me->hostname)
-			max -= strlen (sess->me->hostname);
-		else
-		{
-			max -= 9;	/* username */
-			max -= 65;	/* max possible hostname and '@' */
+		GSList *msgs = split_message(sess, text, "PRIVMSG", 512);
+		while (msgs) {
+			text = (gchar *)msgs->data;
+			inbound_chanmsg (sess->server, sess, sess->channel, sess->server->nick, text, TRUE, FALSE);
+			sess->server->p_message (sess->server, sess->channel, text);
+			msgs = msgs->next;
 		}
-
-		if (strlen (text) > max)
-		{
-			int i = 0, size;
-
-			/* traverse the utf8 string and find the nearest cut point that
-				doesn't split 1 char in half */
-			while (1)
-			{
-				size = g_utf8_skip[((unsigned char *)text)[i]];
-				if ((i + size) >= max)
-					break;
-				i += size;
-			}
-			max = i;
-			t = text[max];
-			text[max] = 0;			  /* insert a NULL terminator to shorten it */
-		}
-
-		inbound_chanmsg (sess->server, sess, sess->channel, sess->server->nick,
-							  text, TRUE, FALSE);
-		sess->server->p_message (sess->server, sess->channel, text);
-
-		if (t)
-		{
-			text[max] = t;
-			handle_say (sess, text + max, FALSE);
-		}
-
 	} else
 	{
 		notc_msg (sess);
