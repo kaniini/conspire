@@ -2421,7 +2421,7 @@ GSList *split_message(const struct session *sess, const gchar *text, const gchar
 			tempstr = g_strconcat(tempstr, space, str[i], space, note_end, NULL);
 			list = g_slist_prepend(list, g_strchug(g_strdup(tempstr)));
 			count = len + j + note_start_len; /* start of next string */
-			tempstr = g_strconcat(note_start, space, str[i], NULL);
+			tempstr = g_strconcat(note_start, NULL);
 		} else if (str[i+1] != NULL) {
 			count += j + 1;
 			tempstr = g_strconcat(tempstr, space, str[i], NULL);
