@@ -378,7 +378,7 @@ dcc_close (struct DCC *dcc, int dccstat, int destroy)
 		{
 			/* if we just completed a dcc recieve, move the */
 			/* completed file to the completed directory */
-			if(dcc->type == TYPE_RECV)
+			if(dcc->type == TYPE_RECV && prefs.dcc_completed_dir != NULL)
 			{			
 				/* mgl: change this to use destfile_fs for correctness and to */
 				/* handle the case where dccwithnick is set */

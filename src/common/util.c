@@ -1416,6 +1416,10 @@ move_file_utf8 (char *src_dir, char *dst_dir, char *fname, int dccpermissions)
 	char *src_fs;	/* FileSystem encoding */
 	char *dst_fs;
 
+	g_return_if_fail(src_dir != NULL);
+	g_return_if_fail(dst_dir != NULL);
+	g_return_if_fail(fname != NULL);
+
 	/* if dcc_dir and dcc_completed_dir are the same then we are done */
 	if (0 == strcmp (src_dir, dst_dir) ||
 		 0 == dst_dir[0])
