@@ -997,7 +997,7 @@ cfg_get_bool (char *var)
 	return -1;
 }
 
-int
+CommandResult
 cmd_set (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int wild = FALSE;
@@ -1032,7 +1032,7 @@ cmd_set (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (!*var)
 	{
 		set_list (sess, tbuf);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	if ((strchr (var, '*') || strchr (var, '?')) && !*val)
@@ -1105,7 +1105,7 @@ cmd_set (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (!finds && !quiet)
 		PrintText (sess, "No such variable.\n");
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
 int

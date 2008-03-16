@@ -534,10 +534,12 @@ typedef struct server
 typedef int (*cmd_callback) (struct session * sess, char *tbuf, char *word[],
 									  char *word_eol[]);
 
+#include "command_factory.h"
+
 struct commands
 {
 	char *name;
-	cmd_callback callback;
+	CommandHandler callback;
 	char needserver;
 	char needchannel;
 	gint16 handle_quotes;

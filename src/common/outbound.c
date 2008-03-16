@@ -60,7 +60,7 @@ extern int current_mem_usage;
 #define TBUFSIZE 4096
 
 static void help (session *sess, char *tbuf, char *helpcmd, int quiet);
-static int cmd_server (session *sess, char *tbuf, char *word[], char *word_eol[]);
+static CommandResult cmd_server (session *sess, char *tbuf, char *word[], char *word_eol[]);
 static void handle_say (session *sess, char *text, int check_spch);
 
 
@@ -236,9 +236,8 @@ def:
 	}
 }
 
-static int
-cmd_addbutton (struct session *sess, char *tbuf, char *word[],
-					char *word_eol[])
+static CommandResult
+cmd_addbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (*word[2] && *word_eol[3])
 	{
@@ -251,19 +250,19 @@ cmd_addbutton (struct session *sess, char *tbuf, char *word[],
 			list_addentry (&button_list, word_eol[3], word[2]);
 			fe_buttons_update (sess);
 		}
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	GSList *list = sess_list;
 	server *serv;
 
 	if (!*word_eol[3])
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	if (!strcasecmp(word[2], "channel"))
 	{
@@ -299,11 +298,12 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 	else {
 		PrintText(sess, "Invalid parameter for foreach");
+		return CMD_EXEC_FAIL;
 	}
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	GSList *list;
@@ -336,7 +336,7 @@ cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			free (sess->server->last_away_reason);
 		sess->server->last_away_reason = NULL;
 
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 	else if (!(*reason))
 		reason = g_strdup(prefs.awayreason);
@@ -369,7 +369,7 @@ cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			sess->server->last_away_reason = reason;
 	}
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
 static void
@@ -492,7 +492,7 @@ ban (session * sess, char *tbuf, char *mask, char *bantypestr, int deop)
 	serv->p_mode (serv, sess->channel, tbuf);
 }
 
-static int
+static CommandResult
 cmd_ban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *mask = word[2];
@@ -505,10 +505,10 @@ cmd_ban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		sess->server->p_mode (sess->server, sess->channel, "+b");	/* banlist */
 	}
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_unban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	/* Allow more than one mask in /unban -- tvk */
@@ -519,15 +519,15 @@ cmd_unban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (!*word[i])
 		{
 			if (i == 2)
-				return FALSE;
+				return CMD_EXEC_FAIL;
 			send_channel_modes (sess, tbuf, word, 2, i, '-', 'b', 0);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		i++;
 	}
 }
 
-static int
+static CommandResult
 cmd_chanopt (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int state;
@@ -548,10 +548,10 @@ cmd_chanopt (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		else if (!strcasecmp (word[2], "TRAY"))
 			state = sess->tray;
 		else
-			return FALSE;
+			return CMD_EXEC_FAIL;
 
 		PrintTextf (sess, "%s is %s\n", word[2], state ? "ON" : "OFF");
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	if (!strcasecmp (word[2], "CONFMODE"))
@@ -568,10 +568,10 @@ cmd_chanopt (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		sess->tray = state;
 	}
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_charset (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	server *serv = sess->server;
@@ -586,7 +586,7 @@ cmd_charset (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		g_get_charset (&locale);
 		PrintTextf (sess, "Current charset: %s\n",
 						serv->encoding ? serv->encoding : locale);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	if (servlist_check_encoding (word[2 + offset]))
@@ -599,10 +599,10 @@ cmd_charset (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		PrintTextf (sess, "\0034Unknown charset:\017 %s\n", word[2 + offset]);
 	}
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_clear (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	GSList *list = sess_list;
@@ -611,13 +611,13 @@ cmd_clear (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (reason[0] == 0)
 	{
 		fe_text_clear (sess);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	if (strcasecmp (reason, "HISTORY") == 0)
 	{
 		history_free (&sess->history);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	if (strncasecmp (reason, "all", 3) == 0)
@@ -629,13 +629,13 @@ cmd_clear (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				fe_text_clear (list->data);
 			list = list->next;
 		}
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_close (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	GSList *list;
@@ -657,10 +657,10 @@ cmd_close (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		fe_close_window (sess);
 	}
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_ctcp (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int mbl;
@@ -687,13 +687,13 @@ cmd_ctcp (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 			EMIT_SIGNAL (XP_TE_CTCPSEND, sess, to, msg, NULL, NULL, 0);
 
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_country (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *code = word[2];
@@ -703,24 +703,24 @@ cmd_country (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (strcmp (code, "-s") == 0)
 		{
 			country_search (word[3], sess, (void *)PrintTextf);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 
 		/* search, but forgot the -s */
 		if (strchr (code, '*'))
 		{
 			country_search (code, sess, (void *)PrintTextf);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 
 		sprintf (tbuf, "%s = %s\n", code, country (code));
 		PrintText (sess, tbuf);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_hop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *key = sess->channelkey;
@@ -730,12 +730,12 @@ cmd_hop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (*chan && sess->type == SESS_CHANNEL)
 	{
 		sess->server->p_cycle (sess->server, chan, key);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int goodtype;
@@ -744,7 +744,7 @@ cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (*type)
 	{
 		if (!strcasecmp (type, "HELP"))
-			return FALSE;
+			return CMD_EXEC_FAIL;
 		if (!strcasecmp (type, "CLOSE"))
 		{
 			if (*word[3] && *word[4])
@@ -772,15 +772,15 @@ cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				}
 
 				if (!goodtype)
-					return FALSE;
+					return CMD_EXEC_FAIL;
 
 				if (!dcc)
 					EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
 
-				return TRUE;
+				return CMD_EXEC_OK;
 
 			}
-			return FALSE;
+			return CMD_EXEC_FAIL;
 		}
 		if ((!strcasecmp (type, "CHAT")) || (!strcasecmp (type, "PCHAT")))
 		{
@@ -788,12 +788,12 @@ cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			int passive = (!strcasecmp(type, "PCHAT")) ? 1 : 0;
 			if (*nick)
 				dcc_chat (sess, nick, passive);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		if (!strcasecmp (type, "LIST"))
 		{
 			dcc_show_list (sess);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		if (!strcasecmp (type, "GET"))
 		{
@@ -811,7 +811,7 @@ cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				else
 					EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
 			}
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		if ((!strcasecmp (type, "SEND")) || (!strcasecmp (type, "PSEND")))
 		{
@@ -821,7 +821,7 @@ cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 			nick = word[i];
 			if (!*nick)
-				return FALSE;
+				return CMD_EXEC_FAIL;
 
 			maxcps = prefs.dcc_max_send_cps;
 			if (!strncasecmp(nick, "-maxcps=", 8))
@@ -830,7 +830,7 @@ cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				i++;
 				nick = word[i];
 				if (!*nick)
-					return FALSE;
+					return CMD_EXEC_FAIL;
 			}
 
 			i++;
@@ -839,7 +839,7 @@ cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			if (!*file)
 			{
 				fe_dcc_send_filereq (sess, nick, maxcps, passive);
-				return TRUE;
+				return CMD_EXEC_OK;
 			}
 
 			do
@@ -850,17 +850,17 @@ cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			}
 			while (*file);
 
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 
-		return FALSE;
+		return CMD_EXEC_FAIL;
 	}
 
 	dcc_show_list (sess);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	struct session *s;
@@ -899,10 +899,10 @@ cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	PrintText (sess, tbuf);
 #endif  /* !MEMORY_DEBUG */
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_delbutton (struct session *sess, char *tbuf, char *word[],
 					char *word_eol[])
 {
@@ -917,12 +917,12 @@ cmd_delbutton (struct session *sess, char *tbuf, char *word[],
 			if (list_delentry (&button_list, word[2]))
 				fe_buttons_update (sess);
 		}
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_dehalfop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
@@ -932,15 +932,15 @@ cmd_dehalfop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (!*word[i])
 		{
 			if (i == 2)
-				return FALSE;
+				return CMD_EXEC_FAIL;
 			send_channel_modes (sess, tbuf, word, 2, i, '-', 'h', 0);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		i++;
 	}
 }
 
-static int
+static CommandResult
 cmd_deop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
@@ -950,9 +950,9 @@ cmd_deop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (!*word[i])
 		{
 			if (i == 2)
-				return FALSE;
+				return CMD_EXEC_FAIL;
 			send_channel_modes (sess, tbuf, word, 2, i, '-', 'o', 0);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		i++;
 	}
@@ -1060,7 +1060,7 @@ menu_del_children (char *path, char *label)
 	}
 }
 
-static int
+static CommandResult
 menu_del (char *path, char *label)
 {
 	GSList *list;
@@ -1157,7 +1157,7 @@ menu_add (char *path, char *label, char *cmd, char *ucmd, int pos, int state, in
 	}
 }
 
-static int
+static CommandResult
 cmd_menu (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int idx = 2;
@@ -1174,7 +1174,7 @@ cmd_menu (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	char *icon = NULL;
 
 	if (!word[2][0] || !word[3][0])
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	/* -eX enabled or not? */
 	if (word[idx][0] == '-' && word[idx][1] == 'e')
@@ -1195,7 +1195,7 @@ cmd_menu (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	{
 		char *comma = strchr (word[idx], ',');
 		if (!comma)
-			return FALSE;
+			return CMD_EXEC_FAIL;
 		mod = atoi (word[idx] + 2);
 		key = atoi (comma + 1);
 		idx++;
@@ -1232,7 +1232,7 @@ cmd_menu (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 
 	if (word[idx+1][0] == 0)
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	/* the path */
 	path_part (word[idx+1], tbuf, 512);
@@ -1265,19 +1265,19 @@ cmd_menu (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			else
 				menu_add (tbuf, label, NULL, NULL, pos, state, markup, enable, mod, key, group, icon);
 		}
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	if (!strcasecmp (word[idx], "DEL"))
 	{
 		menu_del (tbuf, label);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_devoice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
@@ -1287,22 +1287,22 @@ cmd_devoice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (!*word[i])
 		{
 			if (i == 2)
-				return FALSE;
+				return CMD_EXEC_FAIL;
 			send_channel_modes (sess, tbuf, word, 2, i, '-', 'v', 0);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		i++;
 	}
 }
 
-static int
+static CommandResult
 cmd_discon (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	sess->server->disconnect (sess, TRUE, -1);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_dns (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *nick = word[2];
@@ -1326,16 +1326,16 @@ cmd_dns (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			snprintf (tbuf, TBUFSIZE, "exec -d %s %s", prefs.dnsprogram, nick);
 			handle_command (sess, tbuf, FALSE);
 		}
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_echo (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	PrintText (sess, word_eol[2]);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
 static void
@@ -1356,7 +1356,7 @@ exec_check_process (struct session *sess)
 }
 
 #ifndef __EMX__
-static int
+static CommandResult
 cmd_execs (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int r;
@@ -1365,16 +1365,16 @@ cmd_execs (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (sess->running_exec == NULL)
 	{
 		EMIT_SIGNAL (XP_TE_NOCHILD, sess, NULL, NULL, NULL, NULL, 0);
-		return FALSE;
+		return CMD_EXEC_FAIL;
 	}
 	r = kill (sess->running_exec->childpid, SIGSTOP);
 	if (r == -1)
 		PrintText (sess, "Error in kill(2)\n");
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_execc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int r;
@@ -1383,16 +1383,16 @@ cmd_execc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (sess->running_exec == NULL)
 	{
 		EMIT_SIGNAL (XP_TE_NOCHILD, sess, NULL, NULL, NULL, NULL, 0);
-		return FALSE;
+		return CMD_EXEC_FAIL;
 	}
 	r = kill (sess->running_exec->childpid, SIGCONT);
 	if (r == -1)
 		PrintText (sess, "Error in kill(2)\n");
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_execk (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int r;
@@ -1401,7 +1401,7 @@ cmd_execk (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (sess->running_exec == NULL)
 	{
 		EMIT_SIGNAL (XP_TE_NOCHILD, sess, NULL, NULL, NULL, NULL, 0);
-		return FALSE;
+		return CMD_EXEC_FAIL;
 	}
 	if (strcmp (word[2], "-9") == 0)
 		r = kill (sess->running_exec->childpid, SIGKILL);
@@ -1410,12 +1410,12 @@ cmd_execk (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (r == -1)
 		PrintText (sess, "Error in kill(2)\n");
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
 /* OS/2 Can't have the /EXECW command because it uses pipe(2) not socketpair
    and thus it is simplex --AGL */
-static int
+static CommandResult
 cmd_execw (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int len;
@@ -1424,7 +1424,7 @@ cmd_execw (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (sess->running_exec == NULL)
 	{
 		EMIT_SIGNAL (XP_TE_NOCHILD, sess, NULL, NULL, NULL, NULL, 0);
-		return FALSE;
+		return CMD_EXEC_FAIL;
 	}
 	len = strlen(word_eol[2]);
 	temp = malloc(len + 2);
@@ -1433,7 +1433,7 @@ cmd_execw (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	write(sess->running_exec->myfd, temp, len + 1);
 	free(temp);
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 #endif /* !__EMX__ */
 
@@ -1609,7 +1609,7 @@ exec_data (GIOChannel *source, GIOCondition condition, struct nbexec *s)
 		g_source_remove (s->iotag);
 		close (sok);
 		free (s);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 	len += rd;
 	buf[len] = '\0';
@@ -1638,10 +1638,10 @@ exec_data (GIOChannel *source, GIOCondition condition, struct nbexec *s)
 	}
 
 	free(buf);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_exec (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int tochannel = FALSE;
@@ -1657,20 +1657,20 @@ cmd_exec (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (sess->running_exec != NULL)
 		{
 			EMIT_SIGNAL (XP_TE_ALREADYPROCESS, sess, NULL, NULL, NULL, NULL, 0);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 
 		if (!strcmp (word[2], "-d"))
 		{
 			if (!*word[3])
-				return FALSE;
+				return CMD_EXEC_FAIL;
 			cmd = word_eol[3];
 			shell = FALSE;
 		}
 		else if (!strcmp (word[2], "-o"))
 		{
 			if (!*word[3])
-				return FALSE;
+				return CMD_EXEC_FAIL;
 			cmd = word_eol[3];
 			tochannel = TRUE;
 		}
@@ -1680,7 +1680,7 @@ cmd_exec (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			if (access ("/bin/sh", X_OK) != 0)
 			{
 				fe_message (_("I need /bin/sh to run!\n"), FE_MSG_ERROR);
-				return TRUE;
+				return CMD_EXEC_OK;
 			}
 		}
 
@@ -1688,7 +1688,7 @@ cmd_exec (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (pipe (fds) < 0)
 		{
 			PrintText (sess, "Pipe create error\n");
-			return FALSE;
+			return CMD_EXEC_FAIL;
 		}
 		setmode (fds[0], O_BINARY);
 		setmode (fds[1], O_BINARY);
@@ -1696,7 +1696,7 @@ cmd_exec (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (socketpair (PF_UNIX, SOCK_STREAM, 0, fds) == -1)
 		{
 			PrintText (sess, "socketpair(2) failed\n");
-			return FALSE;
+			return CMD_EXEC_FAIL;
 		}
 #endif
 		s = (struct nbexec *) malloc (sizeof (struct nbexec));
@@ -1753,23 +1753,23 @@ cmd_exec (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			s->childpid = pid;
 			s->iotag = fe_input_add (s->myfd, FIA_READ|FIA_EX, exec_data, s);
 			sess->running_exec = s;
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
 
-static int
+static CommandResult
 cmd_flushq (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	sprintf (tbuf, "Flushing server send queue, %d bytes.\n", sess->server->sendq_len);
 	PrintText (sess, tbuf);
 	sess->server->flush_queue (sess->server);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_quit (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (*word_eol[2])
@@ -1778,7 +1778,7 @@ cmd_quit (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	return 2;
 }
 
-static int
+static CommandResult
 cmd_gate (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *server_name = word[2];
@@ -1794,9 +1794,9 @@ cmd_gate (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			serv->connect (serv, server_name, atoi (port), TRUE);
 		else
 			serv->connect (serv, server_name, 23, TRUE);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
 typedef struct
@@ -1821,13 +1821,13 @@ get_int_cb (int cancel, int val, getvalinfo *info)
 	free (info);
 }
 
-static int
+static CommandResult
 cmd_getint (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	getvalinfo *info;
 
 	if (!word[4][0])
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	info = malloc (sizeof (*info));
 	info->cmd = strdup (word[3]);
@@ -1835,7 +1835,7 @@ cmd_getint (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 	fe_get_int (word[4], atoi (word[2]), get_int_cb, info);
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
 static void
@@ -1857,14 +1857,14 @@ get_file_cb (char *cmd, char *file)
 	}
 }
 
-static int
+static CommandResult
 cmd_getfile (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int idx = 2;
 	int flags = 0;
 
 	if (!word[3][0])
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	if (!strcmp (word[2], "-folder"))
 	{
@@ -1886,7 +1886,7 @@ cmd_getfile (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 	fe_get_file (word[idx+1], word[idx+2], (void *)get_file_cb, strdup (word[idx]), flags);
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
 static void
@@ -1905,13 +1905,13 @@ get_str_cb (int cancel, char *val, getvalinfo *info)
 	free (info);
 }
 
-static int
+static CommandResult
 cmd_getstr (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	getvalinfo *info;
 
 	if (!word[4][0])
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	info = malloc (sizeof (*info));
 	info->cmd = strdup (word[3]);
@@ -1919,22 +1919,22 @@ cmd_getstr (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 	fe_get_str (word[4], word[2], get_str_cb, info);
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_ghost (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (word[3][0])
 	{
 		sess->server->p_ns_ghost (sess->server, word[2], word[3]);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
-	return FALSE; 
+	return CMD_EXEC_FAIL; 
 }
 
-static int
+static CommandResult
 cmd_gui (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	switch (str_ihash (word[2]))
@@ -1953,13 +1953,13 @@ cmd_gui (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (!strcasecmp (word[3], "TOGGLE"))
 			fe_ctrl_gui (sess, 6, 0);
 		else
-			return FALSE;
+			return CMD_EXEC_FAIL;
 		break;
 	default:
-		return FALSE;
+		return CMD_EXEC_FAIL;
 	}
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
 typedef struct
@@ -2025,7 +2025,7 @@ show_help_line (session *sess, help_list *hl, char *name, char *usage)
 }
 
 #if 0
-static int
+static CommandResult
 cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 0, longfmt = 0;
@@ -2092,23 +2092,23 @@ cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 		PrintTextf (sess, "\n%s\n\n", _("Type /HELP <command> for more information, or /HELP -l"));
 	}
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 #endif
 
-static int
+static CommandResult
 cmd_id (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (word[2][0])
 	{
 		sess->server->p_ns_identify (sess->server, word[2]);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_ignore (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i;
@@ -2118,10 +2118,10 @@ cmd_ignore (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (!*word[2])
 	{
 		ignore_showlist (sess);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 	if (!*word[3])
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	i = 3;
 	while (1)
@@ -2129,10 +2129,10 @@ cmd_ignore (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (!*word[i])
 		{
 			if (type == 0)
-				return FALSE;
+				return CMD_EXEC_FAIL;
 			i = ignore_add (word[2], type);
 			if (quiet)
-				return TRUE;
+				return CMD_EXEC_OK;
 			switch (i)
 			{
 			case 1:
@@ -2142,7 +2142,7 @@ cmd_ignore (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				EMIT_SIGNAL (XP_TE_IGNORECHANGE, sess, word[2], NULL, NULL,
 								 NULL, 0);
 			}
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		if (!strcasecmp (word[i], "UNIGNORE"))
 			type |= IG_UNIG;
@@ -2173,19 +2173,19 @@ cmd_ignore (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 }
 
-static int
+static CommandResult
 cmd_invite (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (!*word[2])
-		return FALSE;
+		return CMD_EXEC_FAIL;
 	if (*word[3])
 		sess->server->p_invite (sess->server, word[3], word[2]);
 	else
 		sess->server->p_invite (sess->server, sess->channel, word[2]);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_join (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *chan = word[2];
@@ -2200,12 +2200,12 @@ cmd_join (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				*po = 0;
 			g_strlcpy (sess->waitchannel, chan, CHANLEN);
 		}
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_kick (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *nick = word[2];
@@ -2213,12 +2213,12 @@ cmd_kick (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (*nick)
 	{
 		sess->server->p_kick (sess->server, sess->channel, nick, reason);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_kickban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *nick = word[2];
@@ -2240,12 +2240,12 @@ cmd_kickban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 		sess->server->p_kick (sess->server, sess->channel, nick, reason);
 
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_killall (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	GSList *list;
@@ -2266,11 +2266,11 @@ cmd_killall (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	return 2;
 }
 
-static int
+static CommandResult
 cmd_lagcheck (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	lag_check ();
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
 static void
@@ -2292,7 +2292,7 @@ lastlog (session *sess, char *search, gboolean regexp)
 	fe_lastlog (sess, lastlog_sess, search, regexp);
 }
 
-static int
+static CommandResult
 cmd_lastlog (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (*word_eol[2])
@@ -2301,21 +2301,21 @@ cmd_lastlog (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			lastlog (sess, word_eol[3], TRUE);
 		else
 			lastlog (sess, word_eol[2], FALSE);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_list (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	sess->server->p_list_channels (sess->server, word_eol[2], 1);
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	FILE *fp;
@@ -2323,7 +2323,7 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	int len;
 
 	if (!word[2][0])
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	if (strcmp (word[2], "-e") == 0)
 	{
@@ -2334,7 +2334,7 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			PrintTextf (sess, _("Cannot access %s\n"), file);
 			PrintText (sess, errorstring (errno));
 			free (file);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		free (file);
 
@@ -2352,7 +2352,7 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				handle_command (sess, tbuf, TRUE);
 		}
 		fclose (fp);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 #ifdef USE_PLUGIN
@@ -2375,14 +2375,14 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (error)
 			PrintText (sess, error);
 
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 #endif
 
 	sprintf (tbuf, "Unknown file type %s. Maybe you need to install the Perl or Python plugin?\n", word[2]);
 	PrintText (sess, tbuf);
 
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
 static
@@ -2445,19 +2445,19 @@ GSList *split_message(const struct session *sess, const gchar *text, const gchar
 	return list;
 }
 
-static int
+static CommandResult
 cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *act = word_eol[2];
 	GSList *acts = split_message(sess, act, "PRIVMSG", 512);
 
 	if (!(*act))
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	if (sess->type == SESS_SERVER)
 	{
 		notj_msg (sess);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	snprintf (tbuf, TBUFSIZE, "\001ACTION %s\001\r", act);
@@ -2485,10 +2485,10 @@ cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		}
 	}
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_mode (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	/* +channel channels are dying, let those servers whine about modes.
@@ -2497,15 +2497,15 @@ cmd_mode (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				!(rfc_casecmp(sess->server->nick, word[2]) == 0)))
 	{
 		if(sess->channel[0] == 0)
-			return FALSE;
+			return CMD_EXEC_FAIL;
 		sess->server->p_mode (sess->server, sess->channel, word_eol[2]);
 	}
 	else
 		sess->server->p_mode (sess->server, word[2], word_eol[3]);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *nick = word[2];
@@ -2533,14 +2533,14 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				if (!dcc_write_chat (nick, msg))
 				{
 					EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
-					return TRUE;
+					return CMD_EXEC_OK;
 				}
 			} else
 			{
 				if (!sess->server->connected)
 				{
 					notc_msg (sess);
-					return TRUE;
+					return CMD_EXEC_OK;
 				}
 				while (msgs) {
 					msg = (gchar *)msgs->data;
@@ -2570,49 +2570,49 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			g_slist_free(msgs);
 			g_slist_free(mcopy);
 
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_names (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (*word[2])
 	  	sess->server->p_names (sess->server, word[2]);
 	else
 		sess->server->p_names (sess->server, sess->channel);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_nctcp (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (*word_eol[3])
 	{
 		sess->server->p_nctcp (sess->server, word[2], word_eol[3]);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_newserver (struct session *sess, char *tbuf, char *word[],
 					char *word_eol[])
 {
 	if (strcmp (word[2], "-noconnect") == 0)
 	{
 		new_ircwindow (NULL, word[3], SESS_SERVER, 0);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 	
 	sess = new_ircwindow (NULL, NULL, SESS_SERVER, 0);
 	cmd_server (sess, tbuf, word, word_eol);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_nick (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *nick = word[2];
@@ -2622,24 +2622,24 @@ cmd_nick (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			sess->server->p_change_nick (sess->server, nick);
 		else
 			inbound_newnick (sess->server, sess->server->nick, nick, TRUE);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_notice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (*word[2] && *word_eol[3])
 	{
 		sess->server->p_notice (sess->server, word[2], word_eol[3]);
 		EMIT_SIGNAL (XP_TE_NOTICESEND, sess, word[2], word_eol[3], NULL, NULL, 0);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_notify (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 1;
@@ -2661,17 +2661,17 @@ cmd_notify (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			if (notify_deluser (word[i]))
 			{
 				EMIT_SIGNAL (XP_TE_DELNOTIFY, sess, word[i], NULL, NULL, NULL, 0);
-				return TRUE;
+				return CMD_EXEC_OK;
 			}
 			notify_adduser (word[i], net);
 			EMIT_SIGNAL (XP_TE_ADDNOTIFY, sess, word[i], NULL, NULL, NULL, 0);
 		}
 	} else
 		notify_showlist (sess);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_op (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
@@ -2681,15 +2681,15 @@ cmd_op (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (!*word[i])
 		{
 			if (i == 2)
-				return FALSE;
+				return CMD_EXEC_FAIL;
 			send_channel_modes (sess, tbuf, word, 2, i, '+', 'o', 0);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		i++;
 	}
 }
 
-static int
+static CommandResult
 cmd_part (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *chan = word[2];
@@ -2701,7 +2701,7 @@ cmd_part (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (reason[0] == 0)
 			reason = NULL;
 		server_sendpart (sess->server, chan, reason);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 	else if (*chan && sess->channel != NULL)
 	{
@@ -2709,13 +2709,13 @@ cmd_part (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		reason = word_eol[2];
 
 		server_sendpart(sess->server, chan, reason);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_ping (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char timestring[64];
@@ -2727,7 +2727,7 @@ cmd_ping (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	snprintf (timestring, sizeof (timestring), "%lu", tim);
 	sess->server->p_ping (sess->server, to, timestring);
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
 void
@@ -2742,7 +2742,7 @@ open_query (server *serv, char *nick, gboolean focus_existing)
 		fe_ctrl_gui (sess, 2, 0);	/* bring-to-front */
 }
 
-static int
+static CommandResult
 cmd_query (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *nick = word[2];
@@ -2757,12 +2757,12 @@ cmd_query (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (*nick && !is_channel (sess->server, nick))
 	{
 		open_query (sess->server, nick, focus);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_quote (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *raw = word_eol[2];
@@ -2770,7 +2770,7 @@ cmd_quote (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	return sess->server->p_raw (sess->server, raw);
 }
 
-static int
+static CommandResult
 cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int tmp = prefs.recon_delay;
@@ -2820,34 +2820,34 @@ cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 	prefs.recon_delay = tmp;
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_recv (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (*word_eol[2])
 	{
 		sess->server->p_inline (sess->server, word_eol[2], strlen (word_eol[2]));
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_say (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *speech = word_eol[2];
 	if (*speech)
 	{
 		handle_say (sess, speech, FALSE);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_send (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	guint32 addr;
@@ -2855,7 +2855,7 @@ cmd_send (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	struct sockaddr_in SAddr;
 
 	if (!word[2][0])
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	addr = dcc_get_my_address ();
 	if (addr == 0)
@@ -2877,10 +2877,10 @@ cmd_send (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 	handle_command (sess, tbuf, FALSE);
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_setcursor (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int delta = FALSE;
@@ -2890,13 +2890,13 @@ cmd_setcursor (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (word[2][0] == '-' || word[2][0] == '+')
 			delta = TRUE;
 		fe_set_inputbox_cursor (sess, delta, atoi (word[2]));
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_settab (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (*word_eol[2])
@@ -2907,14 +2907,14 @@ cmd_settab (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		strcpy (sess->channel, tbuf);
 	}
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_settext (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	fe_set_inputbox_contents (sess, word_eol[2]);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
 static int
@@ -2961,7 +2961,7 @@ urlserv:
 	return FALSE;
 }
 
-static int
+static CommandResult
 cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int offset = 0;
@@ -2996,7 +2996,7 @@ cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 	
 	if (!(*server_name))
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	sess->server->network = NULL;
 
@@ -3030,7 +3030,7 @@ cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 	/* try to connect by Network name */
 	if (servlist_connect_by_netname (sess, server_name, !is_url))
-		return TRUE;
+		return CMD_EXEC_OK;
 
 	if (*port)
 	{
@@ -3047,10 +3047,10 @@ cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		serv->network = servlist_net_find_from_server (server_name);
 		/* may return NULL, but that's OK */
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_servchan (struct session *sess, char *tbuf, char *word[],
 				  char *word_eol[])
 {
@@ -3067,61 +3067,61 @@ cmd_servchan (struct session *sess, char *tbuf, char *word[],
 		return cmd_server (sess, tbuf, word, word_eol);
 	}
 
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_topic (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (word[2][0] && is_channel (sess->server, word[2]))
 		sess->server->p_topic (sess->server, word[2], word_eol[3]);
 	else
 		sess->server->p_topic (sess->server, sess->channel, word_eol[2]);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_tray (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (strcmp (word[2], "-b") == 0)
 	{
 		fe_tray_set_balloon (word[3], word[4][0] ? word[4] : NULL);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	if (strcmp (word[2], "-t") == 0)
 	{
 		fe_tray_set_tooltip (word[3][0] ? word[3] : NULL);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	if (strcmp (word[2], "-i") == 0)
 	{
 		fe_tray_set_icon (atoi (word[3]));
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	if (strcmp (word[2], "-f") != 0)
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	if (!word[3][0])
 	{
 		fe_tray_set_file (NULL);	/* default xchat icon */
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	if (!word[4][0])
 	{
 		fe_tray_set_file (word[3]);	/* fixed custom icon */
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
 	/* flash between 2 icons */
 	fe_tray_set_flash (word[4], word[5][0] ? word[5] : NULL, atoi (word[3]));
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_unignore (struct session *sess, char *tbuf, char *word[],
 				  char *word_eol[])
 {
@@ -3134,12 +3134,12 @@ cmd_unignore (struct session *sess, char *tbuf, char *word[],
 			if (strcasecmp (arg, "QUIET"))
 				EMIT_SIGNAL (XP_TE_IGNOREREMOVE, sess, mask, NULL, NULL, NULL, 0);
 		}
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_unload (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 #ifdef USE_PLUGIN
@@ -3159,14 +3159,14 @@ cmd_unload (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			PrintText (sess, _("No such plugin found.\n"));
 			break;
 	case 1:
-			return TRUE;
+			return CMD_EXEC_OK;
 	case 2:
 			PrintText (sess, _("That plugin is refusing to unload.\n"));
 			break;
 	}
 #endif
 
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
 static server *
@@ -3213,7 +3213,7 @@ url_join_only (server *serv, char *tbuf, char *channel)
 	serv->p_join (serv, tbuf, "");
 }
 
-static int
+static CommandResult
 cmd_url (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	if (word[2][0])
@@ -3244,7 +3244,7 @@ cmd_url (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				{
 					url_join_only (serv, tbuf, channel);
 					g_free (url);
-					return TRUE;
+					return CMD_EXEC_OK;
 				}
 			}
 			else
@@ -3255,7 +3255,7 @@ cmd_url (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				{
 					url_join_only (serv, tbuf, channel);
 					g_free (url);
-					return TRUE;
+					return CMD_EXEC_OK;
 				}
 			}
 
@@ -3265,13 +3265,13 @@ cmd_url (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		} else
 			fe_open_url (word[2]);
 		g_free (url);
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
 
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 userlist_cb (struct User *user, session *sess)
 {
 	time_t lt;
@@ -3287,7 +3287,7 @@ userlist_cb (struct User *user, session *sess)
 	return TRUE;
 }
 
-static int
+static CommandResult
 cmd_uselect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int idx = 2;
@@ -3306,15 +3306,15 @@ cmd_uselect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 	/* always valid, no args means clear the selection list */
 	fe_uselect (sess, word + idx, clear, scroll);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_userlist (struct session *sess, char *tbuf, char *word[],
 				  char *word_eol[])
 {
 	tree_foreach (sess->usertree, (tree_traverse_func *)userlist_cb, sess);
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
 static int
@@ -3339,14 +3339,14 @@ wallchop_cb (struct User *user, multidata *data)
 	return TRUE;
 }
 
-static int
+static CommandResult
 cmd_wallchop (struct session *sess, char *tbuf, char *word[],
 				  char *word_eol[])
 {
 	multidata data;
 
 	if (!(*word_eol[2]))
-		return FALSE;
+		return CMD_EXEC_FAIL;
 
 	strcpy (tbuf, "NOTICE ");
 
@@ -3363,10 +3363,10 @@ cmd_wallchop (struct session *sess, char *tbuf, char *word[],
 		sess->server->p_raw (sess->server, tbuf);
 	}
 
-	return TRUE;
+	return CMD_EXEC_OK;
 }
 
-static int
+static CommandResult
 cmd_wallchan (struct session *sess, char *tbuf, char *word[],
 				  char *word_eol[])
 {
@@ -3386,12 +3386,12 @@ cmd_wallchan (struct session *sess, char *tbuf, char *word[],
 			}
 			list = list->next;
 		}
-		return TRUE;
+		return CMD_EXEC_OK;
 	}
-	return FALSE;
+	return CMD_EXEC_FAIL;
 }
 
-static int
+static CommandResult
 cmd_halfop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
@@ -3401,15 +3401,15 @@ cmd_halfop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (!*word[i])
 		{
 			if (i == 2)
-				return FALSE;
+				return CMD_EXEC_FAIL;
 			send_channel_modes (sess, tbuf, word, 2, i, '+', 'h', 0);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		i++;
 	}
 }
 
-static int
+static CommandResult
 cmd_voice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
@@ -3419,9 +3419,9 @@ cmd_voice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		if (!*word[i])
 		{
 			if (i == 2)
-				return FALSE;
+				return CMD_EXEC_FAIL;
 			send_channel_modes (sess, tbuf, word, 2, i, '+', 'v', 0);
-			return TRUE;
+			return CMD_EXEC_OK;
 		}
 		i++;
 	}
