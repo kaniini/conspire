@@ -33,6 +33,7 @@ command_register(const gchar *name, const gchar *helptext, CommandFlags flags, C
 		cmd = g_slice_new0(Command);
 		cmd->helptext = g_strdup(helptext);
 		cmd->flags = flags;
+		mowgli_dictionary_add(cmd_dict_, name, cmd);
 	}
 
 	g_assert(cmd != NULL);
