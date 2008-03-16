@@ -30,7 +30,6 @@ typedef enum {
 } CommandFlags;
 
 typedef struct {
-    const gchar *description;
     const gchar *helptext;
     CommandFlags flags;
     GList *handlers;
@@ -50,7 +49,7 @@ typedef enum {
 
 typedef CommandResult (*CommandHandler)(struct session * sess, char *tbuf, char *word[], char *word_eol[]);
 
-void command_register(const gchar *name, const gchar *description, const gchar *helptext, CommandFlags flags, CommandHandler handler);
+void command_register(const gchar *name, const gchar *helptext, CommandFlags flags, CommandHandler handler);
 void command_remove_handler(const gchar *name, CommandHandler handler);
 void command_set_flags(const gchar *name, CommandFlags flags);
 CommandFlags command_get_flags(const gchar *name);

@@ -21,7 +21,7 @@
 static mowgli_dictionary_t *cmd_dict_ = NULL;
 
 void
-command_register(const gchar *name, const gchar *description, const gchar *helptext, CommandFlags flags, CommandHandler handler)
+command_register(const gchar *name, const gchar *helptext, CommandFlags flags, CommandHandler handler)
 {
 	Command *cmd;
 
@@ -31,7 +31,6 @@ command_register(const gchar *name, const gchar *description, const gchar *helpt
 	if (!(cmd = mowgli_dictionary_retrieve(cmd_dict_, name)))
 	{
 		cmd = g_slice_new0(Command);
-		cmd->description = g_strdup(description);
 		cmd->helptext = g_strdup(helptext);
 		cmd->flags = flags;
 	}

@@ -52,7 +52,7 @@
 #include "server.h"
 #include "tree.h"
 #include "outbound.h"
-
+#include "command_factory.h"
 
 #ifdef USE_DEBUG
 extern int current_mem_usage;
@@ -2024,6 +2024,7 @@ show_help_line (session *sess, help_list *hl, char *name, char *usage)
 	}
 }
 
+#if 0
 static int
 cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
@@ -2093,6 +2094,7 @@ cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 	return TRUE;
 }
+#endif
 
 static int
 cmd_id (struct session *sess, char *tbuf, char *word[], char *word_eol[])
@@ -3497,7 +3499,9 @@ struct commands xc_cmds[] = {
 									  "       GUI [MSGBOX <text>|MENU TOGGLE]"},
 	{"HALFOP", cmd_halfop, 1, 1, 1,
 	 N_("HALFOP <nick>, gives chanhalf-op status to the nick (needs chanop)")},
+#if 0
 	{"HELP", cmd_help, 0, 0, 1, 0},
+#endif
 	{"HOP", cmd_hop, 1, 1, 1,
 	 N_("HOP [<channel>], parts the current or given channel and immediately rejoins")},
 	{"ID", cmd_id, 1, 0, 1, N_("ID <password>, identifies yourself to nickserv")},
@@ -3608,39 +3612,35 @@ struct commands xc_cmds[] = {
 	{0, 0, 0, 0, 0, 0}
 };
 
-mowgli_dictionary_t *command_dict_ = NULL;
-
 void
 command_init(void)
 {
 	struct commands *command;
 	int i = 0;
 
-	command_dict_ = mowgli_dictionary_create(g_ascii_strcasecmp);
-
+	/* XXX: doesn't use flags */
 	for (command = &xc_cmds[i]; command->name != NULL; i++, command = &xc_cmds[i])
-		mowgli_dictionary_add(command_dict_, xc_cmds[i].name, command);
+		command_register(xc_cmds[i].name, xc_cmds[i].help, CMD_HANDLE_QUOTES, xc_cmds[i].callback);
 }
 
 static void
 help (session *sess, char *tbuf, char *helpcmd, int quiet)
 {
-	struct commands *cmd;
+	Command *cmd;
 
 	if (plugin_show_help (sess, helpcmd))
 		return;
 
-	g_return_if_fail(command_dict_ != NULL);
-
-	cmd = mowgli_dictionary_retrieve(command_dict_, helpcmd);
+	cmd = command_lookup(helpcmd);
 
 	if (cmd)
 	{
-		if (cmd->help)
+		if (cmd->helptext)
 		{
-			snprintf (tbuf, TBUFSIZE, _("Usage: %s\n"), _(cmd->help));
+			snprintf (tbuf, TBUFSIZE, _("Usage: %s\n"), _(cmd->helptext));
 			PrintText (sess, tbuf);
-		} else
+		}
+		else
 		{
 			if (!quiet)
 				PrintText (sess, _("\nNo help available on that command.\n"));
@@ -4088,15 +4088,14 @@ handle_command (session *sess, char *cmd, int check_spch)
 	char *word[PDIWORDS];
 	char *word_eol[PDIWORDS];
 	static int command_level = 0;
-	struct commands *int_cmd;
+	Command *int_cmd;
 	char pdibuf_static[1024];
 	char tbuf_static[TBUFSIZE];
 	char *pdibuf;
 	char *tbuf;
 	int len;
 	int ret = TRUE;
-
-	g_return_val_if_fail(command_dict_ != NULL, TRUE);
+	CommandExecResult exec_stat_;
 
 	if (command_level > 99)
 	{
@@ -4117,24 +4116,23 @@ handle_command (session *sess, char *cmd, int check_spch)
 	else
 		tbuf = tbuf_static;
 
-	/* split the text into words and word_eol */
-	process_data_init (pdibuf, cmd, word, word_eol, TRUE, TRUE);
-	int_cmd = mowgli_dictionary_retrieve(command_dict_, word[1]);
-	/* redo it without quotes processing, for some commands like /JOIN */
-	if (int_cmd && !int_cmd->handle_quotes)
+	int_cmd = command_lookup(word[1]);
+
+	/* if the command does not have the CMD_HANDLE_QUOTES flag, split this using
+	   traditional rules, otherwise split it like a shell does. --nenolod */
+	if (int_cmd && !(int_cmd->flags & CMD_HANDLE_QUOTES))
 		process_data_init (pdibuf, cmd, word, word_eol, FALSE, FALSE);
+	else
+		process_data_init (pdibuf, cmd, word, word_eol, TRUE, TRUE);
 
 	if (check_spch && prefs.perc_color)
 		check_special_chars (cmd, prefs.perc_ascii);
-
-	if (plugin_emit_command (sess, word[1], word, word_eol))
-		goto xit;
 
 	/* incase a plugin did /close */
 	if (!is_session (sess))
 		goto xit;
 
-	/* first see if it's a userCommand */
+	/* XXX: UGLY ALIAS HACK YUCK YUCK YUCK --nenolod */
 	list = command_list;
 	while (list)
 	{
@@ -4151,35 +4149,25 @@ handle_command (session *sess, char *cmd, int check_spch)
 		goto xit;
 
 	/* now check internal commands */
-	int_cmd = mowgli_dictionary_retrieve(command_dict_, word[1]);
+	exec_stat_ = command_execute(sess, word[1], tbuf, word, word_eol);
 
-	if (int_cmd)
+	switch (exec_stat_)
 	{
-		if (int_cmd->needserver && !sess->server->connected)
-		{
-			notc_msg (sess);
-		} else if (int_cmd->needchannel && !sess->channel[0])
-		{
-			notj_msg (sess);
-		} else
-		{
-			switch (int_cmd->callback (sess, tbuf, word, word_eol))
-			{
-			case FALSE:
-				help (sess, tbuf, int_cmd->name, TRUE);
-				break;
-			case 2:
-				ret = FALSE;
-				goto xit;
-			}
-		}
-	} else
-	{
+	case COMMAND_EXEC_NOCMD:
 		/* unknown command, just send it to the server and hope */
 		if (!sess->server->connected)
 			PrintText (sess, _("Unknown command. Try /help\n"));
 		else
 			sess->server->p_raw (sess->server, cmd);
+		break;
+
+	case COMMAND_EXEC_FAILED:
+		ret = FALSE;
+		help (sess, tbuf, word[1], TRUE);
+		break;
+
+	default:
+		break;
 	}
 
 xit:
