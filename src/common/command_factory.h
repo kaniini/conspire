@@ -55,5 +55,6 @@ void command_remove_handler(const gchar *name, CommandHandler handler);
 void command_set_flags(const gchar *name, CommandFlags flags);
 CommandFlags command_get_flags(const gchar *name);
 CommandExecResult command_execute(struct session *sess, const gchar *name, char *tbuf, char *word[], char *word_eol[]);
+Command *command_lookup(const gchar *name);
 
 #endif

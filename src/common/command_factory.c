@@ -18,7 +18,7 @@
 
 #include "command_factory.h"
 
-mowgli_dictionary_t *cmd_dict_ = NULL;
+static mowgli_dictionary_t *cmd_dict_ = NULL;
 
 void
 command_register(const gchar *name, const gchar *description, const gchar *helptext, CommandFlags flags, CommandHandler handler)
@@ -95,8 +95,16 @@ command_execute(struct session *sess, const gchar *name, char *tbuf, char *word[
 			return COMMAND_EXEC_FAILED;
 
 		if (ret == CMD_EXEC_STOP)
-			continue;
+			break;
 	}
 
 	return COMMAND_EXEC_OK;
+}
+
+Command *
+command_lookup(const gchar *name)
+{
+	g_return_val_if_fail(name != NULL, NULL);
+
+	return mowgli_dictionary_retrieve(cmd_dict_, name);	
 }
