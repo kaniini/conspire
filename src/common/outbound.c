@@ -2420,7 +2420,7 @@ GSList *split_message(const struct session *sess, const gchar *text, const gchar
 		j = strlen(str[i]);
 		if ((count + j + note_end_len + 2) > max) {
 			tempstr = g_strconcat(tempstr, space, str[i], space, note_end, NULL);
-			list = g_slist_prepend(list, g_strchug(g_strdup(tempstr)));
+			list = g_slist_prepend(list, g_strdup(tempstr));
 			count = len + note_start_len; /* start of next string */
 			tempstr = g_strconcat(note_start, NULL);
 		} else if (str[i+1] != NULL) {
