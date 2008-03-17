@@ -66,7 +66,6 @@ enum
 {
 	ST_END,
 	ST_TOGGLE,
-	ST_TOGGLR,
 	ST_3OGGLE,
 	ST_ENTRY,
 	ST_EFONT,
@@ -100,15 +99,15 @@ static const setting textbox_settings[] =
 	{ST_NUMBER,	N_("Scrollback lines:"), &prefs.max_lines,0,0,100000},
 	{ST_TOGGLE, N_("Colored nick names"), &prefs.colorednicks,
 					N_("Give each person on IRC a different color"),0,0},
-	{ST_TOGGLR, N_("Colored nicks (hilighted messages)"), &prefs.coloredhnicks,
+	{ST_TOGGLE, N_("Colored nicks (hilighted messages)"), &prefs.coloredhnicks,
 		N_("Give each person on IRC a different color for hilighted messages"), 0, 0},
 	{ST_TOGGLE, N_("Indent nick names"), &prefs.indent_nicks,
 					N_("Make nick names right-justified"),0,0},
-	{ST_TOGGLR, N_("Show marker line"), &prefs.show_marker,
+	{ST_TOGGLE, N_("Show marker line"), &prefs.show_marker,
 					N_("Insert a red line after the last read text."),0,0},
 	{ST_TOGGLE, N_("Show redundant nicks"), &prefs.redundant_nickstamps,
 		N_("Show nicks when users enter multiple lines of text in a row"), 0, 0},
-	{ST_TOGGLR, N_("Automatically replay logged chats"), &prefs.text_replay,
+	{ST_TOGGLE, N_("Automatically replay logged chats"), &prefs.text_replay,
 					N_("Automatically replays logs for channels and queries."),0,0},
 
 	{ST_HEADER,	N_("Time Stamps"),0,0,0},
@@ -358,8 +357,6 @@ static const setting general_settings[] =
 	{ST_HEADER,	N_("Other Features"), 0, 0, 0},
 	{ST_TOGGLE,	N_("Strip IRCd quit messages"), &prefs.strip_quits,
 					N_("Strip quit prefixes like \"Quit:\" on IRC systems which use them."), 0, 0},
-	{ST_TOGGLE,	N_("Display redundant nickstamps"), &prefs.redundant_nickstamps,
-					N_("Displays the nickname associated with every line. Disabling this creates xchat-gnome like behaviour."), 0, 0},
 	{ST_END, 0, 0, 0, 0, 0}
 };
 
@@ -525,23 +522,8 @@ setup_toggle_cb (GtkToggleButton *but, const setting *set)
 	}
 }
 
-static void
-setup_create_toggleR (GtkWidget *tab, int row, const setting *set)
-{
-	GtkWidget *wid;
-
-	wid = gtk_check_button_new_with_label (_(set->label));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (wid), *((int *) set->ptr));
-	g_signal_connect (G_OBJECT (wid), "toggled",
-							G_CALLBACK (setup_toggle_cb), (gpointer)set);
-	if (set->tooltip)
-		add_tip (wid, _(set->tooltip));
-	gtk_table_attach (GTK_TABLE (tab), wid, 4, 5, row, row + 1,
-							GTK_EXPAND | GTK_SHRINK | GTK_FILL, GTK_SHRINK | GTK_FILL, 0, 0);
-}
-
 static GtkWidget *
-setup_create_toggleL (GtkWidget *tab, int row, const setting *set)
+setup_create_toggle (GtkWidget *tab, int row, const setting *set)
 {
 	GtkWidget *wid;
 
@@ -1025,12 +1007,8 @@ setup_create_page (const setting *set)
 		case ST_EFOLDER:
 			wid = setup_create_entry (tab, row, &set[i]);
 			break;
-		case ST_TOGGLR:
-			row--;
-			setup_create_toggleR (tab, row, &set[i]);
-			break;
 		case ST_TOGGLE:
-			wid = setup_create_toggleL (tab, row, &set[i]);
+			wid = setup_create_toggle (tab, row, &set[i]);
 			do_disable = set[i].extra;
 			break;
 		case ST_3OGGLE:
