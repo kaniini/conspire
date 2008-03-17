@@ -105,10 +105,6 @@ struct _GtkXText
 	int last_win_h;
 	int last_win_w;
 
-	int tint_red;
-	int tint_green;
-	int tint_blue;
-
 	GdkGC *bgc;						  /* backing pixmap */
 	GdkGC *fgc;						  /* text foreground color */
 	GdkGC *light_gc;				  /* sep bar */

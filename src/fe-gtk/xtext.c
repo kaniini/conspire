@@ -21,8 +21,6 @@
  *
  */
 
-#define XCHAT							/* using xchat */
-#define TINT_VALUE 195				/* 195/255 of the brightness. */
 #define MOTION_MONITOR				/* URL hilights. */
 #define SMOOTH_SCROLL				/* line-by-line or pixel scroll? */
 #define SCROLL_HACK					/* use XCopyArea scroll, or full redraw? */
@@ -103,10 +101,8 @@ enum
 
 static guint xtext_signals[LAST_SIGNAL];
 
-#ifdef XCHAT
 char *nocasestrstr (const char *text, const char *tofind);	/* util.c */
 int xtext_get_stamp_str (time_t, char **);
-#endif
 static void gtk_xtext_render_page (GtkXText * xtext);
 static void gtk_xtext_calc_lines (xtext_buffer *buf, int);
 static char *gtk_xtext_selection_get_text (GtkXText *xtext, int *len_ret);
@@ -120,25 +116,6 @@ static int gtk_xtext_find_subline (GtkXText *xtext, textentry *ent, int line);
 static unsigned char *
 gtk_xtext_strip_color (unsigned char *text, int len, unsigned char *outbuf,
 							  int *newlen, int *mb_ret, int strip_hidden);
-
-/* some utility functions first */
-
-#ifndef XCHAT	/* xchat has this in util.c */
-
-static char *
-nocasestrstr (const char *s, const char *tofind)
-{
-   register const size_t len = strlen (tofind);
-
-   if (len == 0)
-     return (char *)s;
-   while (toupper(*s) != toupper(*tofind) || strncasecmp (s, tofind, len))
-     if (*s++ == '\0')
-       return (char *)NULL;
-   return (char *)s;   
-}
-
-#endif
 
 /* gives width of a 8bit string - with no mIRC codes in it */
 
@@ -416,7 +393,6 @@ gtk_xtext_init (GtkXText * xtext)
 	xtext->dont_render = FALSE;
 	xtext->dont_render2 = FALSE;
 	xtext->overdraw = FALSE;
-	xtext->tint_red = xtext->tint_green = xtext->tint_blue = TINT_VALUE;
 
 	xtext->adj = (GtkAdjustment *) gtk_adjustment_new (0, 0, 1, 1, 1, 1);
 	g_object_ref (G_OBJECT (xtext->adj));
@@ -2995,7 +2971,6 @@ gtk_xtext_render_line (GtkXText * xtext, textentry * ent, int line,
 	indent = ent->indent;
 	start_subline = subline;
 
-#ifdef XCHAT
 	/* draw the timestamp */
 	if (xtext->auto_indent && xtext->buffer->time_stamp &&
 		 (!xtext->skip_stamp || xtext->mark_stamp || xtext->force_stamp))
@@ -3007,7 +2982,6 @@ gtk_xtext_render_line (GtkXText * xtext, textentry * ent, int line,
 		gtk_xtext_render_stamp (xtext, ent, time_str, len, line, win_width);
 		g_free (time_str);
 	}
-#endif
 
 	/* draw each line one by one */
 	do
@@ -3162,7 +3136,6 @@ gtk_xtext_set_font (GtkXText *xtext, char *name)
 	xtext->space_width = xtext->fontwidth[' '];
 	xtext->fontsize = xtext->font->ascent + xtext->font->descent;
 
-#ifdef XCHAT
 	{
 		char *time_str;
 		int stamp_size = xtext_get_stamp_str (time(0), &time_str);
@@ -3170,7 +3143,6 @@ gtk_xtext_set_font (GtkXText *xtext, char *name)
 			gtk_xtext_text_width (xtext, time_str, stamp_size, NULL) + MARGIN;
 		g_free (time_str);
 	}
-#endif
 
 	gtk_xtext_fix_indent (xtext->buffer);
 
