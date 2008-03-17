@@ -2419,16 +2419,34 @@ GSList *split_message(const struct session *sess, const gchar *text, const gchar
 	while (str[i]) {
 		j = strlen(str[i]);
 		if ((count + j + note_end_len + 2) > max) {
-			tempstr = g_strconcat(tempstr, space, str[i], space, note_end, NULL);
+			if (note_end_len) {
+				tempstr = g_strconcat(tempstr, space, str[i], space, note_end, NULL);
+			} else {
+				tempstr = g_strconcat(tempstr, space, str[i], NULL);
+			}
 			list = g_slist_prepend(list, g_strdup(tempstr));
-			count = len + note_start_len; /* start of next string */
-			tempstr = g_strconcat(note_start, NULL);
+			if (note_start_len) {
+				count = len + note_start_len; /* start of next string */
+				tempstr = g_strconcat(note_start, NULL);
+			} else {
+				count = len; /* start of next string */
+				tempstr = NULL;
+			}
 		} else if (str[i+1] != NULL) {
-			count += j + 1;
-			tempstr = g_strconcat(tempstr, space, str[i], NULL);
+			if (i == 0) {
+				count += j;
+				tempstr = g_strconcat(str[i], NULL);
+			} else {
+				count += j + 1;
+				tempstr = g_strconcat(tempstr, space, str[i], NULL);
+			}
 		} else {
-			tempstr = g_strconcat(tempstr, space, str[i], NULL);
-			list = g_slist_prepend(list, g_strchug(g_strdup(tempstr)));
+			if (i == 0) {
+				tempstr = g_strconcat(str[i], NULL);
+			} else {
+				tempstr = g_strconcat(tempstr, space, str[i], NULL);
+			}
+			list = g_slist_prepend(list, g_strdup(tempstr));
 			break;
 		}
 		i++;
