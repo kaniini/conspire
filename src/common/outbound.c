@@ -4134,14 +4134,13 @@ handle_command (session *sess, char *cmd, int check_spch)
 	else
 		tbuf = tbuf_static;
 
+	process_data_init (pdibuf, cmd, word, word_eol, TRUE, TRUE);
 	int_cmd = command_lookup(word[1]);
 
 	/* if the command does not have the CMD_HANDLE_QUOTES flag, split this using
 	   traditional rules, otherwise split it like a shell does. --nenolod */
 	if (int_cmd && !(int_cmd->flags & CMD_HANDLE_QUOTES))
 		process_data_init (pdibuf, cmd, word, word_eol, FALSE, FALSE);
-	else
-		process_data_init (pdibuf, cmd, word, word_eol, TRUE, TRUE);
 
 	if (check_spch && prefs.perc_color)
 		check_special_chars (cmd, prefs.perc_ascii);
