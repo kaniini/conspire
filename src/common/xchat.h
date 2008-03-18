@@ -13,6 +13,7 @@
 
 #include "debug.h"
 #include "history.h"
+#include "signal_factory.h"
 
 #ifndef HAVE_SNPRINTF
 #define snprintf g_snprintf
