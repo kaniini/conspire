@@ -14,6 +14,7 @@
 #include "debug.h"
 #include "history.h"
 #include "signal_factory.h"
+#include "signal_printer.h"
 
 #ifndef HAVE_SNPRINTF
 #define snprintf g_snprintf
