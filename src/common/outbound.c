@@ -2785,7 +2785,12 @@ cmd_quote (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *raw = word_eol[2];
 
-	return sess->server->p_raw (sess->server, raw);
+	if (!raw)
+		return CMD_EXEC_FAIL;
+
+	sess->server->p_raw (sess->server, raw);
+
+	return CMD_EXEC_OK;
 }
 
 static CommandResult
