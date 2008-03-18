@@ -448,29 +448,24 @@ server_connected (server * serv)
 	serv->connected = TRUE;
 	set_nonblocking (serv->sok);
 	serv->iotag = fe_input_add (serv->sok, FIA_READ|FIA_EX, server_read, serv);
-	if (!serv->no_login)
+
+	signal_emit("server connected", 1, serv);
+
+	if (serv->network)
 	{
-		EMIT_SIGNAL (XP_TE_CONNECTED, serv->server_session, NULL, NULL, NULL,
-						 NULL, 0);
-		if (serv->network)
-		{
-			serv->p_login (serv,
-								(!(((ircnet *)serv->network)->flags & FLAG_USE_GLOBAL) &&
-								 (((ircnet *)serv->network)->user)) ?
-								(((ircnet *)serv->network)->user) :
-								prefs.username,
-								(!(((ircnet *)serv->network)->flags & FLAG_USE_GLOBAL) &&
-								 (((ircnet *)serv->network)->real)) ?
-								(((ircnet *)serv->network)->real) :
-								prefs.realname);
-		} else
-		{
-			serv->p_login (serv, prefs.username, prefs.realname);
-		}
-	} else
+		serv->p_login (serv,
+							(!(((ircnet *)serv->network)->flags & FLAG_USE_GLOBAL) &&
+							 (((ircnet *)serv->network)->user)) ?
+							(((ircnet *)serv->network)->user) :
+							prefs.username,
+							(!(((ircnet *)serv->network)->flags & FLAG_USE_GLOBAL) &&
+							 (((ircnet *)serv->network)->real)) ?
+							(((ircnet *)serv->network)->real) :
+							prefs.realname);
+	}
+	else
 	{
-		EMIT_SIGNAL (XP_TE_SERVERCONNECTED, serv->server_session, NULL, NULL,
-						 NULL, NULL, 0);
+		serv->p_login (serv, prefs.username, prefs.realname);
 	}
 
 	server_set_name (serv, serv->servername);

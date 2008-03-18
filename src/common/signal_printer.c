@@ -20,6 +20,14 @@
 #include "text.h"
 
 void
+signal_printer_server_connected(gpointer *params)
+{
+	server *serv = params[0];
+
+	EMIT_SIGNAL (XP_TE_CONNECTED, serv->server_session, NULL, NULL, NULL, NULL, 0);
+}
+
+void
 signal_printer_server_stoned(gpointer *params)
 {
 	server *serv = params[0];
@@ -34,5 +42,6 @@ signal_printer_server_stoned(gpointer *params)
 void
 signal_printer_init(void)
 {
+	signal_attach("server connected", signal_printer_server_connected);
 	signal_attach("server stoned", signal_printer_server_stoned);
 }
