@@ -405,7 +405,6 @@ pevent_dialog_show ()
 							G_CALLBACK (pevent_dialog_select), store);
 
 	pevent_dialog_twid = gtk_xtext_new (colors, 0);
-	gtk_xtext_set_tint (GTK_XTEXT (pevent_dialog_twid), prefs.tint_red, prefs.tint_green, prefs.tint_blue);
 	gtk_xtext_set_background (GTK_XTEXT (pevent_dialog_twid),
 									  channelwin_pix, prefs.transparent);
 

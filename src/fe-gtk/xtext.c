@@ -3156,12 +3156,6 @@ void
 gtk_xtext_set_background (GtkXText * xtext, GdkPixmap * pixmap, gboolean trans)
 {
 	GdkGCValues val;
-	gboolean shaded = FALSE;
-
-	if (trans && (xtext->tint_red != 255 || xtext->tint_green != 255 || xtext->tint_blue != 255))
-		shaded = TRUE;
-
-	shaded = FALSE;
 	trans = FALSE;
 
 	if (xtext->pixmap)
@@ -4046,17 +4040,6 @@ void
 gtk_xtext_set_time_stamp (xtext_buffer *buf, gboolean time_stamp)
 {
 	buf->time_stamp = time_stamp;
-}
-
-void
-gtk_xtext_set_tint (GtkXText *xtext, int tint_red, int tint_green, int tint_blue)
-{
-	xtext->tint_red = tint_red;
-	xtext->tint_green = tint_green;
-	xtext->tint_blue = tint_blue;
-
-	/*if (xtext->tint_red != 255 || xtext->tint_green != 255 || xtext->tint_blue != 255)
-		shaded = TRUE;*/
 }
 
 void

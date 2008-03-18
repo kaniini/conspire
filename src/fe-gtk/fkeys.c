@@ -815,7 +815,6 @@ key_dialog_show ()
 	gtk_box_pack_end (GTK_BOX (vbox), hbox2, 0, 0, 1);
 
 	wid = gtk_xtext_new (colors, 0);
-	gtk_xtext_set_tint (GTK_XTEXT (wid), prefs.tint_red, prefs.tint_green, prefs.tint_blue);
 	gtk_xtext_set_background (GTK_XTEXT (wid),
 									  channelwin_pix,
 									  prefs.transparent);
