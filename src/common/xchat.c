@@ -161,10 +161,7 @@ lag_check (void)
 			lag = now - serv->ping_recv;
 			if (prefs.pingtimeout && lag > prefs.pingtimeout && lag > 0)
 			{
-				sprintf (tbuf, "%d", lag);
-				EMIT_SIGNAL (XP_TE_PINGTIMEOUT, serv->server_session, tbuf, NULL,
-								 NULL, NULL, 0);
-				serv->auto_reconnect (serv, FALSE, -1);
+				signal_emit("server stoned", 2, serv, lag);
 			} else
 			{
 				snprintf (tbuf, sizeof (tbuf), "LAG%lu", tim);

@@ -17,9 +17,22 @@
  */
 
 #include "signal_printer.h"
+#include "text.h"
+
+void
+signal_printer_server_stoned(gpointer *params)
+{
+	server *serv = params[0];
+	gchar *tbuf;
+
+	tbuf = g_strdup_printf("%d", GPOINTER_TO_INT(params[1]));
+	EMIT_SIGNAL(XP_TE_PINGTIMEOUT, serv->server_session, tbuf, NULL, NULL, NULL, 0);
+	serv->auto_reconnect(serv, FALSE, -1);
+	g_free(tbuf);
+}
 
 void
 signal_printer_init(void)
 {
-
+	signal_attach("server stoned", signal_printer_server_stoned);
 }
