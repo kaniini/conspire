@@ -677,6 +677,7 @@ xchat_init (void)
 	load_text_events ();
 	notify_load ();
 	ignore_load ();
+	signal_printer_init();
 
 	snprintf (buf, sizeof (buf),
 		"NAME %s\n"                         "CMD query %%s\n\n"\
