@@ -1056,8 +1056,8 @@ cmd_set (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			case PREFS_TYPE_STR:
 				if (erase || *val)
 				{
-					g_free(vars[i].ptr);
-					vars[i].ptr = g_strdup(val);
+					g_free(*((char **) vars[i].ptr));
+					*((char **) vars[i].ptr) = g_strdup(val);
 					if (!quiet)
 						PrintTextf (sess, "%s set to: %s\n", var, *((char **) vars[i].ptr));
 				} else
