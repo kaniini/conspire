@@ -34,6 +34,7 @@ signal_get(const gchar *signal)
 
 	sig = g_slice_new0(Signal);
 	sig->name = signal;
+	mowgli_dictionary_add(signal_dict_, signal, sig);
 
 	return sig;
 }
