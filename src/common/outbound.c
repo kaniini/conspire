@@ -4218,14 +4218,14 @@ handle_user_input (session *sess, char *text, int history, int nocommand)
 
 #ifdef REGEX_SUBSTITUTION
 	if (prefs.text_regex_replace) {
-		while (list)
+		MOWGLI_ITER_FOREACH(list, regex_replace_list)
 		{
 			pop = (struct regex_entry *) list->data;
 			text = g_regex_replace(pop->regex, text, strlen(text), 0, pop->cmd, 0, &error);
 			if (error) {
 				g_print("outbound.c: handle_user_input: %s", error->message);
+				g_clear_error(&error);
 			}
-			list = list->next;
 		}
 	}
 #endif
