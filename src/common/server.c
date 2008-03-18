@@ -748,6 +748,7 @@ server_cleanup (server * serv)
 		gnutls_deinit (serv->gnutls_session);
 		gnutls_certificate_free_credentials (serv->gnutls_x509cred);
 		serv->gnutls_session = NULL;
+		serv->use_ssl = FALSE;
 	}
 #endif
 
