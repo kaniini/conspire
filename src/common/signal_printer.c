@@ -40,8 +40,18 @@ signal_printer_server_stoned(gpointer *params)
 }
 
 void
+signal_printer_server_dns_lookup(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *hostname = params[1];
+
+	EMIT_SIGNAL (XP_TE_SERVERLOOKUP, sess, hostname, NULL, NULL, NULL, 0);
+}
+
+void
 signal_printer_init(void)
 {
 	signal_attach("server connected", signal_printer_server_connected);
+	signal_attach("server dns lookup", signal_printer_server_dns_lookup);
 	signal_attach("server stoned", signal_printer_server_stoned);
 }

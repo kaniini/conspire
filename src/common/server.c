@@ -709,7 +709,7 @@ server_read_child (GIOChannel *source, GIOCondition condition, server *serv)
 		break;
 	case '9':
 		waitline2 (source, tbuf, sizeof tbuf);
-		EMIT_SIGNAL (XP_TE_SERVERLOOKUP, sess, tbuf, NULL, NULL, NULL, 0);
+		signal_emit("server dns lookup", 2, sess, tbuf);
 		break;
 	}
 
@@ -1255,7 +1255,7 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 
 	fe_progressbar_start (sess);
 
-	EMIT_SIGNAL (XP_TE_SERVERLOOKUP, sess, hostname, NULL, NULL, NULL, 0);
+	signal_emit("server dns lookup", 2, sess, hostname);
 
 	g_strlcpy (serv->servername, hostname, sizeof (serv->servername));
 	/* overlap illegal in strncpy */
