@@ -45,6 +45,7 @@
 
 #include <cairo.h>
 #include <gtk/gtk.h>
+#include <pango/pangocairo.h>
 
 #include "xtext.h"
 
@@ -244,70 +245,55 @@ backend_get_char_width (GtkXText *xtext, unsigned char *str, int *mbl_ret)
 	return width;
 }
 
-/* simplified version of gdk_draw_layout_line_with_colors() */
-
-static void 
-xtext_draw_layout_line (GdkDrawable      *drawable,
-								GdkGC            *gc,
-								gint              x, 
-								gint              y,
-								PangoLayoutLine  *line)
-{
-	GSList *tmp_list = line->runs;
-	PangoRectangle logical_rect;
-	gint x_off = 0;
-
-	while (tmp_list)
-	{
-		PangoLayoutRun *run = tmp_list->data;
-
-		pango_glyph_string_extents (run->glyphs, run->item->analysis.font,
-											 NULL, &logical_rect);
-
-		gdk_draw_glyphs (drawable, gc, run->item->analysis.font,
-							  x + x_off / PANGO_SCALE, y, run->glyphs);
-
-		x_off += logical_rect.width;
-		tmp_list = tmp_list->next;
-	}
-}
-
 static void
 backend_draw_text (GtkXText *xtext, int dofill, GdkGC *gc, int x, int y,
 						 char *str, int len, int str_width, int is_mb)
 {
 	GdkGCValues val;
-	GdkColor col;
-	PangoLayoutLine *line;
+	cairo_t *cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
 
 	if (xtext->italics)
 		pango_layout_set_font_description (xtext->layout, xtext->font->ifont);
 
 	pango_layout_set_text (xtext->layout, str, len);
 
+	gdk_gc_get_values (gc, &val);
+
 	if (dofill)
 	{
-		gdk_gc_get_values (gc, &val);
-		col.pixel = val.background.pixel;
-		gdk_gc_set_foreground (gc, &col);
-		gdk_draw_rectangle (xtext->draw_buf, gc, 1, x, y -
-								  xtext->font->ascent, str_width, xtext->fontsize);
-		col.pixel = val.foreground.pixel;
-		gdk_gc_set_foreground (gc, &col);
+#if 0
+		cairo_rectangle(cr, x, y, str_width, xtext->fontsize);
+		cairo_clip(cr);
+
+		gdk_cairo_set_source_color(cr, &val.background);
+		cairo_paint(cr);
+
+		cairo_reset_clip(cr);
+#else
+		gdk_gc_set_foreground (gc, &val.background);
+		gdk_draw_rectangle (xtext->draw_buf, gc, 1, x, y, str_width, xtext->fontsize);
+		gdk_gc_set_foreground (gc, &val.foreground);
+#endif
 	}
 
-	line = pango_layout_get_lines (xtext->layout)->data;
+	gdk_cairo_set_source_color(cr, &val.foreground);
 
-	xtext_draw_layout_line (xtext->draw_buf, gc, x, y, line);
+	cairo_move_to(cr, x, y);
+	pango_cairo_show_layout(cr, xtext->layout);
 
 	if (xtext->overdraw)
-		xtext_draw_layout_line (xtext->draw_buf, gc, x, y, line);
+		pango_cairo_show_layout(cr, xtext->layout);
 
 	if (xtext->bold)
-		xtext_draw_layout_line (xtext->draw_buf, gc, x + 1, y, line);
+	{
+		cairo_move_to(cr, x + 1, y);
+		pango_cairo_show_layout(cr, xtext->layout);
+	}
 
 	if (xtext->italics)
 		pango_layout_set_font_description (xtext->layout, xtext->font->font);
+
+	cairo_destroy(cr);
 }
 
 static void
@@ -2142,7 +2128,7 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 		gdk_gc_set_ts_origin (xtext->bgc, xtext->ts_x - x, xtext->ts_y - dest_y);
 
 		x = 0;
-		y = xtext->font->ascent;
+		y = 0;
 		xtext->draw_buf = pix;
 	}
 
