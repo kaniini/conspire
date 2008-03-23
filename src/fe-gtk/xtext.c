@@ -513,24 +513,6 @@ gtk_xtext_destroy (GtkObject * object)
 		xtext->fgc = NULL;
 	}
 
-	if (xtext->light_gc)
-	{
-		g_object_unref (xtext->light_gc);
-		xtext->light_gc = NULL;
-	}
-
-	if (xtext->dark_gc)
-	{
-		g_object_unref (xtext->dark_gc);
-		xtext->dark_gc = NULL;
-	}
-
-	if (xtext->thin_gc)
-	{
-		g_object_unref (xtext->thin_gc);
-		xtext->thin_gc = NULL;
-	}
-
 	if (xtext->hand_cursor)
 	{
 		gdk_cursor_unref (xtext->hand_cursor);
@@ -571,7 +553,6 @@ gtk_xtext_realize (GtkWidget * widget)
 	GtkXText *xtext;
 	GdkWindowAttr attributes;
 	GdkGCValues val;
-	GdkColor col;
 	GdkColormap *cmap;
 
 	GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
@@ -606,27 +587,6 @@ gtk_xtext_realize (GtkWidget * widget)
 													 GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
 	xtext->fgc = gdk_gc_new_with_values (widget->window, &val,
 													 GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
-	xtext->light_gc = gdk_gc_new_with_values (widget->window, &val,
-											GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
-	xtext->dark_gc = gdk_gc_new_with_values (widget->window, &val,
-											GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
-	xtext->thin_gc = gdk_gc_new_with_values (widget->window, &val,
-											GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
-
-	/* for the separator bar (light) */
-	col.red = 0xffff; col.green = 0xffff; col.blue = 0xffff;
-	gdk_colormap_alloc_color (cmap, &col, FALSE, TRUE);
-	gdk_gc_set_foreground (xtext->light_gc, &col);
-
-	/* for the separator bar (dark) */
-	col.red = 0x1111; col.green = 0x1111; col.blue = 0x1111;
-	gdk_colormap_alloc_color (cmap, &col, FALSE, TRUE);
-	gdk_gc_set_foreground (xtext->dark_gc, &col);
-
-	/* for the separator bar (thinline) */
-	col.red = 0x8e38; col.green = 0x8e38; col.blue = 0x9f38;
-	gdk_colormap_alloc_color (cmap, &col, FALSE, TRUE);
-	gdk_gc_set_foreground (xtext->thin_gc, &col);
 
 	gdk_gc_set_foreground(xtext->fgc, &xtext->palette[XTEXT_FG]);
 	gdk_gc_set_background(xtext->fgc, &xtext->palette[XTEXT_BG]);
@@ -634,6 +594,9 @@ gtk_xtext_realize (GtkWidget * widget)
 
 	/* draw directly to window */
 	xtext->draw_buf = widget->window;
+	xtext->draw_cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+	cairo_set_line_width(xtext->draw_cr, 1.0);
+	cairo_set_antialias(xtext->draw_cr, CAIRO_ANTIALIAS_NONE);
 
 	if (xtext->pixmap)
 	{
@@ -853,10 +816,6 @@ static void
 gtk_xtext_draw_sep (GtkXText * xtext, int y)
 {
 	int x, height;
-	GdkGC *light, *dark;
-	cairo_t *cr;
-
-	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
 
 	if (y == -1)
 	{
@@ -868,31 +827,26 @@ gtk_xtext_draw_sep (GtkXText * xtext, int y)
 	/* draw the separator line */
 	if (xtext->separator && xtext->buffer->indent)
 	{
-		light = xtext->light_gc;
-		dark = xtext->dark_gc;
-
 		x = xtext->buffer->indent - ((xtext->space_width + 1) / 2);
 		if (x < 1)
 			return;
 
-		if (xtext->thinline)
+		if (xtext->moving_separator)
 		{
-			if (xtext->moving_separator)
-				gdk_draw_line (xtext->draw_buf, light, x, y, x, y + height);
-			else
-				gdk_draw_line (xtext->draw_buf, xtext->thin_gc, x, y, x, y + height);
-		} else
-		{
-			if (xtext->moving_separator)
-			{
-				gdk_draw_line (xtext->draw_buf, light, x - 1, y, x - 1, y + height);
-				gdk_draw_line (xtext->draw_buf, dark, x, y, x, y + height);
-			} else
-			{
-				gdk_draw_line (xtext->draw_buf, dark, x - 1, y, x - 1, y + height);
-				gdk_draw_line (xtext->draw_buf, light, x, y, x, y + height);
-			}
+			cairo_set_source_rgb(xtext->draw_cr, 0.9, 0.9, 0.9);
+
+			cairo_move_to(xtext->draw_cr, x, y + height);
+			cairo_line_to(xtext->draw_cr, x, y);
 		}
+		else
+		{
+			cairo_set_source_rgb(xtext->draw_cr, 0.6, 0.6, 0.6);
+
+			cairo_move_to(xtext->draw_cr, x, y + height);
+			cairo_line_to(xtext->draw_cr, x, y);
+		}
+
+		cairo_stroke(xtext->draw_cr);
 	}
 }
 
@@ -900,7 +854,6 @@ static void
 gtk_xtext_draw_marker (GtkXText * xtext, textentry * ent, int y)
 {
 	int x, width, render_y;
-	cairo_t *cr;
 
 	if (!xtext->marker) return;
 
@@ -917,22 +870,14 @@ gtk_xtext_draw_marker (GtkXText * xtext, textentry * ent, int y)
 	x = 0;
 	width = GTK_WIDGET (xtext)->allocation.width;
 
-	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
-	gdk_cairo_set_source_color(cr, &xtext->palette[XTEXT_MARKER]);
-	cairo_set_line_width(cr, 1.0);
-	cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
+	gdk_cairo_set_source_color(xtext->draw_cr, &xtext->palette[XTEXT_MARKER]);
 
-	cairo_move_to(cr, x, render_y);
-	cairo_line_to(cr, x + width, render_y);
+	cairo_move_to(xtext->draw_cr, x, render_y);
+	cairo_line_to(xtext->draw_cr, x + width, render_y);
 
-	cairo_stroke(cr);
-	cairo_destroy(cr);
+	cairo_stroke(xtext->draw_cr);
 
-#if GTK_CHECK_VERSION(2,4,0)
 	if (gtk_window_has_toplevel_focus (GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (xtext)))))
-#else
-	if (GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (xtext)))->has_focus)
-#endif
 	{
 		xtext->buffer->marker_seen = TRUE;
 	}
@@ -2203,15 +2148,6 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 
 	dofill = TRUE;
 
-	/* backcolor is always handled by XDrawImageString */
-	if (!xtext->backcolor && xtext->pixmap)
-	{
-	/* draw the background pixmap behind the text - CAUSES FLICKER HERE!! */
-		xtext_draw_bg (xtext, x, y - xtext->font->ascent, str_width,
-							xtext->fontsize);
-		dofill = FALSE;	/* already drawn the background */
-	}
-
 	backend_draw_text (xtext, dofill, gc, x, y, str, len, str_width, is_mb);
 
 	if (pix)
@@ -3414,7 +3350,7 @@ gtk_xtext_render_page (GtkXText * xtext)
 	/* fill any space below the last line with our background GC */
 	xtext_draw_bg (xtext, 0, line, width + MARGIN, height - line);
 
-	/* draw the separator line */
+	/* plot the separator line */
 	gtk_xtext_draw_sep (xtext, -1);
 }
 

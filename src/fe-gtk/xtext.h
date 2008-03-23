@@ -95,7 +95,10 @@ struct _GtkXText
 
 	GtkAdjustment *adj;
 	GdkPixmap *pixmap;				/* 0 = use palette[19] */
+
 	GdkDrawable *draw_buf;			/* points to ->window */
+	cairo_t *draw_cr;			/* used for queueing draw operations. */
+
 	GdkCursor *hand_cursor;
 	GdkCursor *resize_cursor;
 
@@ -108,9 +111,6 @@ struct _GtkXText
 
 	GdkGC *bgc;						  /* backing pixmap */
 	GdkGC *fgc;						  /* text foreground color */
-	GdkGC *light_gc;				  /* sep bar */
-	GdkGC *dark_gc;
-	GdkGC *thin_gc;
 	GdkColor palette[XTEXT_COLS];
 
 	gint io_tag;					  /* for delayed refresh events */
