@@ -38,7 +38,7 @@ echo "I: Starting plugin load."
 for dir in $PLUGINDIRS; do
 	for server in $dir/*; do
 		echo "I: Launching $server.";
-		$server &> /dev/null &
+		$server > /dev/null 2>&1 &
 	done
 done
 
@@ -49,7 +49,7 @@ if [ -d $xchatplugindir ]; then
 
 	for plugin in $xchatplugindir/*.so; do
 		echo "I: Launching xchat plugin $plugin."
-		conspire-xchatwrap $plugin &> /dev/null &
+		conspire-xchatwrap $plugin > /dev/null 2>&1 &
 	done
 
 	echo "I: XChat plugin load complete."

@@ -74,6 +74,8 @@ struct DCC
 											0x2 = global throttle */
 };
 
+extern const char *dcctypes[];
+
 #define MAX_PROXY_BUFFER 1024
 struct proxy_state
 {
@@ -99,6 +101,8 @@ extern struct dccstat_info dccstat[];
 
 gboolean is_dcc (struct DCC *dcc);
 void dcc_abort (session *sess, struct DCC *dcc);
+void dcc_close (struct DCC *dcc, int dccstat, int destroy);
+void dcc_calc_average_cps (struct DCC *dcc);
 void dcc_get (struct DCC *dcc);
 int dcc_resume (struct DCC *dcc);
 void dcc_check_timeouts (void);
