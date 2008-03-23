@@ -93,8 +93,10 @@ enum
 };
 
 /* two different types of tabs */
-#define TAG_IRC 0		/* server, channel, dialog */
-#define TAG_UTIL 1	/* dcc, notify, chanlist */
+typedef enum {
+	TAG_IRC,
+	TAG_UTIL,
+} TagType;
 
 static void mg_create_entry (session *sess, GtkWidget *box);
 static void mg_link_irctab (session *sess, int focus);
@@ -978,6 +980,12 @@ mg_beepmsg_cb (GtkCheckMenuItem *item, session *sess)
 }
 
 static void
+mg_away_cb (GtkCheckMenuItem *item, session *sess)
+{
+	handle_command(sess, "away", FALSE);
+}
+
+static void
 mg_hidejp_cb (GtkCheckMenuItem *item, session *sess)
 {
 	sess->hide_join_part = TRUE;
@@ -1251,6 +1259,18 @@ mg_link_gentab (chan *ch, GtkWidget *box)
 }
 
 static void
+mg_disconnect_cb (GtkWidget *item, session *sess)
+{
+	handle_command(sess, "disconnect", FALSE);
+}
+
+static void
+mg_reconnect_cb (GtkWidget *item, session *sess)
+{
+	handle_command(sess, "reconnect", FALSE);
+}
+
+static void
 mg_detach_tab_cb (GtkWidget *item, chan *ch)
 {
 	if (chan_get_tag (ch) == TAG_IRC)	/* IRC tab */
@@ -1369,7 +1389,6 @@ mg_tab_contextmenu_cb (chanview *cv, chan *ch, int tag, gpointer ud, GdkEventBut
 {
 	GtkWidget *menu, *item;
 	session *sess = ud;
-	char buf[256];
 
 	/* shift-click to close a tab */
 	if ((event->state & GDK_SHIFT_MASK) && event->type == GDK_BUTTON_PRESS)
@@ -1385,6 +1404,15 @@ mg_tab_contextmenu_cb (chanview *cv, chan *ch, int tag, gpointer ud, GdkEventBut
 
 	if (tag == TAG_IRC)
 	{
+		mg_create_icon_item(_("_Disconnect"), GTK_STOCK_DISCONNECT, menu,
+			mg_disconnect_cb, sess);
+		mg_create_icon_item(_("_Reconnect"), GTK_STOCK_CONNECT, menu,
+			mg_reconnect_cb, sess);
+
+		item = gtk_menu_item_new ();
+		gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+		gtk_widget_show (item);
+
 		menu_toggle_item (_("Beep on message"), menu, mg_beepmsg_cb, sess,
 								sess->beep);
 		if (prefs.gui_tray)
@@ -1396,6 +1424,8 @@ mg_tab_contextmenu_cb (chanview *cv, chan *ch, int tag, gpointer ud, GdkEventBut
 		menu_toggle_item (_("Color paste"), menu, mg_colorpaste_cb, sess,
 								sess->color_paste);
 
+		menu_toggle_item (_("Marked Away"), menu, mg_away_cb, sess,
+								sess->server->is_away);
 	}
 
 	/* separator */
