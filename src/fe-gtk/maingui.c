@@ -1045,124 +1045,6 @@ mg_count_dccs (void)
 }
 
 void
-mg_open_quit_dialog (gboolean minimize_button)
-{
-	static GtkWidget *dialog = NULL;
-	GtkWidget *dialog_vbox1;
-	GtkWidget *table1;
-	GtkWidget *image;
-	GtkWidget *checkbutton1;
-	GtkWidget *label;
-	GtkWidget *dialog_action_area1;
-	GtkWidget *button;
-	char *text, *connecttext;
-	int cons;
-	int dccs;
-
-	if (dialog)
-	{
-		gtk_window_present (GTK_WINDOW (dialog));
-		return;
-	}
-
-	dccs = mg_count_dccs ();
-	cons = mg_count_networks ();
-	if (dccs + cons == 0 || !prefs.gui_quit_dialog)
-	{
-		xchat_exit ();
-		return;
-	}
-
-	dialog = gtk_dialog_new ();
-	gtk_container_set_border_width (GTK_CONTAINER (dialog), 6);
-	gtk_window_set_title (GTK_WINDOW (dialog), _("Quit conspire?"));
-	gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (parent_window));
-	gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
-	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);
-
-	dialog_vbox1 = GTK_DIALOG (dialog)->vbox;
-	gtk_widget_show (dialog_vbox1);
-
-	table1 = gtk_table_new (2, 2, FALSE);
-	gtk_widget_show (table1);
-	gtk_box_pack_start (GTK_BOX (dialog_vbox1), table1, TRUE, TRUE, 0);
-	gtk_container_set_border_width (GTK_CONTAINER (table1), 6);
-	gtk_table_set_row_spacings (GTK_TABLE (table1), 12);
-	gtk_table_set_col_spacings (GTK_TABLE (table1), 12);
-
-	image = gtk_image_new_from_stock ("gtk-dialog-warning", GTK_ICON_SIZE_DIALOG);
-	gtk_widget_show (image);
-	gtk_table_attach (GTK_TABLE (table1), image, 0, 1, 0, 1,
-							(GtkAttachOptions) (GTK_FILL),
-							(GtkAttachOptions) (GTK_FILL), 0, 0);
-
-	checkbutton1 = gtk_check_button_new_with_mnemonic (_("Don't ask next time."));
-	gtk_widget_show (checkbutton1);
-	gtk_table_attach (GTK_TABLE (table1), checkbutton1, 0, 2, 1, 2,
-							(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-							(GtkAttachOptions) (0), 0, 4);
-
-	connecttext = g_strdup_printf (_("You are connected to %i IRC networks."), cons);
-	text = g_strdup_printf ("<span weight=\"bold\" size=\"larger\">%s</span>\n\n%s\n%s",
-								_("Are you sure you want to quit?"),
-								cons ? connecttext : "",
-								dccs ? _("Some file transfers are still active.") : "");
-	g_free (connecttext);
-	label = gtk_label_new (text);
-	g_free (text);
-	gtk_widget_show (label);
-	gtk_table_attach (GTK_TABLE (table1), label, 1, 2, 0, 1,
-							(GtkAttachOptions) (GTK_EXPAND | GTK_SHRINK | GTK_FILL),
-							(GtkAttachOptions) (GTK_EXPAND | GTK_SHRINK), 0, 0);
-	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
-	gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
-
-	dialog_action_area1 = GTK_DIALOG (dialog)->action_area;
-	gtk_widget_show (dialog_action_area1);
-	gtk_button_box_set_layout (GTK_BUTTON_BOX (dialog_action_area1),
-										GTK_BUTTONBOX_END);
-
-	if (minimize_button)
-	{
-		button = gtk_button_new_with_mnemonic (_("_Minimize to Tray"));
-		gtk_widget_show (button);
-		gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button, 1);
-	}
-
-	button = gtk_button_new_from_stock ("gtk-cancel");
-	gtk_widget_show (button);
-	gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button,
-											GTK_RESPONSE_CANCEL);
-	gtk_widget_grab_focus (button);
-
-	button = gtk_button_new_from_stock ("gtk-quit");
-	gtk_widget_show (button);
-	gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button, 0);
-
-	gtk_widget_show (dialog);
-
-	switch (gtk_dialog_run (GTK_DIALOG (dialog)))
-	{
-	case 0:
-		if (GTK_TOGGLE_BUTTON (checkbutton1)->active)
-			prefs.gui_quit_dialog = 0;
-		xchat_exit ();
-		break;
-	case 1: /* minimize to tray */
-		if (GTK_TOGGLE_BUTTON (checkbutton1)->active)
-		{
-			prefs.gui_tray_flags |= 1;
-			/*prefs.gui_quit_dialog = 0;*/
-		}
-		tray_toggle_visibility (TRUE);
-		break;
-	}
-
-	gtk_widget_destroy (dialog);
-	dialog = NULL;
-}
-
-void
 mg_close_sess (session *sess)
 {
 	if (sess->immutable == TRUE)
@@ -1170,7 +1052,7 @@ mg_close_sess (session *sess)
 
 	if (sess_list->next == NULL)
 	{
-		mg_open_quit_dialog (FALSE);
+		xchat_exit();
 		return;
 	}
 
