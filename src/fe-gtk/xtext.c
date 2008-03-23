@@ -311,18 +311,6 @@ backend_draw_text (GtkXText *xtext, int dofill, GdkGC *gc, int x, int y,
 }
 
 static void
-xtext_set_fg (GtkXText *xtext, GdkGC *gc, int index)
-{
-	gdk_gc_set_foreground (gc, &xtext->palette[index]);
-}
-
-static void
-xtext_set_bg (GtkXText *xtext, GdkGC *gc, int index)
-{
-	gdk_gc_set_background (gc, &xtext->palette[index]);
-}
-
-static void
 gtk_xtext_init (GtkXText * xtext)
 {
 	xtext->pixmap = NULL;
@@ -640,9 +628,9 @@ gtk_xtext_realize (GtkWidget * widget)
 	gdk_colormap_alloc_color (cmap, &col, FALSE, TRUE);
 	gdk_gc_set_foreground (xtext->thin_gc, &col);
 
-	xtext_set_fg (xtext, xtext->fgc, XTEXT_FG);
-	xtext_set_bg (xtext, xtext->fgc, XTEXT_BG);
-	xtext_set_fg (xtext, xtext->bgc, XTEXT_BG);
+	gdk_gc_set_foreground(xtext->fgc, &xtext->palette[XTEXT_FG]);
+	gdk_gc_set_background(xtext->fgc, &xtext->palette[XTEXT_BG]);
+	gdk_gc_set_foreground(xtext->bgc, &xtext->palette[XTEXT_BG]);
 
 	/* draw directly to window */
 	xtext->draw_buf = widget->window;
@@ -2284,9 +2272,9 @@ gtk_xtext_reset (GtkXText * xtext, int mark, int attribs)
 	{
 		xtext->backcolor = FALSE;
 		if (xtext->col_fore != XTEXT_FG)
-			xtext_set_fg (xtext, xtext->fgc, XTEXT_FG);
+			gdk_gc_set_foreground(xtext->fgc, &xtext->palette[XTEXT_FG]);
 		if (xtext->col_back != XTEXT_BG)
-			xtext_set_bg (xtext, xtext->fgc, XTEXT_BG);
+			gdk_gc_set_background(xtext->fgc, &xtext->palette[XTEXT_BG]);
 	}
 	xtext->col_fore = XTEXT_FG;
 	xtext->col_back = XTEXT_BG;
@@ -2322,8 +2310,8 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 	if (ent->mark_start != -1 &&
 		 ent->mark_start <= i + offset && ent->mark_end > i + offset)
 	{
-		xtext_set_bg (xtext, gc, XTEXT_MARK_BG);
-		xtext_set_fg (xtext, gc, XTEXT_MARK_FG);
+		gdk_gc_set_background(gc, &xtext->palette[XTEXT_MARK_BG]);
+		gdk_gc_set_foreground(gc, &xtext->palette[XTEXT_MARK_FG]);
 		xtext->backcolor = TRUE;
 		mark = TRUE;
 	}
@@ -2394,7 +2382,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 						col_num = col_num % XTEXT_MIRC_COLS;
 					xtext->col_fore = col_num;
 					if (!mark)
-						xtext_set_fg (xtext, gc, col_num);
+						gdk_gc_set_foreground(gc, &xtext->palette[col_num]);
 				}
 			} else
 			{
@@ -2412,31 +2400,40 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 					xtext->num[xtext->nc] = 0;
 					xtext->nc = 0;
 					col_num = atoi (xtext->num);
+
 					if (xtext->parsing_backcolor)
 					{
 						if (col_num == 99)	/* mIRC lameness */
 							col_num = XTEXT_BG;
 						else
 							col_num = col_num % XTEXT_MIRC_COLS;
+
 						if (col_num == XTEXT_BG)
 							xtext->backcolor = FALSE;
 						else
 							xtext->backcolor = TRUE;
+
 						if (!mark)
-							xtext_set_bg (xtext, gc, col_num);
+							gdk_gc_set_background(gc, &xtext->palette[col_num]);
+
 						xtext->col_back = col_num;
-					} else
+					}
+					else
 					{
 						if (col_num == 99)	/* mIRC lameness */
 							col_num = XTEXT_FG;
 						else
 							col_num = col_num % XTEXT_MIRC_COLS;
+
 						if (!mark)
-							xtext_set_fg (xtext, gc, col_num);
+							gdk_gc_set_foreground(gc, &xtext->palette[col_num]);
+
 						xtext->col_fore = col_num;
 					}
+
 					xtext->parsing_backcolor = FALSE;
-				} else
+				}
+				else
 				{
 					/* got a \003<non-digit>... i.e. reset colors */
 					x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
@@ -2460,8 +2457,8 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 				xtext->col_back = tmp;
 				if (!mark)
 				{
-					xtext_set_fg (xtext, gc, xtext->col_fore);
-					xtext_set_bg (xtext, gc, xtext->col_back);
+					gdk_gc_set_foreground(gc, &xtext->palette[xtext->col_fore]);
+					gdk_gc_set_background(gc, &xtext->palette[xtext->col_back]);
 				}
 				if (xtext->col_back != XTEXT_BG)
 					xtext->backcolor = TRUE;
@@ -2577,8 +2574,8 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
 			pstr += j;
 			j = 0;
-			xtext_set_bg (xtext, gc, XTEXT_MARK_BG);
-			xtext_set_fg (xtext, gc, XTEXT_MARK_FG);
+			gdk_gc_set_background(gc, &xtext->palette[XTEXT_MARK_BG]);
+			gdk_gc_set_foreground(gc, &xtext->palette[XTEXT_MARK_FG]);
 			xtext->backcolor = TRUE;
 			mark = TRUE;
 		}
@@ -2588,8 +2585,8 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
 			pstr += j;
 			j = 0;
-			xtext_set_bg (xtext, gc, xtext->col_back);
-			xtext_set_fg (xtext, gc, xtext->col_fore);
+			gdk_gc_set_background(gc, &xtext->palette[xtext->col_back]);
+			gdk_gc_set_foreground(gc, &xtext->palette[xtext->col_fore]);
 			if (xtext->col_back != XTEXT_BG)
 				xtext->backcolor = TRUE;
 			else
@@ -2604,8 +2601,8 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 
 	if (mark)
 	{
-		xtext_set_bg (xtext, gc, xtext->col_back);
-		xtext_set_fg (xtext, gc, xtext->col_fore);
+		gdk_gc_set_background(gc, &xtext->palette[xtext->col_back]);
+		gdk_gc_set_foreground(gc, &xtext->palette[xtext->col_fore]);
 		if (xtext->col_back != XTEXT_BG)
 			xtext->backcolor = TRUE;
 		else
@@ -2956,9 +2953,9 @@ gtk_xtext_set_palette (GtkXText * xtext, GdkColor palette[])
 
 	if (GTK_WIDGET_REALIZED (xtext))
 	{
-		xtext_set_fg (xtext, xtext->fgc, XTEXT_FG);
-		xtext_set_bg (xtext, xtext->fgc, XTEXT_BG);
-		xtext_set_fg (xtext, xtext->bgc, XTEXT_BG);
+		gdk_gc_set_foreground(xtext->fgc, &xtext->palette[XTEXT_FG]);
+		gdk_gc_set_background(xtext->fgc, &xtext->palette[XTEXT_BG]);
+		gdk_gc_set_foreground(xtext->bgc, &xtext->palette[XTEXT_BG]);
 	}
 
 	xtext->col_fore = XTEXT_FG;
@@ -3088,7 +3085,7 @@ gtk_xtext_set_background (GtkXText * xtext, GdkPixmap * pixmap, gboolean trans)
 		val.graphics_exposures = 0;
 		xtext->bgc = gdk_gc_new_with_values (GTK_WIDGET (xtext)->window,
 								&val, GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
-		xtext_set_fg (xtext, xtext->bgc, XTEXT_BG);
+		gdk_gc_set_foreground(xtext->bgc, &xtext->palette[XTEXT_BG]);
 	}
 }
 
