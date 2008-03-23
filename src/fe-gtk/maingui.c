@@ -798,10 +798,6 @@ mg_populate (session *sess)
 			add_tip (sess->gui->throttlemeter->parent, res->queue_tip);
 	}
 
-	/* menu items */
-	GTK_CHECK_MENU_ITEM (gui->menu_item[MENU_ID_AWAY])->active = sess->server->is_away;
-	gtk_widget_set_sensitive (gui->menu_item[MENU_ID_AWAY], sess->server->connected);
-
 	mg_set_topic_tip (sess);
 
 	plugin_emit_dummy_print (sess, "Focus Tab");
@@ -2876,10 +2872,7 @@ fe_set_away (server *serv)
 	{
 		sess = list->data;
 		if (sess->server == serv)
-		{
-			if (!sess->gui->is_tab || sess == current_tab)
-				GTK_CHECK_MENU_ITEM (sess->gui->menu_item[MENU_ID_AWAY])->active = serv->is_away;
-		}
+			break;
 		list = list->next;
 	}
 }
