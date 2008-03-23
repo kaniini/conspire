@@ -111,6 +111,9 @@ struct _GtkXText
 
 	GdkGC *bgc;						  /* backing pixmap */
 	GdkGC *fgc;						  /* text foreground color */
+
+	GdkColor *fgcol;
+	GdkColor *bgcol;
 	GdkColor palette[XTEXT_COLS];
 
 	gint io_tag;					  /* for delayed refresh events */
