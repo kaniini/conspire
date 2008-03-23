@@ -1050,87 +1050,6 @@ menu_savebuffer (GtkWidget * wid, gpointer none)
 							current_sess, NULL, FRF_WRITE);
 }
 
-/* TODO: remove me. --nenolod */
-static void
-menu_disconnect (GtkWidget * wid, gpointer none)
-{
-	handle_command (current_sess, "DISCONNECT", FALSE);
-}
-
-static void
-menu_reconnect (GtkWidget * wid, gpointer none)
-{
-	if (current_sess->server->hostname[0])
-		handle_command (current_sess, "RECONNECT", FALSE);
-	else
-		fe_serverlist_open (current_sess);
-}
-
-static void
-menu_join_cb (GtkWidget *dialog, gint response, GtkEntry *entry)
-{
-	switch (response)
-	{
-	case GTK_RESPONSE_ACCEPT:
-		menu_chan_join (NULL, entry->text);
-		break;
-
-	case GTK_RESPONSE_HELP:
-		chanlist_opengui (current_sess->server, TRUE);
-		break;
-	}
-
-	gtk_widget_destroy (dialog);
-}
-
-static void
-menu_join_entry_cb (GtkWidget *entry, GtkDialog *dialog)
-{
-	gtk_dialog_response (dialog, GTK_RESPONSE_ACCEPT);
-}
-
-static void
-menu_join (GtkWidget * wid, gpointer none)
-{
-	GtkWidget *hbox, *dialog, *entry, *label;
-
-	dialog = gtk_dialog_new_with_buttons (_("Join Channel"),
-									GTK_WINDOW (parent_window), 0,
-									_("Retrieve channel list..."), GTK_RESPONSE_HELP,
-									GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT,
-									GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
-									NULL);
-	gtk_box_set_homogeneous (GTK_BOX (GTK_DIALOG (dialog)->vbox), TRUE);
-	gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
-	hbox = gtk_hbox_new (TRUE, 0);
-
-	entry = gtk_entry_new ();
-	GTK_ENTRY (entry)->editable = 0;	/* avoid auto-selection */
-	gtk_entry_set_text (GTK_ENTRY (entry), "#");
-	g_signal_connect (G_OBJECT (entry), "activate",
-						 	G_CALLBACK (menu_join_entry_cb), dialog);
-	gtk_box_pack_end (GTK_BOX (hbox), entry, 0, 0, 0);
-
-	label = gtk_label_new (_("Enter Channel to Join:"));
-	gtk_box_pack_end (GTK_BOX (hbox), label, 0, 0, 0);
-
-	g_signal_connect (G_OBJECT (dialog), "response",
-						   G_CALLBACK (menu_join_cb), entry);
-
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), hbox);
-
-	gtk_widget_show_all (dialog);
-
-	gtk_editable_set_editable (GTK_EDITABLE (entry), TRUE);
-	gtk_editable_set_position (GTK_EDITABLE (entry), 1);
-}
-
-static void
-menu_away (GtkCheckMenuItem *item, gpointer none)
-{
-	handle_command (current_sess, item->active ? "away" : "back", FALSE);
-}
-
 static void
 menu_chanlist (GtkWidget * wid, gpointer none)
 {
@@ -1427,9 +1346,6 @@ static struct mymenu mymenu[] = {
 		{N_("Text"), menu_metres_text, 0, M_MENURADIO, 0, 0, 1},
 		{N_("Both"), menu_metres_both, 0, M_MENURADIO, 0, 0, 1},
 		{0, 0, 0, M_END, 0, 0, 0},	/* 29 */
-
-#define AWAY_OFFSET (43)
-	{N_("Marked Away"), menu_away, 0, M_MENUTOG, MENU_ID_AWAY, 0, 1, GDK_a},
 
 	{N_("_Usermenu"), 0, 0, M_NEWMENU, MENU_ID_USERMENU, 0, 1},	/* 37 */
 
@@ -1874,8 +1790,6 @@ menu_create_main (void *accel_group, int bar, int away, int toplevel,
 	mymenu[MENUBAR_OFFSET+2].state = !prefs.hideuserlist;
 	mymenu[MENUBAR_OFFSET+3].state = prefs.userlistbuttons;
 	mymenu[MENUBAR_OFFSET+4].state = prefs.chanmodebuttons;
-
-	mymenu[AWAY_OFFSET].state = away;
 
 	mymenu[METRE_OFFSET].state = 0;
 	mymenu[METRE_OFFSET+1].state = 0;
