@@ -2544,12 +2544,14 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 
 	if (mark)
 	{
-		xtext_set_fg(xtext, xtext->col_back);
-		xtext_set_bg(xtext, xtext->col_fore);
+		xtext_set_fg(xtext, xtext->col_fore);
+		xtext_set_bg(xtext, xtext->col_back);
 		if (xtext->col_back != XTEXT_BG)
 			xtext->backcolor = TRUE;
 		else
 			xtext->backcolor = FALSE;
+
+		mark = FALSE;
 	}
 
 	/* draw background to the right of the text */
