@@ -747,11 +747,6 @@ mg_populate (session *sess)
 	if (gui->is_tab)
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (gui->note_book), 0);
 
-	/* xtext size change? Then don't render, wait for the expose caused
-      by showing/hidding the userlist */
-	if (vis != gui->ul_hidden && gui->user_box->allocation.width > 1)
-		render = FALSE;
-
 	gtk_xtext_buffer_show (GTK_XTEXT (gui->xtext), res->buffer, render);
 	GTK_XTEXT (gui->xtext)->color_paste = sess->color_paste;
 
@@ -1045,6 +1040,12 @@ mg_count_dccs (void)
 }
 
 void
+mg_quit (void)
+{
+	xchat_exit();
+}
+
+void
 mg_close_sess (session *sess)
 {
 	if (sess->immutable == TRUE)
@@ -1052,7 +1053,7 @@ mg_close_sess (session *sess)
 
 	if (sess_list->next == NULL)
 	{
-		xchat_exit();
+		mg_quit();
 		return;
 	}
 
@@ -2642,7 +2643,7 @@ mg_tabwindow_de_cb (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 		list = list->next;
 	}
 
-	mg_open_quit_dialog (TRUE);
+	mg_quit();
 	return TRUE;
 }
 

@@ -404,7 +404,7 @@ tray_menu_restore_cb (GtkWidget *item, gpointer userdata)
 static void
 tray_menu_quit_cb (GtkWidget *item, gpointer userdata)
 {
-	mg_open_quit_dialog (FALSE);
+	mg_quit();
 }
 
 static void

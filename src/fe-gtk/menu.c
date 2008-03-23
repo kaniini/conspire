@@ -1006,7 +1006,7 @@ menu_close (GtkWidget * wid, gpointer none)
 static void
 menu_quit (GtkWidget * wid, gpointer none)
 {
-	mg_open_quit_dialog (FALSE);
+	mg_quit();
 }
 
 static void
