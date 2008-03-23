@@ -1438,19 +1438,6 @@ mg_tab_contextmenu_cb (chanview *cv, chan *ch, int tag, gpointer ud, GdkEventBut
 
 	if (tag == TAG_IRC)
 	{
-		char *name = g_markup_escape_text (sess->channel[0] ? sess->channel : _("<none>"), -1);
-		snprintf (buf, sizeof (buf), "<span foreground=\"#3344cc\"><b>%s</b></span>", name);
-		g_free (name);
-		item = gtk_menu_item_new_with_label ("");
-		gtk_label_set_markup (GTK_LABEL (GTK_BIN (item)->child), buf);
-		gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
-		gtk_widget_show (item);
-
-		/* separator */
-		item = gtk_menu_item_new ();
-		gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
-		gtk_widget_show (item);
-
 		menu_toggle_item (_("Beep on message"), menu, mg_beepmsg_cb, sess,
 								sess->beep);
 		if (prefs.gui_tray)
