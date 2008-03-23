@@ -1996,7 +1996,6 @@ mg_update_xtext (GtkWidget *wid)
 
 	gtk_xtext_set_palette (xtext, colors);
 	gtk_xtext_set_max_lines (xtext, prefs.max_lines);
-	gtk_xtext_set_background (xtext, channelwin_pix, prefs.transparent);
 	gtk_xtext_set_wordwrap (xtext, prefs.wordwrap);
 	gtk_xtext_set_show_marker (xtext, prefs.show_marker);
 	gtk_xtext_set_show_separator (xtext, prefs.indent_nicks ? prefs.show_separator : 0);

@@ -509,18 +509,6 @@ gtk_xtext_destroy (GtkObject * object)
 		xtext->adj = NULL;
 	}
 
-	if (xtext->bgc)
-	{
-		g_object_unref (xtext->bgc);
-		xtext->bgc = NULL;
-	}
-
-	if (xtext->fgc)
-	{
-		g_object_unref (xtext->fgc);
-		xtext->fgc = NULL;
-	}
-
 	if (xtext->hand_cursor)
 	{
 		gdk_cursor_unref (xtext->hand_cursor);
@@ -591,11 +579,6 @@ gtk_xtext_realize (GtkWidget * widget)
 	val.subwindow_mode = GDK_INCLUDE_INFERIORS;
 	val.graphics_exposures = 0;
 
-	xtext->bgc = gdk_gc_new_with_values (widget->window, &val,
-													 GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
-	xtext->fgc = gdk_gc_new_with_values (widget->window, &val,
-													 GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
-
 	xtext_set_fg(xtext, XTEXT_FG);
 	xtext_set_bg(xtext, XTEXT_BG);
 
@@ -605,13 +588,7 @@ gtk_xtext_realize (GtkWidget * widget)
 	cairo_set_line_width(xtext->draw_cr, 1.0);
 	cairo_set_antialias(xtext->draw_cr, CAIRO_ANTIALIAS_NONE);
 
-	if (xtext->pixmap)
-	{
-		gdk_gc_set_tile (xtext->bgc, xtext->pixmap);
-		gdk_gc_set_ts_origin (xtext->bgc, 0, 0);
-		xtext->ts_x = xtext->ts_y = 0;
-		gdk_gc_set_fill (xtext->bgc, GDK_TILED);
-	}
+	xtext->fgc = gdk_gc_new(xtext->draw_buf);
 
 	xtext->hand_cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (widget->window), GDK_HAND1);
 	xtext->resize_cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (widget->window), GDK_LEFT_SIDE);
@@ -2106,8 +2083,7 @@ gtk_xtext_text_width (GtkXText *xtext, unsigned char *text, int len,
 /* actually draw text to screen (one run with the same color/attribs) */
 
 static int
-gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
-								int len, GdkGC *gc, int is_mb)
+gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str, int len, int is_mb)
 {
 	int str_width, dofill;
 	GdkDrawable *pix = NULL;
@@ -2146,8 +2122,6 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 		dest_x = x;
 		dest_y = y - xtext->font->ascent;
 
-		gdk_gc_set_ts_origin (xtext->bgc, xtext->ts_x - x, xtext->ts_y - dest_y);
-
 		x = 0;
 		y = 0;
 		xtext->draw_buf = pix;
@@ -2161,9 +2135,12 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 	{
 		GdkRectangle clip;
 		GdkRectangle dest;
+		GdkGC *gc;
 
-		gdk_gc_set_ts_origin (xtext->bgc, xtext->ts_x, xtext->ts_y);
 		xtext->draw_buf = GTK_WIDGET (xtext)->window;
+		gc = gdk_gc_new(xtext->draw_buf);
+
+		gdk_gc_set_ts_origin (gc, xtext->ts_x, xtext->ts_y);
 
 		clip.x = xtext->clip_x;
 		clip.y = xtext->clip_y;
@@ -2176,11 +2153,10 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 		dest.height = xtext->fontsize;
 
 		if (gdk_rectangle_intersect (&clip, &dest, &dest))
-			/* dump the DB to window, but only within the clip_x/x2/y/y2 */
-			gdk_draw_drawable (xtext->draw_buf, xtext->bgc, pix,
-									 dest.x - dest_x, dest.y - dest_y,
-									 dest.x, dest.y, dest.width, dest.height);
-		g_object_unref (pix);
+			gdk_draw_drawable (xtext->draw_buf, gc, pix, dest.x - dest_x, dest.y - dest_y, dest.x, dest.y, dest.width, dest.height);
+
+		g_object_unref(gc);
+		g_object_unref(pix);
 	}
 
 	if (xtext->underline)
@@ -2194,8 +2170,11 @@ dounder:
 			dest_x = x;
 		}
 
-		/* draw directly to window, it's out of the range of our DB */
-		gdk_draw_line (xtext->draw_buf, gc, dest_x, y, dest_x + str_width - 1, y);
+		cairo_move_to(xtext->draw_cr, dest_x, y);
+		cairo_rel_line_to(xtext->draw_cr, str_width - 1, 0);
+
+		gdk_cairo_set_source_color(xtext->draw_cr, xtext->fgcol);		
+		cairo_stroke(xtext->draw_cr);
 	}
 
 	return str_width;
@@ -2217,7 +2196,7 @@ gtk_xtext_reset (GtkXText * xtext, int mark, int attribs)
 		if (xtext->col_fore != XTEXT_FG)
 			xtext_set_fg(xtext, XTEXT_FG);
 		if (xtext->col_back != XTEXT_BG)
-			gdk_gc_set_background(xtext->fgc, &xtext->palette[XTEXT_BG]);
+			xtext_set_bg(xtext, XTEXT_BG);
 	}
 	xtext->col_fore = XTEXT_FG;
 	xtext->col_back = XTEXT_BG;
@@ -2233,7 +2212,6 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 							 unsigned char *str, int len, int win_width, int indent,
 							 int line, int left_only, int *x_size_ret)
 {
-	GdkGC *gc;
 	int i = 0, x = indent, j = 0;
 	unsigned char *pstr = str;
 	int col_num, tmp;
@@ -2247,8 +2225,6 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 
 	if (line < 255 && line >= 0)
 		xtext->buffer->grid_offset[line] = offset;
-
-	gc = xtext->fgc;				  /* our foreground GC */
 
 	if (ent->mark_start != -1 &&
 		 ent->mark_start <= i + offset && ent->mark_end > i + offset)
@@ -2298,7 +2274,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 	{
 		if (xtext->hilight_ent == ent && xtext->hilight_start == (i + offset))
 		{
-			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 			pstr += j;
 			j = 0;
 			if (!xtext->un_hilight)
@@ -2357,7 +2333,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 							xtext->backcolor = TRUE;
 
 						if (!mark)
-							gdk_gc_set_background(gc, &xtext->palette[col_num]);
+							xtext_set_bg(xtext, col_num);
 
 						xtext->col_back = col_num;
 					}
@@ -2379,7 +2355,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 				else
 				{
 					/* got a \003<non-digit>... i.e. reset colors */
-					x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+					x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 					pstr += j;
 					j = 0;
 					gtk_xtext_reset (xtext, mark, FALSE);
@@ -2392,7 +2368,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			/*case ATTR_BEEP:*/
 				break;
 			case ATTR_REVERSE:
-				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 				pstr += j + 1;
 				j = 0;
 				tmp = xtext->col_fore;
@@ -2409,37 +2385,37 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 					xtext->backcolor = FALSE;
 				break;
 			case ATTR_BOLD:
-				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 				xtext->bold = !xtext->bold;
 				pstr += j + 1;
 				j = 0;
 				break;
 			case ATTR_UNDERLINE:
-				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 				xtext->underline = !xtext->underline;
 				pstr += j + 1;
 				j = 0;
 				break;
 			case ATTR_ITALICS:
-				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 				xtext->italics = !xtext->italics;
 				pstr += j + 1;
 				j = 0;
 				break;
 			case ATTR_HIDDEN:
-				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 				xtext->hidden = (!xtext->hidden) & (!xtext->ignore_hidden);
 				pstr += j + 1;
 				j = 0;
 				break;
 			case ATTR_RESET:
-				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 				pstr += j + 1;
 				j = 0;
 				gtk_xtext_reset (xtext, mark, !xtext->in_hilight);
 				break;
 			case ATTR_COLOR:
-				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 				xtext->parsing_color = TRUE;
 				pstr += j + 1;
 				j = 0;
@@ -2466,13 +2442,13 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			/* we've reached the end of the left part? */
 			if ((pstr-str)+j == ent->left_len)
 			{
-				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 				pstr += j;
 				j = 0;
 			}
 			else if ((pstr-str)+j == ent->left_len+1)
 			{
-				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 				pstr += j;
 				j = 0;
 			}
@@ -2481,7 +2457,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 		/* have we been told to stop rendering at this point? */
 		if (xtext->jump_out_offset > 0 && xtext->jump_out_offset <= (i + offset))
 		{
-			gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+			gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 			ret = 0;	/* skip the rest of the lines, we're done. */
 			j = 0;
 			break;
@@ -2489,7 +2465,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 
 		if (xtext->jump_in_offset > 0 && xtext->jump_in_offset == (i + offset))
 		{
-			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 			pstr += j;
 			j = 0;
 			xtext->dont_render2 = FALSE;
@@ -2497,7 +2473,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 
 		if (xtext->hilight_ent == ent && xtext->hilight_end == (i + offset))
 		{
-			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 			pstr += j;
 			j = 0;
 
@@ -2514,7 +2490,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 
 		if (!mark && ent->mark_start == (i + offset))
 		{
-			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 			pstr += j;
 			j = 0;
 			xtext_set_fg(xtext, XTEXT_MARK_FG);
@@ -2525,7 +2501,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 
 		if (mark && ent->mark_end == (i + offset))
 		{
-			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 			pstr += j;
 			j = 0;
 			xtext_set_fg(xtext, xtext->col_fore);
@@ -2540,7 +2516,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 	}
 
 	if (j)
-		x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
+		x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 
 	if (mark)
 	{
@@ -2983,44 +2959,6 @@ gtk_xtext_set_font (GtkXText *xtext, char *name)
 		gtk_xtext_recalc_widths (xtext->buffer, TRUE);
 
 	return TRUE;
-}
-
-void
-gtk_xtext_set_background (GtkXText * xtext, GdkPixmap * pixmap, gboolean trans)
-{
-	GdkGCValues val;
-	trans = FALSE;
-
-	if (xtext->pixmap)
-	{
-		g_object_unref (xtext->pixmap);
-		xtext->pixmap = NULL;
-	}
-
-	xtext->transparent = trans;
-
-	dontscroll (xtext->buffer);
-	xtext->pixmap = pixmap;
-
-	if (pixmap != 0)
-	{
-		g_object_ref (pixmap);
-		if (GTK_WIDGET_REALIZED (xtext))
-		{
-			gdk_gc_set_tile (xtext->bgc, pixmap);
-			gdk_gc_set_ts_origin (xtext->bgc, 0, 0);
-			xtext->ts_x = xtext->ts_y = 0;
-			gdk_gc_set_fill (xtext->bgc, GDK_TILED);
-		}
-	} else if (GTK_WIDGET_REALIZED (xtext))
-	{
-		g_object_unref (xtext->bgc);
-		val.subwindow_mode = GDK_INCLUDE_INFERIORS;
-		val.graphics_exposures = 0;
-		xtext->bgc = gdk_gc_new_with_values (GTK_WIDGET (xtext)->window,
-								&val, GDK_GC_EXPOSURES | GDK_GC_SUBWINDOW);
-		xtext_set_bg(xtext, XTEXT_BG);
-	}
 }
 
 void
