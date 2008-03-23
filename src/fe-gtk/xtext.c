@@ -1,5 +1,8 @@
-/* X-Chat
- * Copyright (C) 1998 Peter Zelezny.
+/* Conspire
+ * Copyright (c) 2007,2008 William Pitcock
+ *
+ * X-Chat
+ * Copyright (C) 1998 Peter Zelezny
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,24 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
- * =========================================================================
- *
- * xtext, the text widget used by X-Chat.
- * By Peter Zelezny <zed@xchat.org>.
- *
  */
 
-#define MOTION_MONITOR				/* URL hilights. */
-#define SMOOTH_SCROLL				/* line-by-line or pixel scroll? */
-#define SCROLL_HACK					/* use XCopyArea scroll, or full redraw? */
-/* Italic is buggy because it assumes drawing an italic string will have
-   identical extents to the normal font. This is only true some of the
-   time, so we can't use this hack yet. */
-#undef ITALIC							/* support Italic? */
-#define GDK_MULTIHEAD_SAFE
-#define USE_DB							/* double buffer */
+/*
+ * This is XText-NG. It is a refactored version of XText, which was quite
+ * ancient. It was written to address the following issues with the original
+ * XText:
+ *
+ *   - direct manipulation of video memory
+ *   - overall speed
+ *   - other things
+ */
 
-#define MARGIN 2						/* dont touch. */
+/*
+ * MARGIN defines the margin used for the widget. Use the default of 2 unless
+ * you know what you're doing.
+ */
+#define MARGIN 2
 #define REFRESH_TIMEOUT 20
 #define WORDWRAP_LIMIT 24
 
@@ -56,12 +58,8 @@
 	(c == ' ' || c == '\n' || c == ')' || c == '(' || \
 	 c == '>' || c == '<' || c == ATTR_RESET || c == ATTR_BOLD || c == 0)
 
-#ifdef SCROLL_HACK
 /* force scrolling off */
 #define dontscroll(buf) (buf)->last_pixel_pos = 0x7fffffff
-#else
-#define dontscroll(buf)
-#endif
 
 static GtkWidgetClass *parent_class = NULL;
 
@@ -144,9 +142,7 @@ static void
 backend_font_close (GtkXText *xtext)
 {
 	pango_font_description_free (xtext->font->font);
-#ifdef ITALIC
 	pango_font_description_free (xtext->font->ifont);
-#endif
 }
 
 static void
@@ -201,10 +197,9 @@ backend_font_open (GtkXText *xtext, char *name)
 		xtext->font = NULL;
 		return;
 	}
-#ifdef ITALIC
+
 	xtext->font->ifont = backend_font_open_real (name);
 	pango_font_description_set_style (xtext->font->ifont, PANGO_STYLE_ITALIC);
-#endif
 
 	backend_init (xtext);
 	pango_layout_set_font_description (xtext->layout, xtext->font->font);
@@ -289,10 +284,8 @@ backend_draw_text (GtkXText *xtext, int dofill, GdkGC *gc, int x, int y,
 	GdkColor col;
 	PangoLayoutLine *line;
 
-#ifdef ITALIC
 	if (xtext->italics)
 		pango_layout_set_font_description (xtext->layout, xtext->font->ifont);
-#endif
 
 	pango_layout_set_text (xtext->layout, str, len);
 
@@ -317,25 +310,9 @@ backend_draw_text (GtkXText *xtext, int dofill, GdkGC *gc, int x, int y,
 	if (xtext->bold)
 		xtext_draw_layout_line (xtext->draw_buf, gc, x + 1, y, line);
 
-#ifdef ITALIC
 	if (xtext->italics)
 		pango_layout_set_font_description (xtext->layout, xtext->font->font);
-#endif
 }
-
-/*static void
-backend_set_clip (GtkXText *xtext, GdkRectangle *area)
-{
-	gdk_gc_set_clip_rectangle (xtext->fgc, area);
-	gdk_gc_set_clip_rectangle (xtext->bgc, area);
-}
-
-static void
-backend_clear_clip (GtkXText *xtext)
-{
-	gdk_gc_set_clip_rectangle (xtext->fgc, NULL);
-	gdk_gc_set_clip_rectangle (xtext->bgc, NULL);
-}*/
 
 static void
 xtext_set_fg (GtkXText *xtext, GdkGC *gc, int index)
@@ -369,10 +346,10 @@ gtk_xtext_init (GtkXText * xtext)
 	xtext->pixel_offset = 0;
 	xtext->bold = FALSE;
 	xtext->underline = FALSE;
-	xtext->italics = FALSE;
 	xtext->hidden = FALSE;
 	xtext->font = NULL;
 	xtext->layout = NULL;
+	xtext->italics = FALSE;
 	xtext->jump_out_offset = 0;
 	xtext->jump_in_offset = 0;
 	xtext->ts_x = 0;
@@ -457,11 +434,7 @@ gtk_xtext_adjustment_timeout (GtkXText * xtext)
 static void
 gtk_xtext_adjustment_changed (GtkAdjustment * adj, GtkXText * xtext)
 {
-#ifdef SMOOTH_SCROLL
 	if (xtext->buffer->old_value != xtext->adj->value)
-#else
-	if ((int) xtext->buffer->old_value != (int) xtext->adj->value)
-#endif
 	{
 		if (xtext->adj->value >= xtext->adj->upper - xtext->adj->page_size)
 			xtext->buffer->scrollbar_down = TRUE;
@@ -640,11 +613,7 @@ gtk_xtext_realize (GtkWidget * widget)
 	attributes.window_type = GDK_WINDOW_CHILD;
 	attributes.event_mask = gtk_widget_get_events (widget) |
 		GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK
-#ifdef MOTION_MONITOR
 		| GDK_POINTER_MOTION_MASK | GDK_LEAVE_NOTIFY_MASK;
-#else
-		| GDK_POINTER_MOTION_MASK;
-#endif
 
 	cmap = gtk_widget_get_colormap (widget);
 	attributes.colormap = cmap;
@@ -1484,8 +1453,6 @@ gtk_xtext_get_word (GtkXText * xtext, int x, int y, textentry ** ret_ent,
 	return gtk_xtext_strip_color (word, len, xtext->scratch_buffer, NULL, NULL, FALSE);
 }
 
-#ifdef MOTION_MONITOR
-
 static void
 gtk_xtext_unrender_hilight (GtkXText *xtext)
 {
@@ -1530,10 +1497,7 @@ gtk_xtext_leave_notify (GtkWidget * widget, GdkEventCrossing * event)
 	return FALSE;
 }
 
-#endif
-
 /* check if we should mark time stamps, and if a redraw is needed */
-
 static gboolean
 gtk_xtext_check_mark_stamp (GtkXText *xtext, GdkModifierType mask)
 {
@@ -1613,7 +1577,6 @@ gtk_xtext_motion_notify (GtkWidget * widget, GdkEventMotion * event)
 		}
 		return FALSE;
 	}
-#ifdef MOTION_MONITOR
 
 	if (xtext->separator && xtext->buffer->indent)
 	{
@@ -1673,8 +1636,6 @@ gtk_xtext_motion_notify (GtkWidget * widget, GdkEventMotion * event)
 	}
 
 	gtk_xtext_leave_notify (widget, NULL);
-
-#endif
 
 	return FALSE;
 }
@@ -2100,9 +2061,7 @@ gtk_xtext_class_init (GtkXTextClass * class)
 	widget_class->selection_get = gtk_xtext_selection_get;
 	widget_class->expose_event = gtk_xtext_expose;
 	widget_class->scroll_event = gtk_xtext_scroll;
-#ifdef MOTION_MONITOR
 	widget_class->leave_notify_event = gtk_xtext_leave_notify;
-#endif
 
 	xtext_class->word_click = NULL;
 }
@@ -2255,7 +2214,6 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 			goto dounder;
 	}
 
-#ifdef USE_DB
 	if (str_width)
 		pix = gdk_pixmap_new (xtext->draw_buf, str_width, xtext->fontsize, xtext->depth);
 	else
@@ -2272,7 +2230,6 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 		y = xtext->font->ascent;
 		xtext->draw_buf = pix;
 	}
-#endif
 
 	dofill = TRUE;
 
@@ -2287,7 +2244,6 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 
 	backend_draw_text (xtext, dofill, gc, x, y, str, len, str_width, is_mb);
 
-#ifdef USE_DB
 	if (pix)
 	{
 		GdkRectangle clip;
@@ -2295,10 +2251,7 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 
 		gdk_gc_set_ts_origin (xtext->bgc, xtext->ts_x, xtext->ts_y);
 		xtext->draw_buf = GTK_WIDGET (xtext)->window;
-#if 0
-		gdk_draw_drawable (xtext->draw_buf, xtext->bgc, pix, 0, 0, dest_x,
-								 dest_y, str_width, xtext->fontsize);
-#else
+
 		clip.x = xtext->clip_x;
 		clip.y = xtext->clip_y;
 		clip.width = xtext->clip_x2 - xtext->clip_x;
@@ -2314,10 +2267,8 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 			gdk_draw_drawable (xtext->draw_buf, xtext->bgc, pix,
 									 dest.x - dest_x, dest.y - dest_y,
 									 dest.x, dest.y, dest.width, dest.height);
-#endif
 		g_object_unref (pix);
 	}
-#endif
 
 	if (xtext->underline)
 	{
@@ -2394,7 +2345,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 		xtext->backcolor = TRUE;
 		mark = TRUE;
 	}
-#ifdef MOTION_MONITOR
+
 	if (xtext->hilight_ent == ent &&
 		 xtext->hilight_start <= i + offset && xtext->hilight_end > i + offset)
 	{
@@ -2404,7 +2355,6 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 		}
 		xtext->in_hilight = TRUE;
 	}
-#endif
 
 	if (!xtext->skip_border_fills && !xtext->dont_render)
 	{
@@ -2433,8 +2383,6 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 
 	while (i < len)
 	{
-
-#ifdef MOTION_MONITOR
 		if (xtext->hilight_ent == ent && xtext->hilight_start == (i + offset))
 		{
 			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
@@ -2445,7 +2393,6 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 
 			xtext->in_hilight = TRUE;
 		}
-#endif
 
 		if ((xtext->parsing_color && isdigit (str[i]) && xtext->nc < 2) ||
 			 (xtext->parsing_color && str[i] == ',' && isdigit (str[i+1]) && xtext->nc < 3 && !xtext->parsing_backcolor))
@@ -2626,7 +2573,6 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			xtext->dont_render2 = FALSE;
 		}
 
-#ifdef MOTION_MONITOR
 		if (xtext->hilight_ent == ent && xtext->hilight_end == (i + offset))
 		{
 			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
@@ -2643,7 +2589,6 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 				break;
 			}
 		}
-#endif
 
 		if (!mark && ent->mark_start == (i + offset))
 		{
@@ -3393,6 +3338,8 @@ gtk_xtext_render_ents (GtkXText * xtext, textentry * enta, textentry * entb)
 static void
 gtk_xtext_render_page (GtkXText * xtext)
 {
+	int pos, overlap;
+	GdkRectangle area;
 	textentry *ent;
 	int line;
 	int lines_max;
@@ -3412,11 +3359,7 @@ gtk_xtext_render_page (GtkXText * xtext)
 	if (width < 34 || height < xtext->fontsize || width < xtext->buffer->indent + 32)
 		return;
 
-#ifdef SMOOTH_SCROLL
 	xtext->pixel_offset = (xtext->adj->value - startline) * xtext->fontsize;
-#else
-	xtext->pixel_offset = 0;
-#endif
 
 	subline = line = 0;
 	ent = xtext->buffer->text_first;
@@ -3428,29 +3371,14 @@ gtk_xtext_render_page (GtkXText * xtext)
 	xtext->buffer->pagetop_subline = subline;
 	xtext->buffer->pagetop_line = startline;
 
-#ifdef SCROLL_HACK
-{
-	int pos, overlap;
-	GdkRectangle area;
-
 	if (xtext->buffer->num_lines <= xtext->adj->page_size)
 		dontscroll (xtext->buffer);
 
-#ifdef SMOOTH_SCROLL
 	pos = xtext->adj->value * xtext->fontsize;
-#else
-	pos = startline * xtext->fontsize;
-#endif
 	overlap = xtext->buffer->last_pixel_pos - pos;
 	xtext->buffer->last_pixel_pos = pos;
 
-#ifdef USE_DB
 	if (!xtext->pixmap && abs (overlap) < height)
-#else
-	/* dont scroll PageUp/Down without a DB, it looks ugly */
-	if (!xtext->pixmap && abs (overlap) < height - (3*xtext->fontsize))
-#endif
-#endif
 	{
 		/* so the obscured regions are exposed */
 		gdk_gc_set_exposures (xtext->fgc, TRUE);
@@ -3483,7 +3411,6 @@ gtk_xtext_render_page (GtkXText * xtext)
 
 		return;
 	}
-}
 
 	xtext->buffer->grid_dirty = FALSE;
 	width -= MARGIN;
@@ -3801,11 +3728,9 @@ gtk_xtext_append_entry (xtext_buffer *buf, textentry * ent, time_t stamp)
 
 	if (buf->xtext->buffer == buf)
 	{
-#ifdef SCROLL_HACK
 		/* this could be improved */
 		if ((buf->num_lines - 1) <= buf->xtext->adj->page_size)
 			dontscroll (buf);
-#endif
 
 		if (!buf->xtext->add_io_tag)
 		{
