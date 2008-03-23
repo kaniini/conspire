@@ -541,7 +541,6 @@ gtk_xtext_realize (GtkWidget * widget)
 {
 	GtkXText *xtext;
 	GdkWindowAttr attributes;
-	GdkGCValues val;
 	GdkColormap *cmap;
 
 	GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
@@ -568,9 +567,6 @@ gtk_xtext_realize (GtkWidget * widget)
 	gdk_window_set_user_data (widget->window, widget);
 
 	xtext->depth = gdk_drawable_get_visual (widget->window)->depth;
-
-	val.subwindow_mode = GDK_INCLUDE_INFERIORS;
-	val.graphics_exposures = 0;
 
 	xtext_set_fg(xtext, XTEXT_FG);
 	xtext_set_bg(xtext, XTEXT_BG);
