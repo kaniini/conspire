@@ -303,11 +303,6 @@ backend_draw_text (GtkXText *xtext, int dofill, GdkGC *gc, int x, int y,
 		cairo_paint(cr);
 
 		cairo_reset_clip(cr);
-#if 0
-		gdk_gc_set_foreground (gc, &val.background);
-		gdk_draw_rectangle (xtext->draw_buf, gc, 1, x, y, str_width, xtext->fontsize);
-		gdk_gc_set_foreground (gc, &val.foreground);
-#endif
 	}
 
 	gdk_cairo_set_source_color(cr, xtext->fgcol);
