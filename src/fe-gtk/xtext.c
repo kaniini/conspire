@@ -286,7 +286,7 @@ backend_draw_text (GtkXText *xtext, int dofill, GdkGC *gc, int x, int y,
 
 	if (xtext->bold)
 	{
-		cairo_move_to(cr, x + 1, y);
+		cairo_rel_move_to(cr, 1, 0);
 		pango_cairo_show_layout(cr, xtext->layout);
 	}
 
