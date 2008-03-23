@@ -94,7 +94,6 @@ struct _GtkXText
 #endif
 
 	GtkAdjustment *adj;
-	GdkPixmap *pixmap;				/* 0 = use palette[19] */
 
 	GdkDrawable *draw_buf;			/* points to ->window */
 	cairo_t *draw_cr;			/* used for queueing draw operations. */
@@ -108,8 +107,6 @@ struct _GtkXText
 	int last_win_y;
 	int last_win_h;
 	int last_win_w;
-
-	GdkGC *fgc;						  /* text foreground color */
 
 	GdkColor *fgcol;
 	GdkColor *bgcol;

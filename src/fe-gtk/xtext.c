@@ -321,7 +321,6 @@ backend_draw_text (GtkXText *xtext, int dofill, int x, int y, const gchar *str, 
 static void
 gtk_xtext_init (GtkXText * xtext)
 {
-	xtext->pixmap = NULL;
 	xtext->io_tag = 0;
 	xtext->add_io_tag = 0;
 	xtext->scroll_tag = 0;
@@ -488,12 +487,6 @@ gtk_xtext_destroy (GtkObject * object)
 		xtext->io_tag = 0;
 	}
 
-	if (xtext->pixmap)
-	{
-		g_object_unref (xtext->pixmap);
-		xtext->pixmap = NULL;
-	}
-
 	if (xtext->font)
 	{
 		backend_font_close (xtext);
@@ -587,8 +580,6 @@ gtk_xtext_realize (GtkWidget * widget)
 	xtext->draw_cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
 	cairo_set_line_width(xtext->draw_cr, 1.0);
 	cairo_set_antialias(xtext->draw_cr, CAIRO_ANTIALIAS_NONE);
-
-	xtext->fgc = gdk_gc_new(xtext->draw_buf);
 
 	xtext->hand_cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (widget->window), GDK_HAND1);
 	xtext->resize_cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (widget->window), GDK_LEFT_SIDE);
@@ -3231,15 +3222,16 @@ gtk_xtext_render_page (GtkXText * xtext)
 	overlap = xtext->buffer->last_pixel_pos - pos;
 	xtext->buffer->last_pixel_pos = pos;
 
-	if (!xtext->pixmap && abs (overlap) < height)
+	if (abs (overlap) < height)
 	{
-		/* so the obscured regions are exposed */
-		gdk_gc_set_exposures (xtext->fgc, TRUE);
+		GdkGC *gc = gdk_gc_new(xtext->draw_buf);
+		gdk_gc_set_exposures(gc, TRUE);
+
 		if (overlap < 1)	/* DOWN */
 		{
 			int remainder;
 
-			gdk_draw_drawable (xtext->draw_buf, xtext->fgc, xtext->draw_buf,
+			gdk_draw_drawable (xtext->draw_buf, gc, xtext->draw_buf,
 									 0, -overlap, 0, 0, width, height + overlap);
 			remainder = ((height - xtext->font->descent) % xtext->fontsize) +
 							xtext->font->descent;
@@ -3247,12 +3239,13 @@ gtk_xtext_render_page (GtkXText * xtext)
 			area.height = remainder - overlap;
 		} else
 		{
-			gdk_draw_drawable (xtext->draw_buf, xtext->fgc, xtext->draw_buf,
+			gdk_draw_drawable (xtext->draw_buf, gc, xtext->draw_buf,
 									 0, 0, 0, overlap, width, height - overlap);
 			area.y = 0;
 			area.height = overlap;
 		}
-		gdk_gc_set_exposures (xtext->fgc, FALSE);
+
+		g_object_unref(gc);
 
 		if (area.height > 0)
 		{
