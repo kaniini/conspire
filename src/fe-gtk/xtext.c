@@ -153,8 +153,6 @@ xtext_set_bg(GtkXText *xtext, gint color)
 	g_return_if_fail(xtext != NULL);
 
 	xtext->bgcol = &xtext->palette[color];
-	gdk_gc_set_foreground(xtext->bgc, xtext->bgcol);
-	gdk_gc_set_background(xtext->fgc, xtext->bgcol);
 }
 
 static void
@@ -163,7 +161,6 @@ xtext_set_fg(GtkXText *xtext, gint color)
 	g_return_if_fail(xtext != NULL);
 
 	xtext->fgcol = &xtext->palette[color];
-	gdk_gc_set_foreground(xtext->fgc, xtext->bgcol);
 }
 
 /* ======================================= */
@@ -281,18 +278,14 @@ backend_get_char_width (GtkXText *xtext, unsigned char *str, int *mbl_ret)
 }
 
 static void
-backend_draw_text (GtkXText *xtext, int dofill, GdkGC *gc, int x, int y,
-						 char *str, int len, int str_width, int is_mb)
+backend_draw_text (GtkXText *xtext, int dofill, int x, int y, const gchar *str, int len, int str_width, int is_mb)
 {
-	GdkGCValues val;
 	cairo_t *cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
 
 	if (xtext->italics)
 		pango_layout_set_font_description (xtext->layout, xtext->font->ifont);
 
 	pango_layout_set_text (xtext->layout, str, len);
-
-	gdk_gc_get_values (gc, &val);
 
 	if (dofill)
 	{
@@ -2162,7 +2155,7 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 
 	dofill = TRUE;
 
-	backend_draw_text (xtext, dofill, gc, x, y, str, len, str_width, is_mb);
+	backend_draw_text (xtext, dofill, x, y, str, len, str_width, is_mb);
 
 	if (pix)
 	{
