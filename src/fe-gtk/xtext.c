@@ -24,7 +24,6 @@
 #define MOTION_MONITOR				/* URL hilights. */
 #define SMOOTH_SCROLL				/* line-by-line or pixel scroll? */
 #define SCROLL_HACK					/* use XCopyArea scroll, or full redraw? */
-#undef COLOR_HILIGHT				/* Color instead of underline? */
 /* Italic is buggy because it assumes drawing an italic string will have
    identical extents to the normal font. This is only true some of the
    time, so we can't use this hack yet. */
@@ -2251,10 +2250,9 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 	{
 		if (!xtext->in_hilight)	/* is it a hilight prefix? */
 			return str_width;
-#ifndef COLOR_HILIGHT
+
 		if (!xtext->un_hilight)	/* doing a hilight? no need to draw the text */
 			goto dounder;
-#endif
 	}
 
 #ifdef USE_DB
@@ -2323,10 +2321,7 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str,
 
 	if (xtext->underline)
 	{
-
-#ifndef COLOR_HILIGHT
 dounder:
-#endif
 		if (pix)
 			y = dest_y + xtext->font->ascent + 1;
 		else
@@ -2334,6 +2329,7 @@ dounder:
 			y++;
 			dest_x = x;
 		}
+
 		/* draw directly to window, it's out of the range of our DB */
 		gdk_draw_line (xtext->draw_buf, gc, dest_x, y, dest_x + str_width - 1, y);
 	}
@@ -2404,11 +2400,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 	{
 		if (!xtext->un_hilight)
 		{
-#ifdef COLOR_HILIGHT
-			xtext_set_bg (xtext, gc, 2);
-#else
 			xtext->underline = TRUE;
-#endif
 		}
 		xtext->in_hilight = TRUE;
 	}
@@ -2449,13 +2441,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			pstr += j;
 			j = 0;
 			if (!xtext->un_hilight)
-			{
-#ifdef COLOR_HILIGHT
-				xtext_set_bg (xtext, gc, 2);
-#else
 				xtext->underline = TRUE;
-#endif
-			}
 
 			xtext->in_hilight = TRUE;
 		}
@@ -2646,23 +2632,10 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			x += gtk_xtext_render_flush (xtext, x, y, pstr, j, gc, ent->mb);
 			pstr += j;
 			j = 0;
-#ifdef COLOR_HILIGHT
-			if (mark)
-			{
-				xtext_set_bg (xtext, gc, XTEXT_MARK_BG);
-				xtext->backcolor = TRUE;
-			} else
-			{
-				xtext_set_bg (xtext, gc, xtext->col_back);
-				if (xtext->col_back != XTEXT_BG)
-					xtext->backcolor = TRUE;
-				else
-					xtext->backcolor = FALSE;
-			}
-#else
+
 			xtext->underline = FALSE;
-#endif
 			xtext->in_hilight = FALSE;
+
 			if (xtext->render_hilights_only)
 			{
 				/* stop drawing this ent */
