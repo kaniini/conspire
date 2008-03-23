@@ -1401,14 +1401,17 @@ mg_tab_contextmenu_cb (chanview *cv, chan *ch, int tag, gpointer ud, GdkEventBut
 
 	if (tag == TAG_IRC)
 	{
-		mg_create_icon_item(_("_Disconnect"), GTK_STOCK_DISCONNECT, menu,
-			mg_disconnect_cb, sess);
-		mg_create_icon_item(_("_Reconnect"), GTK_STOCK_CONNECT, menu,
-			mg_reconnect_cb, sess);
+		if (sess->type == SESS_SERVER)
+		{
+			mg_create_icon_item(_("_Disconnect"), GTK_STOCK_DISCONNECT, menu,
+				mg_disconnect_cb, sess);
+			mg_create_icon_item(_("_Reconnect"), GTK_STOCK_CONNECT, menu,
+				mg_reconnect_cb, sess);
 
-		item = gtk_menu_item_new ();
-		gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
-		gtk_widget_show (item);
+			item = gtk_menu_item_new ();
+			gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+			gtk_widget_show (item);
+		}
 
 		menu_toggle_item (_("Beep on message"), menu, mg_beepmsg_cb, sess,
 								sess->beep);
