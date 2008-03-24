@@ -588,16 +588,9 @@ gtk_xtext_size_allocate (GtkWidget * widget, GtkAllocation * allocation)
 {
 	GtkXText *xtext = GTK_XTEXT (widget);
 	int height_only = FALSE;
-	int do_trans = TRUE;
 
 	if (allocation->width == xtext->buffer->window_width)
 		height_only = TRUE;
-
-	if (allocation->x == widget->allocation.x &&
-		 allocation->y == widget->allocation.y && xtext->avoid_trans)
-		do_trans = FALSE;
-
-	xtext->avoid_trans = FALSE;
 
 	widget->allocation = *allocation;
 	if (GTK_WIDGET_REALIZED (widget))
@@ -3259,7 +3252,7 @@ gtk_xtext_render_page (GtkXText * xtext)
 }
 
 void
-gtk_xtext_refresh (GtkXText * xtext, int do_trans)
+gtk_xtext_refresh (GtkXText * xtext)
 {
 	if (GTK_WIDGET_REALIZED (GTK_WIDGET (xtext)))
 		gtk_xtext_render_page (xtext);
@@ -3329,7 +3322,7 @@ gtk_xtext_clear (xtext_buffer *buf)
 	if (buf->xtext->buffer == buf)
 	{
 		gtk_xtext_calc_lines (buf, TRUE);
-		gtk_xtext_refresh (buf->xtext, 0);
+		gtk_xtext_refresh (buf->xtext);
 	} else
 	{
 		gtk_xtext_calc_lines (buf, FALSE);
@@ -3849,11 +3842,6 @@ gtk_xtext_buffer_show (GtkXText *xtext, xtext_buffer *buf, int render)
 
 		gtk_xtext_render_page (xtext);
 		gtk_adjustment_changed (xtext->adj);
-	}
-	else
-	{
-		/* avoid redoing the transparency */
-		xtext->avoid_trans = TRUE;
 	}
 }
 

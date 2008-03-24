@@ -2006,7 +2006,7 @@ mg_update_xtext (GtkWidget *wid)
 		exit (1);
 	}
 
-	gtk_xtext_refresh (xtext, FALSE);
+	gtk_xtext_refresh (xtext);
 }
 
 /* handle errors reported by xtext */
