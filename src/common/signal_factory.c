@@ -63,7 +63,7 @@ signal_attach_head(const gchar *signal, SignalHandler hdl)
 	sig->handlers = g_list_prepend(sig->handlers, hdl);
 }
 
-void
+gint
 signal_emit(const gchar *signal, int params, ...)
 {
 	gint i;
@@ -83,7 +83,7 @@ signal_emit(const gchar *signal, int params, ...)
 
 	va_end(va);
 
-	for (node = sig->handlers; node != NULL && sig->stop == FALSE; node = node->next)
+	for (i = 0, node = sig->handlers; node != NULL && sig->stop == FALSE; node = node->next, i++)
 	{
 		SignalHandler hdl = (SignalHandler) node->data;
 		hdl(sig->values);
@@ -92,6 +92,8 @@ signal_emit(const gchar *signal, int params, ...)
 	sig->stop = FALSE;
 	g_free(sig->values);
 	current_sig_ = NULL;
+
+	return i;
 }
 
 void

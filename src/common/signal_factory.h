@@ -33,7 +33,7 @@ typedef void (*SignalHandler)(gpointer *params);
 void signal_attach(const gchar *signal, SignalHandler hdl);
 void signal_attach_head(const gchar *signal, SignalHandler hdl);
 
-void signal_emit(const gchar *signal, int params, ...);
+gint signal_emit(const gchar *signal, int params, ...);
 void signal_continue(int params, ...);
 
 void signal_stop(const gchar *signal);
