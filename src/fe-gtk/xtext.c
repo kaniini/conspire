@@ -2163,13 +2163,10 @@ gtk_xtext_reset (GtkXText * xtext, int mark, int attribs)
 		xtext->hidden = FALSE;
 	}
 	if (!mark)
-	{
 		xtext->backcolor = FALSE;
-		if (xtext->col_fore != XTEXT_FG)
-			xtext_set_fg(xtext, XTEXT_FG);
-		if (xtext->col_back != XTEXT_BG)
-			xtext_set_bg(xtext, XTEXT_BG);
-	}
+
+	xtext_set_fg(xtext, XTEXT_FG);
+	xtext_set_bg(xtext, XTEXT_BG);
 	xtext->col_fore = XTEXT_FG;
 	xtext->col_back = XTEXT_BG;
 	xtext->parsing_color = FALSE;
