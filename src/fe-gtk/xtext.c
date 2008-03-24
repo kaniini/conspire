@@ -490,7 +490,6 @@ gtk_xtext_destroy (GtkObject * object)
 	{
 		g_signal_handlers_disconnect_matched (G_OBJECT (xtext->adj),
 					G_SIGNAL_MATCH_DATA, 0, 0, NULL, NULL, xtext);
-	/*	gtk_signal_disconnect_by_data (GTK_OBJECT (xtext->adj), xtext);*/
 		g_object_unref (G_OBJECT (xtext->adj));
 		xtext->adj = NULL;
 	}
@@ -2474,7 +2473,6 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 				xtext->backcolor = FALSE;
 			mark = FALSE;
 		}
-
 	}
 
 	if (j)
@@ -2737,7 +2735,7 @@ gtk_xtext_render_stamp (GtkXText * xtext, textentry * ent,
 
 static int
 gtk_xtext_render_line (GtkXText * xtext, textentry * ent, int line,
-							  int lines_max, int subline, int win_width)
+		       int lines_max, int subline, int win_width)
 {
 	unsigned char *str;
 	int indent, taken, entline, len, y, start_subline;
@@ -3526,11 +3524,7 @@ gtk_xtext_append_entry (xtext_buffer *buf, textentry * ent, time_t stamp)
 
 	if (buf->reset_marker_pos || 
 		((buf->marker_pos == NULL || buf->marker_seen) && (buf->xtext->buffer != buf || 
-#if GTK_CHECK_VERSION(2,4,0)
 		!gtk_window_has_toplevel_focus (GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (buf->xtext)))))))
-#else
-		!(GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (buf->xtext))))->has_focus)))
-#endif
 	{
 		buf->marker_pos = ent;
 		dontscroll (buf); /* force scrolling off */
@@ -3787,8 +3781,6 @@ gtk_xtext_buffer_show (GtkXText *xtext, xtext_buffer *buf, int render)
 
 	if (xtext->buffer == buf)
 		return;
-
-/*printf("text_buffer_show: xtext=%p buffer=%p\n", xtext, buf);*/
 
 	if (xtext->add_io_tag)
 	{
