@@ -2173,8 +2173,8 @@ gtk_xtext_reset (GtkXText * xtext, int mark, int attribs)
 
 static int
 gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
-							 unsigned char *str, int len, int win_width, int indent,
-							 int line, int left_only, int *x_size_ret)
+		      unsigned char *str, int len, int win_width, int indent,
+		      int line, int left_only, int *x_size_ret)
 {
 	int i = 0, x = indent, j = 0;
 	unsigned char *pstr = str;
@@ -2225,8 +2225,11 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			/* fill the indent area with background gc */
 			if (indent >= xtext->clip_x)
 			{
-				xtext_draw_bg (xtext, 0, y - xtext->font->ascent,
-									MIN (indent, xtext->clip_x2), xtext->fontsize);
+				GdkColor *old_bg = xtext->bgcol;
+
+				xtext->bgcol = &xtext->palette[XTEXT_BG];
+				xtext_draw_bg (xtext, 0, y - xtext->font->ascent, indent, xtext->fontsize);
+				xtext->bgcol = old_bg;
 			}
 		}
 	}
