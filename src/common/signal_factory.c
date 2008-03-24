@@ -22,7 +22,7 @@ static mowgli_dictionary_t *signal_dict_ = NULL;
 static Signal *current_sig_ = NULL;
 
 static Signal *
-signal_get(const gchar *signal)
+signal_get(const gchar *signal, gboolean allocate)
 {
 	Signal *sig;
 
@@ -31,6 +31,9 @@ signal_get(const gchar *signal)
 
 	if ((sig = mowgli_dictionary_retrieve(signal_dict_, signal)) != NULL)
 		return sig;
+
+	if (allocate == FALSE)
+		return NULL;
 
 	sig = g_slice_new0(Signal);
 	sig->name = signal;
@@ -44,7 +47,7 @@ signal_attach(const gchar *signal, SignalHandler hdl)
 {
 	Signal *sig;
 
-	sig = signal_get(signal);
+	sig = signal_get(signal, TRUE);
 
 	g_assert(sig != NULL);
 
@@ -56,7 +59,7 @@ signal_attach_head(const gchar *signal, SignalHandler hdl)
 {
 	Signal *sig;
 
-	sig = signal_get(signal);
+	sig = signal_get(signal, TRUE);
 
 	g_assert(sig != NULL);
 
@@ -71,7 +74,11 @@ signal_emit(const gchar *signal, int params, ...)
 	va_list va;
 	GList *node;
 
-	sig = signal_get(signal);
+	sig = signal_get(signal, FALSE);
+
+	if (sig == NULL)
+		return 0;
+
 	sig->values = g_new0(gpointer, params);
 
 	current_sig_ = sig;
@@ -122,7 +129,7 @@ signal_stop(const gchar *signal)
 {
 	Signal *sig;
 
-	sig = signal_get(signal);
+	sig = signal_get(signal, FALSE);
 
 	if (sig == NULL)
 		return;
@@ -146,9 +153,15 @@ signal_disconnect(const gchar *signal, SignalHandler hdl)
 {
 	Signal *sig;
 
-	sig = signal_get(signal);
-
-	g_assert(sig != NULL);
+	sig = signal_get(signal, FALSE);
+	if (sig == NULL)
+		return;
 
 	sig->handlers = g_list_remove(sig->handlers, hdl);
+
+	if (sig->handlers == NULL)
+	{
+		mowgli_dictionary_delete(signal_dict_, signal);
+		g_slice_free(Signal, sig);
+	}
 }
