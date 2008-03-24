@@ -2254,6 +2254,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			xtext->in_hilight = TRUE;
 		}
 
+		/* XXX this is ugly rewrite it --nenolod */
 		if ((xtext->parsing_color && ((xtext->parsing_htmlcolor && isxdigit (str[i])) || isdigit(str[i]) || str[i] == '#') && xtext->nc < (xtext->parsing_htmlcolor ? 7 : 2)) ||
 			 (xtext->parsing_color && str[i] == ',' && ((xtext->parsing_htmlcolor && isxdigit (str[i])) || isdigit(str[i+1]) || str[i+1] == '#') && !xtext->parsing_backcolor && xtext->nc < (xtext->parsing_htmlcolor ? 8 : 3)))
 		{
