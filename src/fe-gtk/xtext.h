@@ -198,7 +198,6 @@ struct _GtkXText
 	unsigned int in_hilight:1;
 	unsigned int un_hilight:1;
 	unsigned int recycle:1;
-	unsigned int avoid_trans:1;
 	unsigned int indent_changed:1;
 	unsigned int shm:1;
 
@@ -206,7 +205,6 @@ struct _GtkXText
 	unsigned int auto_indent:1;
 	unsigned int color_paste:1;
 	unsigned int thinline:1;
-	unsigned int transparent:1;
 	unsigned int shaded:1;
 	unsigned int marker:1;
 	unsigned int separator:1;
