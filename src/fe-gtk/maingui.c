@@ -705,7 +705,6 @@ mg_populate (session *sess)
 	session_gui *gui = sess->gui;
 	restore_gui *res = sess->res;
 	int i, render = TRUE;
-	guint16 vis = gui->ul_hidden;
 
 	switch (sess->type)
 	{
@@ -996,40 +995,6 @@ mg_create_icon_item (char *label, char *stock, GtkWidget *menu,
 	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (callback),
 							userdata);
 	gtk_widget_show (item);
-}
-
-static int
-mg_count_networks (void)
-{
-	int cons = 0;
-	GSList *list;
-
-	for (list = serv_list; list; list = list->next)
-	{
-		if (((server *)list->data)->connected)
-			cons++;
-	}
-	return cons;
-}
-
-static int
-mg_count_dccs (void)
-{
-	GSList *list;
-	struct DCC *dcc;
-	int dccs = 0;
-
-	list = dcc_list;
-	while (list)
-	{
-		dcc = list->data;
-		if ((dcc->type == TYPE_SEND || dcc->type == TYPE_RECV) &&
-			 dcc->dccstat == STAT_ACTIVE)
-			dccs++;
-		list = list->next;
-	}
-
-	return dccs;
 }
 
 void
