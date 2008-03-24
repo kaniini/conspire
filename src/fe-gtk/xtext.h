@@ -179,6 +179,7 @@ struct _GtkXText
 	unsigned int hidden:1;
 
 	/* text parsing states */
+	unsigned int parsing_htmlcolor:1;
 	unsigned int parsing_backcolor:1;
 	unsigned int parsing_color:1;
 	unsigned int backcolor:1;

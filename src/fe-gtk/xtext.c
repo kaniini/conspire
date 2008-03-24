@@ -2169,6 +2169,7 @@ gtk_xtext_reset (GtkXText * xtext, int mark, int attribs)
 	xtext->col_back = XTEXT_BG;
 	xtext->parsing_color = FALSE;
 	xtext->parsing_backcolor = FALSE;
+	xtext->parsing_htmlcolor = FALSE;
 	xtext->nc = 0;
 }
 
@@ -2253,8 +2254,8 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			xtext->in_hilight = TRUE;
 		}
 
-		if ((xtext->parsing_color && (isxdigit (str[i]) || str[i] == '#') && xtext->nc < 7) ||
-			 (xtext->parsing_color && str[i] == ',' && (isxdigit(str[i+1]) || str[i+1] == '#') && !xtext->parsing_backcolor && xtext->nc < 8))
+		if ((xtext->parsing_color && ((xtext->parsing_htmlcolor && isxdigit (str[i])) || isdigit(str[i]) || str[i] == '#') && xtext->nc < 7) ||
+			 (xtext->parsing_color && str[i] == ',' && ((xtext->parsing_htmlcolor && isxdigit (str[i])) || isdigit(str[i+1]) || str[i+1] == '#') && !xtext->parsing_backcolor && xtext->nc < 8))
 		{
 			pstr++;
 			if (str[i] == ',')
@@ -2265,9 +2266,10 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 					xtext->num[xtext->nc] = 0;
 					xtext->nc = 0;
 
-					if (*xtext->num == '#')
+					if (*xtext->num == '#') {
+						xtext->parsing_htmlcolor = TRUE;
 						col_num = xtext->parsing_backcolor ? XTEXT_CUSTOM_BG : XTEXT_CUSTOM_FG;
-					else
+					} else
 						col_num = atoi(xtext->num);
 
 					if (col_num == 99)
@@ -2291,15 +2293,17 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 		{
 			if (xtext->parsing_color)
 			{
+				xtext->parsing_htmlcolor = FALSE;
 				xtext->parsing_color = FALSE;
 				if (xtext->nc)
 				{
 					xtext->num[xtext->nc] = 0;
 					xtext->nc = 0;
 
-					if (*xtext->num == '#')
+					if (*xtext->num == '#') {
+						xtext->parsing_htmlcolor = TRUE;
 						col_num = xtext->parsing_backcolor ? XTEXT_CUSTOM_BG : XTEXT_CUSTOM_FG;
-					else
+					} else
 						col_num = atoi(xtext->num);
 
 					if (xtext->parsing_backcolor)
@@ -2403,6 +2407,8 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			case ATTR_COLOR:
 				x += gtk_xtext_render_flush (xtext, x, y, pstr, j, ent->mb);
 				xtext->parsing_color = TRUE;
+				if (str[i + 1] == '#')
+					xtext->parsing_htmlcolor = TRUE;
 				pstr += j + 1;
 				j = 0;
 				break;
