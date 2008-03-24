@@ -151,7 +151,7 @@ xtext_draw_bg(GtkXText *xtext, gint x, gint y, gint width, gint height)
 	cairo_rectangle(cr, x, y, width, height);
 	cairo_clip(cr);
 
-	gdk_cairo_set_source_color(cr, xtext->bgcol);
+	gdk_cairo_set_source_color(cr, &xtext->palette[XTEXT_BG]);
 	cairo_paint(cr);
 
 	cairo_destroy(cr);
@@ -2253,8 +2253,8 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			xtext->in_hilight = TRUE;
 		}
 
-		if ((xtext->parsing_color && isdigit (str[i]) && xtext->nc < 2) ||
-			 (xtext->parsing_color && str[i] == ',' && isdigit (str[i+1]) && xtext->nc < 3 && !xtext->parsing_backcolor))
+		if ((xtext->parsing_color && (isxdigit (str[i]) || str[i] == '#') && xtext->nc < 7) ||
+			 (xtext->parsing_color && str[i] == ',' && (isxdigit(str[i+1]) || str[i+1] == '#') && !xtext->parsing_backcolor && xtext->nc < 8))
 		{
 			pstr++;
 			if (str[i] == ',')
@@ -2264,14 +2264,22 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 				{
 					xtext->num[xtext->nc] = 0;
 					xtext->nc = 0;
-					col_num = atoi (xtext->num);
-					if (col_num == 99)	/* mIRC lameness */
-						col_num = XTEXT_FG;
+
+					if (*xtext->num == '#')
+						col_num = xtext->parsing_backcolor ? XTEXT_CUSTOM_BG : XTEXT_CUSTOM_FG;
 					else
-						col_num = col_num % XTEXT_MIRC_COLS;
+						col_num = atoi(xtext->num);
+
+					if (col_num == 99)
+						col_num = XTEXT_FG;
+
 					xtext->col_fore = col_num;
-					if (!mark)
+					if (!mark && *xtext->num != '#')
 						xtext_set_fg(xtext, col_num);
+					else if (*xtext->num == '#') {
+						gdk_color_parse(xtext->num, &xtext->palette[XTEXT_CUSTOM_FG]);
+						xtext_set_fg(xtext, XTEXT_CUSTOM_FG);
+					}
 				}
 			} else
 			{
@@ -2288,34 +2296,42 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 				{
 					xtext->num[xtext->nc] = 0;
 					xtext->nc = 0;
-					col_num = atoi (xtext->num);
+
+					if (*xtext->num == '#')
+						col_num = xtext->parsing_backcolor ? XTEXT_CUSTOM_BG : XTEXT_CUSTOM_FG;
+					else
+						col_num = atoi(xtext->num);
 
 					if (xtext->parsing_backcolor)
 					{
-						if (col_num == 99)	/* mIRC lameness */
+						if (col_num == 99)
 							col_num = XTEXT_BG;
-						else
-							col_num = col_num % XTEXT_MIRC_COLS;
 
 						if (col_num == XTEXT_BG)
 							xtext->backcolor = FALSE;
 						else
 							xtext->backcolor = TRUE;
 
-						if (!mark)
+						if (!mark && *xtext->num != '#')
 							xtext_set_bg(xtext, col_num);
+						else if (*xtext->num == '#') {
+							gdk_color_parse(xtext->num, &xtext->palette[col_num]);
+							xtext_set_bg(xtext, col_num);
+						}
 
 						xtext->col_back = col_num;
 					}
 					else
 					{
-						if (col_num == 99)	/* mIRC lameness */
+						if (col_num == 99)
 							col_num = XTEXT_FG;
-						else
-							col_num = col_num % XTEXT_MIRC_COLS;
 
-						if (!mark)
+						if (!mark && *xtext->num != '#')
 							xtext_set_fg(xtext, col_num);
+						else if (*xtext->num == '#') {
+							gdk_color_parse(xtext->num, &xtext->palette[col_num]);
+							xtext_set_fg(xtext, col_num);
+						}
 
 						xtext->col_fore = col_num;
 					}

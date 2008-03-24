@@ -33,12 +33,14 @@
 
 /* these match palette.h */
 #define XTEXT_MIRC_COLS 32
-#define XTEXT_COLS 37		/* 32 plus 5 for extra stuff below */
+#define XTEXT_COLS 39		/* 32 plus 5 for extra stuff below */
 #define XTEXT_MARK_FG 32	/* for marking text */
 #define XTEXT_MARK_BG 33
 #define XTEXT_FG 34
 #define XTEXT_BG 35
 #define XTEXT_MARKER 36		/* for marker line */
+#define XTEXT_CUSTOM_FG 37
+#define XTEXT_CUSTOM_BG 38
 
 typedef struct _GtkXText GtkXText;
 typedef struct _GtkXTextClass GtkXTextClass;
@@ -130,7 +132,7 @@ struct _GtkXText
 
 	int depth;						  /* gdk window depth */
 
-	char num[8];					  /* for parsing mirc color */
+	char num[20];					  /* for parsing mirc color */
 	int nc;							  /* offset into xtext->num */
 
 	textentry *hilight_ent;
