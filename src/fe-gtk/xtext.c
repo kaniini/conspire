@@ -1541,13 +1541,8 @@ gtk_xtext_set_clip_owner (GtkWidget * xtext, GdkEventButton * event)
 	str = gtk_xtext_selection_get_text (GTK_XTEXT (xtext), &len);
 	if (str)
 	{
-#if (GTK_MAJOR_VERSION == 2) && (GTK_MINOR_VERSION == 0)
-		gtk_clipboard_set_text (gtk_clipboard_get (GDK_SELECTION_CLIPBOARD),
-										str, len);
-#else
 		gtk_clipboard_set_text (gtk_widget_get_clipboard (xtext, GDK_SELECTION_CLIPBOARD),
 										str, len);
-#endif
 		free (str);
 	}
 
@@ -1865,23 +1860,16 @@ gtk_xtext_selection_get (GtkWidget * widget,
 			gint format;
 			gint new_length;
 
-#if (GTK_MAJOR_VERSION == 2) && (GTK_MINOR_VERSION == 0)
-			gdk_string_to_compound_text (
-#else
-			gdk_string_to_compound_text_for_display (
-												gdk_drawable_get_display (widget->window),
-#endif
-												stripped, &encoding, &format, &new_text,
-												&new_length);
-			gtk_selection_data_set (selection_data_ptr, encoding, format,
-											new_text, new_length);
+			gdk_string_to_compound_text_for_display (gdk_drawable_get_display (widget->window),
+								 stripped, &encoding, &format, &new_text,
+								 &new_length);
+			gtk_selection_data_set (selection_data_ptr, encoding, format, new_text, new_length);
 			gdk_free_compound_text (new_text);
 		}
 		break;
 	default:
 		new_text = g_locale_from_utf8 (stripped, len, NULL, &glen, NULL);
-		gtk_selection_data_set (selection_data_ptr, GDK_SELECTION_TYPE_STRING,
-										8, new_text, glen);
+		gtk_selection_data_set (selection_data_ptr, GDK_SELECTION_TYPE_STRING, 8, new_text, glen);
 		g_free (new_text);
 	}
 
@@ -2058,8 +2046,7 @@ gtk_xtext_text_width (GtkXText *xtext, unsigned char *text, int len,
 	unsigned char *new_buf;
 	int new_len, mb;
 
-	new_buf = gtk_xtext_strip_color (text, len, xtext->scratch_buffer,
-												&new_len, &mb, !xtext->ignore_hidden);
+	new_buf = gtk_xtext_strip_color (text, len, xtext->scratch_buffer, &new_len, &mb, !xtext->ignore_hidden);
 
 	if (mb_ret)
 		*mb_ret = mb;
