@@ -256,6 +256,16 @@ signal_printer_server_dns_lookup(gpointer *params)
 	EMIT_SIGNAL (XP_TE_SERVERLOOKUP, sess, hostname, NULL, NULL, NULL, 0);
 }
 
+/* sasl */
+void
+signal_printer_sasl_complete(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *account = params[1];
+
+	EMIT_SIGNAL(XP_TE_SASL_AUTH, sess, account, NULL, NULL, NULL, NULL);
+}
+
 void
 signal_printer_init(void)
 {
@@ -284,4 +294,7 @@ signal_printer_init(void)
 	signal_attach("server connected",   signal_printer_server_connected);
 	signal_attach("server dns lookup",  signal_printer_server_dns_lookup);
 	signal_attach("server stoned",      signal_printer_server_stoned);
+
+	/* sasl */
+	signal_attach("sasl complete",      signal_printer_sasl_complete);
 }
