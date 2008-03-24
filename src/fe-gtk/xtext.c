@@ -34,7 +34,17 @@
  * you know what you're doing.
  */
 #define MARGIN 2
+
+/*
+ * REFRESH_TIMEOUT is the value used for refreshing the XText buffer. This will
+ * eventually be removed.
+ */
 #define REFRESH_TIMEOUT 20
+
+/*
+ * WORDWRAP_LIMIT is the default limit in pixels of when to cut off and start
+ * a new line of text.
+ */
 #define WORDWRAP_LIMIT 24
 
 #include <string.h>
