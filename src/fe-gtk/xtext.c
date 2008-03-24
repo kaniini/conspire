@@ -303,9 +303,6 @@ backend_draw_text (GtkXText *xtext, int dofill, int x, int y, const gchar *str, 
 	cairo_move_to(cr, x, y);
 	pango_cairo_show_layout(cr, xtext->layout);
 
-	if (xtext->overdraw)
-		pango_cairo_show_layout(cr, xtext->layout);
-
 	if (xtext->bold)
 	{
 		cairo_rel_move_to(cr, 1, 0);
@@ -353,7 +350,6 @@ gtk_xtext_init (GtkXText * xtext)
 	xtext->recycle = FALSE;
 	xtext->dont_render = FALSE;
 	xtext->dont_render2 = FALSE;
-	xtext->overdraw = FALSE;
 
 	xtext->adj = (GtkAdjustment *) gtk_adjustment_new (0, 0, 1, 1, 1, 1);
 	g_object_ref (G_OBJECT (xtext->adj));
@@ -374,9 +370,6 @@ gtk_xtext_init (GtkXText * xtext)
 		gtk_selection_add_targets (GTK_WIDGET (xtext), GDK_SELECTION_PRIMARY,
 											targets, n_targets);
 	}
-
-	if (getenv ("XCHAT_OVERDRAW"))
-		xtext->overdraw = TRUE;
 }
 
 static void
