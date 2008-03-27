@@ -1,7 +1,8 @@
 #ifndef __XTEXT_H__
 #define __XTEXT_H__
 
-#include <gtk/gtkadjustment.h>
+#include <cairo.h>
+#include <gtk/gtk.h>
 
 #ifdef USE_SHM
 #include <X11/Xlib.h>
@@ -32,12 +33,14 @@
 
 /* these match palette.h */
 #define XTEXT_MIRC_COLS 32
-#define XTEXT_COLS 37		/* 32 plus 5 for extra stuff below */
+#define XTEXT_COLS 39		/* 32 plus 5 for extra stuff below */
 #define XTEXT_MARK_FG 32	/* for marking text */
 #define XTEXT_MARK_BG 33
 #define XTEXT_FG 34
 #define XTEXT_BG 35
 #define XTEXT_MARKER 36		/* for marker line */
+#define XTEXT_CUSTOM_FG 37
+#define XTEXT_CUSTOM_BG 38
 
 typedef struct _GtkXText GtkXText;
 typedef struct _GtkXTextClass GtkXTextClass;
@@ -93,8 +96,10 @@ struct _GtkXText
 #endif
 
 	GtkAdjustment *adj;
-	GdkPixmap *pixmap;				/* 0 = use palette[19] */
+
 	GdkDrawable *draw_buf;			/* points to ->window */
+	cairo_t *draw_cr;			/* used for queueing draw operations. */
+
 	GdkCursor *hand_cursor;
 	GdkCursor *resize_cursor;
 
@@ -105,13 +110,9 @@ struct _GtkXText
 	int last_win_h;
 	int last_win_w;
 
-	GdkGC *bgc;						  /* backing pixmap */
-	GdkGC *fgc;						  /* text foreground color */
-	GdkGC *light_gc;				  /* sep bar */
-	GdkGC *dark_gc;
-	GdkGC *thin_gc;
-	GdkGC *marker_gc;
-	gulong palette[XTEXT_COLS];
+	GdkColor *fgcol;
+	GdkColor *bgcol;
+	GdkColor palette[XTEXT_COLS];
 
 	gint io_tag;					  /* for delayed refresh events */
 	gint add_io_tag;				  /* "" when adding new text */
@@ -131,7 +132,7 @@ struct _GtkXText
 
 	int depth;						  /* gdk window depth */
 
-	char num[8];					  /* for parsing mirc color */
+	char num[20];					  /* for parsing mirc color */
 	int nc;							  /* offset into xtext->num */
 
 	textentry *hilight_ent;
@@ -178,6 +179,7 @@ struct _GtkXText
 	unsigned int hidden:1;
 
 	/* text parsing states */
+	unsigned int parsing_htmlcolor:1;
 	unsigned int parsing_backcolor:1;
 	unsigned int parsing_color:1;
 	unsigned int backcolor:1;
@@ -199,7 +201,6 @@ struct _GtkXText
 	unsigned int in_hilight:1;
 	unsigned int un_hilight:1;
 	unsigned int recycle:1;
-	unsigned int avoid_trans:1;
 	unsigned int indent_changed:1;
 	unsigned int shm:1;
 
@@ -207,12 +208,10 @@ struct _GtkXText
 	unsigned int auto_indent:1;
 	unsigned int color_paste:1;
 	unsigned int thinline:1;
-	unsigned int transparent:1;
 	unsigned int shaded:1;
 	unsigned int marker:1;
 	unsigned int separator:1;
 	unsigned int wordwrap:1;
-	unsigned int overdraw:1;
 	unsigned int ignore_hidden:1;	/* rawlog uses this */
 };
 
@@ -229,11 +228,10 @@ void gtk_xtext_append_indent (xtext_buffer *buf,
 										unsigned char *right_text, int right_len,
 										time_t stamp);
 int gtk_xtext_set_font (GtkXText *xtext, char *name);
-void gtk_xtext_set_background (GtkXText * xtext, GdkPixmap * pixmap, gboolean trans);
 void gtk_xtext_set_palette (GtkXText * xtext, GdkColor palette[]);
 void gtk_xtext_clear (xtext_buffer *buf);
 void gtk_xtext_save (GtkXText * xtext, int fh);
-void gtk_xtext_refresh (GtkXText * xtext, int do_trans);
+void gtk_xtext_refresh (GtkXText * xtext);
 int gtk_xtext_lastlog (xtext_buffer *out, xtext_buffer *search_area, int (*cmp_func) (char *, void *userdata), void *userdata);
 textentry *gtk_xtext_search (GtkXText * xtext, const gchar *text, textentry *start, gboolean case_match, gboolean backward);
 void gtk_xtext_reset_marker_pos (GtkXText *xtext);

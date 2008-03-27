@@ -826,31 +826,9 @@ fe_server_event (server *serv, int type, int arg)
 		sess = list->data;
 		if (sess->server == serv && (current_tab == sess || !sess->gui->is_tab))
 		{
-			session_gui *gui = sess->gui;
-
 			switch (type)
 			{
-			case FE_SE_CONNECTING:	/* connecting in progress */
-			case FE_SE_RECONDELAY:	/* reconnect delay begun */
-				/* enable Disconnect item */
-				gtk_widget_set_sensitive (gui->menu_item[MENU_ID_DISCONNECT], 1);
-				break;
-
-			case FE_SE_CONNECT:
-				/* enable Disconnect and Away menu items */
-				gtk_widget_set_sensitive (gui->menu_item[MENU_ID_AWAY], 1);
-				gtk_widget_set_sensitive (gui->menu_item[MENU_ID_DISCONNECT], 1);
-				break;
-
-			case FE_SE_LOGGEDIN:	/* end of MOTD */
-				gtk_widget_set_sensitive (gui->menu_item[MENU_ID_JOIN], 1);
-				break;
-
-			case FE_SE_DISCONNECT:
-				/* disable Disconnect and Away menu items */
-				gtk_widget_set_sensitive (gui->menu_item[MENU_ID_AWAY], 0);
-				gtk_widget_set_sensitive (gui->menu_item[MENU_ID_DISCONNECT], 0);
-				gtk_widget_set_sensitive (gui->menu_item[MENU_ID_JOIN], 0);
+			default:
 				break;
 			}
 		}

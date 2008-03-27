@@ -748,7 +748,7 @@ process_numeric (session * sess, int n,
 			break;
 
 	case 900:
-		EMIT_SIGNAL(XP_TE_SASL_AUTH, serv->server_session, word[5], NULL, NULL, NULL, NULL);
+		signal_emit("sasl complete", 2, serv->server_session, word[5]);
 		break;
 	case 903:
 	case 904:

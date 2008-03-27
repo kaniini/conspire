@@ -93,8 +93,10 @@ enum
 };
 
 /* two different types of tabs */
-#define TAG_IRC 0		/* server, channel, dialog */
-#define TAG_UTIL 1	/* dcc, notify, chanlist */
+typedef enum {
+	TAG_IRC,
+	TAG_UTIL,
+} TagType;
 
 static void mg_create_entry (session *sess, GtkWidget *box);
 static void mg_link_irctab (session *sess, int focus);
@@ -114,59 +116,6 @@ static PangoAttrList *newdata_list;
 static PangoAttrList *nickseen_list;
 static PangoAttrList *newmsg_list;
 static PangoAttrList *plain_list = NULL;
-
-
-#ifdef USE_GTKSPELL
-
-/* use these when it's a GtkTextView instead of GtkEntry */
-
-char *
-SPELL_ENTRY_GET_TEXT (GtkWidget *entry)
-{
-	static char *last = NULL;	/* warning: don't overlap 2 GET_TEXT calls! */
-	GtkTextBuffer *buf = gtk_text_view_get_buffer (GTK_TEXT_VIEW (entry));
-	GtkTextIter start_iter, end_iter;
-
-	gtk_text_buffer_get_iter_at_offset (buf, &start_iter, 0);
-	gtk_text_buffer_get_end_iter (buf, &end_iter);
-	g_free (last);
-	last = gtk_text_buffer_get_text (buf, &start_iter, &end_iter, FALSE);
-	return last;
-}
-
-void
-SPELL_ENTRY_SET_POS (GtkWidget *entry, int pos)
-{
-	GtkTextIter iter;
-	GtkTextBuffer *buf = gtk_text_view_get_buffer (GTK_TEXT_VIEW (entry));
-
-	gtk_text_buffer_get_iter_at_offset (buf, &iter, pos);
-	gtk_text_buffer_place_cursor (buf, &iter);
-}
-
-int
-SPELL_ENTRY_GET_POS (GtkWidget *entry)
-{
-	GtkTextIter cursor;
-	GtkTextBuffer *buf = gtk_text_view_get_buffer (GTK_TEXT_VIEW (entry));
-
-	gtk_text_buffer_get_iter_at_mark (buf, &cursor, gtk_text_buffer_get_insert (buf));
-	return gtk_text_iter_get_offset (&cursor);
-}
-
-void
-SPELL_ENTRY_INSERT (GtkWidget *entry, const char *text, int len, int *pos)
-{
-	GtkTextIter iter;
-	GtkTextBuffer *buf = gtk_text_view_get_buffer (GTK_TEXT_VIEW (entry));
-
-	/* len is bytes. pos is chars. */
-	gtk_text_buffer_get_iter_at_offset (buf, &iter, *pos);
-	gtk_text_buffer_insert (buf, &iter, text, len);
-	*pos += g_utf8_strlen (text, len);
-}
-
-#endif
 
 static PangoAttrList *
 mg_attr_list_create (GdkColor *col, int size)
@@ -447,9 +396,6 @@ mg_configure_cb (GtkWidget *wid, GdkEventConfigure *event, session *sess)
 			gtk_window_get_size (GTK_WINDOW (wid), &prefs.dialog_width,
 										&prefs.dialog_height);
 		}
-
-		if (((GtkXText *) sess->gui->xtext)->transparent)
-			gtk_widget_queue_draw (sess->gui->xtext);
 	}
 
 	return FALSE;
@@ -759,7 +705,6 @@ mg_populate (session *sess)
 	session_gui *gui = sess->gui;
 	restore_gui *res = sess->res;
 	int i, render = TRUE;
-	guint16 vis = gui->ul_hidden;
 
 	switch (sess->type)
 	{
@@ -797,11 +742,6 @@ mg_populate (session *sess)
 	/* move to THE irc tab */
 	if (gui->is_tab)
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (gui->note_book), 0);
-
-	/* xtext size change? Then don't render, wait for the expose caused
-      by showing/hidding the userlist */
-	if (vis != gui->ul_hidden && gui->user_box->allocation.width > 1)
-		render = FALSE;
 
 	gtk_xtext_buffer_show (GTK_XTEXT (gui->xtext), res->buffer, render);
 	GTK_XTEXT (gui->xtext)->color_paste = sess->color_paste;
@@ -853,13 +793,6 @@ mg_populate (session *sess)
 		if (res->queue_tip)
 			add_tip (sess->gui->throttlemeter->parent, res->queue_tip);
 	}
-
-	/* menu items */
-	GTK_CHECK_MENU_ITEM (gui->menu_item[MENU_ID_AWAY])->active = sess->server->is_away;
-	gtk_widget_set_sensitive (gui->menu_item[MENU_ID_AWAY], sess->server->connected);
-	gtk_widget_set_sensitive (gui->menu_item[MENU_ID_JOIN], sess->server->end_of_motd);
-	gtk_widget_set_sensitive (gui->menu_item[MENU_ID_DISCONNECT],
-									  sess->server->connected || sess->server->recondelay_tag);
 
 	mg_set_topic_tip (sess);
 
@@ -1031,6 +964,12 @@ mg_beepmsg_cb (GtkCheckMenuItem *item, session *sess)
 }
 
 static void
+mg_away_cb (GtkCheckMenuItem *item, session *sess)
+{
+	handle_command(sess, "away", FALSE);
+}
+
+static void
 mg_hidejp_cb (GtkCheckMenuItem *item, session *sess)
 {
 	sess->hide_join_part = TRUE;
@@ -1058,156 +997,10 @@ mg_create_icon_item (char *label, char *stock, GtkWidget *menu,
 	gtk_widget_show (item);
 }
 
-static int
-mg_count_networks (void)
-{
-	int cons = 0;
-	GSList *list;
-
-	for (list = serv_list; list; list = list->next)
-	{
-		if (((server *)list->data)->connected)
-			cons++;
-	}
-	return cons;
-}
-
-static int
-mg_count_dccs (void)
-{
-	GSList *list;
-	struct DCC *dcc;
-	int dccs = 0;
-
-	list = dcc_list;
-	while (list)
-	{
-		dcc = list->data;
-		if ((dcc->type == TYPE_SEND || dcc->type == TYPE_RECV) &&
-			 dcc->dccstat == STAT_ACTIVE)
-			dccs++;
-		list = list->next;
-	}
-
-	return dccs;
-}
-
 void
-mg_open_quit_dialog (gboolean minimize_button)
+mg_quit (void)
 {
-	static GtkWidget *dialog = NULL;
-	GtkWidget *dialog_vbox1;
-	GtkWidget *table1;
-	GtkWidget *image;
-	GtkWidget *checkbutton1;
-	GtkWidget *label;
-	GtkWidget *dialog_action_area1;
-	GtkWidget *button;
-	char *text, *connecttext;
-	int cons;
-	int dccs;
-
-	if (dialog)
-	{
-		gtk_window_present (GTK_WINDOW (dialog));
-		return;
-	}
-
-	dccs = mg_count_dccs ();
-	cons = mg_count_networks ();
-	if (dccs + cons == 0 || !prefs.gui_quit_dialog)
-	{
-		xchat_exit ();
-		return;
-	}
-
-	dialog = gtk_dialog_new ();
-	gtk_container_set_border_width (GTK_CONTAINER (dialog), 6);
-	gtk_window_set_title (GTK_WINDOW (dialog), _("Quit conspire?"));
-	gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (parent_window));
-	gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
-	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);
-
-	dialog_vbox1 = GTK_DIALOG (dialog)->vbox;
-	gtk_widget_show (dialog_vbox1);
-
-	table1 = gtk_table_new (2, 2, FALSE);
-	gtk_widget_show (table1);
-	gtk_box_pack_start (GTK_BOX (dialog_vbox1), table1, TRUE, TRUE, 0);
-	gtk_container_set_border_width (GTK_CONTAINER (table1), 6);
-	gtk_table_set_row_spacings (GTK_TABLE (table1), 12);
-	gtk_table_set_col_spacings (GTK_TABLE (table1), 12);
-
-	image = gtk_image_new_from_stock ("gtk-dialog-warning", GTK_ICON_SIZE_DIALOG);
-	gtk_widget_show (image);
-	gtk_table_attach (GTK_TABLE (table1), image, 0, 1, 0, 1,
-							(GtkAttachOptions) (GTK_FILL),
-							(GtkAttachOptions) (GTK_FILL), 0, 0);
-
-	checkbutton1 = gtk_check_button_new_with_mnemonic (_("Don't ask next time."));
-	gtk_widget_show (checkbutton1);
-	gtk_table_attach (GTK_TABLE (table1), checkbutton1, 0, 2, 1, 2,
-							(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-							(GtkAttachOptions) (0), 0, 4);
-
-	connecttext = g_strdup_printf (_("You are connected to %i IRC networks."), cons);
-	text = g_strdup_printf ("<span weight=\"bold\" size=\"larger\">%s</span>\n\n%s\n%s",
-								_("Are you sure you want to quit?"),
-								cons ? connecttext : "",
-								dccs ? _("Some file transfers are still active.") : "");
-	g_free (connecttext);
-	label = gtk_label_new (text);
-	g_free (text);
-	gtk_widget_show (label);
-	gtk_table_attach (GTK_TABLE (table1), label, 1, 2, 0, 1,
-							(GtkAttachOptions) (GTK_EXPAND | GTK_SHRINK | GTK_FILL),
-							(GtkAttachOptions) (GTK_EXPAND | GTK_SHRINK), 0, 0);
-	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
-	gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
-
-	dialog_action_area1 = GTK_DIALOG (dialog)->action_area;
-	gtk_widget_show (dialog_action_area1);
-	gtk_button_box_set_layout (GTK_BUTTON_BOX (dialog_action_area1),
-										GTK_BUTTONBOX_END);
-
-	if (minimize_button)
-	{
-		button = gtk_button_new_with_mnemonic (_("_Minimize to Tray"));
-		gtk_widget_show (button);
-		gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button, 1);
-	}
-
-	button = gtk_button_new_from_stock ("gtk-cancel");
-	gtk_widget_show (button);
-	gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button,
-											GTK_RESPONSE_CANCEL);
-	gtk_widget_grab_focus (button);
-
-	button = gtk_button_new_from_stock ("gtk-quit");
-	gtk_widget_show (button);
-	gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button, 0);
-
-	gtk_widget_show (dialog);
-
-	switch (gtk_dialog_run (GTK_DIALOG (dialog)))
-	{
-	case 0:
-		if (GTK_TOGGLE_BUTTON (checkbutton1)->active)
-			prefs.gui_quit_dialog = 0;
-		xchat_exit ();
-		break;
-	case 1: /* minimize to tray */
-		if (GTK_TOGGLE_BUTTON (checkbutton1)->active)
-		{
-			prefs.gui_tray_flags |= 1;
-			/*prefs.gui_quit_dialog = 0;*/
-		}
-		tray_toggle_visibility (TRUE);
-		break;
-	}
-
-	gtk_widget_destroy (dialog);
-	dialog = NULL;
+	xchat_exit();
 }
 
 void
@@ -1218,7 +1011,7 @@ mg_close_sess (session *sess)
 
 	if (sess_list->next == NULL)
 	{
-		mg_open_quit_dialog (FALSE);
+		mg_quit();
 		return;
 	}
 
@@ -1301,6 +1094,18 @@ mg_link_gentab (chan *ch, GtkWidget *box)
 	gtk_widget_show (win);
 
 	g_object_unref (box);
+}
+
+static void
+mg_disconnect_cb (GtkWidget *item, session *sess)
+{
+	handle_command(sess, "disconnect", FALSE);
+}
+
+static void
+mg_reconnect_cb (GtkWidget *item, session *sess)
+{
+	handle_command(sess, "reconnect", FALSE);
 }
 
 static void
@@ -1422,7 +1227,6 @@ mg_tab_contextmenu_cb (chanview *cv, chan *ch, int tag, gpointer ud, GdkEventBut
 {
 	GtkWidget *menu, *item;
 	session *sess = ud;
-	char buf[256];
 
 	/* shift-click to close a tab */
 	if ((event->state & GDK_SHIFT_MASK) && event->type == GDK_BUTTON_PRESS)
@@ -1438,18 +1242,17 @@ mg_tab_contextmenu_cb (chanview *cv, chan *ch, int tag, gpointer ud, GdkEventBut
 
 	if (tag == TAG_IRC)
 	{
-		char *name = g_markup_escape_text (sess->channel[0] ? sess->channel : _("<none>"), -1);
-		snprintf (buf, sizeof (buf), "<span foreground=\"#3344cc\"><b>%s</b></span>", name);
-		g_free (name);
-		item = gtk_menu_item_new_with_label ("");
-		gtk_label_set_markup (GTK_LABEL (GTK_BIN (item)->child), buf);
-		gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
-		gtk_widget_show (item);
+		if (sess->type == SESS_SERVER)
+		{
+			mg_create_icon_item(_("_Disconnect"), GTK_STOCK_DISCONNECT, menu,
+				mg_disconnect_cb, sess);
+			mg_create_icon_item(_("_Reconnect"), GTK_STOCK_CONNECT, menu,
+				mg_reconnect_cb, sess);
 
-		/* separator */
-		item = gtk_menu_item_new ();
-		gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
-		gtk_widget_show (item);
+			item = gtk_menu_item_new ();
+			gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
+			gtk_widget_show (item);
+		}
 
 		menu_toggle_item (_("Beep on message"), menu, mg_beepmsg_cb, sess,
 								sess->beep);
@@ -1462,6 +1265,8 @@ mg_tab_contextmenu_cb (chanview *cv, chan *ch, int tag, gpointer ud, GdkEventBut
 		menu_toggle_item (_("Color paste"), menu, mg_colorpaste_cb, sess,
 								sess->color_paste);
 
+		menu_toggle_item (_("Marked Away"), menu, mg_away_cb, sess,
+								sess->server->is_away);
 	}
 
 	/* separator */
@@ -2153,7 +1958,6 @@ mg_update_xtext (GtkWidget *wid)
 
 	gtk_xtext_set_palette (xtext, colors);
 	gtk_xtext_set_max_lines (xtext, prefs.max_lines);
-	gtk_xtext_set_background (xtext, channelwin_pix, prefs.transparent);
 	gtk_xtext_set_wordwrap (xtext, prefs.wordwrap);
 	gtk_xtext_set_show_marker (xtext, prefs.show_marker);
 	gtk_xtext_set_show_separator (xtext, prefs.indent_nicks ? prefs.show_separator : 0);
@@ -2164,7 +1968,7 @@ mg_update_xtext (GtkWidget *wid)
 		exit (1);
 	}
 
-	gtk_xtext_refresh (xtext, FALSE);
+	gtk_xtext_refresh (xtext);
 }
 
 /* handle errors reported by xtext */
@@ -2796,7 +2600,7 @@ mg_tabwindow_de_cb (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 		list = list->next;
 	}
 
-	mg_open_quit_dialog (TRUE);
+	mg_quit();
 	return TRUE;
 }
 
@@ -3029,10 +2833,7 @@ fe_set_away (server *serv)
 	{
 		sess = list->data;
 		if (sess->server == serv)
-		{
-			if (!sess->gui->is_tab || sess == current_tab)
-				GTK_CHECK_MENU_ITEM (sess->gui->menu_item[MENU_ID_AWAY])->active = serv->is_away;
-		}
+			break;
 		list = list->next;
 	}
 }
