@@ -391,7 +391,17 @@ signal_printer_whois_end(gpointer *params)
 	session *sess = params[0];
 	gchar *nick   = params[1];
 
-	EMIT_SIGNAL (XP_TE_WHOIS_END, whois_sess, word[4], NULL, NULL, NULL, 0);
+	EMIT_SIGNAL (XP_TE_WHOIS_END, sess, nick, NULL, NULL, NULL, 0);
+}
+
+/* sasl */
+void
+signal_printer_sasl_complete(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *account = params[1];
+
+	EMIT_SIGNAL (XP_TE_SASL_AUTH, sess, account, NULL, NULL, NULL, 0);
 }
 
 void
@@ -444,6 +454,9 @@ signal_printer_init(void)
 	signal_attach("whois idle",         signal_printer_whois_idle);
 	signal_attach("whois idle signon",  signal_printer_whois_idle_signon);
 	signal_attach("whois end",          signal_printer_whois_end);
+
+	/* sasl */
+	signal_attach("sasl complete",      signal_printer_sasl_complete);
 }
 /*
  * UNIMPLEMENTED SIGNALS:
