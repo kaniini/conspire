@@ -1408,10 +1408,7 @@ dcc_send_data (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 	{
 abortit:
 		free (buf);
-		EMIT_SIGNAL (XP_TE_DCCSENDFAIL, dcc->serv->front_session,
-						 file_part (dcc->file), dcc->nick,
-						 errorstring (sock_error ()), NULL, 0);
-		dcc_close (dcc, STAT_FAILED, FALSE);
+		signal_emit("dcc send failed", 2, dcc, errorstring(sock_error()));
 		return TRUE;
 	}
 	if (sent > 0)
@@ -1459,12 +1456,7 @@ dcc_handle_new_ack (struct DCC *dcc)
 	/* DCC complete check */
 	if (dcc->pos >= dcc->size && dcc->ack >= (dcc->size & 0xffffffff))
 	{
-		dcc->ack = dcc->size;	/* force 100% ack for >4 GB */
-		dcc_close (dcc, STAT_DONE, FALSE);
-		dcc_calc_average_cps (dcc);	/* this must be done _after_ dcc_close, or dcc_remove_from_sum will see the wrong value in dcc->cps */
-		sprintf (buf, "%d", dcc->cps);
-		EMIT_SIGNAL (XP_TE_DCCSENDCOMP, dcc->serv->front_session,
-						 file_part (dcc->file), dcc->nick, buf, NULL, 0);
+		signal_emit("dcc send complete", 1, dcc);
 		done = TRUE;
 	}
 	else if ((!dcc->fastsend) && (dcc->ack >= (dcc->pos & 0xffffffff)))
@@ -1486,6 +1478,7 @@ static gboolean
 dcc_read_ack (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 {
 	int len;
+	gchar *error;
 
 	while (1)
 	{
@@ -1498,10 +1491,8 @@ dcc_read_ack (GIOChannel *source, GIOCondition condition, struct DCC *dcc)
 				if (would_block ())	/* ok - keep waiting */
 					return TRUE;
 			}
-			EMIT_SIGNAL (XP_TE_DCCSENDFAIL, dcc->serv->front_session,
-							 file_part (dcc->file), dcc->nick,
-							 errorstring ((len < 0) ? sock_error () : 0), NULL, 0);
-			dcc_close (dcc, STAT_FAILED, FALSE);
+			error = errorstring((len < 0) ? sock_error() : 0);
+			signal_emit("dcc send failed", 2, dcc, error);
 			return TRUE;
 		}
 
@@ -1810,8 +1801,7 @@ dcc_send (struct session *sess, char *to, char *file, int maxcps, int passive)
 				}
 				sess->server->p_ctcp (sess->server, to, outbuf);
 
-				EMIT_SIGNAL (XP_TE_DCCOFFER, sess, file_part (dcc->file),
-								 to, dcc->file, NULL, 0);
+				signal_emit("dcc send request", 3, sess, dcc, to);
 			} else
 			{
 				dcc_close (dcc, 0, TRUE);

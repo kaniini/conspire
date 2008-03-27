@@ -127,8 +127,7 @@ inbound_open_dialog (server *serv, char *from)
 	session *sess;
 
 	sess = new_ircwindow (serv, from, SESS_DIALOG, 0);
-	/* for playing sounds */
-	EMIT_SIGNAL (XP_TE_OPENDIALOG, sess, NULL, NULL, NULL, NULL, 0);
+	signal_emit("query open", 1, sess);
 
 	return sess;
 }
@@ -205,7 +204,7 @@ inbound_privmsg (server *serv, char *from, char *ip, char *text, int id)
 		if (prefs.input_beep_priv || (sess && sess->beep))
 			sound_beep (sess);
 
-		EMIT_SIGNAL (XP_TE_PRIVMSG, sess, from, text, idtext, NULL, 0);
+		signal_emit("message private", 4, sess, from, text, idtext);
 		return;
 	}
 
@@ -215,10 +214,7 @@ inbound_privmsg (server *serv, char *from, char *ip, char *text, int id)
 	if (prefs.input_flash_priv)
 		fe_flash_window (sess);
 
-	if (sess->type == SESS_DIALOG)
-		EMIT_SIGNAL (XP_TE_DPRIVMSG, sess, from, text, idtext, NULL, 0);
-	else
-		EMIT_SIGNAL (XP_TE_PRIVMSG, sess, from, text, idtext, NULL, 0);
+	signal_emit("message private", 4, sess, from, text, idtext);
 }
 
 static int
@@ -371,7 +367,7 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 
 		if (hilight)
 		{
-			EMIT_SIGNAL (XP_TE_HCHANACTION, sess, from, text, nickchar, NULL, 0);
+			signal_emit("action public highlight", 4, sess, from, text, nickchar);
 			return;
 		}
 	}

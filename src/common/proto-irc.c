@@ -317,7 +317,7 @@ channel_date (session *sess, char *chan, char *timestr)
 	time_t timestamp = (time_t) atol (timestr);
 	char *tim = ctime (&timestamp);
 	tim[24] = 0;	/* get rid of the \n */
-	EMIT_SIGNAL (XP_TE_CHANDATE, sess, chan, tim, NULL, NULL, 0);
+	signal_emit("channel created", 3, sess, chan, tim);
 }
 
 static void
@@ -426,7 +426,7 @@ process_numeric (session * sess, int n,
 		goto def;
 
 	case 312:
-		EMIT_SIGNAL (XP_TE_WHOIS_SERVER, whois_sess, word[4], word_eol[5], NULL, NULL, 0);
+		signal_emit("whois server", 3, whois_sess, word[4], word_eol[5]);
 		break;
 
 	case 311:
@@ -435,8 +435,7 @@ process_numeric (session * sess, int n,
 
 	case 314:
 		inbound_user_info_start (sess, word[4]);
-		EMIT_SIGNAL (XP_TE_WHOIS_NAME, whois_sess, word[4], word[5],
-						 word[6], word_eol[8] + 1, 0);
+		signal_emit("whois name", 3, whois_sess, word, word_eol);
 		break;
 
 	case 317:
@@ -450,42 +449,36 @@ process_numeric (session * sess, int n,
 						"%02ld:%02ld:%02ld", idle / 3600, (idle / 60) % 60,
 						idle % 60);
 			if (timestamp == 0)
-				EMIT_SIGNAL (XP_TE_WHOIS_IDLE, whois_sess, word[4],
-								 outbuf, NULL, NULL, 0);
+				signal_emit("whois idle", 3, whois_sess, word[4], outbuf);
 			else
 			{
 				tim = ctime (&timestamp);
 				tim[19] = 0; 	/* get rid of the \n */
-				EMIT_SIGNAL (XP_TE_WHOIS_IDLE_SIGNON, whois_sess, word[4],
-								 outbuf, tim, NULL, 0);
+				signal_emit("whois idle signon", 4, whois_sess, word[4], outbuf, tim);
 			}
 		}
 		break;
 
 	case 318:
 		serv->inside_whois = 0;
-		EMIT_SIGNAL (XP_TE_WHOIS_END, whois_sess, word[4], NULL,
-						 NULL, NULL, 0);
+		signal_emit("whois end", 2, whois_sess, word[4]);
 		break;
 
 	case 313:	/* WHOIS server oper */
-		EMIT_SIGNAL (XP_TE_WHOIS_OPER, whois_sess, word[4], word_eol[5] + 1,
-		             NULL, NULL, 0);
+		signal_emit("whois oper", 3, whois_sess, word, word_eol);
 		break;
 	case 319:	/* WHOIS channels */
-		EMIT_SIGNAL (XP_TE_WHOIS_CHANNELS, whois_sess, word[4],
-						 word_eol[5] + 1, NULL, NULL, 0);
+		signal_emit("whois channels", 3, whois_sess, word, word_eol);
 		break;
 
 	case 307:	/* dalnet version */
 	case 320:	/* :is an identified user */
-		EMIT_SIGNAL (XP_TE_WHOIS_ID, whois_sess, word[4],
-						 word_eol[5] + 1, NULL, NULL, 0);
+		signal_emit("whois identified", 3, whois_sess, word, word_eol);
 		break;
 
 	case 321:
 		if (!fe_is_chanwindow (sess->server))
-			EMIT_SIGNAL (XP_TE_CHANLISTHEAD, serv->server_session, NULL, NULL, NULL, NULL, 0);
+			signal_emit("channel list head", 1, serv);
 		break;
 
 	case 322:
@@ -501,7 +494,7 @@ process_numeric (session * sess, int n,
 
 	case 323:
 		if (!fe_is_chanwindow (sess->server))
-			EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, text, word[1], NULL, NULL, 0);
+			signal_emit("server text", 3, serv, text, word);
 		else
 			fe_chan_list_end (sess->server);
 		break;
@@ -513,8 +506,7 @@ process_numeric (session * sess, int n,
 		if (sess->ignore_mode)
 			sess->ignore_mode = FALSE;
 		else
-			EMIT_SIGNAL (XP_TE_CHANMODES, sess, word[4], word_eol[5],
-							 NULL, NULL, 0);
+			signal_emit("channel modes", 3, sess, word, word_eol);
 		fe_update_mode_buttons (sess, 't', '-');
 		fe_update_mode_buttons (sess, 'n', '-');
 		fe_update_mode_buttons (sess, 's', '-');
@@ -538,8 +530,7 @@ process_numeric (session * sess, int n,
 		break;
 
 	case 330:
-		EMIT_SIGNAL (XP_TE_WHOIS_AUTH, whois_sess, word[4],
-						 word_eol[6] + 1, word[5], NULL, 0);
+		signal_emit("whois authenticated", 3, whois_sess, word, word_eol);
 		break;
 
 	case 332:
@@ -559,6 +550,7 @@ process_numeric (session * sess, int n,
 #endif
 
 	case 341:						  /* INVITE ACK */
+		signal_emit("user invite", 3, sess, word, serv);
 		EMIT_SIGNAL (XP_TE_UINVITE, sess, word[4], word[5], serv->servername,
 						 NULL, 0);
 		break;

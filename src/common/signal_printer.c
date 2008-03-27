@@ -24,6 +24,32 @@
 #include "network.h"
 #include "util.h"
 
+/* actions */
+
+void
+signal_printer_action_public_highlight(gpointer *params)
+{
+	session *sess   = params[0];
+	gchar *nick     = params[1];
+	gchar *message  = params[2];
+	gchar *nickchar = params[3];
+	
+	EMIT_SIGNAL (XP_TE_HCHANACTION, sess, from, text, nickchar, NULL, 0);
+}
+
+/* Channels */
+
+void
+signal_printer_channel_created(gpointer *params)
+{
+	struct session *sess = params[0];
+	gchar *channel       = params[1];
+	gchar *timestamp     = params[2]
+	EMIT_SIGNAL (XP_TE_CHANDATE, sess, channel, timestamp, NULL, NULL, 0);
+}
+
+/* DCC */
+
 void
 signal_printer_dcc_abort(gpointer *params)
 {
@@ -215,6 +241,41 @@ signal_printer_dcc_recv_error(gpointer *params)
 }
 
 void
+signal_printer_dcc_send_complete(gpointer *params)
+{
+	struct DCC *dcc = params[0];
+	server *serv = dcc->serv;
+
+	/* force 100% ack for >4 GB */
+	dcc->ack = dcc->size;
+	dcc_close (dcc, STAT_DONE, FALSE);
+	dcc_calc_average_cps (dcc);
+	sprintf (buf, "%d", dcc->cps);
+	EMIT_SIGNAL (XP_TE_DCCSENDCOMP, serv->front_session, file_part(dcc->file), dcc->nick, buf, NULL, 0);
+}
+
+void
+signal_printer_dcc_send_failed(gpointer *params)
+{
+	struct DCC *dcc = params[0];
+	server *serv = dcc->serv;
+	gchar *error = params[1];
+
+	EMIT_SIGNAL (XP_TE_DCCSENDFAIL, serv->front_session, file_part(dcc->file), dcc->nick, error, NULL, 0);
+	dcc_close (dcc, STAT_FAILED, FALSE);
+}
+
+void
+signal_printer_dcc_send_request(gpointer *params)
+{
+	struct session *sess = params[0];
+	struct DCC *dcc = params[1];
+	gchar *to = params[2];
+	
+	EMIT_SIGNAL (XP_TE_DCCOFFER, sess, file_part(dcc->file), to, dcc->file, NULL, 0);
+}
+
+void
 signal_printer_dcc_stoned(gpointer *params)
 {
 	struct DCC *dcc = params[0];
@@ -223,6 +284,31 @@ signal_printer_dcc_stoned(gpointer *params)
 
 	EMIT_SIGNAL (XP_TE_DCCTOUT, serv->front_session, type, file_part(dcc->file), dcc->nick, NULL, 0);
 	dcc_close(dcc, STAT_ABORTED, FALSE); 
+}
+
+/* non-query private messages */
+
+signal_printer_message_private(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	gchar *message = params[2];
+	gchar *idtext  = params[3];
+	
+	if (sess->type == SESS_DIALOG) {
+		EMIT_SIGNAL (XP_TE_DPRIVMSG, sess, nick, message, idtext, NULL, 0);
+	} else {
+		EMIT_SIGNAL (XP_TE_PRIVMSG, sess, nick, message, idtext, NULL, 0);
+	}
+}
+
+/* queries */
+
+signal_printer_query_open(gpointer *params)
+{
+	session *sess = params[0];
+
+	EMIT_SIGNAL (XP_TE_OPENDIALOG, sess, NULL, NULL, NULL, NULL, 0);
 }
 
 /* server */
@@ -256,9 +342,67 @@ signal_printer_server_dns_lookup(gpointer *params)
 	EMIT_SIGNAL (XP_TE_SERVERLOOKUP, sess, hostname, NULL, NULL, NULL, 0);
 }
 
+/* whois */
+
+void
+signal_printer_whois_server(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *nick   = params[1];
+	gchar *server = params[2];
+	
+	EMIT_SIGNAL (XP_TE_WHOIS_SERVER, sess, nick, server, NULL, NULL, 0);
+}
+
+void
+signal_printer_whois_name(gpointer *params)
+{
+	session *sess = params[0];
+	gchar **word  = params[1];
+	gchar **line  = params[2];
+
+	EMIT_SIGNAL (XP_TE_WHOIS_NAME, sess, word[4], word[5], word[6], line[8] + 1, 0);
+}
+
+void
+signal_printer_whois_idle(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *nick   = params[1];
+	gchar *idle   = params[2];
+
+	EMIT_SIGNAL (XP_TE_WHOIS_IDLE, sess, nick, idle, NULL, NULL, 0);
+}
+
+void
+signal_printer_whois_idle_signon(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *nick   = params[1];
+	gchar *idle   = params[2];
+	gchar *signon = params[3];
+
+	EMIT_SIGNAL (XP_TE_WHOIS_IDLE_SIGNON, sess, nick, idle, signon, NULL, 0);
+}
+
+void
+signal_printer_whois_end(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *nick   = params[1];
+
+	EMIT_SIGNAL (XP_TE_WHOIS_END, whois_sess, word[4], NULL, NULL, NULL, 0);
+}
+
 void
 signal_printer_init(void)
 {
+	/* actions */
+	signal_attach("action public highlight", signal_printer_action_public_highlight);
+
+	/* Channels */
+	signal_attach("channel created",    signal_printer_channel_created);
+
 	/* DCC */
 	signal_attach("dcc abort",          signal_printer_dcc_abort);
 	signal_attach("dcc chat duplicate", signal_printer_dcc_chat_duplicate);
@@ -278,10 +422,43 @@ signal_printer_init(void)
 	signal_attach("dcc list start",     signal_printer_dcc_list_start);
 	signal_attach("dcc malformed",      signal_printer_dcc_malformed);
 	signal_attach("dcc recv error",     signal_printer_dcc_recv_error);
+	signal_attach("dcc send complete",  signal_printer_dcc_send_complete);
+	signal_attach("dcc send failed",    signal_printer_dcc_send_failed);
+	signal_attach("dcc send request",   signal_printer_dcc_send_request);
 	signal_attach("dcc stoned",         signal_printer_dcc_stoned);
+
+	/* non-query messages */
+	signal_attach("message private",    signal_printer_message_private);
+
+	/* queries */
+	signal_attach("query open",         signal_printer_query_open);
 
 	/* server */
 	signal_attach("server connected",   signal_printer_server_connected);
 	signal_attach("server dns lookup",  signal_printer_server_dns_lookup);
 	signal_attach("server stoned",      signal_printer_server_stoned);
+
+	/* whois */
+	signal_attach("whois server",       signal_printer_whois_server);
+	signal_attach("whois name",         signal_printer_whois_name);
+	signal_attach("whois idle",         signal_printer_whois_idle);
+	signal_attach("whois idle signon",  signal_printer_whois_idle_signon);
+	signal_attach("whois end",          signal_printer_whois_end);
 }
+/*
+ * UNIMPLEMENTED SIGNALS:
+whois oper
+	EMIT_SIGNAL (XP_TE_WHOIS_OPER, whois_sess, word[4], word_eol[5] + 1, NULL, NULL, 0);
+whois channels
+	EMIT_SIGNAL (XP_TE_WHOIS_CHANNELS, whois_sess, word[4], word_eol[5] + 1, NULL, NULL, 0);
+whois identified
+	EMIT_SIGNAL (XP_TE_WHOIS_ID, whois_sess, word[4], word_eol[5] + 1, NULL, NULL, 0);
+channel list head
+	EMIT_SIGNAL (XP_TE_CHANLISTHEAD, serv->server_session, NULL, NULL, NULL, NULL, 0);
+server text
+	EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, text, word[1], NULL, NULL, 0);
+channel modes
+	EMIT_SIGNAL (XP_TE_CHANMODES, sess, word[4], word_eol[5], NULL, NULL, 0);
+whois authenticated
+	EMIT_SIGNAL (XP_TE_WHOIS_AUTH, whois_sess, word[4], word_eol[6] + 1, word[5], NULL, 0);
+*/
