@@ -18,6 +18,8 @@
 
 #include "signal_printer.h"
 #include "text.h"
+#include "modes.h"
+#include "xchatc.h"
 
 /* DCC */
 #include "dcc.h"
@@ -400,7 +402,7 @@ signal_printer_whois_end(gpointer *params)
 	EMIT_SIGNAL (XP_TE_WHOIS_END, sess, nick, NULL, NULL, NULL, 0);
 }
 
-/* sasl */
+/* sasl -- temporary */
 void
 signal_printer_sasl_complete(gpointer *params)
 {
@@ -408,6 +410,29 @@ signal_printer_sasl_complete(gpointer *params)
 	gchar *account = params[1];
 
 	EMIT_SIGNAL (XP_TE_SASL_AUTH, sess, account, NULL, NULL, NULL, 0);
+}
+
+/* ctcp */
+void
+signal_printer_ctcp_inbound(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *msg    = params[1];
+	gchar *nick   = params[2];
+	gchar *to     = params[3];
+
+	if(!is_channel(sess->server, to))
+	{
+		EMIT_SIGNAL(XP_TE_CTCPGEN, sess->server->front_session, msg, nick, NULL, NULL, 0);
+	}
+	else
+	{
+		session *chansess = find_channel(sess->server, to);
+		if (!chansess)
+			chansess = sess;
+
+		EMIT_SIGNAL(XP_TE_CTCPGENC, chansess, msg, nick, to, NULL, 0);
+	}
 }
 
 void
@@ -463,6 +488,9 @@ signal_printer_init(void)
 
 	/* sasl */
 	signal_attach("sasl complete",      signal_printer_sasl_complete);
+
+	/* ctcp */
+	signal_attach("ctcp inbound",       signal_printer_ctcp_inbound);
 }
 /*
  * UNIMPLEMENTED SIGNALS:

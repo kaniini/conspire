@@ -87,7 +87,6 @@ ctcp_handle (session *sess, char *to, char *nick,
 				 char *msg, char *word[], char *word_eol[], int id)
 {
 	char *po;
-	session *chansess;
 	server *serv = sess->server;
 	char outbuf[1024];
 
@@ -164,15 +163,5 @@ generic:
 	if (po)
 		po[0] = 0;
 
-	if (!is_channel (sess->server, to))
-	{
-		EMIT_SIGNAL (XP_TE_CTCPGEN, sess->server->front_session, msg, nick,
-						 NULL, NULL, 0);
-	} else
-	{
-		chansess = find_channel (sess->server, to);
-		if (!chansess)
-			chansess = sess;
-		EMIT_SIGNAL (XP_TE_CTCPGENC, chansess, msg, nick, to, NULL, 0);
-	}
+	signal_emit("ctcp inbound", 4, sess, msg, nick, to);
 }
