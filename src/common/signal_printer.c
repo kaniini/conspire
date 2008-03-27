@@ -30,8 +30,8 @@ void
 signal_printer_action_public_highlight(gpointer *params)
 {
 	session *sess   = params[0];
-	gchar *nick     = params[1];
-	gchar *message  = params[2];
+	gchar *from     = params[1];
+	gchar *text     = params[2];
 	gchar *nickchar = params[3];
 	
 	EMIT_SIGNAL (XP_TE_HCHANACTION, sess, from, text, nickchar, NULL, 0);
@@ -42,9 +42,10 @@ signal_printer_action_public_highlight(gpointer *params)
 void
 signal_printer_channel_created(gpointer *params)
 {
-	struct session *sess = params[0];
-	gchar *channel       = params[1];
-	gchar *timestamp     = params[2]
+	session *sess    = params[0];
+	gchar *channel   = params[1];
+	gchar *timestamp = params[2];
+
 	EMIT_SIGNAL (XP_TE_CHANDATE, sess, channel, timestamp, NULL, NULL, 0);
 }
 
@@ -245,13 +246,16 @@ signal_printer_dcc_send_complete(gpointer *params)
 {
 	struct DCC *dcc = params[0];
 	server *serv = dcc->serv;
+	gchar *buf;
 
 	/* force 100% ack for >4 GB */
 	dcc->ack = dcc->size;
 	dcc_close (dcc, STAT_DONE, FALSE);
 	dcc_calc_average_cps (dcc);
-	sprintf (buf, "%d", dcc->cps);
+
+	buf = g_strdup_printf("%d", dcc->cps);
 	EMIT_SIGNAL (XP_TE_DCCSENDCOMP, serv->front_session, file_part(dcc->file), dcc->nick, buf, NULL, 0);
+	g_free(buf);
 }
 
 void
@@ -288,6 +292,7 @@ signal_printer_dcc_stoned(gpointer *params)
 
 /* non-query private messages */
 
+void
 signal_printer_message_private(gpointer *params)
 {
 	session *sess  = params[0];
@@ -304,6 +309,7 @@ signal_printer_message_private(gpointer *params)
 
 /* queries */
 
+void
 signal_printer_query_open(gpointer *params)
 {
 	session *sess = params[0];
