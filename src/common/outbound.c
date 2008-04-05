@@ -4158,6 +4158,8 @@ handle_command (session *sess, char *cmd, int check_spch)
 	if (!is_session (sess))
 		goto xit;
 
+	plugin_emit_command (sess, tbuf, word, word_eol);
+
 	/* XXX: UGLY ALIAS HACK YUCK YUCK YUCK --nenolod */
 	list = command_list;
 	while (list)
