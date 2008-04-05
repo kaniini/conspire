@@ -473,7 +473,7 @@ process_numeric (session * sess, int n,
 
 	case 307:	/* dalnet version */
 	case 320:	/* :is an identified user */
-		signal_emit("whois identified", 3, whois_sess, word, word_eol);
+		signal_emit("whois authenticated", 3, whois_sess, word, word_eol);
 		break;
 
 	case 321:
@@ -494,7 +494,7 @@ process_numeric (session * sess, int n,
 
 	case 323:
 		if (!fe_is_chanwindow (sess->server))
-			signal_emit("server text", 3, serv, text, word);
+			signal_emit("server text", 3, serv, text, word[1]);
 		else
 			fe_chan_list_end (sess->server);
 		break;
@@ -542,17 +542,8 @@ process_numeric (session * sess, int n,
 		inbound_topictime (serv, word[4], word[5], atol (word[6]));
 		break;
 
-#if 0
-	case 338:  /* Undernet Real user@host, Real IP */
-		EMIT_SIGNAL (XP_TE_WHOIS_REALHOST, sess, word[4], word[5], word[6], 
-			(word_eol[7][0]==':') ? word_eol[7]+1 : word_eol[7], 0);
-		break;
-#endif
-
 	case 341:						  /* INVITE ACK */
 		signal_emit("user invite", 3, sess, word, serv);
-		EMIT_SIGNAL (XP_TE_UINVITE, sess, word[4], word[5], serv->servername,
-						 NULL, 0);
 		break;
 
 	case 352:						  /* WHO */
@@ -568,8 +559,7 @@ process_numeric (session * sess, int n,
 
 			/* try to show only user initiated whos */
 			if (!who_sess || !who_sess->doing_who)
-				EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, text, word[1],
-								 NULL, NULL, 0);
+				signal_emit("server text", 3, serv->server_session, text, word[1]);
 		}
 		break;
 
@@ -591,8 +581,7 @@ process_numeric (session * sess, int n,
 
 				/* try to show only user initiated whos */
 				if (!who_sess || !who_sess->doing_who)
-					EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, text,
-									 word[1], NULL, NULL, 0);
+					signal_emit("server text", 3, serv->server_session, text, word[1]);
 			} else
 				goto def;
 		}
@@ -605,14 +594,12 @@ process_numeric (session * sess, int n,
 			if (who_sess)
 			{
 				if (!who_sess->doing_who)
-					EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, text,
-									 word[1], NULL, NULL, 0);
+					signal_emit("server text", 3, serv->server_session, text, word[1]);
 				who_sess->doing_who = FALSE;
 			} else
 			{
 				if (!serv->doing_dns)
-					EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, text,
-									 word[1], NULL, NULL, 0);
+					signal_emit("server text", 3, serv->server_session, text, word[1]);
 				serv->doing_dns = FALSE;
 			}
 		}
@@ -663,15 +650,14 @@ process_numeric (session * sess, int n,
 
 	case 369:	/* WHOWAS end */
 	case 406:	/* WHOWAS error */
-		EMIT_SIGNAL (XP_TE_SERVTEXT, whois_sess, text, word[1], NULL, NULL, 0);
+		signal_emit("server text", 3, whois_sess, text, word[1]);
 		serv->inside_whois = 0;
 		break;
 
 	case 372:	/* motd text */
 	case 375:	/* motd start */
 		if (!prefs.skipmotd || serv->motd_skipped)
-			EMIT_SIGNAL (XP_TE_MOTD, serv->server_session, text, NULL, NULL,
-							 NULL, 0);
+			signal_emit("server motd", 2, serv->server_session, text);
 		break;
 
 	case 376:	/* end of motd */
@@ -693,19 +679,19 @@ process_numeric (session * sess, int n,
 		break;
 
 	case 471:
-		EMIT_SIGNAL (XP_TE_USERLIMIT, sess, word[4], NULL, NULL, NULL, 0);
+		signal_emit("channel join error", 3, sess, word, _("user limit reached"));
 		break;
 
 	case 473:
-		EMIT_SIGNAL (XP_TE_INVITE, sess, word[4], NULL, NULL, NULL, 0);
+		signal_emit("channel join error", 3, sess, word, _("channel is invite-only"));
 		break;
 
 	case 474:
-		EMIT_SIGNAL (XP_TE_BANNED, sess, word[4], NULL, NULL, NULL, 0);
+		signal_emit("channel join error", 3, sess, word, _("you are banned"));
 		break;
 
 	case 475:
-		EMIT_SIGNAL (XP_TE_KEYWORD, sess, word[4], NULL, NULL, NULL, 0);
+		signal_emit("channel join error", 3, sess, word, _("channel requires a keyword"));
 		break;
 
 	case 601:
@@ -770,9 +756,7 @@ process_numeric (session * sess, int n,
 		if (serv->inside_whois && word[4][0])
 		{
 			/* some unknown WHOIS reply, ircd coders make them up weekly */
-			EMIT_SIGNAL (XP_TE_WHOIS_SPECIAL, whois_sess, word[4],
-							(word_eol[5][0] == ':') ? word_eol[5] + 1 : word_eol[5],
-							 word[2], NULL, 0);
+			signal_emit("whois generic", 3, whois_sess, word, word_eol);
 			return;
 		}
 
@@ -782,11 +766,10 @@ process_numeric (session * sess, int n,
 			session *realsess = find_channel (serv, word[4]);
 			if (!realsess)
 				realsess = serv->server_session;
-			EMIT_SIGNAL (XP_TE_SERVTEXT, realsess, text, word[1], NULL, NULL, 0);
+			signal_emit("server text", 3, realsess, text, word[1]);
 		} else
 		{
-			EMIT_SIGNAL (XP_TE_SERVTEXT, serv->server_session, text, word[1],
-							 NULL, NULL, 0);
+			signal_emit("server text", 3, serv->server_session, text, word[1]);
 		}
 	}
 }
@@ -889,7 +872,7 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 			return;
 
 		case WORDL('K','I','L','L'):
-			EMIT_SIGNAL (XP_TE_KILL, sess, nick, word_eol[5], NULL, NULL, 0);
+			signal_emit("server kill", 3, sess, nick, word_eol);
 			return;
 
 		case WORDL('M','O','D','E'):
@@ -942,13 +925,8 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 		case WORDL('I','N','V','I'):
 			if (ignore_check (word[1], IG_INVI))
 				return;
-			
-			if (word[4][0] == ':')
-				EMIT_SIGNAL (XP_TE_INVITED, sess, word[4] + 1, nick,
-								 serv->servername, NULL, 0);
-			else
-				EMIT_SIGNAL (XP_TE_INVITED, sess, word[4], nick,
-								 serv->servername, NULL, 0);
+
+			signal_emit("channel invited", 4, sess, word, nick, serv);
 				
 			return;
 
@@ -1032,7 +1010,7 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 			text = word_eol[3];
 			if (*text == ':')
 				text++;
-			EMIT_SIGNAL (XP_TE_WALLOPS, sess, nick, text, NULL, NULL, 0);
+			signal_emit("server wallops", 3, sess, nick, text);
 			return;
 		}
 	}
@@ -1088,7 +1066,7 @@ process_named_servermsg (session *sess, char *buf, char *word_eol[])
 	}
 	if (!strncmp (buf, "ERROR", 5))
 	{
-		EMIT_SIGNAL (XP_TE_SERVERERROR, sess, buf + 7, NULL, NULL, NULL, 0);
+		signal_emit("server error", 2, sess, buf+7);
 		return;
 	}
 	if (!strncmp (buf, "NOTICE ", 7))
@@ -1096,10 +1074,10 @@ process_named_servermsg (session *sess, char *buf, char *word_eol[])
 		buf = word_eol[3];
 		if (*buf == ':')
 			buf++;
-		EMIT_SIGNAL (XP_TE_SERVNOTICE, sess, buf, sess->server->servername, NULL, NULL, 0);
+		signal_emit("server notice", 2, sess, buf);
 		return;
 	}
-	EMIT_SIGNAL (XP_TE_SERVTEXT, sess, buf, sess->server->servername, NULL, NULL, 0);
+	signal_emit("server text", 3, sess->server, buf, sess->server->servername);
 }
 
 /* irc_inline() - 1 single line received from serv */

@@ -8,9 +8,6 @@ N_("%C27*$t%C27$1 added to notify list.")},
 {"Ban List", pevt_banlist_help, 4, 
 N_("%C27*$t%C27$1 Banlist: %C3$4 %C4$2 %C5$3%O")},
 
-{"Banned", pevt_generic_channel_help, 1, 
-N_("%C27*$t%C27Cannot join%C11 %B$1 %O(You are banned).")},
-
 {"Beep", pevt_generic_none_help, 0, 
 N_("")},
 
@@ -25,6 +22,9 @@ N_("%C13*%O$t%C8%B$1%B%O $2%O")},
 
 {"Channel Creation", pevt_chandate_help, 2, 
 N_("%C27*$t%C27Channel $1 created on $2")},
+
+{"Channel Join Error", pevt_generic_channel_join_error_help, 2, 
+N_("%C27*$t%C27Cannot join%C11 %B$1%O ($2).")},
 
 {"Channel List", pevt_generic_none_help, 0, 
 N_("%UChannel          Users   Topic%O")},
@@ -173,17 +173,11 @@ N_("%C27*$t%C27$1 removed from ignore list.")},
 {"Ignorelist Empty", pevt_generic_none_help, 0, 
 N_("  Ignore list is empty.")},
 
-{"Invite", pevt_generic_channel_help, 1, 
-N_("%C27*$t%C27Cannot join $1 (Channel is invite only).")},
-
 {"Invited", pevt_invited_help, 3, 
 N_("%C27*$t%C27You have been invited to $1 by $2 ($3).")},
 
 {"Join", pevt_join_help, 3, 
 N_("%C27*$t%C27$1 ($3) has joined $2")},
-
-{"Keyword", pevt_generic_channel_help, 1, 
-N_("%C27*$t%C27Cannot join $1 (Requires keyword).")},
 
 {"Kick", pevt_kick_help, 4, 
 N_("%C27*$t%C27$1 has kicked $2 from $3: $4")},
@@ -298,9 +292,6 @@ N_("%C27*$t%C27Topic for $1 set by $2 at $3")},
 
 {"Unknown Host", pevt_generic_none_help, 0, 
 N_("%C27*$t%C27Unknown host. Maybe you misspelled it?")},
-
-{"User Limit", pevt_generic_channel_help, 1, 
-N_("%C27*$t%C27Cannot join%C11 %B$1 %O(User limit reached).")},
 
 {"Users On Channel", pevt_usersonchan_help, 2, 
 N_("%C27*$t%C27%C11Users on $1:%C $2")},
