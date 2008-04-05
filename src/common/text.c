@@ -1121,7 +1121,7 @@ static char * const pevt_generic_channel_help[] = {
 	N_("Channel Name"),
 };
 
-static char * const pevt_channel_join_error_help[] = {
+static char * const pevt_generic_channel_join_error_help[] = {
 	N_("Channel Name"),
 	N_("Error Message"),
 };

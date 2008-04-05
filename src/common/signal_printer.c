@@ -76,7 +76,7 @@ signal_printer_channel_join_error(gpointer *params)
 	gchar *channel = params[1];
 	gchar *error   = params[2];
 
-	EMIT_SIGNAL (XP_TE_CHANNEL_JOIN_ERROR, sess, word[4], error, NULL, NULL, 0);
+	EMIT_SIGNAL (XP_TE_CHANNEL_JOIN_ERROR, sess, channel, error, NULL, NULL, 0);
 }
 
 void
@@ -539,9 +539,9 @@ signal_printer_whois_authenticated(gpointer *params)
 	gchar **line  = params[2];
 
 	if (word[5])
-		EMIT_SIGNAL (XP_TE_WHOIS_AUTH, sess, word[4], word_eol[6] + 1, word[5], NULL, 0);
+		EMIT_SIGNAL (XP_TE_WHOIS_AUTH, sess, word[4], line[6] + 1, word[5], NULL, 0);
 	else
-		EMIT_SIGNAL (XP_TE_WHOIS_ID, sess, word[4], word_eol[5] + 1, NULL, NULL, 0);
+		EMIT_SIGNAL (XP_TE_WHOIS_ID, sess, word[4], line[5] + 1, NULL, NULL, 0);
 }
 
 void
