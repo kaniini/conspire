@@ -37,7 +37,7 @@
 #include "ignore.h"
 #include "xchat-plugin.h"
 #include "plugin.h"
-#include "plugin-timer.h"
+#include "timer.h"
 #include "notify.h"
 #include "server.h"
 #include "servlist.h"
@@ -277,8 +277,6 @@ irc_init (session *sess)
 #ifdef USE_DBUS
 	plugin_add (sess, NULL, NULL, dbus_plugin_init, NULL, NULL, FALSE);
 #endif
-
-	plugin_add (sess, NULL, NULL, timer_plugin_init, NULL, NULL, FALSE);
 
 	if (prefs.notify_timeout)
 		notify_tag = g_timeout_add (prefs.notify_timeout * 1000, (GSourceFunc) notify_checklist, 0);
