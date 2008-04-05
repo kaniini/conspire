@@ -10,12 +10,6 @@ pevt_banlist_help
 %C27*$t%C27$1 Banlist: %C3$4 %C4$2 %C5$3%O
 4
 
-Banned
-XP_TE_BANNED
-pevt_generic_channel_help
-%C27*$t%C27Cannot join%C11 %B$1 %O(You are banned).
-1
-
 Beep
 XP_TE_BEEP
 pevt_generic_none_help
@@ -44,6 +38,12 @@ Channel Creation
 XP_TE_CHANDATE
 pevt_chandate_help
 %C27*$t%C27Channel $1 created on $2
+2
+
+Channel Join Error
+XP_TE_CHANNEL_JOIN_ERROR
+pevt_generic_channel_join_error_help
+%C27*$t%C27Cannot join%C11 %B$1%O ($2).
 2
 
 Channel List
@@ -340,12 +340,6 @@ pevt_generic_none_help
   Ignore list is empty.
 0
 
-Invite
-XP_TE_INVITE
-pevt_generic_channel_help
-%C27*$t%C27Cannot join $1 (Channel is invite only).
-1
-
 Invited
 XP_TE_INVITED
 pevt_invited_help
@@ -357,12 +351,6 @@ XP_TE_JOIN
 pevt_join_help
 %C27*$t%C27$1 ($3) has joined $2
 3
-
-Keyword
-XP_TE_KEYWORD
-pevt_generic_channel_help
-%C27*$t%C27Cannot join $1 (Requires keyword).
-1
 
 Kick
 XP_TE_KICK
@@ -591,12 +579,6 @@ XP_TE_UKNHOST
 pevt_generic_none_help
 %C27*$t%C27Unknown host. Maybe you misspelled it?
 0
-
-User Limit
-XP_TE_USERLIMIT
-pevt_generic_channel_help
-%C27*$t%C27Cannot join%C11 %B$1 %O(User limit reached).
-1
 
 Users On Channel
 XP_TE_USERSONCHAN
