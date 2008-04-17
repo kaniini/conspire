@@ -1,12 +1,12 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([conspire],[0.20.0],[http://conspire.atheme.org/],[conspire])
+AC_INIT([conspire],[0.14.0],[http://conspire.atheme.org/],[conspire])
 
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
 AC_PREREQ([2.59])
-AC_COPYRIGHT([Copyright (C) 1998-2007 atheme.org])
+AC_COPYRIGHT([Copyright (C) 1998-2008 atheme.org])
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([configure.ac])
