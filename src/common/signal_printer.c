@@ -538,10 +538,7 @@ signal_printer_whois_authenticated(gpointer *params)
 	gchar **word  = params[1];
 	gchar **line  = params[2];
 
-	if (word[5])
-		EMIT_SIGNAL (XP_TE_WHOIS_AUTH, sess, word[4], line[6] + 1, word[5], NULL, 0);
-	else
-		EMIT_SIGNAL (XP_TE_WHOIS_ID, sess, word[4], line[5] + 1, NULL, NULL, 0);
+	EMIT_SIGNAL (XP_TE_WHOIS_AUTH, sess, word[4], line[6] + 1, word[5], NULL, 0);
 }
 
 void
@@ -550,7 +547,7 @@ signal_printer_whois_generic(gpointer *params)
 	session *sess = params[0];
 	gchar **word  = params[1];
 	gchar **line  = params[2];
-	
+
 	EMIT_SIGNAL (XP_TE_WHOIS_SPECIAL, sess, word[4], (line[5][0] == ':') ? line[5] + 1 : line[5], word[2], NULL, 0);
 }
 
@@ -661,6 +658,7 @@ signal_printer_init(void)
 	signal_attach("whois oper",          signal_printer_whois_oper);
 	signal_attach("whois channels",      signal_printer_whois_channels);
 	signal_attach("whois authenticated", signal_printer_whois_authenticated);
+	signal_attach("whois identified",    signal_printer_whois_identified);
 	signal_attach("whois generic",       signal_printer_whois_generic);
 
 	/* sasl */

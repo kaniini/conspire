@@ -473,7 +473,7 @@ process_numeric (session * sess, int n,
 
 	case 307:	/* dalnet version */
 	case 320:	/* :is an identified user */
-		signal_emit("whois authenticated", 3, whois_sess, word, word_eol);
+		signal_emit("whois identified", 3, whois_sess, word, word_eol);
 		break;
 
 	case 321:
@@ -679,19 +679,19 @@ process_numeric (session * sess, int n,
 		break;
 
 	case 471:
-		signal_emit("channel join error", 3, sess, word, _("user limit reached"));
+		signal_emit("channel join error", 3, sess, word[4], _("user limit reached"));
 		break;
 
 	case 473:
-		signal_emit("channel join error", 3, sess, word, _("channel is invite-only"));
+		signal_emit("channel join error", 3, sess, word[4], _("channel is invite-only"));
 		break;
 
 	case 474:
-		signal_emit("channel join error", 3, sess, word, _("you are banned"));
+		signal_emit("channel join error", 3, sess, word[4], _("you are banned"));
 		break;
 
 	case 475:
-		signal_emit("channel join error", 3, sess, word, _("channel requires a keyword"));
+		signal_emit("channel join error", 3, sess, word[4], _("channel requires a keyword"));
 		break;
 
 	case 601:
