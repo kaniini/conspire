@@ -322,6 +322,77 @@ channel_date (session *sess, char *chan, char *timestr)
 
 /* giant ugly hackaround */
 static void
+process_numeric_001 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	char *text = params[3];
+
+	inbound_login_start (sess, word[3], word[1]);
+
+	/* umm .. what the fuck is all this shit? we should just set a services agent
+	   in the network factory .. --nenolod */
+
+	/* use /NICKSERV */
+	if (strcasecmp (word[7], "DALnet") == 0 ||
+		 strcasecmp (word[7], "BRASnet") == 0)
+		serv->nickservtype = 1;
+
+	/* use /NS */
+	else if (strcasecmp (word[7], "FreeNode") == 0)
+		serv->nickservtype = 2;
+}
+
+static void
+process_numeric_005 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+
+	inbound_005 (sess->server, word);
+}
+
+static void
+process_monitor_reply (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[2];
+	server *serv = sess->server;
+
+	int n = atoi(word[2]);
+
+	switch(n)
+	{
+	case 730:
+	case 731:
+		{
+			char *nick, *p;
+			for(nick = strtok(word[4] +1, ","); nick != NULL; nick = strtok(NULL, ","))
+			{
+				p = strchr(nick, '!');
+				if(p != NULL)
+					*p = '\0';
+				if(n == 731) 
+					notify_set_offline(serv, nick, serv->inside_monitor);
+				else
+					notify_set_online(serv, nick);
+			}
+		}
+		break;
+              
+	case 732:
+		break;
+	case 733:
+		if(serv->inside_monitor)
+			serv->inside_monitor = FALSE;
+		break;
+	default:
+		break;
+	}
+}
+
+static void
 process_numeric (gpointer *params)
 {
 	session *sess = params[0];
@@ -334,31 +405,6 @@ process_numeric (gpointer *params)
 
 	switch (n)
 	{
-	case 1:
-		inbound_login_start (sess, word[3], word[1]);
-		/* if network is PTnet then you must get your IP address
-			from "001" server message */
-		if ((strncmp(word[7], "PTnet", 5) == 0) &&
-			(strncmp(word[8], "IRC", 3) == 0) &&
-			(strncmp(word[9], "Network", 7) == 0) &&
-			(strrchr(word[10], '@') != NULL))
-		{
-			serv->use_who = FALSE;
-			if (prefs.ip_from_server)
-				inbound_foundip (sess, strrchr(word[10], '@')+1);
-		}
-
-		/* use /NICKSERV */
-		if (strcasecmp (word[7], "DALnet") == 0 ||
-			 strcasecmp (word[7], "BRASnet") == 0)
-			serv->nickservtype = 1;
-
-		/* use /NS */
-		else if (strcasecmp (word[7], "FreeNode") == 0)
-			serv->nickservtype = 2;
-
-		goto def;
-
 	case 4:	/* check the ircd type */
 		serv->use_listargs = FALSE;
 		serv->modes_per_line = 3;		/* default to IRC RFC */
@@ -373,10 +419,6 @@ process_numeric (gpointer *params)
 		{
 			serv->use_listargs = TRUE;		/* use the /list args */
 		}
-		goto def;
-
-	case 5:
-		inbound_005 (serv, word);
 		goto def;
 
 	case 263:	/*Server load is temporarily too heavy */
@@ -712,32 +754,6 @@ process_numeric (gpointer *params)
 		notify_set_online (serv, word[4]);
 		break;
 
-	case 730:
-	case 731:
-		{
-			char *nick, *p;
-			for(nick = strtok(word[4] +1, ","); nick != NULL; nick = strtok(NULL, ","))
-			{
-				p = strchr(nick, '!');
-				if(p != NULL)
-					*p = '\0';
-				if(n == 731) 
-					notify_set_offline(serv, nick, serv->inside_monitor);
-				else
-					notify_set_online(serv, nick);
-			}
-		}
-		break;
-              
-	case 732:
-			if(!serv->inside_monitor)
-				goto def;
-			break;
-	case 733:
-			if(serv->inside_monitor)
-				serv->inside_monitor = FALSE;
-			break;
-
 	case 900:
 		signal_emit("sasl complete", 2, serv->server_session, word[5]);
 		break;
@@ -757,7 +773,6 @@ process_numeric (gpointer *params)
 		break;
 
 	default:
-
 		if (serv->inside_whois && word[4][0])
 		{
 			/* some unknown WHOIS reply, ircd coders make them up weekly */
@@ -1204,5 +1219,13 @@ proto_fill_her_up (server *serv)
 void
 proto_irc_init(void)
 {
+	signal_attach("server numeric 001", process_numeric_001);
+	signal_attach("server numeric 005", process_numeric_005);
+
+	signal_attach("server numeric 730", process_monitor_reply);
+	signal_attach("server numeric 731", process_monitor_reply);
+	signal_attach("server numeric 732", process_monitor_reply);
+	signal_attach("server numeric 733", process_monitor_reply);
+
 	signal_attach("server numeric", process_numeric);
 }
