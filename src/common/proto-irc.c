@@ -326,8 +326,7 @@ process_numeric_001 (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
-	char **word_eol = params[2];
-	char *text = params[3];
+	server *serv = sess->server;
 
 	inbound_login_start (sess, word[3], word[1]);
 
