@@ -320,10 +320,15 @@ channel_date (session *sess, char *chan, char *timestr)
 	signal_emit("channel created", 3, sess, chan, tim);
 }
 
+/* giant ugly hackaround */
 static void
-process_numeric (session * sess, int n,
-					  char *word[], char *word_eol[], char *text)
+process_numeric (gpointer *params)
 {
+	session *sess = params[0];
+	int n = GPOINTER_TO_INT(params[1]);
+	char **word = params[2];
+	char **word_eol = params[3];
+	char *text = params[4];
 	server *serv = sess->server;
 	session *whois_sess = serv->front_session;
 
@@ -1138,11 +1143,16 @@ irc_inline (server *serv, char *buf, int len)
 	/* see if the second word is a numeric */
 	if (isdigit ((unsigned char) word[2][0]))
 	{
+		static gchar scratch[512];
+
 		text = word_eol[4];
 		if (*text == ':')
 			text++;
 
-		process_numeric (sess, atoi (word[2]), word, word_eol, text);
+		signal_emit("server numeric", 5, sess, atoi(word[2]), word, word_eol, text);
+
+		g_snprintf(scratch, 512, "server numeric %s", word[2]);
+		signal_emit(scratch, 4, sess, word, word_eol, text);
 	} else
 	{
 		process_named_msg (sess, type, word, word_eol);
@@ -1188,4 +1198,11 @@ proto_fill_her_up (server *serv)
 	serv->p_ping = irc_ping;
 	serv->p_raw = irc_raw;
 	serv->p_cmp = rfc_casecmp;	/* can be changed by 005 in modes.c */
+}
+
+/* hook up signals for IRC protocol implementation. */
+void
+proto_irc_init(void)
+{
+	signal_attach("server numeric", process_numeric);
 }
