@@ -320,6 +320,22 @@ channel_date (session *sess, char *chan, char *timestr)
 	signal_emit("channel created", 3, sess, chan, tim);
 }
 
+static void
+server_text_passthrough(server *serv, char **word, char *text)
+{
+	if (is_channel (serv, word[4]))
+	{
+		session *realsess = find_channel (serv, word[4]);
+		if (!realsess)
+			realsess = serv->server_session;
+		signal_emit("server text", 3, realsess, text, word[1]);
+	}
+	else
+	{
+		signal_emit("server text", 3, serv->server_session, text, word[1]);
+	}
+}
+
 /* giant ugly hackaround */
 static void
 process_numeric_001 (gpointer *params)
@@ -356,7 +372,8 @@ static void
 process_monitor_reply (gpointer *params)
 {
 	session *sess = params[0];
-	char **word = params[2];
+	char **word = params[1];
+	char *text = params[3];
 	server *serv = sess->server;
 
 	int n = atoi(word[2]);
@@ -381,6 +398,8 @@ process_monitor_reply (gpointer *params)
 		break;
               
 	case 732:
+		if(!serv->inside_monitor)
+			server_text_passthrough(serv, word, text);
 		break;
 	case 733:
 		if(serv->inside_monitor)
@@ -780,6 +799,7 @@ process_numeric (gpointer *params)
 		}
 
 	def:
+
 		if (is_channel (serv, word[4]))
 		{
 			session *realsess = find_channel (serv, word[4]);
@@ -1158,15 +1178,17 @@ irc_inline (server *serv, char *buf, int len)
 	if (isdigit ((unsigned char) word[2][0]))
 	{
 		static gchar scratch[512];
+		gint sigs;
 
 		text = word_eol[4];
 		if (*text == ':')
 			text++;
 
-		signal_emit("server numeric", 5, sess, atoi(word[2]), word, word_eol, text);
-
 		g_snprintf(scratch, 512, "server numeric %s", word[2]);
-		signal_emit(scratch, 4, sess, word, word_eol, text);
+		sigs = signal_emit(scratch, 4, sess, word, word_eol, text);
+
+		if (!sigs)
+			signal_emit("server numeric", 5, sess, atoi(word[2]), word, word_eol, text);
 	} else
 	{
 		process_named_msg (sess, type, word, word_eol);
