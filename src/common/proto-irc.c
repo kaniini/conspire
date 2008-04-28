@@ -411,6 +411,17 @@ process_monitor_reply (gpointer *params)
 }
 
 static void
+process_numeric_301 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+
+	inbound_away (serv, word[4], (word_eol[5][0] == ':') ? word_eol[5] + 1 : word_eol[5]);
+}
+
+static void
 process_numeric (gpointer *params)
 {
 	session *sess = params[0];
@@ -451,11 +462,6 @@ process_numeric (gpointer *params)
 			break;
 		}
 		goto def;
-
-	case 301:
-		inbound_away (serv, word[4],
-						(word_eol[5][0] == ':') ? word_eol[5] + 1 : word_eol[5]);
-		break;
 
 	case 302:
 		if (serv->skip_next_userhost)
@@ -1242,6 +1248,8 @@ proto_irc_init(void)
 {
 	signal_attach("server numeric 001", process_numeric_001);
 	signal_attach("server numeric 005", process_numeric_005);
+
+	signal_attach("server numeric 301", process_numeric_301);
 
 	signal_attach("server numeric 730", process_monitor_reply);
 	signal_attach("server numeric 731", process_monitor_reply);
