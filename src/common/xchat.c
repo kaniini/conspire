@@ -46,6 +46,7 @@
 #include "url.h"
 #include "xchatc.h"
 #include "proto-irc.h"
+#include "upnp.h"
 
 GSList *popup_list = 0;
 GSList *button_list = 0;
@@ -675,6 +676,7 @@ xchat_init (void)
 	ignore_load ();
 	signal_printer_init();
 	proto_irc_init();
+	upnp_init();
 
 	snprintf (buf, sizeof (buf),
 		"NAME %s\n"                         "CMD query %%s\n\n"\
