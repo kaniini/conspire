@@ -28,19 +28,18 @@
 
 static struct UPNPUrls urls = {};
 static struct IGDdatas data = {};
+static GStaticMutex upnp_mutex = G_STATIC_MUTEX_INIT;
 
-void
-upnp_init(void)
+gpointer
+upnp_discovery_thread(gpointer unused)
 {
 	struct UPNPDev *devlist;
 	struct UPNPDev *dev;
 	char *descXML;
 	int descXMLsize = 0;
 
-	memset(&urls, 0, sizeof(struct UPNPUrls));
-	memset(&data, 0, sizeof(struct IGDdatas));
+	g_static_mutex_lock(&upnp_mutex);
 
-	g_print("I: initializing UPNP support, please wait...\n");
 	devlist = upnpDiscover(2000, NULL, NULL);
 
 	if (devlist)
@@ -67,7 +66,24 @@ upnp_init(void)
 		freeUPNPDevlist(devlist);
 	}
 
-	g_print("I: UPNP initialization completed.\n");
+	g_static_mutex_unlock(&upnp_mutex);
+
+	g_thread_exit(NULL);
+	return NULL;
+}
+
+void
+upnp_init(void)
+{
+	GError *error = NULL;
+
+	g_thread_create(upnp_discovery_thread, NULL, FALSE, &error);
+
+	if (error != NULL)
+	{
+		g_print("Error while creating UPnP Discovery thread: %s\n", error->message);
+		g_clear_error(&error);
+	}
 }
 
 void
@@ -75,8 +91,13 @@ upnp_add_redir(const char * addr, int port)
 {
 	gchar port_str[16];
 
-	if(!urls.controlURL)
+	g_static_mutex_lock(&upnp_mutex);
+
+	if (!urls.controlURL)
+	{
+		g_static_mutex_unlock(&upnp_mutex);
 		return;
+	}
 
 	g_snprintf(port_str, 16, "%d", port);
 
@@ -85,6 +106,8 @@ upnp_add_redir(const char * addr, int port)
 	{
 		g_print("warning: AddPortMapping(%s, %s, %s) failed\n", port_str, port_str, addr);
 	}
+
+	g_static_mutex_unlock(&upnp_mutex);
 }
 
 void
@@ -92,9 +115,16 @@ upnp_rem_redir(int port)
 {
 	gchar port_str[16];
 
-	if(!urls.controlURL)
+	g_static_mutex_lock(&upnp_mutex);
+
+	if (!urls.controlURL)
+	{
+		g_static_mutex_unlock(&upnp_mutex);
 		return;
+	}
 
 	g_snprintf(port_str, 16, "%d", port);
 	UPNP_DeletePortMapping(urls.controlURL, data.servicetype, port_str, "TCP");
+
+	g_static_mutex_unlock(&upnp_mutex);
 }
