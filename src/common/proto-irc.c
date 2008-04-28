@@ -364,8 +364,9 @@ process_numeric_005 (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
+	server *serv = sess->server;
 
-	inbound_005 (sess->server, word);
+	inbound_005(serv, word);
 }
 
 static void
@@ -389,14 +390,14 @@ process_monitor_reply (gpointer *params)
 				p = strchr(nick, '!');
 				if(p != NULL)
 					*p = '\0';
-				if(n == 731) 
+				if(n == 731)
 					notify_set_offline(serv, nick, serv->inside_monitor);
 				else
 					notify_set_online(serv, nick);
 			}
 		}
 		break;
-              
+
 	case 732:
 		if(!serv->inside_monitor)
 			server_text_passthrough(serv, word, text);
@@ -411,6 +412,40 @@ process_monitor_reply (gpointer *params)
 }
 
 static void
+process_numeric_263 (gpointer *params)
+{
+	/* Load too high (RPL_TRYAGAIN) */
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	if (fe_is_chanwindow (serv))
+		fe_chan_list_end (serv);
+
+	server_text_passthrough(serv, word, text);
+}
+
+static void
+process_numeric_290 (gpointer *params)
+{
+	/* CAPAB reply */
+	session *sess = params[0];
+	char ** word = params[1];
+	char **word_eol = params[2];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	if (strstr(word_eol[1], "IDENTIFY-MSG"))
+	{
+		serv->have_idmsg = TRUE;
+		return;
+	}
+
+	server_text_passthrough(serv, word, text);
+}
+
+static void
 process_numeric_301 (gpointer *params)
 {
 	session *sess = params[0];
@@ -418,7 +453,196 @@ process_numeric_301 (gpointer *params)
 	char **word_eol = params[2];
 	server *serv = sess->server;
 
-	inbound_away (serv, word[4], (word_eol[5][0] == ':') ? word_eol[5] + 1 : word_eol[5]);
+	inbound_away(serv, word[4], (word_eol[5][0] == ':') ? word_eol[5] + 1 : word_eol[5]);
+}
+
+static void
+process_numeric_302 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	if (serv->skip_next_userhost)
+	{
+		char *eq = strchr(word[4], '=');
+		if (eq)
+		{
+			*eq = 0;
+			if (!serv->p_cmp(word[4] + 1, serv->nick))
+			{
+				char *at = strrchr(eq + 1, '@');
+				if (at)
+					inbound_foundip(sess, at + 1);
+			}
+		}
+
+		serv->skip_next_userhost = FALSE;
+		return;
+	}
+	else
+		server_text_passthrough(serv, word, text);
+}
+
+static void
+process_numeric_303 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	word[4]++;
+	notify_markonline(serv, word);
+}
+
+static void
+process_numeric_305 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	inbound_uback(serv);
+
+	server_text_passthrough(serv, word, text);
+}
+
+static void
+process_numeric_306 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[4];
+	server *serv = sess->server;
+
+	inbound_uaway(serv);
+
+	server_text_passthrough(serv, word, text);
+}
+
+static void
+process_numeric_312 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+	session *whois_sess = serv->front_session;
+
+	signal_emit("whois server", 3, whois_sess, word[4], word_eol[5]);
+}
+
+/* handles 311 (RPL_WHOISUSER) and 314 (RPL_WHOWASUSER) */
+static void
+process_whois_user (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+	session *whois_sess = serv->front_session;
+
+	inbound_user_info_start(sess, word[4]);
+	signal_emit("whois name", 3, whois_sess, word, word_eol);
+}
+
+static void
+process_numeric_311 (gpointer *params)
+{
+	session *sess = params[0];
+	server *serv = sess->server;
+
+	serv->inside_whois = 1;
+}
+
+static void
+process_numeric_313 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+	session *whois_sess = serv->front_session;
+
+	signal_emit("whois oper", 3, whois_sess, word, word_eol);
+}
+
+static void
+process_numeric_317 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+	session *whois_sess = serv->front_session;
+
+	time_t timestamp = (time_t) atol(word[6]);
+	long idle = atol(word[5]);
+	char *tim;
+	char outbuf[64];
+
+	snprintf(outbuf, sizeof (outbuf),
+		"%02ld:%02ld:%02ld", idle / 3600, (idle / 60) % 60, idle % 60);
+
+	if (timestamp == 0)
+		signal_emit("whois idle", 3, whois_sess, word[4], outbuf);
+	else
+	{
+		tim = ctime(&timestamp);
+		/* get rid of the \n */
+		tim[19] = 0;
+		signal_emit("whois idle signon", 4, whois_sess, word[4], outbuf, tim);
+	}
+}
+
+static void
+process_numeric_318 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+	session *whois_sess = serv->front_session;
+
+	serv->inside_whois = 0;
+	signal_emit("whois end", 2, whois_sess, word[4]);
+}
+
+static void
+process_numeric_319 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+	session *whois_sess = serv->front_session;
+
+	signal_emit("whois channels", 3, whois_sess, word, word_eol);
+}
+
+/* this comes in several forms depending on the IRCd, notably 307
+   (RPL_WHOISREGNICK, bahamut, Unreal) and 320 (RPL_WHOISSPECIAL ??).
+   figure out how to attach signals to this based on IRCd. -- nfontes */
+static void
+process_whois_identified (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+	session *whois_sess = serv->front_session;
+
+	signal_emit("whois identified", 3, whois_sess, word, word_eol);
+}
+
+static void
+process_numeric_321 (gpointer *params)
+{
+	session *sess = params[0];
+	server *serv = sess->server;
+
+	if (!fe_is_chanwindow(serv))
+		signal_emit("channel list head", 1, serv);
 }
 
 static void
@@ -434,123 +658,31 @@ process_numeric (gpointer *params)
 
 	switch (n)
 	{
-	case 4:	/* check the ircd type */
+	case 4:
 		serv->use_listargs = FALSE;
-		serv->modes_per_line = 3;		/* default to IRC RFC */
-		if (strncmp (word[5], "bahamut", 7) == 0)				/* DALNet */
+
+		/* default to IRC RFC */
+		serv->modes_per_line = 3;
+
+		/* DALnet */
+		if (strncmp (word[5], "bahamut", 7) == 0)
+			/* use the /list args */
+			serv->use_listargs = TRUE;
+
+		/* Undernet */
+		else if (strncmp (word[5], "u2.10.", 6) == 0)
 		{
-			serv->use_listargs = TRUE;		/* use the /list args */
-		} else if (strncmp (word[5], "u2.10.", 6) == 0)		/* Undernet */
+			/* use the /list args */
+			serv->use_listargs = TRUE;
+			/* allow 6 modes per line */
+			serv->modes_per_line = 6;
+		}
+		else if (strncmp (word[5], "glx2", 4) == 0)
 		{
-			serv->use_listargs = TRUE;		/* use the /list args */
-			serv->modes_per_line = 6;		/* allow 6 modes per line */
-		} else if (strncmp (word[5], "glx2", 4) == 0)
-		{
-			serv->use_listargs = TRUE;		/* use the /list args */
+			/* use the /list args */
+			serv->use_listargs = TRUE;
 		}
 		goto def;
-
-	case 263:	/*Server load is temporarily too heavy */
-		if (fe_is_chanwindow (sess->server))
-			fe_chan_list_end (sess->server);
-		goto def;
-
-	case 290:	/* CAPAB reply */
-		if (strstr (word_eol[1], "IDENTIFY-MSG"))
-		{
-			serv->have_idmsg = TRUE;
-			break;
-		}
-		goto def;
-
-	case 302:
-		if (serv->skip_next_userhost)
-		{
-			char *eq = strchr (word[4], '=');
-			if (eq)
-			{
-				*eq = 0;
-				if (!serv->p_cmp (word[4] + 1, serv->nick))
-				{
-					char *at = strrchr (eq + 1, '@');
-					if (at)
-						inbound_foundip (sess, at + 1);
-				}
-			}
-
-			serv->skip_next_userhost = FALSE;
-			break;
-		}
-		else goto def;
-
-	case 303:
-		word[4]++;
-		notify_markonline (serv, word);
-		break;
-
-	case 305:
-		inbound_uback (serv);
-		goto def;
-
-	case 306:
-		inbound_uaway (serv);
-		goto def;
-
-	case 312:
-		signal_emit("whois server", 3, whois_sess, word[4], word_eol[5]);
-		break;
-
-	case 311:
-		serv->inside_whois = 1;
-		/* FALL THROUGH */
-
-	case 314:
-		inbound_user_info_start (sess, word[4]);
-		signal_emit("whois name", 3, whois_sess, word, word_eol);
-		break;
-
-	case 317:
-		{
-			time_t timestamp = (time_t) atol (word[6]);
-			long idle = atol (word[5]);
-			char *tim;
-			char outbuf[64];
-
-			snprintf (outbuf, sizeof (outbuf),
-						"%02ld:%02ld:%02ld", idle / 3600, (idle / 60) % 60,
-						idle % 60);
-			if (timestamp == 0)
-				signal_emit("whois idle", 3, whois_sess, word[4], outbuf);
-			else
-			{
-				tim = ctime (&timestamp);
-				tim[19] = 0; 	/* get rid of the \n */
-				signal_emit("whois idle signon", 4, whois_sess, word[4], outbuf, tim);
-			}
-		}
-		break;
-
-	case 318:
-		serv->inside_whois = 0;
-		signal_emit("whois end", 2, whois_sess, word[4]);
-		break;
-
-	case 313:	/* WHOIS server oper */
-		signal_emit("whois oper", 3, whois_sess, word, word_eol);
-		break;
-	case 319:	/* WHOIS channels */
-		signal_emit("whois channels", 3, whois_sess, word, word_eol);
-		break;
-
-	case 307:	/* dalnet version */
-	case 320:	/* :is an identified user */
-		signal_emit("whois identified", 3, whois_sess, word, word_eol);
-		break;
-
-	case 321:
-		if (!fe_is_chanwindow (sess->server))
-			signal_emit("channel list head", 1, serv);
-		break;
 
 	case 322:
 		if (fe_is_chanwindow (sess->server))
@@ -860,7 +992,7 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 	{
 		guint32 t;
 
-		t = WORDL((guint8)type[0], (guint8)type[1], (guint8)type[2], (guint8)type[3]); 	
+		t = WORDL((guint8)type[0], (guint8)type[1], (guint8)type[2], (guint8)type[3]);
 		/* this should compile to a bunch of: CMP.L, JE ... nice & fast */
 		switch (t)
 		{
@@ -963,7 +1095,7 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 	{
 		guint32 t;
 
-		t = WORDL((guint8)type[0], (guint8)type[1], (guint8)type[2], (guint8)type[3]); 	
+		t = WORDL((guint8)type[0], (guint8)type[1], (guint8)type[2], (guint8)type[3]);
 		/* this should compile to a bunch of: CMP.L, JE ... nice & fast */
 		switch (t)
 		{
@@ -972,7 +1104,7 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 				return;
 
 			signal_emit("channel invited", 4, sess, word, nick, serv);
-				
+
 			return;
 
 		case WORDL('N','O','T','I'):
@@ -1087,7 +1219,7 @@ process_named_servermsg (session *sess, char *buf, char *word_eol[])
 			ret = g_strlcpy(iter_p, serv->sasl_user, 1024 - (iter_p - buf));
 			iter_p += ret + 1;
 			ret = g_strlcpy(iter_p, serv->sasl_pass, 1024 - (iter_p - buf));
-			
+
 			base64_encode(buf, (strlen(serv->sasl_user) * 2) + strlen(serv->sasl_pass) + 2, b64buf, 1024);
 
 			/* TODO: chunk into 400 byte segments */
@@ -1249,7 +1381,25 @@ proto_irc_init(void)
 	signal_attach("server numeric 001", process_numeric_001);
 	signal_attach("server numeric 005", process_numeric_005);
 
+	signal_attach("server numeric 263", process_numeric_263);
+	signal_attach("server numeric 290", process_numeric_290);
+
 	signal_attach("server numeric 301", process_numeric_301);
+	signal_attach("server numeric 302", process_numeric_302);
+	signal_attach("server numeric 303", process_numeric_303);
+	signal_attach("server numeric 305", process_numeric_305);
+	signal_attach("server numeric 306", process_numeric_306);
+	signal_attach("server numeric 307", process_whois_identified);
+	signal_attach("server numeric 311", process_numeric_311);
+	signal_attach("server numeric 311", process_whois_user);
+	signal_attach("server numeric 312", process_numeric_312);
+	signal_attach("server numeric 313", process_numeric_313);
+	signal_attach("server numeric 314", process_whois_user);
+	signal_attach("server numeric 317", process_numeric_317);
+	signal_attach("server numeric 318", process_numeric_318);
+	signal_attach("server numeric 319", process_numeric_319);
+	signal_attach("server numeric 320", process_whois_identified);
+	signal_attach("server numeric 321", process_numeric_321);
 
 	signal_attach("server numeric 730", process_monitor_reply);
 	signal_attach("server numeric 731", process_monitor_reply);
