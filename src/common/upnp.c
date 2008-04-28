@@ -41,7 +41,7 @@ upnp_init(void)
 	memset(&data, 0, sizeof(struct IGDdatas));
 
 	g_print("I: initializing UPNP support, please wait...\n");
-	devlist = upnpDiscover(500, NULL, NULL);
+	devlist = upnpDiscover(2000, NULL, NULL);
 
 	if (devlist)
 	{
@@ -75,12 +75,12 @@ upnp_add_redir(const char * addr, int port)
 {
 	gchar port_str[16];
 
-	if(urls.controlURL[0] == '\0')
+	if(!urls.controlURL)
 		return;
 
 	g_snprintf(port_str, 16, "%d", port);
 
-	if (!UPNP_AddPortMapping(urls.controlURL, data.servicetype,
+	if (UPNP_AddPortMapping(urls.controlURL, data.servicetype,
 	                        port_str, port_str, addr, 0, "TCP"))
 	{
 		g_print("warning: AddPortMapping(%s, %s, %s) failed\n", port_str, port_str, addr);
@@ -92,7 +92,7 @@ upnp_rem_redir(int port)
 {
 	gchar port_str[16];
 
-	if(urls.controlURL[0] == '\0')
+	if(!urls.controlURL)
 		return;
 
 	g_snprintf(port_str, 16, "%d", port);
