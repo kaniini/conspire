@@ -54,6 +54,7 @@
 #include "url.h"
 #include "xchatc.h"
 #include "base64.h"
+#include "upnp.h"
 
 #ifdef USE_DCC64
 #define BIG_STR_TO_INT(x) strtoull(x,NULL,10)
@@ -345,6 +346,9 @@ dcc_connect_sok (struct DCC *dcc)
 void
 dcc_close (struct DCC *dcc, int dccstat, int destroy)
 {
+	if (dcc->port)
+		upnp_rem_redir(dcc->port);
+
 	if (dcc->wiotag)
 	{
 		g_source_remove (dcc->wiotag);
@@ -1669,6 +1673,8 @@ dcc_listen_init (struct DCC *dcc, session *sess)
 	set_blocking (dcc->sok);
 
 	dcc->iotag = fe_input_add (dcc->sok, FIA_READ|FIA_EX, dcc_accept, dcc);
+
+	upnp_add_redir (inet_ntoa(SAddr.sin_addr), dcc->port);
 
 	return TRUE;
 }
