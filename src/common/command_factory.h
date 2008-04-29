@@ -56,4 +56,6 @@ CommandFlags command_get_flags(const gchar *name);
 CommandExecResult command_execute(struct session *sess, const gchar *name, char *tbuf, char *word[], char *word_eol[]);
 Command *command_lookup(const gchar *name);
 
+extern mowgli_dictionary_t *cmd_dict_;
+
 #endif
