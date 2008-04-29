@@ -360,6 +360,41 @@ process_numeric_001 (gpointer *params)
 }
 
 static void
+process_numeric_004 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	serv->use_listargs = FALSE;
+
+	/* default to IRC RFC */
+	serv->modes_per_line = 3;
+
+	/* DALnet */
+	if (strncmp (word[5], "bahamut", 7) == 0)
+		/* use the /list args */
+		serv->use_listargs = TRUE;
+
+	/* Undernet */
+	else if (strncmp (word[5], "u2.10.", 6) == 0)
+	{
+		/* use the /list args */
+		serv->use_listargs = TRUE;
+		/* allow 6 modes per line */
+		serv->modes_per_line = 6;
+	}
+	else if (strncmp (word[5], "glx2", 4) == 0)
+	{
+		/* use the /list args */
+		serv->use_listargs = TRUE;
+	}
+
+	server_text_passthrough(serv, word, text);
+}
+
+static void
 process_numeric_005 (gpointer *params)
 {
 	session *sess = params[0];
@@ -370,48 +405,6 @@ process_numeric_005 (gpointer *params)
 	inbound_005(serv, word);
 
 	server_text_passthrough(serv, word, text);
-}
-
-static void
-process_monitor_reply (gpointer *params)
-{
-	session *sess = params[0];
-	char **word = params[1];
-	char *text = params[3];
-	server *serv = sess->server;
-
-	int n = atoi(word[2]);
-
-	switch(n)
-	{
-	case 730:
-	case 731:
-		{
-			char *nick, *p;
-			for(nick = strtok(word[4] +1, ","); nick != NULL; nick = strtok(NULL, ","))
-			{
-				p = strchr(nick, '!');
-				if(p != NULL)
-					*p = '\0';
-				if(n == 731)
-					notify_set_offline(serv, nick, serv->inside_monitor);
-				else
-					notify_set_online(serv, nick);
-			}
-		}
-		break;
-
-	case 732:
-		if(!serv->inside_monitor)
-			server_text_passthrough(serv, word, text);
-		break;
-	case 733:
-		if(serv->inside_monitor)
-			serv->inside_monitor = FALSE;
-		break;
-	default:
-		break;
-	}
 }
 
 static void
@@ -1072,6 +1065,48 @@ process_numeric_605 (gpointer *params)
 }
 
 static void
+process_monitor_reply (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	int n = atoi(word[2]);
+
+	switch(n)
+	{
+	case 730:
+	case 731:
+		{
+			char *nick, *p;
+			for(nick = strtok(word[4] +1, ","); nick != NULL; nick = strtok(NULL, ","))
+			{
+				p = strchr(nick, '!');
+				if(p != NULL)
+					*p = '\0';
+				if(n == 731)
+					notify_set_offline(serv, nick, serv->inside_monitor);
+				else
+					notify_set_online(serv, nick);
+			}
+		}
+		break;
+
+	case 732:
+		if(!serv->inside_monitor)
+			server_text_passthrough(serv, word, text);
+		break;
+	case 733:
+		if(serv->inside_monitor)
+			serv->inside_monitor = FALSE;
+		break;
+	default:
+		break;
+	}
+}
+
+static void
 process_numeric (gpointer *params)
 {
 	session *sess = params[0];
@@ -1084,32 +1119,6 @@ process_numeric (gpointer *params)
 
 	switch (n)
 	{
-	case 4:
-		serv->use_listargs = FALSE;
-
-		/* default to IRC RFC */
-		serv->modes_per_line = 3;
-
-		/* DALnet */
-		if (strncmp (word[5], "bahamut", 7) == 0)
-			/* use the /list args */
-			serv->use_listargs = TRUE;
-
-		/* Undernet */
-		else if (strncmp (word[5], "u2.10.", 6) == 0)
-		{
-			/* use the /list args */
-			serv->use_listargs = TRUE;
-			/* allow 6 modes per line */
-			serv->modes_per_line = 6;
-		}
-		else if (strncmp (word[5], "glx2", 4) == 0)
-		{
-			/* use the /list args */
-			serv->use_listargs = TRUE;
-		}
-		goto def;
-
 	/* not worrying about these, going to be rewritten for 0.20. */
 	case 900:
 		signal_emit("sasl complete", 2, serv->server_session, word[5]);
@@ -1137,7 +1146,7 @@ process_numeric (gpointer *params)
 			return;
 		}
 
-	def:
+	/*def:*/
 
 		if (is_channel (serv, word[4]))
 		{
@@ -1165,235 +1174,459 @@ sasl_timeout_cb(gpointer data)
 	return FALSE;
 }
 
-/* handle named messages that starts with a ':' */
+/* TODO get nick, user, hostname processing into their own functions! */
 
 static void
-process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
+process_message_cap (gpointer *params)
 {
+	session *sess = params[0];
+	char **word_eol = params[2];
 	server *serv = sess->server;
-	char ip[128], nick[NICKLEN];
-	char *text, *ex;
-	int len = strlen (type);
 
-	/* fill in the "ip" and "nick" buffers */
-	ex = strchr (word[1], '!');
+	if (serv->sasl_user && serv->sasl_pass && serv->sasl_state != SASL_COMPLETE)
+	{
+		if (!strstr(word_eol[5], "sasl"))
+		{
+			tcp_sendf(serv, "CAP END\r\n");
+			serv->sasl_state = SASL_COMPLETE;
+
+			return;
+		}
+
+		/* request SASL authentication from IRCd. todo: other mechanisms */
+		tcp_sendf(serv, "AUTHENTICATE PLAIN\r\n");
+		serv->sasl_timeout_tag = g_timeout_add(5000, sasl_timeout_cb, serv);
+	}
+	else if (serv->sasl_state != SASL_COMPLETE)
+	{
+		tcp_sendf(serv, "CAP END\r\n");
+		serv->sasl_state = SASL_COMPLETE;
+	}
+}
+
+static void
+process_message_invite (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	char nick[NICKLEN], *ex;
+	/* fill in the "nick" buffer */
+	ex = strchr(word[1], '!');
 	if (!ex)							  /* no '!', must be a server message */
 	{
-		g_strlcpy (ip, word[1], sizeof (ip));
-		g_strlcpy (nick, word[1], sizeof (nick));
+		g_strlcpy(nick, word[1], sizeof (nick));
 	} else
 	{
-		g_strlcpy (ip, ex + 1, sizeof (ip));
+		/* this is rigged. disgraceful. */
 		ex[0] = 0;
-		g_strlcpy (nick, word[1], sizeof (nick));
+		g_strlcpy(nick, word[1], sizeof (nick));
 		ex[0] = '!';
 	}
 
-	if (len <= 4)
+	if (ignore_check(word[1], IG_INVI))
+		return;
+
+	signal_emit("channel invited", 4, sess, word, nick, serv);
+}
+
+static void
+process_message_join (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	char ip[128], nick[NICKLEN], *ex;
+	/* fill in the "ip" and "nick" buffers */
+	ex = strchr(word[1], '!');
+	if (!ex)							  /* no '!', must be a server message */
 	{
-		guint32 t;
-
-		t = WORDL((guint8)type[0], (guint8)type[1], (guint8)type[2], (guint8)type[3]);
-		/* this should compile to a bunch of: CMP.L, JE ... nice & fast */
-		switch (t)
-		{
-		case WORDL('C','A','P', 0 ):
-			{
-				if (serv->sasl_user && serv->sasl_pass && serv->sasl_state != SASL_COMPLETE)
-				{
-					if (!strstr(word_eol[5], "sasl"))
-					{
-						tcp_sendf(serv, "CAP END\r\n");
-						serv->sasl_state = SASL_COMPLETE;
-
-						return;
-					}
-
-					/* request SASL authentication from IRCd. todo: other mechanisms */
-					tcp_sendf(serv, "AUTHENTICATE PLAIN\r\n");
-					serv->sasl_timeout_tag = g_timeout_add(5000, sasl_timeout_cb, serv);
-				}
-				else if (serv->sasl_state != SASL_COMPLETE)
-				{
-					tcp_sendf(serv, "CAP END\r\n");
-					serv->sasl_state = SASL_COMPLETE;
-				}
-			}
-			return;
-		case WORDL('J','O','I','N'):
-			{
-				char *chan = word[3];
-
-				if (*chan == ':')
-					chan++;
-				if (!serv->p_cmp (nick, serv->nick))
-					inbound_ujoin (serv, chan, nick, ip);
-				else
-					inbound_join (serv, chan, nick, ip);
-			}
-			return;
-
-		case WORDL('K','I','C','K'):
-			{
-				char *kicked = word[4];
-				char *reason = word_eol[5];
-				if (*kicked)
-				{
-					if (*reason == ':')
-						reason++;
-					if (!strcmp (kicked, serv->nick))
-	 					inbound_ukick (serv, word[3], nick, reason);
-					else
-						inbound_kick (serv, word[3], kicked, nick, reason);
-				}
-			}
-			return;
-
-		case WORDL('K','I','L','L'):
-			signal_emit("server kill", 3, sess, nick, word_eol);
-			return;
-
-		case WORDL('M','O','D','E'):
-			handle_mode (serv, word, word_eol, nick, FALSE);	/* modes.c */
-			return;
-
-		case WORDL('N','I','C','K'):
-			inbound_newnick (serv, nick, (word_eol[3][0] == ':')
-									? word_eol[3] + 1 : word_eol[3], FALSE);
-			return;
-
-		case WORDL('P','A','R','T'):
-			{
-				char *chan = word[3];
-				char *reason = word_eol[4];
-
-				if (*chan == ':')
-					chan++;
-				if (*reason == ':')
-					reason++;
-				if (!strcmp (nick, serv->nick))
-					inbound_upart (serv, chan, ip, reason);
-				else
-					inbound_part (serv, chan, nick, ip, reason);
-			}
-			return;
-
-		case WORDL('P','O','N','G'):
-			inbound_ping_reply (serv->server_session,
-								 (word[4][0] == ':') ? word[4] + 1 : word[4], word[3]);
-			return;
-
-		case WORDL('Q','U','I','T'):
-			inbound_quit (serv, nick, ip,
-							  (word_eol[3][0] == ':') ? word_eol[3] + 1 : word_eol[3]);
-			return;
-		}
-
-		goto garbage;
+		g_strlcpy(ip, word[1], sizeof (ip));
+		g_strlcpy(nick, word[1], sizeof (nick));
+	} else
+	{
+		g_strlcpy(ip, ex + 1, sizeof (ip));
+		ex[0] = 0;
+		g_strlcpy(nick, word[1], sizeof (nick));
+		ex[0] = '!';
 	}
 
-	else if (len >= 5)
+	char *chan = word[3];
+
+	if (*chan == ':')
+		chan++;
+
+	if (!serv->p_cmp(nick, serv->nick))
+		inbound_ujoin(serv, chan, nick, ip);
+	else
+		inbound_join(serv, chan, nick, ip);
+}
+
+static void
+process_message_kick (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+
+	char nick[NICKLEN], *ex;
+	/* fill in the "nick" buffer */
+	ex = strchr(word[1], '!');
+	if (!ex)							  /* no '!', must be a server message */
 	{
-		guint32 t;
+		g_strlcpy(nick, word[1], sizeof (nick));
+	} else
+	{
+		ex[0] = 0;
+		g_strlcpy(nick, word[1], sizeof (nick));
+		ex[0] = '!';
+	}
 
-		t = WORDL((guint8)type[0], (guint8)type[1], (guint8)type[2], (guint8)type[3]);
-		/* this should compile to a bunch of: CMP.L, JE ... nice & fast */
-		switch (t)
+	char *kicked = word[4];
+	char *reason = word_eol[5];
+	if (*kicked)
+	{
+		if (*reason == ':')
+			reason++;
+
+		if (strcmp(kicked, serv->nick) == 0)
+			inbound_ukick(serv, word[3], nick, reason);
+		else
+			inbound_kick(serv, word[3], kicked, nick, reason);
+	}
+}
+
+static void
+process_message_kill (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+
+	char nick[NICKLEN], *ex;
+	/* fill in the "nick" buffer */
+	ex = strchr(word[1], '!');
+	if (!ex)							  /* no '!', must be a server message */
+	{
+		g_strlcpy(nick, word[1], sizeof (nick));
+	} else
+	{
+		ex[0] = 0;
+		g_strlcpy(nick, word[1], sizeof (nick));
+		ex[0] = '!';
+	}
+
+	signal_emit("server kill", 3, sess, nick, word_eol);
+}
+
+static void
+process_message_mode (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+
+	char nick[NICKLEN], *ex;
+	/* fill in the "nick" buffer */
+	ex = strchr(word[1], '!');
+	if (!ex)							  /* no '!', must be a server message */
+	{
+		g_strlcpy(nick, word[1], sizeof (nick));
+	} else
+	{
+		ex[0] = 0;
+		g_strlcpy(nick, word[1], sizeof (nick));
+		ex[0] = '!';
+	}
+
+	handle_mode (serv, word, word_eol, nick, FALSE);	/* modes.c */
+}
+
+static void
+process_message_nick (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+
+	char nick[NICKLEN], *ex;
+	/* fill in the "nick" buffer */
+	ex = strchr(word[1], '!');
+	if (!ex)							  /* no '!', must be a server message */
+	{
+		g_strlcpy(nick, word[1], sizeof (nick));
+	} else
+	{
+		ex[0] = 0;
+		g_strlcpy(nick, word[1], sizeof (nick));
+		ex[0] = '!';
+	}
+
+	inbound_newnick (serv, nick, (word_eol[3][0] == ':') ? word_eol[3] + 1 : word_eol[3], FALSE);
+}
+
+static void
+process_message_notice (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	char *text;
+	server *serv = sess->server;
+	gboolean id; /* freenode crap? */
+
+	char ip[128], nick[NICKLEN], *ex;
+	/* fill in the "ip" and "nick" buffers */
+	ex = strchr(word[1], '!');
+	if (!ex)							  /* no '!', must be a server message */
+	{
+		g_strlcpy(ip, word[1], sizeof (ip));
+		g_strlcpy(nick, word[1], sizeof (nick));
+	} else
+	{
+		g_strlcpy(ip, ex + 1, sizeof (ip));
+		ex[0] = 0;
+		g_strlcpy(nick, word[1], sizeof (nick));
+		ex[0] = '!';
+	}
+
+	id = FALSE;	/* identified */
+
+	text = word_eol[4];
+	if (*text == ':')
+		text++;
+
+	/* freenode crap? */
+	if (serv->have_idmsg)
+	{
+		if (*text == '+')
 		{
-		case WORDL('I','N','V','I'):
-			if (ignore_check (word[1], IG_INVI))
-				return;
+			id = TRUE;
+			text++;
+		} else if (*text == '-')
+			text++;
+	}
 
-			signal_emit("channel invited", 4, sess, word, nick, serv);
+	if (!ignore_check(word[1], IG_NOTI))
+		inbound_notice(serv, word[3], nick, text, ip, id);
+}
 
-			return;
+static void
+process_message_part (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
 
-		case WORDL('N','O','T','I'):
+	char ip[128], nick[NICKLEN], *ex;
+	/* fill in the "ip" and "nick" buffers */
+	ex = strchr(word[1], '!');
+	if (!ex)							  /* no '!', must be a server message */
+	{
+		g_strlcpy(ip, word[1], sizeof (ip));
+		g_strlcpy(nick, word[1], sizeof (nick));
+	} else
+	{
+		g_strlcpy(ip, ex + 1, sizeof (ip));
+		ex[0] = 0;
+		g_strlcpy(nick, word[1], sizeof (nick));
+		ex[0] = '!';
+	}
+
+	char *chan = word[3];
+	char *reason = word_eol[4];
+
+	if (*chan == ':')
+		chan++;
+
+	if (*reason == ':')
+		reason++;
+
+	if (strcmp(nick, serv->nick) == 0)
+		inbound_upart (serv, chan, ip, reason);
+	else
+		inbound_part (serv, chan, nick, ip, reason);
+}
+
+static void
+process_message_pong (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	inbound_ping_reply(serv->server_session, (word[4][0] == ':') ? word[4] + 1 : word[4], word[3]);
+}
+
+static void
+process_message_privmsg (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	char *text;
+	server *serv = sess->server;
+	char *to;
+	int len;
+	gboolean id; /* freenode crap? */
+
+	char ip[128], nick[NICKLEN], *ex;
+	/* fill in the "ip" and "nick" buffers */
+	ex = strchr(word[1], '!');
+	if (!ex)							  /* no '!', must be a server message */
+	{
+		g_strlcpy(ip, word[1], sizeof (ip));
+		g_strlcpy(nick, word[1], sizeof (nick));
+	} else
+	{
+		g_strlcpy(ip, ex + 1, sizeof (ip));
+		ex[0] = 0;
+		g_strlcpy(nick, word[1], sizeof (nick));
+		ex[0] = '!';
+	}
+
+	to = word[3];
+	id = FALSE;
+	if (*to)
+	{
+		text = word_eol[4];
+		if (*text == ':')
+			text++;
+
+		/* freenode crap? */
+		if (serv->have_idmsg)
+		{
+			if (*text == '+')
 			{
-				int id = FALSE;	/* identified */
-
-				text = word_eol[4];
-				if (*text == ':')
-					text++;
-
-				if (serv->have_idmsg)
-				{
-					if (*text == '+')
-					{
-						id = TRUE;
-						text++;
-					} else if (*text == '-')
-						text++;
-				}
-
-				if (!ignore_check (word[1], IG_NOTI))
-					inbound_notice (serv, word[3], nick, text, ip, id);
-			}
-			return;
-
-		case WORDL('P','R','I','V'):
-			{
-				char *to = word[3];
-				int len;
-				int id = FALSE;	/* identified */
-				if (*to)
-				{
-					text = word_eol[4];
-					if (*text == ':')
-						text++;
-					if (serv->have_idmsg)
-					{
-						if (*text == '+')
-						{
-							id = TRUE;
-							text++;
-						} else if (*text == '-')
-							text++;
-					}
-					len = strlen (text);
-					if (text[0] == 1 && text[len - 1] == 1)	/* ctcp */
-					{
-						text[len - 1] = 0;
-						text++;
-						if (strncasecmp (text, "ACTION", 6) != 0)
-							flood_check (nick, ip, serv, sess, 0);
-						if (strncasecmp (text, "DCC ", 4) == 0)
-							/* redo this with handle_quotes TRUE */
-							process_data_init (word[1], word_eol[1], word, word_eol, TRUE, FALSE);
-						ctcp_handle (sess, to, nick, text, word, word_eol, id);
-					} else
-					{
-						if (is_channel (serv, to))
-						{
-							if (ignore_check (word[1], IG_CHAN))
-								return;
-							inbound_chanmsg (serv, NULL, to, nick, text, FALSE, id);
-						} else
-						{
-							if (ignore_check (word[1], IG_PRIV))
-								return;
-							inbound_privmsg (serv, nick, ip, text, id);
-						}
-					}
-				}
-			}
-			return;
-
-		case WORDL('T','O','P','I'):
-			inbound_topicnew (serv, nick, word[3],
-									(word_eol[4][0] == ':') ? word_eol[4] + 1 : word_eol[4]);
-			return;
-
-		case WORDL('W','A','L','L'):
-			text = word_eol[3];
-			if (*text == ':')
+				id = TRUE;
 				text++;
-			signal_emit("server wallops", 3, sess, nick, text);
-			return;
+			} else if (*text == '-')
+				text++;
+		}
+
+		len = strlen(text);
+
+		/* CTCP? */
+		if (*text == '\1' && text[len - 1] == 1)
+		{
+			/* needs signals ... */
+			text[len - 1] = '\0';
+			text++;
+			if (strncasecmp (text, "ACTION", 6) != 0)
+				flood_check (nick, ip, serv, sess, 0);
+			if (strncasecmp (text, "DCC ", 4) == 0)
+				/* redo this with handle_quotes TRUE */
+				process_data_init (word[1], word_eol[1], word, word_eol, TRUE, FALSE);
+			ctcp_handle (sess, to, nick, text, word, word_eol, id);
+		}
+		else
+		{
+			if (is_channel(serv, to))
+			{
+				if (ignore_check(word[1], IG_CHAN))
+					return;
+				inbound_chanmsg(serv, NULL, to, nick, text, FALSE, id);
+			}
+			else
+			{
+				if (ignore_check(word[1], IG_PRIV))
+					return;
+				inbound_privmsg(serv, nick, ip, text, id);
+			}
 		}
 	}
+}
 
-garbage:
+static void
+process_message_quit (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+
+	char ip[128], nick[NICKLEN], *ex;
+	/* fill in the "ip" and "nick" buffers */
+	ex = strchr(word[1], '!');
+	if (!ex)							  /* no '!', must be a server message */
+	{
+		g_strlcpy(ip, word[1], sizeof (ip));
+		g_strlcpy(nick, word[1], sizeof (nick));
+	} else
+	{
+		g_strlcpy(ip, ex + 1, sizeof (ip));
+		ex[0] = 0;
+		g_strlcpy(nick, word[1], sizeof (nick));
+		ex[0] = '!';
+	}
+
+	inbound_quit(serv, nick, ip, (word_eol[3][0] == ':') ? word_eol[3] + 1 : word_eol[3]);
+}
+
+static void
+process_message_topic (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+
+	char nick[NICKLEN], *ex;
+	/* fill in the "nick" buffer */
+	ex = strchr(word[1], '!');
+	if (!ex)							  /* no '!', must be a server message */
+	{
+		g_strlcpy(nick, word[1], sizeof (nick));
+	} else
+	{
+		ex[0] = 0;
+		g_strlcpy(nick, word[1], sizeof (nick));
+		ex[0] = '!';
+	}
+
+	inbound_topicnew(serv, nick, word[3], (word_eol[4][0] == ':') ? word_eol[4] + 1 : word_eol[4]);
+}
+
+static void
+process_message_wallops (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	char *text;
+
+	char nick[NICKLEN], *ex;
+	/* fill in the "nick" buffer */
+	ex = strchr(word[1], '!');
+	if (!ex)							  /* no '!', must be a server message */
+	{
+		g_strlcpy(nick, word[1], sizeof (nick));
+	} else
+	{
+		ex[0] = 0;
+		g_strlcpy(nick, word[1], sizeof (nick));
+		ex[0] = '!';
+	}
+
+	text = word_eol[3];
+	if (*text == ':')
+		text++;
+
+	signal_emit("server wallops", 3, sess, nick, text);
+}
+
+static void
+process_named_msg (gpointer *params)
+{
+	session *sess = params[0];
+	char **word_eol = params[3];
+
 	/* unknown message */
 	PrintTextf (sess, "Unknown message: %s\n", word_eol[1]);
 }
@@ -1471,7 +1704,8 @@ irc_inline (server *serv, char *buf, int len)
 		word[1]++;
 		word_eol[1] = buf + 1;	/* but not for xchat internally */
 
-	} else
+	}
+	else
 	{
 		process_data_init (pdibuf, buf, word, word_eol, FALSE, FALSE);
 		word[0] = type = word[1];
@@ -1493,12 +1727,11 @@ irc_inline (server *serv, char *buf, int len)
 		goto xit;
 	}
 
+	static gchar scratch[512];
+	gint sigs;
 	/* see if the second word is a numeric */
-	if (isdigit ((unsigned char) word[2][0]))
+	if (isdigit((unsigned char) word[2][0]))
 	{
-		static gchar scratch[512];
-		gint sigs;
-
 		text = word_eol[4];
 		if (*text == ':')
 			text++;
@@ -1508,9 +1741,15 @@ irc_inline (server *serv, char *buf, int len)
 
 		if (!sigs)
 			signal_emit("server numeric", 5, sess, atoi(word[2]), word, word_eol, text);
-	} else
+	}
+	else
 	{
-		process_named_msg (sess, type, word, word_eol);
+		/* text isn't necessarily word_eol[4] here... */
+		g_snprintf(scratch, 512, "server message %s", word[2]);
+		sigs = signal_emit(scratch, 3, sess, word, word_eol);
+
+		if (!sigs)
+			signal_emit("server message", 4, sess, word[2], word, word_eol);
 	}
 
 xit:
@@ -1559,7 +1798,27 @@ proto_fill_her_up (server *serv)
 void
 proto_irc_init(void)
 {
+	/* server messages */
+	signal_attach("server message cap", process_message_cap);
+	signal_attach("server message invite", process_message_invite);
+	signal_attach("server message join", process_message_join);
+	signal_attach("server message kick", process_message_kick);
+	signal_attach("server message kill", process_message_kill);
+	signal_attach("server message mode", process_message_mode);
+	signal_attach("server message nick", process_message_nick);
+	signal_attach("server message notice", process_message_notice);
+	signal_attach("server message part", process_message_part);
+	signal_attach("server message pong", process_message_pong);
+	signal_attach("server message privmsg", process_message_privmsg);
+	signal_attach("server message quit", process_message_quit);
+	signal_attach("server message topic", process_message_topic);
+	signal_attach("server message wallops", process_message_wallops);
+
+	signal_attach("server message", process_named_msg);
+
+	/* server numerics */
 	signal_attach("server numeric 001", process_numeric_001);
+	signal_attach("server numeric 004", process_numeric_004);
 	signal_attach("server numeric 005", process_numeric_005);
 
 	signal_attach("server numeric 263", process_numeric_263);
