@@ -18,7 +18,7 @@
 
 #include "command_factory.h"
 
-static mowgli_dictionary_t *cmd_dict_ = NULL;
+mowgli_dictionary_t *cmd_dict_ = NULL;
 
 void
 command_register(const gchar *name, const gchar *helptext, CommandFlags flags, CommandHandler handler)

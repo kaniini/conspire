@@ -1971,10 +1971,10 @@ typedef struct
 } help_list;
 
 static void
-show_help_line (session *sess, help_list *hl, char *name, char *usage)
+show_help_line (session *sess, help_list *hl, const char *name, const char *usage)
 {
 	int j, len, max;
-	char *p;
+	const char *p;
 
 	if (name[0] == '.')	/* hidden command? */
 		return;
@@ -2025,13 +2025,13 @@ show_help_line (session *sess, help_list *hl, char *name, char *usage)
 	}
 }
 
-#if 0
 static CommandResult
 cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 0, longfmt = 0;
 	char *helpcmd = "";
 	GSList *list;
+	mowgli_dictionary_iteration_state_t state;
 
 	if (tbuf)
 		helpcmd = word[2];
@@ -2046,25 +2046,26 @@ cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		struct popup *pop;
 		char *buf = malloc (4096);
 		help_list hl;
+		Command *cmd;
 
 		hl.longfmt = longfmt;
 		hl.buf = buf;
 
-		PrintTextf (sess, "\n%s\n\n", _("Commands Available:"));
+		PrintTextf (sess, "\n%s\n\n", _("Commands available:"));
 		buf[0] = ' ';
 		buf[1] = ' ';
 		buf[2] = 0;
 		hl.t = 0;
 		hl.i = 0;
-		while (xc_cmds[i].name)
+		MOWGLI_DICTIONARY_FOREACH(cmd, &state, cmd_dict_)
 		{
-			show_help_line (sess, &hl, xc_cmds[i].name, xc_cmds[i].help);
+			show_help_line (sess, &hl, state.cur->key, cmd->helptext);
 			i++;
 		}
 		strcat (buf, "\n");
 		PrintText (sess, buf);
 
-		PrintTextf (sess, "\n%s\n\n", _("User defined commands:"));
+		PrintTextf (sess, "\n%s\n\n", _("Aliases:"));
 		buf[0] = ' ';
 		buf[1] = ' ';
 		buf[2] = 0;
@@ -2080,6 +2081,7 @@ cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		strcat (buf, "\n");
 		PrintText (sess, buf);
 
+		/* XXX */
 		PrintTextf (sess, "\n%s\n\n", _("Plugin defined commands:"));
 		buf[0] = ' ';
 		buf[1] = ' ';
@@ -2095,7 +2097,6 @@ cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 	return CMD_EXEC_OK;
 }
-#endif
 
 static CommandResult
 cmd_id (struct session *sess, char *tbuf, char *word[], char *word_eol[])
@@ -3523,9 +3524,7 @@ struct commands xc_cmds[] = {
 									  "       GUI [MSGBOX <text>|MENU TOGGLE]"},
 	{"HALFOP", cmd_halfop, 1, 1, 1,
 	 N_("HALFOP <nick>, gives chanhalf-op status to the nick (needs chanop)")},
-#if 0
 	{"HELP", cmd_help, 0, 0, 1, 0},
-#endif
 	{"HOP", cmd_hop, 1, 1, 1,
 	 N_("HOP [<channel>], parts the current or given channel and immediately rejoins")},
 	{"ID", cmd_id, 1, 0, 1, N_("ID <password>, identifies yourself to nickserv")},
