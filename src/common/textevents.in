@@ -49,8 +49,14 @@ pevt_generic_channel_join_error_help
 Channel List
 XP_TE_CHANLISTHEAD
 pevt_generic_none_help
-%UChannel          Users   Topic%O
+
 0
+
+Channel List Entry
+XP_TE_CHANLISTENTRY
+pevt_chanlistentry_help
+%C27*$t%O%B$1%O%C27/%O$2%C27: %O$3%O
+3
 
 Channel Message
 XP_TE_CHANMSG

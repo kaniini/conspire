@@ -35,7 +35,7 @@ signal_printer_action_public_highlight(gpointer *params)
 	gchar *from     = params[1];
 	gchar *text     = params[2];
 	gchar *nickchar = params[3];
-	
+
 	EMIT_SIGNAL (XP_TE_HCHANACTION, sess, from, text, nickchar, NULL, 0);
 }
 
@@ -57,6 +57,17 @@ signal_printer_channel_list_head(gpointer *params)
 	server *serv = params[0];
 
 	EMIT_SIGNAL (XP_TE_CHANLISTHEAD, serv->server_session, NULL, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_channel_list_entry(gpointer *params)
+{
+	session *sess = params[0];
+	gchar **word = params[1];
+	gchar **word_eol = params[2];
+	server *serv = sess->server;
+
+	EMIT_SIGNAL (XP_TE_CHANLISTENTRY, serv->server_session, word[4], word[5], word_eol[6] + 1, NULL, 0);
 }
 
 void
@@ -86,7 +97,7 @@ signal_printer_channel_invited(gpointer *params)
 	gchar **word  = params[1];
 	gchar *nick   = params[2];
 	server *serv  = params[3];
-			
+
 	if (word[4][0] == ':')
 		EMIT_SIGNAL (XP_TE_INVITED, sess, word[4] + 1, nick, serv->servername, NULL, 0);
 	else
@@ -319,7 +330,7 @@ signal_printer_dcc_send_request(gpointer *params)
 	struct session *sess = params[0];
 	struct DCC *dcc = params[1];
 	gchar *to = params[2];
-	
+
 	EMIT_SIGNAL (XP_TE_DCCOFFER, sess, file_part(dcc->file), to, dcc->file, NULL, 0);
 }
 
@@ -331,7 +342,7 @@ signal_printer_dcc_stoned(gpointer *params)
 	gchar *type = g_strdup(dcctypes[dcc->type]);
 
 	EMIT_SIGNAL (XP_TE_DCCTOUT, serv->front_session, type, file_part(dcc->file), dcc->nick, NULL, 0);
-	dcc_close(dcc, STAT_ABORTED, FALSE); 
+	dcc_close(dcc, STAT_ABORTED, FALSE);
 }
 
 /* non-query private messages */
@@ -343,7 +354,7 @@ signal_printer_message_private(gpointer *params)
 	gchar *nick    = params[1];
 	gchar *message = params[2];
 	gchar *idtext  = params[3];
-	
+
 	if (sess->type == SESS_DIALOG) {
 		EMIT_SIGNAL (XP_TE_DPRIVMSG, sess, nick, message, idtext, NULL, 0);
 	} else {
@@ -426,7 +437,7 @@ signal_printer_server_error(gpointer *params)
 {
 	session *sess = params[0];
 	gchar *error  = params[1];
-	
+
 	EMIT_SIGNAL (XP_TE_SERVERERROR, sess, error, NULL, NULL, NULL, 0);
 }
 
@@ -457,7 +468,7 @@ signal_printer_whois_server(gpointer *params)
 	session *sess = params[0];
 	gchar *nick   = params[1];
 	gchar *server = params[2];
-	
+
 	EMIT_SIGNAL (XP_TE_WHOIS_SERVER, sess, nick, server, NULL, NULL, 0);
 }
 
@@ -605,6 +616,7 @@ signal_printer_init(void)
 	/* Channels */
 	signal_attach("channel created",    signal_printer_channel_created);
 	signal_attach("channel list head",  signal_printer_channel_list_head);
+	signal_attach("channel list entry", signal_printer_channel_list_entry);
 	signal_attach("channel modes",      signal_printer_channel_modes);
 	signal_attach("channel join error", signal_printer_channel_join_error);
 	signal_attach("channel invited",    signal_printer_channel_invited);

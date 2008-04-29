@@ -101,7 +101,7 @@ UPNP_GetTotalPacketsReceived(const char * controlURL,
  * returns the current status and uptime */
 int UPNP_GetStatusInfo(const char * controlURL,
 					const char * servicetype,
-					char * status, 
+					char * status,
 					unsigned int * uptime,
 					char * lastconnerror)
 {
@@ -195,8 +195,8 @@ int UPNP_GetConnectionTypeInfo(const char * controlURL,
 
 /* UPNP_GetLinkLayerMaxBitRate() call the corresponding UPNP method.
  * Returns 2 values: Downloadlink bandwidth and Uplink bandwidth.
- * One of the values can be null 
- * Note : GetLinkLayerMaxBitRates belongs to WANPPPConnection:1 only 
+ * One of the values can be null
+ * Note : GetLinkLayerMaxBitRates belongs to WANPPPConnection:1 only
  * We can use the GetCommonLinkProperties from WANCommonInterfaceConfig:1 */
 int UPNP_GetLinkLayerMaxBitRates(const char * controlURL, const char * servicetype, unsigned int * bitrateDown, unsigned int* bitrateUp)
 {
@@ -254,7 +254,7 @@ int UPNP_GetLinkLayerMaxBitRates(const char * controlURL, const char * servicety
 /* UPNP_GetExternalIPAddress() call the corresponding UPNP method.
  * if the third arg is not null the value is copied to it.
  * at least 16 bytes must be available
- * 
+ *
  * Return values :
  * 0 : SUCCESS
  * NON ZERO : ERROR Either an UPnP error code or an unknown error.
@@ -485,7 +485,7 @@ int UPNP_GetPortMappingNumberOfEntries(const char * controlURL, const char * ser
 	int ret = UPNPCOMMAND_UNKNOWN_ERROR;
  	simpleUPnPcommand(-1, controlURL, servicetype, "GetPortMappingNumberOfEntries", 0, buffer, &bufsize);
 #ifndef NDEBUG
-	DisplayNameValueList(buffer, bufsize);
+	/*DisplayNameValueList(buffer, bufsize); suck it. --nfontes */
 #endif
  	ParseNameValue(buffer, bufsize, &pdata);
 
@@ -565,5 +565,3 @@ UPNP_GetSpecificPortMappingEntry(const char * controlURL,
 	free(GetPortMappingArgs);
 	return ret;
 }
-
-

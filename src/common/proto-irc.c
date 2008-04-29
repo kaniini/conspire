@@ -364,9 +364,12 @@ process_numeric_005 (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
+	char *text = params[3];
 	server *serv = sess->server;
 
 	inbound_005(serv, word);
+
+	server_text_passthrough(serv, word, text);
 }
 
 static void
@@ -569,6 +572,31 @@ process_numeric_313 (gpointer *params)
 	signal_emit("whois oper", 3, whois_sess, word, word_eol);
 }
 
+/* RPL_ENDOFWHO */
+static void
+process_numeric_315 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	session *who_sess;
+	who_sess = find_channel(serv, word[4]);
+	if (who_sess)
+	{
+		if (!who_sess->doing_who)
+			signal_emit("server text", 3, serv->server_session, text, word[1]);
+		who_sess->doing_who = FALSE;
+	}
+	else
+	{
+		if (!serv->doing_dns)
+			signal_emit("server text", 3, serv->server_session, text, word[1]);
+		serv->doing_dns = FALSE;
+	}
+}
+
 static void
 process_numeric_317 (gpointer *params)
 {
@@ -646,6 +674,404 @@ process_numeric_321 (gpointer *params)
 }
 
 static void
+process_numeric_322 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+
+	if (!fe_is_chanwindow(serv))
+		signal_emit("channel list entry", 3, sess, word, word_eol);
+	else
+		fe_add_chan_list(serv, word[4], word[5], word_eol[6] + 1);
+}
+
+static void
+process_numeric_323 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	if (!fe_is_chanwindow(serv))
+		signal_emit("server text", 3, serv, text, word[1]);
+	else
+		fe_chan_list_end(serv);
+}
+
+static void
+process_numeric_324 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+
+	sess = find_channel(serv, word[4]);
+	if (!sess)
+		sess = serv->server_session;
+
+	if (sess->ignore_mode)
+		sess->ignore_mode = FALSE;
+	else
+		signal_emit("channel modes", 3, sess, word, word_eol);
+
+	fe_update_mode_buttons (sess, 't', '-');
+	fe_update_mode_buttons (sess, 'n', '-');
+	fe_update_mode_buttons (sess, 's', '-');
+	fe_update_mode_buttons (sess, 'i', '-');
+	fe_update_mode_buttons (sess, 'p', '-');
+	fe_update_mode_buttons (sess, 'm', '-');
+	fe_update_mode_buttons (sess, 'l', '-');
+	fe_update_mode_buttons (sess, 'k', '-');
+	handle_mode(serv, word, word_eol, "", TRUE);
+}
+
+static void
+process_numeric_329 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	sess = find_channel(serv, word[4]);
+	if (sess)
+	{
+		if (sess->ignore_date)
+			sess->ignore_date = FALSE;
+		else
+			channel_date(sess, word[4], word[5]);
+	}
+}
+
+static void
+process_numeric_330 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+	session *whois_sess = serv->front_session;
+
+	signal_emit("whois authenticated", 3, whois_sess, word, word_eol);
+}
+
+static void
+process_numeric_332 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+
+	inbound_topic(serv, word[4], (word_eol[5][0] == ':') ? word_eol[5] + 1 : word_eol[5]);
+}
+
+static void
+process_numeric_333 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	inbound_topictime(serv, word[4], word[5], atol(word[6]));
+}
+
+/* RPL_INVITING */
+static void
+process_numeric_341 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	signal_emit("user invite", 3, sess, word, serv);
+}
+
+/* RPL_EXCEPTLIST */
+static void
+process_numeric_348 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	if (!inbound_banlist(sess, atol(word[7]), word[4], word[5], word[6], TRUE))
+		server_text_passthrough(serv, word, text);
+}
+
+/* RPL_ENDOFEXCEPTLIST */
+static void
+process_numeric_349 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	sess = find_channel(serv, word[4]);
+	if (!sess)
+	{
+		sess = serv->front_session;
+		server_text_passthrough(serv, word, text);
+		return;
+	}
+
+	if (!fe_is_banwindow (sess))
+		server_text_passthrough(serv, word, text);
+	else
+		fe_ban_list_end(sess, TRUE);
+}
+
+/* RPL_WHOREPLY */
+static void
+process_numeric_352 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	gboolean away = FALSE;
+	session *who_sess = find_channel(serv, word[4]);
+
+	if (*word[9] == 'G')
+		away = TRUE;
+
+	inbound_user_info(sess, word[4], word[5], word[6], word[7],
+		word[8], word_eol[11], away);
+
+	/* try to show only user initiated whos */
+	if (!who_sess || !who_sess->doing_who)
+		signal_emit("server text", 3, serv->server_session, text, word[1]);
+}
+
+/* RPL_NAMREPLY */
+static void
+process_numeric_353 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+
+	inbound_nameslist(serv, word[5], (word_eol[6][0] == ':') ? word_eol[6] + 1 : word_eol[6]);
+}
+
+/* RPL_WHOSPCRPL -- Undernet WHOX */
+static void
+process_numeric_354 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	gboolean away = FALSE;
+	session *who_sess;
+
+	/* irc_away_status sends out a "152" */
+	if (strcmp(word[4], "152") == 0)
+	{
+		who_sess = find_channel(serv, word[5]);
+
+		if (*word[7] == 'G')
+			away = TRUE;
+
+		/* :SanJose.CA.us.undernet.org 354 z1 152 #zed1 z1 H@ */
+		inbound_user_info(sess, word[5], 0, 0, 0, word[6], 0, away);
+
+		/* try to show only user initiated whos */
+		if (!who_sess || !who_sess->doing_who)
+			signal_emit("server text", 3, serv->server_session, text, word[1]);
+	}
+	else
+		server_text_passthrough(serv, word, text);
+}
+
+static void
+process_numeric_366 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	if (!inbound_nameslist_end(serv, word[4]))
+		server_text_passthrough(serv, word, text);
+}
+
+/* RPL_BANLIST */
+static void
+process_numeric_367 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+
+	inbound_banlist(sess, atol(word[7]), word[4], word[5], word[6], FALSE);
+}
+
+static void
+process_numeric_368 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	sess = find_channel(serv, word[4]);
+	if (!sess)
+	{
+		sess = serv->front_session;
+		server_text_passthrough(serv, word, text);
+		return;
+	}
+
+	if (!fe_is_banwindow(sess))
+		server_text_passthrough(serv, word, text);
+	else
+		fe_ban_list_end(sess, FALSE);
+}
+
+/* 369 (RPL_ENDOFWHOWAS) and 406 (ERR_WASNOSUCHNICK) */
+static void
+process_whowas_end (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+	session *whois_sess = serv->front_session;
+
+	signal_emit("server text", 3, whois_sess, text, word[1]);
+	serv->inside_whois = 0;
+}
+
+/* 372 (RPL_MOTD) and 375 (RPL_MOTDSTART) */
+static void
+process_motd (gpointer *params)
+{
+	session *sess = params[0];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	if (!prefs.skipmotd || serv->motd_skipped)
+		signal_emit("server motd", 2, serv->server_session, text);
+}
+
+/* 376 (RPL_ENDOFMOTD) and 422 (ERR_NOMOTD) */
+static void
+process_motd_end (gpointer *params)
+{
+	session *sess = params[0];
+	char *text = params[3];
+
+	inbound_login_end (sess, text);
+}
+
+/* 432 (ERR_ERRONEUSNICKNAME) and 433 (ERR_NICKNAMEINUSE) */
+static void
+process_nickname_change_error (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	if (serv->end_of_motd)
+		server_text_passthrough(serv, word, text);
+	else
+		inbound_next_nick(sess, word[4]);
+}
+
+static void
+process_numeric_437 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	char *text = params[3];
+	server *serv = sess->server;
+
+	if (serv->end_of_motd || is_channel(serv, word[4]))
+		server_text_passthrough(serv, word, text);
+	else
+		inbound_next_nick(sess, word[4]);
+}
+
+static void
+process_numeric_471 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+
+	signal_emit("channel join error", 3, sess, word[4], _("user limit reached"));
+}
+
+static void
+process_numeric_473 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+
+	signal_emit("channel join error", 3, sess, word[4], _("channel is invite-only"));
+}
+
+static void
+process_numeric_474 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+
+	signal_emit("channel join error", 3, sess, word[4], _("you are banned"));
+}
+
+static void
+process_numeric_475 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+
+	signal_emit("channel join error", 3, sess, word[4], _("channel requires a keyword"));
+}
+
+/* 600 (RPL_LOGON) and 604 (RPL_NOWON) (Bahamut, Unreal) */
+static void
+process_notify_online (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	notify_set_online (serv, word[4]);
+}
+
+/* RPL_LOGOFF (Bahamut, Unreal) */
+static void
+process_numeric_601 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	notify_set_offline (serv, word[4], FALSE);
+}
+
+/* RPL_NOWOFF (Bahamut, Unreal) */
+static void
+process_numeric_605 (gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	notify_set_offline (serv, word[4], TRUE);
+}
+
+static void
 process_numeric (gpointer *params)
 {
 	session *sess = params[0];
@@ -684,232 +1110,7 @@ process_numeric (gpointer *params)
 		}
 		goto def;
 
-	case 322:
-		if (fe_is_chanwindow (sess->server))
-		{
-			fe_add_chan_list (sess->server, word[4], word[5], word_eol[6] + 1);
-		} else
-		{
-			PrintTextf (serv->server_session, "%-16s %-7d %s\017\n",
-							word[4], atoi (word[5]), word_eol[6] + 1);
-		}
-		break;
-
-	case 323:
-		if (!fe_is_chanwindow (sess->server))
-			signal_emit("server text", 3, serv, text, word[1]);
-		else
-			fe_chan_list_end (sess->server);
-		break;
-
-	case 324:
-		sess = find_channel (serv, word[4]);
-		if (!sess)
-			sess = serv->server_session;
-		if (sess->ignore_mode)
-			sess->ignore_mode = FALSE;
-		else
-			signal_emit("channel modes", 3, sess, word, word_eol);
-		fe_update_mode_buttons (sess, 't', '-');
-		fe_update_mode_buttons (sess, 'n', '-');
-		fe_update_mode_buttons (sess, 's', '-');
-		fe_update_mode_buttons (sess, 'i', '-');
-		fe_update_mode_buttons (sess, 'p', '-');
-		fe_update_mode_buttons (sess, 'm', '-');
-		fe_update_mode_buttons (sess, 'l', '-');
-		fe_update_mode_buttons (sess, 'k', '-');
-		handle_mode (serv, word, word_eol, "", TRUE);
-		break;
-
-	case 329:
-		sess = find_channel (serv, word[4]);
-		if (sess)
-		{
-			if (sess->ignore_date)
-				sess->ignore_date = FALSE;
-			else
-				channel_date (sess, word[4], word[5]);
-		}
-		break;
-
-	case 330:
-		signal_emit("whois authenticated", 3, whois_sess, word, word_eol);
-		break;
-
-	case 332:
-		inbound_topic (serv, word[4],
-						(word_eol[5][0] == ':') ? word_eol[5] + 1 : word_eol[5]);
-		break;
-
-	case 333:
-		inbound_topictime (serv, word[4], word[5], atol (word[6]));
-		break;
-
-	case 341:						  /* INVITE ACK */
-		signal_emit("user invite", 3, sess, word, serv);
-		break;
-
-	case 352:						  /* WHO */
-		{
-			unsigned int away = 0;
-			session *who_sess = find_channel (serv, word[4]);
-
-			if (*word[9] == 'G')
-				away = 1;
-
-			inbound_user_info (sess, word[4], word[5], word[6], word[7],
-									 word[8], word_eol[11], away);
-
-			/* try to show only user initiated whos */
-			if (!who_sess || !who_sess->doing_who)
-				signal_emit("server text", 3, serv->server_session, text, word[1]);
-		}
-		break;
-
-	case 354:	/* undernet WHOX: used as a reply for irc_away_status */
-		{
-			unsigned int away = 0;
-			session *who_sess;
-
-			/* irc_away_status sends out a "152" */
-			if (!strcmp (word[4], "152"))
-			{
-				who_sess = find_channel (serv, word[5]);
-
-				if (*word[7] == 'G')
-					away = 1;
-
-				/* :SanJose.CA.us.undernet.org 354 z1 152 #zed1 z1 H@ */
-				inbound_user_info (sess, word[5], 0, 0, 0, word[6], 0, away);
-
-				/* try to show only user initiated whos */
-				if (!who_sess || !who_sess->doing_who)
-					signal_emit("server text", 3, serv->server_session, text, word[1]);
-			} else
-				goto def;
-		}
-		break;
-
-	case 315:						  /* END OF WHO */
-		{
-			session *who_sess;
-			who_sess = find_channel (serv, word[4]);
-			if (who_sess)
-			{
-				if (!who_sess->doing_who)
-					signal_emit("server text", 3, serv->server_session, text, word[1]);
-				who_sess->doing_who = FALSE;
-			} else
-			{
-				if (!serv->doing_dns)
-					signal_emit("server text", 3, serv->server_session, text, word[1]);
-				serv->doing_dns = FALSE;
-			}
-		}
-		break;
-
-	case 348:	/* +e-list entry */
-		if (!inbound_banlist (sess, atol (word[7]), word[4], word[5], word[6], TRUE))
-			goto def;
-		break;
-
-	case 349:	/* end of exemption list */
-		sess = find_channel (serv, word[4]);
-		if (!sess)
-		{
-			sess = serv->front_session;
-			goto def;
-		}
-		if (!fe_is_banwindow (sess))
-			goto def;
-		fe_ban_list_end (sess, TRUE);
-		break;
-
-	case 353:						  /* NAMES */
-		inbound_nameslist (serv, word[5],
-							(word_eol[6][0] == ':') ? word_eol[6] + 1 : word_eol[6]);
-		break;
-
-	case 366:
-		if (!inbound_nameslist_end (serv, word[4]))
-			goto def;
-		break;
-
-	case 367: /* banlist entry */
-		inbound_banlist (sess, atol (word[7]), word[4], word[5], word[6], FALSE);
-		break;
-
-	case 368:
-		sess = find_channel (serv, word[4]);
-		if (!sess)
-		{
-			sess = serv->front_session;
-			goto def;
-		}
-		if (!fe_is_banwindow (sess))
-			goto def;
-		fe_ban_list_end (sess, FALSE);
-		break;
-
-	case 369:	/* WHOWAS end */
-	case 406:	/* WHOWAS error */
-		signal_emit("server text", 3, whois_sess, text, word[1]);
-		serv->inside_whois = 0;
-		break;
-
-	case 372:	/* motd text */
-	case 375:	/* motd start */
-		if (!prefs.skipmotd || serv->motd_skipped)
-			signal_emit("server motd", 2, serv->server_session, text);
-		break;
-
-	case 376:	/* end of motd */
-	case 422:	/* motd file is missing */
-		inbound_login_end (sess, text);
-		break;
-
-	case 433:	/* nickname in use */
-	case 432:	/* erroneous nickname */
-		if (serv->end_of_motd)
-			goto def;
-		inbound_next_nick (sess,  word[4]);
-		break;
-
-	case 437:
-		if (serv->end_of_motd || is_channel (serv, word[4]))
-			goto def;
-		inbound_next_nick (sess, word[4]);
-		break;
-
-	case 471:
-		signal_emit("channel join error", 3, sess, word[4], _("user limit reached"));
-		break;
-
-	case 473:
-		signal_emit("channel join error", 3, sess, word[4], _("channel is invite-only"));
-		break;
-
-	case 474:
-		signal_emit("channel join error", 3, sess, word[4], _("you are banned"));
-		break;
-
-	case 475:
-		signal_emit("channel join error", 3, sess, word[4], _("channel requires a keyword"));
-		break;
-
-	case 601:
-		notify_set_offline (serv, word[4], FALSE);
-		break;
-
-	case 605:
-		notify_set_offline (serv, word[4], TRUE);
-		break;
-
-	case 600:
-	case 604:
-		notify_set_online (serv, word[4]);
-		break;
-
+	/* not worrying about these, going to be rewritten for 0.20. */
 	case 900:
 		signal_emit("sasl complete", 2, serv->server_session, word[5]);
 		break;
@@ -1395,11 +1596,47 @@ proto_irc_init(void)
 	signal_attach("server numeric 312", process_numeric_312);
 	signal_attach("server numeric 313", process_numeric_313);
 	signal_attach("server numeric 314", process_whois_user);
+	signal_attach("server numeric 315", process_numeric_315);
 	signal_attach("server numeric 317", process_numeric_317);
 	signal_attach("server numeric 318", process_numeric_318);
 	signal_attach("server numeric 319", process_numeric_319);
 	signal_attach("server numeric 320", process_whois_identified);
 	signal_attach("server numeric 321", process_numeric_321);
+	signal_attach("server numeric 322", process_numeric_322);
+	signal_attach("server numeric 323", process_numeric_323);
+	signal_attach("server numeric 324", process_numeric_324);
+	signal_attach("server numeric 329", process_numeric_329);
+	signal_attach("server numeric 330", process_numeric_330);
+	signal_attach("server numeric 332", process_numeric_332);
+	signal_attach("server numeric 333", process_numeric_333);
+	signal_attach("server numeric 341", process_numeric_341);
+	signal_attach("server numeric 348", process_numeric_348);
+	signal_attach("server numeric 349", process_numeric_349);
+	signal_attach("server numeric 352", process_numeric_352);
+	signal_attach("server numeric 353", process_numeric_353);
+	signal_attach("server numeric 354", process_numeric_354);
+	signal_attach("server numeric 366", process_numeric_366);
+	signal_attach("server numeric 367", process_numeric_367);
+	signal_attach("server numeric 368", process_numeric_368);
+	signal_attach("server numeric 369", process_whowas_end);
+	signal_attach("server numeric 372", process_motd);
+	signal_attach("server numeric 375", process_motd);
+	signal_attach("server numeric 376", process_motd_end);
+
+	signal_attach("server numeric 406", process_whowas_end);
+	signal_attach("server numeric 422", process_motd_end);
+	signal_attach("server numeric 432", process_nickname_change_error);
+	signal_attach("server numeric 433", process_nickname_change_error);
+	signal_attach("server numeric 437", process_numeric_437);
+	signal_attach("server numeric 471", process_numeric_471);
+	signal_attach("server numeric 473", process_numeric_473);
+	signal_attach("server numeric 474", process_numeric_474);
+	signal_attach("server numeric 475", process_numeric_475);
+
+	signal_attach("server numeric 600", process_notify_online);
+	signal_attach("server numeric 601", process_numeric_601);
+	signal_attach("server numeric 604", process_notify_online);
+	signal_attach("server numeric 605", process_numeric_605);
 
 	signal_attach("server numeric 730", process_monitor_reply);
 	signal_attach("server numeric 731", process_monitor_reply);

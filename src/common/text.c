@@ -718,7 +718,7 @@ text_validate (char **text, int *len)
 			utf = iso_8859_1_to_utf8 (*text, *len, &utf_len);
 	}
 
-	if (!utf) 
+	if (!utf)
 	{
 		*text = g_strdup ("%INVALID%");
 		*len = 9;
@@ -860,6 +860,12 @@ static char * const pevt_netsplit1_help[] = {
 	N_("Server 1"),
 	N_("Server 2"),
 	N_("Users affected by split"),
+};
+
+static char * const pevt_chanlistentry_help[] = {
+	N_("Channel"),
+	N_("Number of users"),
+	N_("Topic")
 };
 
 static char * const pevt_chanmsg_help[] = {
@@ -1942,7 +1948,7 @@ pevent_save (char *fn)
 	if (fd == -1)
 	{
 		/*
-		   fe_message ("Error opening config file\n", FALSE); 
+		   fe_message ("Error opening config file\n", FALSE);
 		   If we get here when X-Chat is closing the fe-message causes a nice & hard crash
 		   so we have to use perror which doesn't rely on GTK
 		 */

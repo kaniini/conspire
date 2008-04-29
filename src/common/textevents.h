@@ -27,7 +27,10 @@ N_("%C27*$t%C27Channel $1 created on $2")},
 N_("%C27*$t%C27Cannot join%C11 %B$1%O ($2).")},
 
 {"Channel List", pevt_generic_none_help, 0, 
-N_("%UChannel          Users   Topic%O")},
+N_("")},
+
+{"Channel List Entry", pevt_chanlistentry_help, 3, 
+N_("%C27*$t%O%B$1%O%C27/%O$2%C27: %O$3%O")},
 
 {"Channel Message", pevt_chanmsg_help, 4, 
 N_("%C2%H<%H$1%H>%H%O$t$2%O")},
