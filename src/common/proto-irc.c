@@ -1404,7 +1404,6 @@ static void
 process_named_servermsg(gpointer *params)
 {
 	session *sess = params[0];
-	char **word = params[1];
 	char **word_eol = params[2];
 	char *buf = params[3];
 	server *serv = sess->server;
@@ -1516,7 +1515,7 @@ irc_inline (server *serv, char *buf, int len)
 		static gchar scratch[512];
 		gint sigs;
 
-		g_snprintf(scratch, "server message %s", word[1]);
+		g_snprintf(scratch, 512, "server message %s", word[1]);
 		sigs = signal_emit(scratch, 4, sess, word, word_eol, buf);
 
 		if (!sigs)
