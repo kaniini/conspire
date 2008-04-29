@@ -1177,7 +1177,7 @@ sasl_timeout_cb(gpointer data)
 /* TODO get nick, user, hostname processing into their own functions! */
 
 static void
-process_message_cap (gpointer *params)
+process_peer_cap (gpointer *params)
 {
 	session *sess = params[0];
 	char **word_eol = params[2];
@@ -1205,7 +1205,7 @@ process_message_cap (gpointer *params)
 }
 
 static void
-process_message_invite (gpointer *params)
+process_peer_invite (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1232,7 +1232,7 @@ process_message_invite (gpointer *params)
 }
 
 static void
-process_message_join (gpointer *params)
+process_peer_join (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1265,7 +1265,7 @@ process_message_join (gpointer *params)
 }
 
 static void
-process_message_kick (gpointer *params)
+process_peer_kick (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1300,7 +1300,7 @@ process_message_kick (gpointer *params)
 }
 
 static void
-process_message_kill (gpointer *params)
+process_peer_kill (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1323,7 +1323,7 @@ process_message_kill (gpointer *params)
 }
 
 static void
-process_message_mode (gpointer *params)
+process_peer_mode (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1347,7 +1347,7 @@ process_message_mode (gpointer *params)
 }
 
 static void
-process_message_nick (gpointer *params)
+process_peer_nick (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1371,7 +1371,7 @@ process_message_nick (gpointer *params)
 }
 
 static void
-process_message_notice (gpointer *params)
+process_peer_notice (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1417,7 +1417,7 @@ process_message_notice (gpointer *params)
 }
 
 static void
-process_message_part (gpointer *params)
+process_peer_part (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1455,7 +1455,7 @@ process_message_part (gpointer *params)
 }
 
 static void
-process_message_pong (gpointer *params)
+process_peer_pong (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1465,7 +1465,7 @@ process_message_pong (gpointer *params)
 }
 
 static void
-process_message_privmsg (gpointer *params)
+process_peer_privmsg (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1544,7 +1544,7 @@ process_message_privmsg (gpointer *params)
 }
 
 static void
-process_message_quit (gpointer *params)
+process_peer_quit (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1570,7 +1570,7 @@ process_message_quit (gpointer *params)
 }
 
 static void
-process_message_topic (gpointer *params)
+process_peer_topic (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1594,7 +1594,7 @@ process_message_topic (gpointer *params)
 }
 
 static void
-process_message_wallops (gpointer *params)
+process_peer_wallops (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
@@ -1634,32 +1634,51 @@ process_named_msg (gpointer *params)
 /* handle named messages that DON'T start with a ':' */
 
 static void
-process_named_servermsg(gpointer *params)
+process_message_error (gpointer *params)
 {
 	session *sess = params[0];
 	char **word_eol = params[2];
-	char *buf = params[3];
+	char *text;
+
+	text = word_eol[2];
+	if (*text == ':')
+		text++;
+
+	signal_emit("server error", 2, sess, text);
+}
+
+static void
+process_message_notice (gpointer *params)
+{
+	session *sess = params[0];
+	char **word_eol = params[2];
+	char *text;
+
+	text = word_eol[3];
+	if (*text == ':')
+		text++;
+
+	signal_emit("server notice", 2, sess, text);
+}
+
+static void
+process_message_ping (gpointer *params)
+{
+	session *sess = params[0];
+	char **word_eol = params[2];
+	server *serv = sess->server;
+
+	tcp_sendf(serv, "PONG %s\r\n", word_eol[2]);
+}
+
+static void
+process_named_servermsg(gpointer *params)
+{
+	session *sess = params[0];
+	char *buf = params[4];
 	server *serv = sess->server;
 	sess = serv->server_session;
 
-	if (!strncmp (buf, "PING ", 5))
-	{
-		tcp_sendf (sess->server, "PONG %s\r\n", buf + 5);
-		return;
-	}
-	if (!strncmp (buf, "ERROR", 5))
-	{
-		signal_emit("server error", 2, sess, buf+7);
-		return;
-	}
-	if (!strncmp (buf, "NOTICE ", 7))
-	{
-		buf = word_eol[3];
-		if (*buf == ':')
-			buf++;
-		signal_emit("server notice", 2, sess, buf);
-		return;
-	}
 	signal_emit("server text", 3, sess->server, buf, sess->server->servername);
 }
 
@@ -1722,7 +1741,7 @@ irc_inline (server *serv, char *buf, int len)
 		sigs = signal_emit(scratch, 4, sess, word, word_eol, buf);
 
 		if (!sigs)
-			signal_emit("server message", 4, sess, word, word_eol, buf);
+			signal_emit("server message", 5, sess, word[1], word, word_eol, buf);
 
 		goto xit;
 	}
@@ -1745,11 +1764,11 @@ irc_inline (server *serv, char *buf, int len)
 	else
 	{
 		/* text isn't necessarily word_eol[4] here... */
-		g_snprintf(scratch, 512, "server message %s", word[2]);
+		g_snprintf(scratch, 512, "server peer %s", word[2]);
 		sigs = signal_emit(scratch, 3, sess, word, word_eol);
 
 		if (!sigs)
-			signal_emit("server message", 4, sess, word[2], word, word_eol);
+			signal_emit("server peer", 4, sess, word[2], word, word_eol);
 	}
 
 xit:
@@ -1798,23 +1817,23 @@ proto_fill_her_up (server *serv)
 void
 proto_irc_init(void)
 {
-	/* server messages */
-	signal_attach("server message cap", process_message_cap);
-	signal_attach("server message invite", process_message_invite);
-	signal_attach("server message join", process_message_join);
-	signal_attach("server message kick", process_message_kick);
-	signal_attach("server message kill", process_message_kill);
-	signal_attach("server message mode", process_message_mode);
-	signal_attach("server message nick", process_message_nick);
-	signal_attach("server message notice", process_message_notice);
-	signal_attach("server message part", process_message_part);
-	signal_attach("server message pong", process_message_pong);
-	signal_attach("server message privmsg", process_message_privmsg);
-	signal_attach("server message quit", process_message_quit);
-	signal_attach("server message topic", process_message_topic);
-	signal_attach("server message wallops", process_message_wallops);
+	/* server peer messages */
+	signal_attach("server peer cap", process_peer_cap);
+	signal_attach("server peer invite", process_peer_invite);
+	signal_attach("server peer join", process_peer_join);
+	signal_attach("server peer kick", process_peer_kick);
+	signal_attach("server peer kill", process_peer_kill);
+	signal_attach("server peer mode", process_peer_mode);
+	signal_attach("server peer nick", process_peer_nick);
+	signal_attach("server peer notice", process_peer_notice);
+	signal_attach("server peer part", process_peer_part);
+	signal_attach("server peer pong", process_peer_pong);
+	signal_attach("server peer privmsg", process_peer_privmsg);
+	signal_attach("server peer quit", process_peer_quit);
+	signal_attach("server peer topic", process_peer_topic);
+	signal_attach("server peer wallops", process_peer_wallops);
 
-	signal_attach("server message", process_named_msg);
+	signal_attach("server peer", process_named_msg);
 
 	/* server numerics */
 	signal_attach("server numeric 001", process_numeric_001);
@@ -1883,6 +1902,11 @@ proto_irc_init(void)
 	signal_attach("server numeric 733", process_monitor_reply);
 
 	signal_attach("server numeric", process_numeric);
+
+	/* server messages */
+	signal_attach("server message error", process_message_error);
+	signal_attach("server message notice", process_message_notice);
+	signal_attach("server message ping", process_message_ping);
 
 	signal_attach("server message", process_named_servermsg);
 }
