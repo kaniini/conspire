@@ -1395,14 +1395,18 @@ process_named_msg (session *sess, char *type, char *word[], char *word_eol[])
 
 garbage:
 	/* unknown message */
-	PrintTextf (sess, "GARBAGE: %s\n", word_eol[1]);
+	PrintTextf (sess, "Unknown message: %s\n", word_eol[1]);
 }
 
 /* handle named messages that DON'T start with a ':' */
 
 static void
-process_named_servermsg (session *sess, char *buf, char *word_eol[])
+process_named_servermsg(gpointer *params)
 {
+	session *sess = params[0];
+	char **word = params[1];
+	char **word_eol = params[2];
+	char *buf = params[3];
 	server *serv = sess->server;
 	sess = serv->server_session;
 
@@ -1509,7 +1513,15 @@ irc_inline (server *serv, char *buf, int len)
 
 	if (buf[0] != ':')
 	{
-		process_named_servermsg (sess, buf, word_eol);
+		static gchar scratch[512];
+		gint sigs;
+
+		g_snprintf(scratch, "server message %s", word[1]);
+		sigs = signal_emit(scratch, 4, sess, word, word_eol, buf);
+
+		if (!sigs)
+			signal_emit("server message", 4, sess, word, word_eol, buf);
+
 		goto xit;
 	}
 
@@ -1644,4 +1656,6 @@ proto_irc_init(void)
 	signal_attach("server numeric 733", process_monitor_reply);
 
 	signal_attach("server numeric", process_numeric);
+
+	signal_attach("server message", process_named_servermsg);
 }
