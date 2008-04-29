@@ -47,6 +47,7 @@
 #include "xchatc.h"
 #include "proto-irc.h"
 #include "upnp.h"
+#include "sasl.h"
 
 GSList *popup_list = 0;
 GSList *button_list = 0;
@@ -677,6 +678,7 @@ xchat_init (void)
 	signal_printer_init();
 	proto_irc_init();
 	upnp_init();
+	sasl_init();
 
 	snprintf (buf, sizeof (buf),
 		"NAME %s\n"                         "CMD query %%s\n\n"\

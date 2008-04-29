@@ -1409,37 +1409,6 @@ process_named_servermsg(gpointer *params)
 	server *serv = sess->server;
 	sess = serv->server_session;
 
-	if (!strncmp (buf, "AUTHENTICATE ", 13))
-	{
-		if (*word_eol[2] == '+')
-		{
-			char buf[1024];
-			char b64buf[1024];
-			char *iter_p = buf;
-			gsize ret;
-
-			ret = g_strlcpy(iter_p, serv->sasl_user, 1024 - (iter_p - buf));
-			iter_p += ret + 1;
-			ret = g_strlcpy(iter_p, serv->sasl_user, 1024 - (iter_p - buf));
-			iter_p += ret + 1;
-			ret = g_strlcpy(iter_p, serv->sasl_pass, 1024 - (iter_p - buf));
-
-			base64_encode(buf, (strlen(serv->sasl_user) * 2) + strlen(serv->sasl_pass) + 2, b64buf, 1024);
-
-			/* TODO: chunk into 400 byte segments */
-			tcp_sendf(serv, "AUTHENTICATE %s\r\n", b64buf);
-		}
-		else if (!word_eol[2])
-		{
-			g_source_remove(serv->sasl_timeout_tag);
-			tcp_sendf(serv, "AUTHENTICATE *\r\n");
-			tcp_sendf(serv, "CAP END\r\n");
-			serv->sasl_state = SASL_COMPLETE;
-			return;
-		}
-
-		return;
-	}
 	if (!strncmp (buf, "PING ", 5))
 	{
 		tcp_sendf (sess->server, "PONG %s\r\n", buf + 5);
