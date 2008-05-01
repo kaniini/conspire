@@ -510,7 +510,7 @@ process_numeric_306 (gpointer *params)
 {
 	session *sess = params[0];
 	char **word = params[1];
-	char *text = params[4];
+	char *text = params[3];
 	server *serv = sess->server;
 
 	inbound_uaway(serv);
