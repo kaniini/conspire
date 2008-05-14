@@ -55,7 +55,6 @@ AH_VERBATIM([USE_PLUGIN],[#undef USE_PLUGIN])
 AH_VERBATIM([USE_SIGACTION],[#undef USE_SIGACTION])
 AH_VERBATIM([USING_FREEBSD],[#undef USING_FREEBSD])
 AH_VERBATIM([USING_LINUX],[#undef USING_LINUX])
-AH_VERBATIM([USE_DBUS],[#undef USE_DBUS])
 
 AC_PATH_PROG(sedpath, sed)
 if test "_$sedpath" = _; then
@@ -253,37 +252,6 @@ if test "$plugin" = yes; then
 	LIBS="$LIBS $RDYNAMIC_FLAGS"
 fi
 
-dnl #######################################################################
-dnl # Check for DBUS libraries
-dnl #######################################################################
-
-PKG_CHECK_MODULES(DBUS, [dbus-1 >= 0.60 dbus-glib-1 >= 0.60 gthread-2.0], dbus=yes, [
-	AC_MSG_RESULT(no)
-	AC_MSG_ERROR([DBus is required by Conspire.])
-	dbus=no
-])
-AC_PATH_PROG(DBUS_BINDING_TOOL, dbus-binding-tool, no)
-AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal, no)
-if test "x$DBUS_BINDING_TOOL" = "xno" || test "x$GLIB_GENMARSHAL" = "xno" || test "x$dbus" = "xno" ; then
-	dbus="no"
-else
-	COMMON_LIBS="$COMMON_LIBS $DBUS_LIBS"
-	COMMON_CFLAGS="$COMMON_CFLAGS $DBUS_CFLAGS"
-	AC_DEFINE(USE_DBUS)
-	AS_AC_EXPAND(DATADIR, $datadir)
-
-	XCHATWRAP="libconspire-xchatemu xchatwrap"
-	DBUSDIR="dbus"
-	DBUSLIBADD="-Ldbus/ -lconspire-dbus"
-	AC_SUBST(DBUSDIR)
-	AC_SUBST(DBUSLIBADD)
-	AC_SUBST(XCHATWRAP)
-
-	DBUS_SERVICES_DIR="$DATADIR/dbus-1/services"
-	AC_SUBST(DBUS_SERVICES_DIR)
-	AC_DEFINE_UNQUOTED(DBUS_SERVICES_DIR, "$DBUS_SERVICES_DIR", [Where services dir for DBUS is])
-fi
-
 dnl ** Python **
 
 if test "$dbus" = no; then
@@ -340,7 +308,6 @@ dnl *********************************************************************
 AM_CONDITIONAL(USE_LIBSEXY, test "x$spell" = "xstatic")
 AM_CONDITIONAL(DO_GTK, test "x$gtkfe" = "xyes")
 AM_CONDITIONAL(DO_PLUGIN, test "x$plugin" = "xyes")
-AM_CONDITIONAL(USE_DBUS, test "x$dbus" = "xyes")
 AM_CONDITIONAL(DO_GCONF, test "x$GCONFTOOL" != "xno")
 
 dnl *********************************************************************
@@ -507,8 +474,6 @@ AC_SUBST(PERL_CFLAGS)
 AC_SUBST(PERL_LDFLAGS)
 AC_SUBST(PY_CFLAGS)
 AC_SUBST(PY_LIBS)
-AC_SUBST(DBUS_CFLAGS)
-AC_SUBST(DBUS_LIBS)
 
 
 PLUGIN_INCLUDES='-I$(top_srcdir)/plugins'
@@ -544,7 +509,6 @@ echo
 echo "  Install path:                           ${prefix}"
 echo
 echo "  GnuTLS support:                         ${gnutls}"
-echo "  DBus support:                           ${dbus}"
 echo "  IPv6 support:                           ${ipv6}"
 echo "  Plugin loader:                          ${plugin}"
 echo "  Regex substitution support:             ${regex}"
