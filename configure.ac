@@ -151,6 +151,11 @@ dnl *********************************************************************
 dnl ** GLIB *************************************************************
 dnl *********************************************************************
 
+PKG_CHECK_MODULES(GTHREAD, [gthread-2.0], glib=yes, glib=no)
+if test "$glib" = no; then
+	AC_MSG_ERROR("Cannot find a threaded glib")
+fi
+
 if test "$regex" = yes; then
 	AM_PATH_GLIB_2_0(2.14.0, glib=yes, glib=no)
 	if test "$glib" = no; then
@@ -167,8 +172,8 @@ if test "$glib" = no; then
 	AC_MSG_ERROR("Cannot find glib")
 fi
 
-COMMON_CFLAGS="$GLIB_CFLAGS"
-COMMON_LIBS="$GLIB_LIBS"
+COMMON_CFLAGS="$GLIB_CFLAGS $GTHREAD_CFLAGS"
+COMMON_LIBS="$GLIB_LIBS $GTHREAD_LIBS"
 
 dnl *********************************************************************
 dnl ** GTK **************************************************************
