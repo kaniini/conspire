@@ -156,6 +156,11 @@ if test "$glib" = no; then
 	AC_MSG_ERROR("Cannot find a threaded glib")
 fi
 
+PKG_CHECK_MODULES(GOBJECT, [gobject-2.0], glib=yes, glib=no)
+if test "$glib" = no; then
+	AC_MSG_ERROR("Cannot find a GObject")
+fi
+
 if test "$regex" = yes; then
 	AM_PATH_GLIB_2_0(2.14.0, glib=yes, glib=no)
 	if test "$glib" = no; then
@@ -172,8 +177,10 @@ if test "$glib" = no; then
 	AC_MSG_ERROR("Cannot find glib")
 fi
 
-COMMON_CFLAGS="$GLIB_CFLAGS $GTHREAD_CFLAGS"
-COMMON_LIBS="$GLIB_LIBS $GTHREAD_LIBS"
+GLIB_CFLAGS="$GLIB_CFLAGS $GTHREAD_CFLAGS $GOBJECT_CFLAGS"
+GLIB_LIBS="$GLIB_LIBS $GTHREAD_LIBS $GOBJECT_LIBS"
+COMMON_CFLAGS="$GLIB_CFLAGS"
+COMMON_LIBS="$GLIB_LIBS"
 
 dnl *********************************************************************
 dnl ** GTK **************************************************************
@@ -189,8 +196,8 @@ if test "$havegtk" = no; then
 fi
 
 if test "$gtkfe" != yes; then
-	COMMON_LIBS="$GLIB_LIBS $GTHREAD_LIBS"
-	COMMON_CFLAGS="$GLIB_CFLAGS $GTHREAD_CFLAGS"
+	COMMON_LIBS="$GLIB_LIBS"
+	COMMON_CFLAGS="$GLIB_CFLAGS"
 fi
 
 dnl *********************************************************************
@@ -202,8 +209,8 @@ if test "$mowgli" = no; then
 	AC_MSG_ERROR("Cannot find acceptable version of mowgli. http://atheme.org/projects/mowgli.shtml")
 fi
 
-COMMON_CFLAGS="$GLIB_CFLAGS $GTHREAD_CFLAGS $MOWGLI_CFLAGS"
-COMMON_LIBS="$GLIB_LIBS $GTHREAD_LIBS $MOWGLI_LIBS"
+COMMON_CFLAGS="$GLIB_CFLAGS $MOWGLI_CFLAGS"
+COMMON_LIBS="$GLIB_LIBS $MOWGLI_LIBS"
 
 dnl *********************************************************************
 dnl ** IPv6 *************************************************************
