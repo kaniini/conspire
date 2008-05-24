@@ -52,7 +52,6 @@
 #include "../common/xchatc.h"
 #include "../common/outbound.h"
 #include "../common/inbound.h"
-#include "../common/plugin.h"
 #include "../common/modes.h"
 #include "../common/url.h"
 #include "fe-gtk.h"
@@ -795,8 +794,6 @@ mg_populate (session *sess)
 	}
 
 	mg_set_topic_tip (sess);
-
-	plugin_emit_dummy_print (sess, "Focus Tab");
 
 	/* recalculate line widths... window size may have changed on us. --nenolod */
 	gtk_xtext_set_time_stamp (sess->res->buffer, prefs.timestamp);
@@ -2449,7 +2446,6 @@ mg_tabwin_focus_cb (GtkWindow * win, GdkEventFocus *event, gpointer userdata)
 	if (current_sess)
 	{
 		gtk_xtext_check_marker_visibility (GTK_XTEXT (current_sess->gui->xtext));
-		plugin_emit_dummy_print (current_sess, "Focus Window");
 	}
 
 	gtk_window_set_urgency_hint(win, FALSE);
@@ -2467,7 +2463,6 @@ mg_topwin_focus_cb (GtkWindow * win, GdkEventFocus *event, session *sess)
 
 	gtk_window_set_urgency_hint (win, FALSE);
 
-	plugin_emit_dummy_print (sess, "Focus Window");
 	return FALSE;
 }
 

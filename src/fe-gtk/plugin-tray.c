@@ -2,7 +2,6 @@
 
 #include <string.h>
 #include <unistd.h>
-#include "../common/xchat-plugin.h"
 #include "../common/xchat.h"
 #include "../common/xchatc.h"
 #include "../common/inbound.h"
@@ -44,7 +43,6 @@ typedef GdkPixbuf* TrayIcon;
 static GtkStatusIcon *sticon;
 static gint flash_tag;
 static TrayStatus tray_status;
-static xchat_plugin *ph;
 
 static TrayIcon custom_icon1;
 static TrayIcon custom_icon2;
@@ -63,6 +61,7 @@ tray_get_window_status (void)
 {
 	const char *st;
 
+#if 0
 	st = xchat_get_info (ph, "win_status");
 
 	if (!st)
@@ -73,6 +72,7 @@ tray_get_window_status (void)
 
 	if (!strcmp (st, "hidden"))
 		return WS_HIDDEN;
+#endif
 
 	return WS_NORMAL;
 }
@@ -107,6 +107,7 @@ tray_count_networks (void)
 	}
 	return cons;
 }
+#endif
 
 void
 fe_tray_set_tooltip (const char *text)

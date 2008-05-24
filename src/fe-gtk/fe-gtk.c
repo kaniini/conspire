@@ -40,7 +40,6 @@
 #include "../common/text.h"
 #include "../common/cfgfiles.h"
 #include "../common/xchatc.h"
-#include "../common/plugin.h"
 #include "gtkutil.h"
 #include "maingui.h"
 #include "pixmaps.h"
@@ -237,7 +236,9 @@ fe_idle (gpointer data)
 {
 	session *sess = sess_list->data;
 
+#if 0
 	plugin_add (sess, NULL, NULL, tray_plugin_init, tray_plugin_deinit, NULL, FALSE);
+#endif
 
 	if (arg_minimize == 1)
 		gtk_window_iconify (GTK_WINDOW (sess->gui->window));

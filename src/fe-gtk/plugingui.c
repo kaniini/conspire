@@ -37,8 +37,6 @@
 #include "../common/xchat.h"
 #define PLUGIN_C
 typedef struct session xchat_context;
-#include "../common/xchat-plugin.h"
-#include "../common/plugin.h"
 #include "../common/util.h"
 #include "../common/outbound.h"
 #include "../common/fe.h"
@@ -100,7 +98,6 @@ extern GSList *plugin_list;
 void
 fe_pluginlist_update (void)
 {
-	xchat_plugin *pl;
 	GSList *list;
 	GtkTreeView *view;
 	GtkListStore *store;
@@ -113,6 +110,7 @@ fe_pluginlist_update (void)
 	store = GTK_LIST_STORE (gtk_tree_view_get_model (view));
 	gtk_list_store_clear (store);
 
+#if 0
 	list = plugin_list;
 	while (list)
 	{
@@ -127,6 +125,7 @@ fe_pluginlist_update (void)
 		}
 		list = list->next;
 	}
+#endif
 }
 
 static void
@@ -178,8 +177,10 @@ plugingui_unload (GtkWidget * wid, gpointer unused)
 	if (len > 3 && strcasecmp (file + len - 3, ".so") == 0)
 #endif
 	{
+#if 0
 		if (plugin_kill (modname, FALSE) == 2)
 			fe_message (_("That plugin is refusing to unload.\n"), FE_MSG_ERROR);
+#endif
 	} else
 	{
 		/* let python.so or perl.so handle it */

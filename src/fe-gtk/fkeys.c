@@ -48,7 +48,6 @@
 #include "../common/outbound.h"
 #include "../common/util.h"
 #include "../common/text.h"
-#include "../common/plugin.h"
 #include <gdk/gdkkeysyms.h>
 #include "gtkutil.h"
 #include "menu.h"
