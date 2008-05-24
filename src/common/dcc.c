@@ -480,14 +480,11 @@ static int
 dcc_chat_line (struct DCC *dcc, char *line)
 {
 	session *sess;
-	char *word[PDIWORDS];
 	char *po;
 	char *utf;
 	char *conv;
-	int ret, i;
 	int len;
 	gsize utf_len;
-	char portbuf[32];
 
 	len = strlen (line);
 	if (dcc->serv->using_cp1255)
@@ -516,18 +513,6 @@ dcc_chat_line (struct DCC *dcc, char *line)
 	if (!sess)
 		sess = dcc->serv->front_session;
 
-	sprintf (portbuf, "%d", dcc->port);
-
-	word[0] = "DCC Chat Text";
-	word[1] = net_ip (dcc->addr);
-	word[2] = portbuf;
-	word[3] = dcc->nick;
-	word[4] = line;
-	for (i = 5; i < PDIWORDS; i++)
-		word[i] = "\000";
-
-	ret = plugin_emit_print (sess, word);
-
 	/* did the plugin close it? */
 	if (!g_slist_find (dcc_list, dcc))
 	{
@@ -536,16 +521,6 @@ dcc_chat_line (struct DCC *dcc, char *line)
 		if (conv)
 			g_free (conv);
 		return 1;
-	}
-
-	/* did the plugin eat the event? */
-	if (ret)
-	{
-		if (utf)
-			g_free (utf);
-		if (conv)
-			g_free (conv);
-		return 0;
 	}
 
 	url_check_line (line, len);

@@ -1716,9 +1716,6 @@ irc_inline (server *serv, char *buf, int len)
 		type = word[2];
 
 		word[0] = type;
-		word_eol[1] = buf;	/* keep the ":" for plugins */
-		if (plugin_emit_server (sess, type, word, word_eol))
-			goto xit;
 		word[1]++;
 		word_eol[1] = buf + 1;	/* but not for xchat internally */
 
@@ -1727,8 +1724,6 @@ irc_inline (server *serv, char *buf, int len)
 	{
 		process_data_init (pdibuf, buf, word, word_eol, FALSE, FALSE);
 		word[0] = type = word[1];
-		if (plugin_emit_server (sess, type, word, word_eol))
-			goto xit;
 	}
 
 	if (buf[0] != ':')

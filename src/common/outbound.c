@@ -2080,18 +2080,6 @@ cmd_help (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		strcat (buf, "\n");
 		PrintText (sess, buf);
 
-		/* XXX */
-		PrintTextf (sess, "\n%s\n\n", _("Plugin defined commands:"));
-		buf[0] = ' ';
-		buf[1] = ' ';
-		buf[2] = 0;
-		hl.t = 0;
-		hl.i = 0;
-		plugin_command_foreach (sess, &hl, (void *)show_help_line);
-		strcat (buf, "\n");
-		PrintText (sess, buf);
-		free (buf);
-
 		PrintTextf (sess, "\n%s\n\n", _("Type /HELP <command> for more information, or /HELP -l"));
 	}
 	return CMD_EXEC_OK;
@@ -2365,6 +2353,7 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (len > 3 && strcasecmp (".so", word[2] + len - 3) == 0)
 #endif
 	{
+#if 0
 		arg = NULL;
 		if (word_eol[3][0])
 			arg = word_eol[3];
@@ -2375,7 +2364,7 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 		if (error)
 			PrintText (sess, error);
-
+#endif
 		return CMD_EXEC_OK;
 	}
 #endif
@@ -3166,7 +3155,7 @@ cmd_unignore (struct session *sess, char *tbuf, char *word[],
 static CommandResult
 cmd_unload (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-#ifdef USE_PLUGIN
+#if 0
 	int len, by_file = FALSE;
 
 	len = strlen (word[2]);
@@ -3653,9 +3642,6 @@ help (session *sess, char *tbuf, char *helpcmd, int quiet)
 {
 	Command *cmd;
 
-	if (plugin_show_help (sess, helpcmd))
-		return;
-
 	cmd = command_lookup(helpcmd);
 
 	if (cmd)
@@ -4045,10 +4031,6 @@ handle_say (session *sess, char *text, int check_spch)
 	/* split the text into words and word_eol */
 	process_data_init (pdibuf, text, word, word_eol, TRUE, FALSE);
 
-	/* a command of "" can be hooked for non-commands */
-	if (plugin_emit_command (sess, "", word, word_eol))
-		goto xit;
-
 	/* incase a plugin did /close */
 	if (!is_session (sess))
 		goto xit;
@@ -4155,8 +4137,6 @@ handle_command (session *sess, char *cmd, int check_spch)
 	/* incase a plugin did /close */
 	if (!is_session (sess))
 		goto xit;
-
-	plugin_emit_command (sess, word[1], word, word_eol);
 
 	/* XXX: UGLY ALIAS HACK YUCK YUCK YUCK --nenolod */
 	list = command_list;

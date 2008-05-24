@@ -1897,9 +1897,6 @@ text_emit (int index, session *sess, char *a, char *b, char *c, char *d)
 	for (i = 5; i < PDIWORDS; i++)
 		word[i] = "\000";
 
-	if (plugin_emit_print (sess, word))
-		return;
-
 	/* If a plugin's callback executes "/close", 'sess' may be invalid */
 	if (is_session (sess))
 		display_event (sess, index, word, stripcolor_args);

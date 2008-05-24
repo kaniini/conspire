@@ -265,7 +265,7 @@ irc_init (session *sess)
 
 	done_init = TRUE;
 
-#ifdef USE_PLUGIN
+#if 0
 	if (!arg_skip_plugins)
 		plugin_auto_load (sess);	/* autoload ~/.xchat *.so */
 #endif
@@ -341,7 +341,6 @@ new_ircwindow (server *serv, char *name, int type, int focus)
 	irc_init (sess);
 	if (prefs.text_replay)
 		scrollback_load (sess);
-	plugin_emit_dummy_print (sess, "Open Context");
 
 	return sess;
 }
@@ -415,8 +414,6 @@ session_free (session *killsess)
 	server *killserv = killsess->server;
 	session *sess;
 	GSList *list;
-
-	plugin_emit_dummy_print (killsess, "Close Context");
 
 	if (current_tab == killsess)
 		current_tab = NULL;
@@ -793,7 +790,9 @@ xchat_exit (void)
 {
 	xchat_is_quitting = TRUE;
 	in_xchat_exit = TRUE;
-	plugin_kill_all ();
+#if 0
+	plugin_shutdown();
+#endif
 	fe_cleanup ();
 	if (prefs.autosave)
 	{
