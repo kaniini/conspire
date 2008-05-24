@@ -29,7 +29,6 @@
 #include "xchat.h"
 #include <glib/ghash.h>
 #include "cfgfiles.h"
-#include "plugin.h"
 #include "fe.h"
 #include "server.h"
 #include "util.h"

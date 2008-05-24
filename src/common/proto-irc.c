@@ -32,7 +32,6 @@
 #include "inbound.h"
 #include "modes.h"
 #include "notify.h"
-#include "plugin.h"
 #include "server.h"
 #include "text.h"
 #include "outbound.h"

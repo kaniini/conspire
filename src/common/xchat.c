@@ -35,8 +35,6 @@
 #include "util.h"
 #include "cfgfiles.h"
 #include "ignore.h"
-#include "xchat-plugin.h"
-#include "plugin.h"
 #include "timer.h"
 #include "notify.h"
 #include "server.h"

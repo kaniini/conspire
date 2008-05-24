@@ -37,7 +37,6 @@
 #include <fcntl.h>
 
 #include "xchat.h"
-#include "plugin.h"
 #include "ignore.h"
 #include "util.h"
 #include "fe.h"
