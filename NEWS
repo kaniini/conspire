@@ -1,3 +1,12 @@
+conspire 0.19.0 (05-25-2008):
+
+  * Entirely new event processing engine and signals API.
+  * DBus support dropped; use the new Plugin API.
+  * Support for XChat plugins dropped.
+  * New plugin API, things are not entirely set in stone yet.
+  * Several UI improvements, including more use of context-sensitive menus.
+  * New implementation of XText using Cairo.
+
 conspire 0.13.0 (02-25-2008):
 
   * Replace old message-splitting system for /say with new one for /msg, /me, and /say.
