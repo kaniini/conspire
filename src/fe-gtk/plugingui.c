@@ -41,6 +41,7 @@ typedef struct session xchat_context;
 #include "../common/outbound.h"
 #include "../common/fe.h"
 #include "../common/xchatc.h"
+#include "../common/plugin.h"
 #include "gtkutil.h"
 
 /* model for the plugin treeview */
@@ -49,7 +50,6 @@ enum
 	NAME_COLUMN,
 	VERSION_COLUMN,
 	FILE_COLUMN,
-	DESC_COLUMN,
 	N_COLUMNS
 };
 
@@ -70,8 +70,7 @@ plugingui_treeview_new (GtkWidget *box)
 	view = gtkutil_treeview_new (box, GTK_TREE_MODEL (store), NULL,
 	                             NAME_COLUMN, _("Name"),
 	                             VERSION_COLUMN, _("Version"),
-	                             FILE_COLUMN, _("File"),
-	                             DESC_COLUMN, _("Description"), -1);
+	                             FILE_COLUMN, _("File"), -1);
 	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (view), TRUE);
 	for (col_id=0; (col = gtk_tree_view_get_column (GTK_TREE_VIEW (view), col_id));
 	     col_id++)
@@ -93,15 +92,14 @@ plugingui_close (GtkWidget * wid, gpointer a)
 	plugin_window = NULL;
 }
 
-extern GSList *plugin_list;
-
 void
 fe_pluginlist_update (void)
 {
-	GSList *list;
+	mowgli_dictionary_iteration_state_t state;
 	GtkTreeView *view;
 	GtkListStore *store;
 	GtkTreeIter iter;
+	Plugin *p;
 
 	if (!plugin_window)
 		return;
@@ -110,22 +108,16 @@ fe_pluginlist_update (void)
 	store = GTK_LIST_STORE (gtk_tree_view_get_model (view));
 	gtk_list_store_clear (store);
 
-#if 0
-	list = plugin_list;
-	while (list)
+	MOWGLI_DICTIONARY_FOREACH(p, &state, plugin_dict)
 	{
-		pl = list->data;
-		if (pl->version[0] != 0)
+		if (p->header)
 		{
 			gtk_list_store_append (store, &iter);
-			gtk_list_store_set (store, &iter, NAME_COLUMN, pl->name,
-			                    VERSION_COLUMN, pl->version,
-			                    FILE_COLUMN, file_part (pl->filename),
-			                    DESC_COLUMN, pl->desc, -1);
+			gtk_list_store_set (store, &iter, NAME_COLUMN, p->header->name,
+			                    VERSION_COLUMN, p->header->version,
+			                    FILE_COLUMN, file_part(state.cur->key), -1);
 		}
-		list = list->next;
 	}
-#endif
 }
 
 static void
