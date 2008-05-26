@@ -21,7 +21,7 @@
 #include "palette.h"
 #include "pixmaps.h"
 #include "menu.h"
-#include "plugin-tray.h"
+#include "tray.h"
 
 #include <gtk/gtkcolorseldialog.h>
 #include <gtk/gtktable.h>
@@ -118,7 +118,7 @@ static const setting textbox_settings[] =
 	{ST_END, 0, 0, 0, 0, 0}
 };
 
-static const char *const tabcompmenu[] = 
+static const char *const tabcompmenu[] =
 {
 	N_("A-Z"),
 	N_("Last-spoke order"),
@@ -154,7 +154,7 @@ static const setting inputbox_settings[] =
 	{ST_END, 0, 0, 0, 0, 0}
 };
 
-static const char *const lagmenutext[] = 
+static const char *const lagmenutext[] =
 {
 	N_("Off"),
 	N_("Graph"),
@@ -163,7 +163,7 @@ static const char *const lagmenutext[] =
 	NULL
 };
 
-static const char *const ulmenutext[] = 
+static const char *const ulmenutext[] =
 {
 	N_("A-Z, Ops first"),
 	N_("A-Z"),
@@ -283,11 +283,11 @@ static const setting filexfer_settings[] =
 	{ST_ENTRY,	N_("DCC IP address:"), &prefs.dcc_ip_str,
 					N_("Claim you are at this address when offering files."), 0},
 	{ST_NUMBER,	N_("First DCC send port:"), &prefs.first_dcc_send_port, 0, 0, 65535},
-	{ST_NUMBER,	N_("Last DCC send port:"), &prefs.last_dcc_send_port, 0, 
+	{ST_NUMBER,	N_("Last DCC send port:"), &prefs.last_dcc_send_port, 0,
 		(const char **)N_("!Leave ports at zero for full range."), 65535},
 
 	{ST_HEADER, N_("Maximum File Transfer Speeds (bytes per second)"), 0, 0, 0},
-	{ST_NUMBER,	N_("One upload:"), &prefs.dcc_max_send_cps, 
+	{ST_NUMBER,	N_("One upload:"), &prefs.dcc_max_send_cps,
 					N_("Maximum speed for one transfer"), 0, 1000000},
 	{ST_NUMBER,	N_("One download:"), &prefs.dcc_max_get_cps,
 					N_("Maximum speed for one transfer"), 0, 1000000},
@@ -437,7 +437,7 @@ static const setting gui_colors_gtk[] =
 };
 
 #define setup_get_int(pr,set) *(((int *)pr)+set->offset)
-#define setup_get_int3(pr,off) *(((int *)pr)+off) 
+#define setup_get_int3(pr,off) *(((int *)pr)+off)
 
 #define setup_set_int(pr,set,num) *((int *)pr+set->offset)=num
 
@@ -903,7 +903,7 @@ setup_create_entry (GtkWidget *table, int row, const setting *set)
 	if (set->ptr == &prefs.proxy_user)
 		proxy_user = wid;
 	if (set->ptr == &prefs.proxy_pass)
-		proxy_pass = wid; 
+		proxy_pass = wid;
 
 	/* only http and Socks5 can auth */
 	if ( (set->ptr == &prefs.proxy_pass ||
@@ -1534,7 +1534,8 @@ setup_apply (struct xchatprefs *pr)
 	int do_ulist = FALSE;
 	int do_layout = FALSE;
 
-	if (strcmp (pr->background, prefs.background) != 0)
+	if ((!pr->background && prefs.background) || (pr->background && !prefs.background) ||
+		(pr->background && prefs.background && strcmp(pr->background, prefs.background) != 0))
 		new_pix = TRUE;
 
 #define DIFF(a) (pr->a != prefs.a)

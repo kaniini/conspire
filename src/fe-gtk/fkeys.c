@@ -230,10 +230,10 @@ key_get_key_name (int keyval)
    * key bindings are stored in a linked list of key_binding structs
    * which looks like {
    int keyval;  GDK keynumber
-   char *keyname;  String with the name of the function 
-   int action;  Index into key_actions 
-   int mod; Flags of STATE_* above 
-   char *data1, *data2;  Pointers to strings, these must be freed 
+   char *keyname;  String with the name of the function
+   int action;  Index into key_actions
+   int mod; Flags of STATE_* above
+   char *data1, *data2;  Pointers to strings, these must be freed
    struct key_binding *next;
    }
    * remember that is (data1 || data2) != NULL then they need to be free()'ed
@@ -267,8 +267,10 @@ key_handle_key_press (GtkWidget *wid, GdkEventKey *evt, session *sess)
 		return FALSE;
 	current_sess = sess;
 
+#if 0
 	if (plugin_emit_keypress (sess, evt->state, evt->keyval, evt->length, evt->string))
 		return 1;
+#endif
 
 	/* maybe the plugin closed this tab? */
 	if (!is_session (sess))
@@ -1449,7 +1451,7 @@ key_action_tab_comp (GtkWidget *t, GdkEventKey *entry, char *d1, char *d2,
 			return 2;
 
 		cursor_pos = g_utf8_pointer_to_offset(text, ch);
-		if (cursor_pos && (g_utf8_get_char_validated(ch, -1) == ':' || 
+		if (cursor_pos && (g_utf8_get_char_validated(ch, -1) == ':' ||
 					g_utf8_get_char_validated(ch, -1) == ',' ||
 					g_utf8_get_char_validated(ch, -1) == prefs.nick_suffix[0]))
 		{
@@ -1460,7 +1462,7 @@ key_action_tab_comp (GtkWidget *t, GdkEventKey *entry, char *d1, char *d2,
 	}
 
 	comp = skip_len;
-	
+
 	/* store the text following the cursor for reinsertion later */
 	if ((cursor_pos + skip_len) < len)
 		postfix = g_utf8_offset_to_pointer(text, cursor_pos + skip_len);
@@ -1479,14 +1481,14 @@ key_action_tab_comp (GtkWidget *t, GdkEventKey *entry, char *d1, char *d2,
 		ent_start++;
 		is_cmd = 1;
 	}
-	
+
 	prefix_len = ent_start;
 	elen = cursor_pos - ent_start;
 
 	g_utf8_strncpy (ent, g_utf8_offset_to_pointer (text, prefix_len), elen);
 
 	is_nick = (ent[0] == '#' || ent[0] == '&' || is_cmd) ? 0 : 1;
-	
+
 	if (sess->type == SESS_DIALOG && is_nick)
 	{
 		/* tab in a dialog completes the other person's name */
@@ -1517,7 +1519,9 @@ key_action_tab_comp (GtkWidget *t, GdkEventKey *entry, char *d1, char *d2,
 				{
 					tmp_list = g_list_prepend (tmp_list, xc_cmds[i].name);
 				}
+#if 0
 				tmp_list = plugin_command_list(tmp_list);
+#endif
 			}
 			else
 				tmp_list = chanlist_double_list (sess_list);
@@ -1535,13 +1539,13 @@ key_action_tab_comp (GtkWidget *t, GdkEventKey *entry, char *d1, char *d2,
 			key_action_tab_clean ();
 			comp = 0;
 		}
-	
+
 #if GLIB_CHECK_VERSION(2,4,0)
 		list = g_completion_complete_utf8 (gcomp, comp ? old_gcomp.data : ent, &result);
 #else
 		list = g_completion_complete (gcomp, comp ? old_gcomp.data : ent, &result);
 #endif
-		
+
 		if (result == NULL) /* No matches found */
 		{
 			g_completion_free(gcomp);
@@ -1648,7 +1652,7 @@ key_action_tab_comp (GtkWidget *t, GdkEventKey *entry, char *d1, char *d2,
 			}
 		}
 	}
-	
+
 	if(result)
 	{
 		if (prefix_len)

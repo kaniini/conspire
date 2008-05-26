@@ -49,7 +49,7 @@
 #include "notifygui.h"
 #include "textgui.h"
 #include "fkeys.h"
-#include "plugin-tray.h"
+#include "tray.h"
 #include "urlgrab.h"
 
 #ifdef USE_GTKSPELL
@@ -67,7 +67,7 @@ static gint arg_show_config = 0;
 static gint arg_show_version = 0;
 static gint arg_minimize = 0;
 
-static const GOptionEntry gopt_entries[] = 
+static const GOptionEntry gopt_entries[] =
 {
  {"no-auto",	'a', 0, G_OPTION_ARG_NONE,	&arg_dont_autoconnect, N_("Don't auto connect to servers"), NULL},
  {"cfgdir",	'd', 0, G_OPTION_ARG_STRING,	&arg_cfgdir, N_("Use a different config directory"), "PATH"},
@@ -130,7 +130,7 @@ fe_args (int argc, char *argv[])
 		printf ("%s\n", XCHATLIBDIR"/plugins");
 		return 0;
 	}
-	
+
 	if (arg_show_config)
 	{
 		printf ("%s\n", get_xdir_fs ());
@@ -236,9 +236,9 @@ fe_idle (gpointer data)
 {
 	session *sess = sess_list->data;
 
-#if 0
-	plugin_add (sess, NULL, NULL, tray_plugin_init, tray_plugin_deinit, NULL, FALSE);
-#endif
+	/* initialize tray */
+	tray_init();
+	tray_apply_setup();
 
 	if (arg_minimize == 1)
 		gtk_window_iconify (GTK_WINDOW (sess->gui->window));
@@ -841,7 +841,7 @@ void
 fe_get_file (const char *title, char *initial,
 				 void (*callback) (void *userdata, char *file), void *userdata,
 				 int flags)
-				
+
 {
 	/* OK: Call callback once per file, then once more with file=NULL. */
 	/* CANCEL: Call callback once with file=NULL. */

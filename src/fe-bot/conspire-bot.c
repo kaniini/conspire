@@ -25,7 +25,6 @@
 #include "../common/text.h"
 #include "../common/cfgfiles.h"
 #include "../common/xchatc.h"
-#include "../common/plugin.h"
 
 /* === command-line parameter parsing : requires glib 2.6 === */
 

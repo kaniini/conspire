@@ -364,6 +364,7 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 		if (!is_channel (serv, chan) && prefs.input_flash_priv)
 			fe_flash_window (sess);
 
+		/* XXX this isn't necessarily a public action */
 		if (hilight)
 		{
 			signal_emit("action public highlight", 4, sess, from, text, nickchar);
@@ -374,7 +375,7 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 	if (fromme)
 		EMIT_SIGNAL (XP_TE_UACTION, sess, from, text, nickchar, NULL, 0);
 	else
-		EMIT_SIGNAL (XP_TE_CHANACTION, sess, from, text, nickchar, NULL, 0);
+		signal_emit("action public", 4, sess, from, text, nickchar);
 }
 
 void
@@ -445,11 +446,11 @@ inbound_chanmsg (server *serv, session *sess, char *chan, char *from, char *text
 	}
 
 	if (sess->type == SESS_DIALOG)
-		EMIT_SIGNAL (XP_TE_DPRIVMSG, sess, from, text, idtext, NULL, 0);
+		signal_emit("message private", 4, sess, from, text, idtext);
 	else if (hilight)
-		EMIT_SIGNAL (XP_TE_HCHANMSG, sess, from, text, nickchar, idtext, 0);
+		signal_emit("message public highlight", 5, sess, from, text, nickchar, idtext);
 	else
-		EMIT_SIGNAL (XP_TE_CHANMSG, sess, from, text, nickchar, idtext, 0);
+		signal_emit("message public", 5, sess, from, text, nickchar, idtext);
 }
 
 void
@@ -789,7 +790,7 @@ netsplit_display_victims(server *serv)
 	return FALSE;
 }
 
-/* check if quit message is a netsplit message -- shamelessly 
+/* check if quit message is a netsplit message -- shamelessly
    stolen from irssi. --nenolod */
 static gboolean
 quitmsg_is_split(const char *msg)
@@ -882,7 +883,7 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 	if (serv->split_reason && !strcmp(serv->split_reason, reason))
 		netsplit = TRUE;
 	else if ((netsplit = quitmsg_is_split(reason)) == TRUE)
-	{		
+	{
 		if (netsplit)
 		{
 			if (serv->split_list)
@@ -1090,7 +1091,7 @@ inbound_notice (server *serv, char *to, char *nick, char *msg, char *ip, int id)
 		}
 		if (!sess)
 		{
-			if (server_notice)	
+			if (server_notice)
 				sess = serv->server_session;
 			else
 				sess = serv->front_session;
@@ -1116,9 +1117,9 @@ inbound_notice (server *serv, char *to, char *nick, char *msg, char *ip, int id)
 	if (server_notice)
 		EMIT_SIGNAL (XP_TE_SERVNOTICE, sess, msg, nick, NULL, NULL, 0);
 	else if (ptr)
-		EMIT_SIGNAL (XP_TE_CHANNOTICE, sess, nick, to, msg, NULL, 0);
+		signal_emit("notice public", 4, sess, nick, to, msg);
 	else
-		EMIT_SIGNAL (XP_TE_NOTICE, sess, nick, msg, NULL, NULL, 0);
+		signal_emit("notice private", 3, sess, nick, msg);
 }
 
 void
@@ -1480,7 +1481,7 @@ inbound_login_end (session *sess, char *text)
 			notify_send_watches (serv);
 		else if(serv->supports_monitor)
 			notify_send_monitor (serv);
-			
+
 		serv->end_of_motd = TRUE;
 	}
 	if (prefs.skipmotd && !serv->motd_skipped)

@@ -1931,7 +1931,7 @@ cmd_ghost (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		return CMD_EXEC_OK;
 	}
 
-	return CMD_EXEC_FAIL; 
+	return CMD_EXEC_FAIL;
 }
 
 static CommandResult
@@ -2449,7 +2449,7 @@ GSList *split_message(const struct session *sess, const gchar *text, const gchar
 	g_free(temp);
 	g_free(note_start);
 	g_free(note_end);
-	
+
 	return list;
 }
 
@@ -2614,7 +2614,7 @@ cmd_newserver (struct session *sess, char *tbuf, char *word[],
 		new_ircwindow (NULL, word[3], SESS_SERVER, 0);
 		return CMD_EXEC_OK;
 	}
-	
+
 	sess = new_ircwindow (NULL, NULL, SESS_SERVER, 0);
 	cmd_server (sess, tbuf, word, word_eol);
 	return CMD_EXEC_OK;
@@ -2967,7 +2967,7 @@ urlserv:
 				*channel = co+1;
 			else
 				*channel = co;
-			
+
 		}
 		return TRUE;
 	}
@@ -3007,7 +3007,7 @@ cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		port = word[3 + offset];
 		pass = word[4 + offset];
 	}
-	
+
 	if (!(*server_name))
 		return CMD_EXEC_FAIL;
 
@@ -3597,7 +3597,7 @@ struct commands xc_cmds[] = {
 	{"SETCURSOR", cmd_setcursor, 0, 0, 1, N_("SETCURSOR [-|+]<position>")},
 	{"SETTAB", cmd_settab, 0, 0, 1, 0},
 	{"SETTEXT", cmd_settext, 0, 0, 1, 0},
-        {"TIMER", timer_cb, 0, 0, 1, 
+        {"TIMER", timer_cb, 0, 0, 1,
 		N_("Usage: TIMER [-refnum <num>] [-repeat <num>] <seconds> <command>\n"
 		   "       TIMER [-quiet] -delete <num>")},
 	{"TOPIC", cmd_topic, 1, 1, 1,

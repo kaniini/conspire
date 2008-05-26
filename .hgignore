@@ -22,6 +22,7 @@ syntax: regexp
 ^po/Makefile\.in$
 ^po/POTFILES$
 ^po/stamp-po$
+^po/remove-potcdate\.sed$
 ^conspire$
 ^src/common/tools/make-te$
 ^src/fe-bot/conspire-bot$

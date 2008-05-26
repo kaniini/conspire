@@ -29,6 +29,17 @@
 /* actions */
 
 void
+signal_printer_action_public(gpointer *params)
+{
+	session *sess   = params[0];
+	gchar *from     = params[1];
+	gchar *text     = params[2];
+	gchar *nickchar = params[3];
+
+	EMIT_SIGNAL (XP_TE_CHANACTION, sess, from, text, nickchar, NULL, 0);
+}
+
+void
 signal_printer_action_public_highlight(gpointer *params)
 {
 	session *sess   = params[0];
@@ -362,6 +373,55 @@ signal_printer_message_private(gpointer *params)
 	}
 }
 
+/* channel messages */
+
+void
+signal_printer_message_public(gpointer *params)
+{
+	session *sess   = params[0];
+	gchar *from     = params[1];
+	gchar *message  = params[2];
+	gchar *nickchar = params[3];
+	gchar *idtext   = params[4];
+
+	EMIT_SIGNAL (XP_TE_CHANMSG, sess, from, message, nickchar, idtext, 0);
+}
+
+void
+signal_printer_message_public_highlight(gpointer *params)
+{
+	session *sess   = params[0];
+	gchar *from     = params[1];
+	gchar *message  = params[2];
+	gchar *nickchar = params[3];
+	gchar *idtext   = params[4];
+
+	EMIT_SIGNAL (XP_TE_HCHANMSG, sess, from, message, nickchar, idtext, 0);
+}
+
+/* notices */
+
+void
+signal_printer_notice_private(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	gchar *message = params[2];
+
+	EMIT_SIGNAL (XP_TE_NOTICE, sess, nick, message, NULL, NULL, 0);
+}
+
+void
+signal_printer_notice_public(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	gchar *to      = params[2];
+	gchar *message = params[3];
+
+	EMIT_SIGNAL (XP_TE_CHANNOTICE, sess, nick, to, message, NULL, 0);
+}
+
 /* queries */
 
 void
@@ -611,9 +671,10 @@ void
 signal_printer_init(void)
 {
 	/* actions */
+	signal_attach("action public",      signal_printer_action_public);
 	signal_attach("action public highlight", signal_printer_action_public_highlight);
 
-	/* Channels */
+	/* channels */
 	signal_attach("channel created",    signal_printer_channel_created);
 	signal_attach("channel list head",  signal_printer_channel_list_head);
 	signal_attach("channel list entry", signal_printer_channel_list_entry);
@@ -647,6 +708,14 @@ signal_printer_init(void)
 
 	/* non-query messages */
 	signal_attach("message private",    signal_printer_message_private);
+
+	/* channel messages */
+	signal_attach("message public",     signal_printer_message_public);
+	signal_attach("message public highlight", signal_printer_message_public_highlight);
+
+	/* notices */
+	signal_attach("notice public",      signal_printer_notice_public);
+	signal_attach("notice private",     signal_printer_notice_private);
 
 	/* queries */
 	signal_attach("query open",         signal_printer_query_open);
