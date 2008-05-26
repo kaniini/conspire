@@ -17,6 +17,8 @@
  */
 
 #include "plugin.h"
+#include "xchat.h"
+#include "fe.h"
 
 mowgli_dictionary_t *plugin_dict = NULL;
 

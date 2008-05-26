@@ -53,6 +53,7 @@
 #include "outbound.h"
 #include "command_factory.h"
 #include "timer.h"
+#include "plugin.h"
 
 #ifdef USE_DEBUG
 extern int current_mem_usage;
@@ -2308,7 +2309,7 @@ static CommandResult
 cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	FILE *fp;
-	char *error, *arg, *nl, *file;
+	char *arg, *nl, *file;
 	int len;
 
 	if (!word[2][0])
@@ -2353,18 +2354,14 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (len > 3 && strcasecmp (".so", word[2] + len - 3) == 0)
 #endif
 	{
-#if 0
 		arg = NULL;
 		if (word_eol[3][0])
 			arg = word_eol[3];
 
 		file = expand_homedir (word[2]);
-		error = plugin_load (sess, file, arg);
+		plugin_load(file);
 		free (file);
 
-		if (error)
-			PrintText (sess, error);
-#endif
 		return CMD_EXEC_OK;
 	}
 #endif
