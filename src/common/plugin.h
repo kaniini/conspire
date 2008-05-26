@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
+#include <mowgli.h>
 #include <gmodule.h>
 
 #ifndef __CONSPIRE__LIBCONSPIRE__PLUGIN_H__GUARD
