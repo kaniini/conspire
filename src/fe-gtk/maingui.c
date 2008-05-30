@@ -68,12 +68,7 @@
 #include "xtext.h"
 #include "sync-menu.h"
 
-#ifdef USE_GTKSPELL
-#include <gtk/gtktextview.h>
-#include <gtkspell/gtkspell.h>
-#endif
-
-#include "sexy-spell-entry.h"
+#include <sexy/sexy.h>
 
 #define GUI_SPACING (3)
 #define GUI_BORDER (0)

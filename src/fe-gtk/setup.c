@@ -48,11 +48,7 @@
 #include <gtk/gtktreeselection.h>
 #include <gtk/gtkcellrenderertext.h>
 #include <gtk/gtkhscale.h>
-#ifdef USE_GTKSPELL
-#include <gtk/gtktextview.h>
-#include <gtkspell/gtkspell.h>
-#endif
-#include "sexy-spell-entry.h"
+#include <sexy/sexy.h>
 
 GtkStyle *create_input_style (GtkStyle *);
 
