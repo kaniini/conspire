@@ -2458,6 +2458,8 @@ mg_topwin_focus_cb (GtkWindow * win, GdkEventFocus *event, session *sess)
 
 	gtk_window_set_urgency_hint (win, FALSE);
 
+	signal_emit("gui focused", 1, win);
+
 	return FALSE;
 }
 

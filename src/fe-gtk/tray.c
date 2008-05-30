@@ -636,7 +636,7 @@ process_dcc(gpointer *params)
 }
 
 static void
-tray_focus_cb(GtkWidget *widget, guint button, guint time, gpointer userdata)
+tray_focus_cb(gpointer *unused)
 {
 	tray_stop_flash();
 	tray_reset_counts();
@@ -672,9 +672,6 @@ tray_apply_setup(void)
 void
 tray_init(void)
 {
-	session *sess = sess_list->data;
-	GtkWidget *win = fe_gui_info_ptr(sess, 0);
-
 	signal_attach("action public highlight", process_message_highlight);
 	signal_attach("message public highlight", process_message_highlight);
 
@@ -691,5 +688,5 @@ tray_init(void)
 	signal_attach("dcc chat request", process_dcc);
 	signal_attach("dcc generic offer", process_dcc);
 
-	g_signal_connect(G_OBJECT(win), "focus_in_event", G_CALLBACK(tray_focus_cb), NULL);
+	signal_attach("gui focused", tray_focus_cb);
 }
