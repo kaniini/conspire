@@ -48,7 +48,7 @@
 #include <gtk/gtktreeselection.h>
 #include <gtk/gtkcellrenderertext.h>
 #include <gtk/gtkhscale.h>
-#include <sexy/sexy.h>
+#include <libsexy/sexy.h>
 
 GtkStyle *create_input_style (GtkStyle *);
 

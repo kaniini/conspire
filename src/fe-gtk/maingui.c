@@ -68,7 +68,7 @@
 #include "xtext.h"
 #include "sync-menu.h"
 
-#include <sexy/sexy.h>
+#include <libsexy/sexy.h>
 
 #define GUI_SPACING (3)
 #define GUI_BORDER (0)
