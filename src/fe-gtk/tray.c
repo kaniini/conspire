@@ -272,6 +272,10 @@ tray_timeout_cb (TrayIcon icon)
 static void
 tray_set_flash(TrayIcon icon)
 {
+	/* don't ever flash the window if it's focused, that's just dumb. --nenolod */
+	if (tray_get_window_status() == WS_FOCUSED)
+		return;
+
 	if (!sticon)
 		return;
 

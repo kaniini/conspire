@@ -645,13 +645,7 @@ fe_gui_info (session *sess, int info_type)
 	case 0:	/* window status */
 		if (!GTK_WIDGET_VISIBLE (GTK_WINDOW (sess->gui->window)))
 			return 2;	/* hidden (iconified or systray) */
-#if GTK_CHECK_VERSION(2,4,0)
 		if (gtk_window_is_active (GTK_WINDOW (sess->gui->window)))
-#else
-#if GTK_CHECK_VERSION(2,2,0)
-		if (GTK_WINDOW (sess->gui->window)->is_active)
-#endif
-#endif
 			return 1;	/* active/focused */
 
 		return 0;		/* normal (no keyboard focus or behind a window) */
