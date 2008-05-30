@@ -57,10 +57,6 @@
 #include "textgui.h"
 #include "fkeys.h"
 
-#ifdef USE_GTKSPELL
-#include <gtk/gtktextview.h>
-#endif
-
 static void replace_handle (GtkWidget * wid);
 void key_action_tab_clean (void);
 
@@ -315,17 +311,6 @@ key_handle_key_press (GtkWidget *wid, GdkEventKey *evt, session *sess)
 	case GDK_space:
 		key_action_tab_clean ();
 		break;
-
-#ifdef USE_GTKSPELL
-	/* gtktextview has no 'activate' event, so we trap ENTER here */
-	case GDK_Return:
-	case GDK_KP_Enter:
-		if (!(evt->state & GDK_CONTROL_MASK))
-		{
-			g_signal_stop_emission_by_name (G_OBJECT (wid), "key_press_event");
-			mg_inputbox_cb (wid, sess->gui);
-		}
-#endif
 	}
 
 	return 0;

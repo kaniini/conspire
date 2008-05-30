@@ -50,11 +50,6 @@
 #include "userlistgui.h"
 #include "../common/fe.h"
 
-#ifdef USE_GTKSPELL
-#include <gtk/gtktextview.h>
-#endif
-
-
 GdkPixbuf *
 get_user_icon (server *serv, struct User *user)
 {

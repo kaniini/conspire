@@ -1409,10 +1409,6 @@ setup_apply_entry_style (GtkWidget *entry)
 static void
 setup_apply_to_sess (session_gui *gui)
 {
-#ifdef USE_GTKSPELL
-	GtkSpell *spell;
-#endif
-
 	mg_update_xtext (gui->xtext);
 
 	if (prefs.style_namelistgad)
@@ -1438,20 +1434,6 @@ setup_apply_to_sess (session_gui *gui)
 		gtk_widget_show (gui->button_box);
 	else
 		gtk_widget_hide (gui->button_box);
-
-#ifdef USE_GTKSPELL
-	spell = gtkspell_get_from_text_view (GTK_TEXT_VIEW (gui->input_box));
-	if (prefs.gui_input_spell)
-	{
-		if (!spell)
-			gtkspell_new_attach (GTK_TEXT_VIEW (gui->input_box), NULL, NULL);
-	}
-	else
-	{
-		if (spell)
-			gtkspell_detach (spell);
-	}
-#endif
 
 	sexy_spell_entry_set_checked ((SexySpellEntry *)gui->input_box, prefs.gui_input_spell);
 }
