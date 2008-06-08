@@ -49,6 +49,7 @@ enum
 {
 	NAME_COLUMN,
 	VERSION_COLUMN,
+	AUTHOR_COLUMN,
 	FILE_COLUMN,
 	N_COLUMNS
 };
@@ -70,6 +71,7 @@ plugingui_treeview_new (GtkWidget *box)
 	view = gtkutil_treeview_new (box, GTK_TREE_MODEL (store), NULL,
 	                             NAME_COLUMN, _("Name"),
 	                             VERSION_COLUMN, _("Version"),
+				     AUTHOR_COLUMN, _("Author"),
 	                             FILE_COLUMN, _("File"), -1);
 	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (view), TRUE);
 	for (col_id=0; (col = gtk_tree_view_get_column (GTK_TREE_VIEW (view), col_id));
@@ -115,6 +117,7 @@ fe_pluginlist_update (void)
 			gtk_list_store_append (store, &iter);
 			gtk_list_store_set (store, &iter, NAME_COLUMN, p->header->name,
 			                    VERSION_COLUMN, p->header->version,
+					    AUTHOR_COLUMN, p->header->author,
 			                    FILE_COLUMN, file_part(state.cur->key), -1);
 		}
 	}
