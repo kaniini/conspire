@@ -2347,7 +2347,6 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 #ifdef USE_PLUGIN
 	len = strlen (word[2]);
-	if (len > 4 && strcasecmp (".dll", word[2] + len - 4) == 0)
 #if defined(__hpux)
 	if (len > 3 && strcasecmp (".sl", word[2] + len - 3) == 0)
 #else
