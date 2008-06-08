@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([conspire],[0.14.0],[http://conspire.atheme.org/],[conspire])
+AC_INIT([conspire],[0.20~beta1],[http://conspire.atheme.org/],[conspire])
 
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
