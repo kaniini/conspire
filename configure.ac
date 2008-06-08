@@ -267,6 +267,9 @@ fi
 
 dnl ** DBus **
 
+DBUS_REQUIRED=0.60
+DBUS_GLIB_REQUIRED=0.60
+
 AC_MSG_CHECKING([whether D-Bus support is requested])
 AC_ARG_ENABLE([dbus],
 	AS_HELP_STRING([--disable-dbus],[Disable D-Bus support]),
