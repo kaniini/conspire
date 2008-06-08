@@ -46,6 +46,7 @@
 #include "proto-irc.h"
 #include "upnp.h"
 #include "sasl.h"
+#include "plugin.h"
 
 GSList *popup_list = 0;
 GSList *button_list = 0;
@@ -265,10 +266,8 @@ irc_init (session *sess)
 
 	done_init = TRUE;
 
-#if 0
 	if (!arg_skip_plugins)
-		plugin_auto_load (sess);	/* autoload ~/.xchat *.so */
-#endif
+		plugin_autoload();	/* autoload ~/.xchat *.so */
 
 	if (prefs.notify_timeout)
 		notify_tag = g_timeout_add (prefs.notify_timeout * 1000, (GSourceFunc) notify_checklist, 0);
