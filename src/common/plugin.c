@@ -76,5 +76,5 @@ plugin_close(const gchar *filename)
 void
 plugin_autoload(void)
 {
-	for_files(CONSPIRE_LIBDIR "/plugins", "*.plugin", plugin_load);
+	for_files(CONSPIRE_LIBDIR "/plugins", "*" SHARED_SUFFIX, plugin_load);
 }
