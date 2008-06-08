@@ -498,16 +498,16 @@ test "x$exec_prefix" = xNONE && exec_prefix="$prefix"
 
 AC_DEFINE_UNQUOTED(PREFIX, "${prefix}")
 
-XCHATLIBDIR=`eval echo ${libdir}/xchat`
-AC_DEFINE_UNQUOTED(XCHATLIBDIR, "$XCHATLIBDIR")
+CONSPIRE_LIBDIR=`eval echo ${libdir}/conspire`
+AC_DEFINE_UNQUOTED(CONSPIRE_LIBDIR, "$CONSPIRE_LIBDIR")
 
-XCHATSHAREDIR=`eval echo ${datadir}`
-AC_DEFINE_UNQUOTED(XCHATSHAREDIR, "$XCHATSHAREDIR")
+CONSPIRE_SHAREDIR=`eval echo ${datadir}`
+AC_DEFINE_UNQUOTED(CONSPIRE_SHAREDIR, "$CONSPIRE_SHAREDIR")
 
 dnl for plugins/xxx/Makefile.am
 dnl USING RPATHS IS WRONG -nenolod
-xchatlibdir=${libdir}/conspire
-AC_SUBST(xchatlibdir)
+conspire_libdir=${libdir}/conspire
+AC_SUBST(conspire_libdir)
 
 AC_OUTPUT([
 po/Makefile.in
