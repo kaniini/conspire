@@ -117,13 +117,13 @@ fe_args (int argc, char *argv[])
 
 	if (arg_show_autoload)
 	{
-		printf ("%s\n", XCHATLIBDIR"/plugins");
+		printf ("%s\n", CONSPIRE_LIBDIR"/plugins");
 		return 0;
 	}
 
 	if (arg_show_autoloadx)
 	{
-		printf ("%s\n", XCHATLIBDIR"/plugins");
+		printf ("%s\n", CONSPIRE_LIBDIR"/plugins");
 		return 0;
 	}
 
