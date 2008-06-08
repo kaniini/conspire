@@ -265,12 +265,53 @@ if test "$plugin" = yes; then
 	LIBS="$LIBS $RDYNAMIC_FLAGS"
 fi
 
-dnl ** Python **
+dnl ** DBus **
 
-if test "$dbus" = no; then
-	python=no
+AC_MSG_CHECKING([whether D-Bus support is requested])
+AC_ARG_ENABLE([dbus],
+	AS_HELP_STRING([--disable-dbus],[Disable D-Bus support]),
+	[enable_dbus=$enableval dbus=$enableval],
+	[enable_dbus=autodetect dbus=yes])
+AC_MSG_RESULT([$enable_dbus])
+
+if test "x$enable_dbus" != "xno"; then
+# D-BUS soft dependency
+	PKG_CHECK_MODULES([DBUS], [\
+	                  dbus-1 >= $DBUS_REQUIRED \
+	                  dbus-glib-1 >= $DBUS_GLIB_REQUIRED \
+	                  gthread-2.0 \
+			  ], dbus=yes, dbus=no)
+	if test "x$dbus" = "xno"; then
+		AC_MSG_WARN([Library requirements (dbus-1 >= $DBUS_REQUIRED dbus-glib-1 >= $DBUS_GLIB_REQUIRED gthread-2.0) not met; consider adjusting the PKG_CONFIG_PATH environment variable if your libraries are in a nonstandard prefix so pkg-config can find them.])
+	fi
+	AC_SUBST([DBUS_CFLAGS])
+	AC_SUBST([DBUS_LIBS])
+	AC_PATH_PROG([DBUS_BINDING_TOOL],[dbus-binding-tool],[no])
+	if test "x$DBUS_BINDING_TOOL" = "xno"; then
+		dbus="no"
+	fi
 fi
 
+if test "x$dbus" != "xyes"; then
+	if test "x$enable_dbus" = "xyes"; then
+		AC_MSG_ERROR([D-Bus not found])
+	elif test "x$enable_dbus" = "xautodetect"; then
+		AC_MSG_WARN([D-Bus not found, disabling dbus support])
+	fi
+else
+	AC_DEFINE(USE_DBUS,[1],[Whether to use D-Bus])
+	AS_AC_EXPAND(DATADIR, $datadir)
+
+	DBUS_SERVICES_DIR="$DATADIR/dbus-1/services"
+	AC_SUBST(DBUS_SERVICES_DIR)
+	AC_DEFINE_UNQUOTED(DBUS_SERVICES_DIR, "$DBUS_SERVICES_DIR", [Where services dir for DBUS is])
+fi
+
+AM_CONDITIONAL([ENABLE_DBUS],[test "x$dbus" = "xyes"])
+
+dnl ** Python **
+
+python=no
 if test "$python" = yes; then
         AC_PATH_PROG(pythonpath, python2)
         if test "_$pythonpath" = _ ; then
