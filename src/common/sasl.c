@@ -65,7 +65,6 @@ static void
 sasl_process_numeric_abort(gpointer *params)
 {
 	session *sess = params[0];
-	char **word = params[1];
 	server *serv = sess->server;
 
 	if (serv->sasl_state != SASL_COMPLETE)
