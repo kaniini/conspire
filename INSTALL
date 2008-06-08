@@ -1,49 +1,51 @@
-X-Chat Requirements:
-~~~~~~~~~~~~~~~~~~~~
+conspire Installation Guidelines and Tips
+=========================================
 
-	- GTK 2.0 or 2.2  (get it from http://www.gtk.org)
+Requirements
+------------
 
- Optional:
+Library files and development headers for the following libraries are required:
 
-	- Perl                (http://www.perl.org)
-	- Python              (http://www.python.org)
-	- TCL                 (http://tcl.activestate.com)
-	- OpenSSL             (http://www.openssl.org)
+* Glib (2.0 or higher)
+* GTK+ (2.0 or higher)
+* libsexy
+* libmowgli
+* build essentials (automake, gmake)
 
+For SSL support, the following libraries are required:
 
+* GnuTLS
 
-X-Chat Compiling and Installation:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For internationalization, the following libraries are required:
 
-Type this:
+* GNU gettext
 
-	./configure
-	make
+Optional software:
 
-Become root and type:
+* Python (2.2 or higher)
 
-	make install
+Compilation
+-----------
 
+To compile conspire, execute the following commands:
+
+$ ./configure
+$ make
+
+Installation
+------------
+
+After compiling, become the superuser, and execute:
+
+# make install
 
 Other Options
-~~~~~~~~~~~~~
+-------------
 
-To get a full list of compile options, type:
+To get a full list of compile options, execute:
 
-	./configure --help
+$ ./configure --help
 
+If GNU gettext is not installed, use:
 
-If you do not have GNU Gettext installed, instead use:
-
-	./configure --disable-nls
-
-
-If you want to disable Perl you can do:
-
-	./configure --disable-perl
-
-
-If you want to install a smaller stripped binary (without debug) do:
-
-	make install-strip
-
+$ ./configure --disable-nls
