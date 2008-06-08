@@ -1118,25 +1118,6 @@ process_numeric (gpointer *params)
 
 	switch (n)
 	{
-	/* not worrying about these, going to be rewritten for 0.20. */
-	case 900:
-		signal_emit("sasl complete", 2, serv->server_session, word[5]);
-		break;
-	case 903:
-	case 904:
-	case 905:
-	case 906:
-	case 907:
-		/* sasl didn't work. we're boned. lets get out of here. --nenolod */
-		if (serv->sasl_state != SASL_COMPLETE)
-		{
-			g_source_remove(serv->sasl_timeout_tag);
-			tcp_sendf (serv, "CAP END\r\n");
-			serv->sasl_state = SASL_COMPLETE;
-		}
-
-		break;
-
 	default:
 		if (serv->inside_whois && word[4][0])
 		{
@@ -1160,19 +1141,6 @@ process_numeric (gpointer *params)
 	}
 }
 
-/* stop SASL authentication after a 5 second timeout. */
-static gboolean
-sasl_timeout_cb(gpointer data)
-{
-	server *serv = (server *) data;
-
-	tcp_sendf(serv, "AUTHENTICATE *\r\n");
-	tcp_sendf(serv, "CAP END\r\n");
-	serv->sasl_state = SASL_COMPLETE;
-
-	return FALSE;
-}
-
 /* TODO get nick, user, hostname processing into their own functions! */
 
 static void
@@ -1182,25 +1150,7 @@ process_peer_cap (gpointer *params)
 	char **word_eol = params[2];
 	server *serv = sess->server;
 
-	if (serv->sasl_user && serv->sasl_pass && serv->sasl_state != SASL_COMPLETE)
-	{
-		if (!strstr(word_eol[5], "sasl"))
-		{
-			tcp_sendf(serv, "CAP END\r\n");
-			serv->sasl_state = SASL_COMPLETE;
-
-			return;
-		}
-
-		/* request SASL authentication from IRCd. todo: other mechanisms */
-		tcp_sendf(serv, "AUTHENTICATE PLAIN\r\n");
-		serv->sasl_timeout_tag = g_timeout_add(5000, sasl_timeout_cb, serv);
-	}
-	else if (serv->sasl_state != SASL_COMPLETE)
-	{
-		tcp_sendf(serv, "CAP END\r\n");
-		serv->sasl_state = SASL_COMPLETE;
-	}
+	signal_emit("cap message", 2, serv, word_eol[5]);
 }
 
 static void
