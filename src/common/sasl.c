@@ -38,8 +38,73 @@
 #include "base64.h"
 #include "sasl.h"
 
+/* stop SASL authentication after a 5 second timeout. */
+static gboolean
+sasl_timeout_cb(gpointer data)
+{
+	server *serv = (server *) data;
+
+	tcp_sendf(serv, "AUTHENTICATE *\r\n");
+	tcp_sendf(serv, "CAP END\r\n");
+	serv->sasl_state = SASL_COMPLETE;
+
+	return FALSE;
+}
+
 static void
-process_authenticate(gpointer *params)
+sasl_process_numeric_success(gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	signal_emit("sasl complete", 2, serv->server_session, word[5]);
+}
+
+static void
+sasl_process_numeric_abort(gpointer *params)
+{
+	session *sess = params[0];
+	char **word = params[1];
+	server *serv = sess->server;
+
+	if (serv->sasl_state != SASL_COMPLETE)
+	{
+		g_source_remove(serv->sasl_timeout_tag);
+		tcp_sendf (serv, "CAP END\r\n");
+		serv->sasl_state = SASL_COMPLETE;
+	}
+}
+
+static void
+sasl_process_cap(gpointer *params)
+{
+	server *serv = params[0];
+	gchar *caps = params[1];
+
+	if (serv->sasl_user && serv->sasl_pass && serv->sasl_state != SASL_COMPLETE)
+	{
+		if (!strstr(caps, "sasl"))
+		{
+			tcp_sendf(serv, "CAP END\r\n");
+			serv->sasl_state = SASL_COMPLETE;
+
+			return;
+                }
+
+		/* request SASL authentication from IRCd. todo: other mechanisms */
+		tcp_sendf(serv, "AUTHENTICATE PLAIN\r\n");
+		serv->sasl_timeout_tag = g_timeout_add(5000, sasl_timeout_cb, serv);
+	}
+	else if (serv->sasl_state != SASL_COMPLETE)
+	{
+		tcp_sendf(serv, "CAP END\r\n");
+		serv->sasl_state = SASL_COMPLETE;
+	}
+}
+
+static void
+sasl_process_authenticate(gpointer *params)
 {
 	session *sess = params[0];
 	gchar **word_eol = params[2];
@@ -77,5 +142,13 @@ process_authenticate(gpointer *params)
 void
 sasl_init(void)
 {
-	signal_attach("server message authenticate", process_authenticate);
+	signal_attach("cap message", sasl_process_cap);
+	signal_attach("server message authenticate", sasl_process_authenticate);
+	signal_attach("server numeric 900", sasl_process_numeric_success);
+
+	signal_attach("server numeric 903", sasl_process_numeric_abort);
+	signal_attach("server numeric 904", sasl_process_numeric_abort);
+	signal_attach("server numeric 905", sasl_process_numeric_abort);
+	signal_attach("server numeric 906", sasl_process_numeric_abort);
+	signal_attach("server numeric 907", sasl_process_numeric_abort);
 }
