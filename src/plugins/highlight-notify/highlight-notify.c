@@ -36,7 +36,7 @@ process_message(gpointer *params)
 		return;
 
 	PrintTextf(current_sess, "\00323*\tYou have been highlighted on %s/%s by %s: %s",
-		   sess->server->servername,
+		   sess->server->server_session->channel,
 		   sess->channel ? sess->channel : "<unknown channel>",
 		   from, message);
 }
