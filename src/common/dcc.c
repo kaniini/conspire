@@ -1415,7 +1415,6 @@ static gboolean
 dcc_handle_new_ack (struct DCC *dcc)
 {
 	guint32 ack;
-	char buf[16];
 	gboolean done = FALSE;
 
 	memcpy (&ack, dcc->ack_buf, 4);

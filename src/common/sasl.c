@@ -43,7 +43,6 @@ process_authenticate(gpointer *params)
 {
 	session *sess = params[0];
 	gchar **word_eol = params[2];
-	gchar *buf = params[3];
 	server *serv = sess->server;
 	sess = serv->server_session;
 
