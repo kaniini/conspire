@@ -130,14 +130,17 @@ fe_tray_set_balloon(const char *title, const char *text)
 	if (!text)
 		return;
 
+	/* XXX: this is insane. we should just depend on libnotify directly, and use
+	 * the NotifyNotification object here. --nenolod.
+	 */
 	path = g_find_program_in_path ("notify-send");
 	if (path)
 	{
 		argv[0] = path;
 		argv[1] = "-i";
 		argv[2] = "gtk-dialog-info";
-		if (access (XCHATSHAREDIR"/pixmaps/xchat.png", R_OK) == 0)
-			argv[2] = XCHATSHAREDIR"/pixmaps/xchat.png";
+		if (access (CONSPIRE_SHAREDIR"/pixmaps/conspire.png", R_OK) == 0)
+			argv[2] = CONSPIRE_SHAREDIR"/pixmaps/conspire.png";
 		argv[3] = "-t";
 		argv[4] = "20000";
 		argv[5] = title;
