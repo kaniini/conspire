@@ -44,12 +44,14 @@ cmd_hello(session *sess, char *tbuf, const gchar *word[], const gchar *word_eol[
 gboolean
 init(Plugin *p)
 {
+	command_register("HELLO", "Hello World example", 0, cmd_hello);
 	return TRUE;
 }
 
 gboolean
 fini(Plugin *p)
 {
+	command_remove_handler("HELLO", cmd_hello);
 	return TRUE;
 }
 
