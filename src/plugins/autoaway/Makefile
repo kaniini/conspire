@@ -1,6 +1,7 @@
 include ../../../extra.mk
 
 PLUGIN = autoaway${PLUGIN_SUFFIX}
+plugindir = ${LIBDIR}/conspire/plugins
 SRCS = autoaway.c gscreensaver.c xscreensaver.c
 
 include ../../../buildsys.mk
