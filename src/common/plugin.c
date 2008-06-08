@@ -76,5 +76,5 @@ plugin_close(const gchar *filename)
 void
 plugin_autoload(void)
 {
-	/* todo */
+	for_files(CONSPIRE_LIBDIR "/plugins", "*.plugin", plugin_load);
 }
