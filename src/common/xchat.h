@@ -15,6 +15,7 @@
 #include "history.h"
 #include "signal_factory.h"
 #include "signal_printer.h"
+#include "cap.h"
 
 #ifndef HAVE_SNPRINTF
 #define snprintf g_snprintf
@@ -531,6 +532,7 @@ typedef struct server
 	char *sasl_pass;
 	SaslState sasl_state;
 	int sasl_timeout_tag;
+	CapState *cap;
 } server;
 
 typedef int (*cmd_callback) (struct session * sess, char *tbuf, char *word[],
