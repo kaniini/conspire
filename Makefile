@@ -1,6 +1,5 @@
 include buildsys.mk
 
-PROG      = conspire
 SUBDIRS   = po pixmaps src
 MAN	  = conspire.1
 

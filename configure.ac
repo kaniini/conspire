@@ -513,7 +513,6 @@ AC_OUTPUT([
 po/Makefile.in
 buildsys.mk
 extra.mk
-conspire
 ])
 
 echo
