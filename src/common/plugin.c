@@ -19,6 +19,7 @@
 #include "plugin.h"
 #include "xchat.h"
 #include "fe.h"
+#include "util.h"
 
 mowgli_dictionary_t *plugin_dict = NULL;
 
@@ -76,5 +77,5 @@ plugin_close(const gchar *filename)
 void
 plugin_autoload(void)
 {
-	for_files(CONSPIRE_LIBDIR "/plugins", "*" SHARED_SUFFIX, plugin_load);
+	for_files(CONSPIRE_LIBDIR "/plugins", "*" SHARED_SUFFIX, (void(*)(char *)) plugin_load);
 }
