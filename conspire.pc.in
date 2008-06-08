@@ -1,0 +1,16 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+data_dir=@datadir@/@PACKAGE_NAME@
+
+version=@PACKAGE_VERSION@
+include_dir=@includedir@
+conspire_include_dir=@includedir@/conspire
+lib_dir=@libdir@
+
+plugin_dir=@libdir@/conspire/plugins
+
+Name: Conspire
+Description: Conspire is a versatile IRC client.
+Version: @PACKAGE_VERSION@
+Libs: -L${lib_dir} -lconspire
+Cflags: -I${include_dir} -I${conspire_include_dir}
