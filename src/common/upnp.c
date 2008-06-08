@@ -54,8 +54,6 @@ upnp_discovery_thread(gpointer unused)
 		if (!dev)
 			dev = devlist; /* defaulting to first device */
 
-		g_print("I: Found UPNP device [desc='%s' st='%s']\n", dev->descURL, dev->st);
-
 		descXML = miniwget(dev->descURL, &descXMLsize);
 		if (descXML)
 		{
