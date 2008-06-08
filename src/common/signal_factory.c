@@ -70,7 +70,7 @@ gint
 signal_emit(const gchar *signal, int params, ...)
 {
 	gint i;
-	Signal *sig;
+	Signal *sig, *last_sig;
 	va_list va;
 	GList *node;
 
@@ -81,6 +81,7 @@ signal_emit(const gchar *signal, int params, ...)
 
 	sig->values = g_new0(gpointer, params);
 
+	last_sig = current_sig_;
 	current_sig_ = sig;
 
 	va_start(va, params);
@@ -98,7 +99,7 @@ signal_emit(const gchar *signal, int params, ...)
 
 	sig->stop = FALSE;
 	g_free(sig->values);
-	current_sig_ = NULL;
+	current_sig_ = last_sig;
 
 	return i;
 }
