@@ -1,7 +1,6 @@
 #ifndef XCHAT_OUTBOUND_H
 #define XCHAT_OUTBOUND_H
 
-extern struct commands xc_cmds[];
 extern GSList *menu_list;
 
 int auto_insert (char *dest, int destlen, unsigned char *src, char *word[], char *word_eol[],

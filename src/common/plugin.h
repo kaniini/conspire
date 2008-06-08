@@ -45,7 +45,7 @@ typedef struct _PluginHeader PluginHeader;
 	static PluginHeader plugin = { \
 		__VA_ARGS__ \
 	}; \
-	G_MODULE_EXTERN PluginHeader *conspire_get_plugin(void) { \
+	G_MODULE_EXPORT PluginHeader *conspire_get_plugin(void) { \
 		return &plugin; \
 	}
 
