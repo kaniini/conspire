@@ -20,5 +20,6 @@ void server_free (server *serv);
 
 void server_away_save_message (server *serv, char *nick, char *msg);
 struct away_msg *server_away_find_message (server *serv, char *nick);
+void server_ssl_handshake(server *serv);
 
 #endif

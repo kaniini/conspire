@@ -567,6 +567,35 @@ server_flush_queue (server *serv)
 
 #define waitline2(source,buf,size) waitline(serv->childread,buf,size,0)
 
+void
+server_ssl_handshake(server *serv)
+{
+	gint ret;
+	static const gint cert_type_priority[2] = { GNUTLS_CRT_X509, 0 };
+
+	gnutls_init (&serv->gnutls_session, GNUTLS_CLIENT);
+	gnutls_set_default_priority(serv->gnutls_session);
+	gnutls_certificate_type_set_priority(serv->gnutls_session, cert_type_priority);
+	gnutls_certificate_allocate_credentials(&serv->gnutls_x509cred);
+	gnutls_credentials_set (serv->gnutls_session, GNUTLS_CRD_CERTIFICATE, serv->gnutls_x509cred);
+	gnutls_transport_set_ptr (serv->gnutls_session, GINT_TO_POINTER(serv->sok));
+
+	ret = gnutls_handshake (serv->gnutls_session);
+	if (ret < 0)
+	{
+		char *err = g_strdup(gnutls_strerror(ret));
+
+		EMIT_SIGNAL (XP_TE_CONNFAIL, serv->server_session, err, NULL,
+						 NULL, NULL, 0);
+
+		g_free(err);
+		server_cleanup (serv);	/* ->connecting = FALSE */
+		return;
+	}
+
+	set_nonblocking (serv->sok);
+}
+
 /* connect() successed */
 
 static void
@@ -574,32 +603,7 @@ server_connect_success (server *serv)
 {
 #ifdef GNUTLS
 	if (serv->use_ssl)
-	{
-		gint ret;
-		static const gint cert_type_priority[2] = { GNUTLS_CRT_X509, 0 };
-
-		gnutls_init (&serv->gnutls_session, GNUTLS_CLIENT);
-		gnutls_set_default_priority(serv->gnutls_session);
-		gnutls_certificate_type_set_priority(serv->gnutls_session, cert_type_priority);
-		gnutls_certificate_allocate_credentials(&serv->gnutls_x509cred);
-		gnutls_credentials_set (serv->gnutls_session, GNUTLS_CRD_CERTIFICATE, serv->gnutls_x509cred);
-		gnutls_transport_set_ptr (serv->gnutls_session, GINT_TO_POINTER(serv->sok));
-
-		ret = gnutls_handshake (serv->gnutls_session);
-		if (ret < 0)
-		{
-			char *err = g_strdup(gnutls_strerror(ret));
-
-			EMIT_SIGNAL (XP_TE_CONNFAIL, serv->server_session, err, NULL,
-							 NULL, NULL, 0);
-
-			g_free(err);
-			server_cleanup (serv);	/* ->connecting = FALSE */
-			return;
-		}
-
-		set_nonblocking (serv->sok);
-	}
+		server_ssl_handshake (serv);
 #endif
 
 	server_stopconnecting (serv);	/* ->connecting = FALSE */
