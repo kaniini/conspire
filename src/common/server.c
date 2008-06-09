@@ -759,7 +759,7 @@ server_cleanup (server * serv)
 	}
 
 #ifdef GNUTLS
-	if (serv->use_ssl && serv->gnutls_session)
+	if (serv->gnutls_session)
 	{
 		gnutls_bye (serv->gnutls_session, GNUTLS_SHUT_RDWR);
 		gnutls_deinit (serv->gnutls_session);

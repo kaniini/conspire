@@ -147,8 +147,8 @@ tls_process_cap(gpointer *params)
 	if (strstr(cap->caps, "tls"))
 	{
 		cap_state_ref(cap);
+		PrintTextf(serv->server_session, "\00323*\tFound TLS capability, requesting TLS...");
 		tcp_sendf_now(serv, "STARTTLS\r\n");
-		cap_state_unref(cap);		
 	}
 }
 
@@ -159,6 +159,7 @@ tls_process_numeric_begin(gpointer *params)
 	server *serv = sess->server;
 
 	server_ssl_handshake(serv);
+	cap_state_unref(serv->cap);
 }
 
 void
