@@ -131,8 +131,9 @@ sasl_process_authenticate(gpointer *params)
 	{
 		g_source_remove(serv->sasl_timeout_tag);
 		tcp_sendf(serv, "AUTHENTICATE *\r\n");
-		tcp_sendf(serv, "CAP END\r\n");
 		serv->sasl_state = SASL_COMPLETE;
+
+		cap_state_unref(serv->cap);
 		return;
 	}
 }
@@ -143,9 +144,12 @@ tls_process_cap(gpointer *params)
 	CapState *cap = params[0];
 	server *serv = cap->serv;
 
-	if (!strstr(cap->caps, "tls"))
+	if (strstr(cap->caps, "tls"))
 	{
-		
+		cap_state_ref(cap);
+		tcp_sendf_now(serv, "STARTTLS\r\n");
+		server_ssl_handshake(serv);
+		cap_state_unref(cap);		
 	}
 }
 

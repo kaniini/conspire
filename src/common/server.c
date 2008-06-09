@@ -589,6 +589,8 @@ server_ssl_handshake(server *serv)
 	gint ret;
 	static const gint cert_type_priority[2] = { GNUTLS_CRT_X509, 0 };
 
+	set_blocking(serv->sok); /* XXX */
+
 	gnutls_init (&serv->gnutls_session, GNUTLS_CLIENT);
 	gnutls_set_default_priority(serv->gnutls_session);
 	gnutls_certificate_type_set_priority(serv->gnutls_session, cert_type_priority);
@@ -609,7 +611,7 @@ server_ssl_handshake(server *serv)
 		return;
 	}
 
-	set_nonblocking (serv->sok);
+	set_nonblocking(serv->sok);
 }
 
 /* connect() successed */
