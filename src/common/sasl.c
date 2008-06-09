@@ -148,9 +148,17 @@ tls_process_cap(gpointer *params)
 	{
 		cap_state_ref(cap);
 		tcp_sendf_now(serv, "STARTTLS\r\n");
-		server_ssl_handshake(serv);
 		cap_state_unref(cap);		
 	}
+}
+
+static void
+tls_process_numeric_begin(gpointer *params)
+{
+	session *sess = params[0];
+	server *serv = sess->server;
+
+	server_ssl_handshake(serv);
 }
 
 void
@@ -168,4 +176,5 @@ sasl_init(void)
 
 	/* STARTTLS counts as part of SASL */
 	signal_attach("cap message", tls_process_cap);
+	signal_attach("server numeric 670", tls_process_numeric_begin);
 }
