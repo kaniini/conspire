@@ -1150,7 +1150,12 @@ process_peer_cap (gpointer *params)
 	char **word_eol = params[2];
 	server *serv = sess->server;
 
-	signal_emit("cap message", 2, serv, word_eol[5]);
+	serv->cap = cap_state_new(serv, word_eol[5]);
+
+	signal_emit("cap message", 1, serv->cap);
+
+	/* end CAP negotiation if nothing has locked state. --nenolod */
+	cap_state_unref(serv->cap);
 }
 
 static void

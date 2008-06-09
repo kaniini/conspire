@@ -45,8 +45,9 @@ sasl_timeout_cb(gpointer data)
 	server *serv = (server *) data;
 
 	tcp_sendf(serv, "AUTHENTICATE *\r\n");
-	tcp_sendf(serv, "CAP END\r\n");
 	serv->sasl_state = SASL_COMPLETE;
+
+	cap_state_unref(serv->cap);
 
 	return FALSE;
 }
@@ -70,36 +71,34 @@ sasl_process_numeric_abort(gpointer *params)
 	if (serv->sasl_state != SASL_COMPLETE)
 	{
 		g_source_remove(serv->sasl_timeout_tag);
-		tcp_sendf (serv, "CAP END\r\n");
 		serv->sasl_state = SASL_COMPLETE;
+
+		cap_state_unref(serv->cap);
 	}
 }
 
 static void
 sasl_process_cap(gpointer *params)
 {
-	server *serv = params[0];
-	gchar *caps = params[1];
+	CapState *cap = params[0];
+	server *serv = cap->serv;
 
 	if (serv->sasl_user && serv->sasl_pass && serv->sasl_state != SASL_COMPLETE)
 	{
-		if (!strstr(caps, "sasl"))
+		if (!strstr(cap->caps, "sasl"))
 		{
-			tcp_sendf(serv, "CAP END\r\n");
 			serv->sasl_state = SASL_COMPLETE;
-
 			return;
                 }
 
 		/* request SASL authentication from IRCd. todo: other mechanisms */
 		tcp_sendf(serv, "AUTHENTICATE PLAIN\r\n");
 		serv->sasl_timeout_tag = g_timeout_add(5000, sasl_timeout_cb, serv);
+
+		cap_state_ref(cap);
 	}
 	else if (serv->sasl_state != SASL_COMPLETE)
-	{
-		tcp_sendf(serv, "CAP END\r\n");
 		serv->sasl_state = SASL_COMPLETE;
-	}
 }
 
 static void
