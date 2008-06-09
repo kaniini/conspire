@@ -137,6 +137,18 @@ sasl_process_authenticate(gpointer *params)
 	}
 }
 
+static void
+tls_process_cap(gpointer *params)
+{
+	CapState *cap = params[0];
+	server *serv = cap->serv;
+
+	if (!strstr(cap->caps, "tls"))
+	{
+		
+	}
+}
+
 void
 sasl_init(void)
 {
@@ -149,4 +161,7 @@ sasl_init(void)
 	signal_attach("server numeric 905", sasl_process_numeric_abort);
 	signal_attach("server numeric 906", sasl_process_numeric_abort);
 	signal_attach("server numeric 907", sasl_process_numeric_abort);
+
+	/* STARTTLS counts as part of SASL */
+	signal_attach("cap message", tls_process_cap);
 }
