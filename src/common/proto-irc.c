@@ -42,21 +42,15 @@
 static void
 irc_login (server *serv, char *user, char *realname)
 {
+	tcp_sendf_now(serv, "CAP LS\r\n");
+
 	if (serv->password[0])
 		tcp_sendf_now (serv, "PASS %s\r\n", serv->password);
-
-	/* redo this in conspire 0.11 ;) --nenolod */
-	if (serv->sasl_user && serv->sasl_pass)
-		tcp_sendf_now (serv, "CAP REQ :tls sasl multi-prefix\r\n");
-	else
-		tcp_sendf_now (serv, "CAP REQ :tls multi-prefix\r\n");
 
 	tcp_sendf_now(serv,
 				  "NICK %s\r\n"
 				  "USER %s %s %s :%s\r\n",
 				  serv->nick, user, user, serv->servername, realname);
-
-	serv->sasl_state = SASL_INITIALIZED;
 }
 
 static void

@@ -70,7 +70,21 @@ cap_state_unref(CapState *cap)
 
 	if (cap->refs == 0)
 	{
-		tcp_sendf(cap->serv, "CAP END\r\n");
+		switch (cap->op)
+		{
+		case CAP_NAK:
+		case CAP_ACK:
+			tcp_sendf(cap->serv, "CAP END\r\n");
+			break;
+
+		case CAP_LS:
+			return cap_request(cap);
+			break;
+
+		default:
+			break;
+		}
+		
 
 		serv->cap = NULL;
 

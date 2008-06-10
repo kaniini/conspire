@@ -83,22 +83,38 @@ sasl_process_cap(gpointer *params)
 	CapState *cap = params[0];
 	server *serv = cap->serv;
 
-	if (serv->sasl_user && serv->sasl_pass && serv->sasl_state != SASL_COMPLETE)
+	switch (cap->op)
 	{
-		if (!strstr(cap->caps, "sasl"))
+	case CAP_ACK:
+		if (serv->sasl_user && serv->sasl_pass && serv->sasl_state != SASL_COMPLETE)
 		{
+			if (!strstr(cap->caps, "sasl"))
+			{
+				serv->sasl_state = SASL_COMPLETE;
+				return;
+	                }
+
+			/* request SASL authentication from IRCd. todo: other mechanisms */
+			tcp_sendf(serv, "AUTHENTICATE PLAIN\r\n");
+			serv->sasl_timeout_tag = g_timeout_add(5000, sasl_timeout_cb, serv);
+
+			cap_state_ref(cap);
+		}
+		else if (serv->sasl_state != SASL_COMPLETE)
 			serv->sasl_state = SASL_COMPLETE;
-			return;
-                }
 
-		/* request SASL authentication from IRCd. todo: other mechanisms */
-		tcp_sendf(serv, "AUTHENTICATE PLAIN\r\n");
-		serv->sasl_timeout_tag = g_timeout_add(5000, sasl_timeout_cb, serv);
+		break;
+	case CAP_LS:
+		if (serv->sasl_user && serv->sasl_pass && strstr(cap->caps, "sasl"))
+		{
+			serv->sasl_state = SASL_INITIALIZED;
+			cap_add_cap(cap, "sasl");
+		}
 
-		cap_state_ref(cap);
+		break;
+	default:
+		break;
 	}
-	else if (serv->sasl_state != SASL_COMPLETE)
-		serv->sasl_state = SASL_COMPLETE;
 }
 
 static void
@@ -144,11 +160,24 @@ tls_process_cap(gpointer *params)
 	CapState *cap = params[0];
 	server *serv = cap->serv;
 
-	if (strstr(cap->caps, "tls"))
+	switch(cap->op)
 	{
-		cap_state_ref(cap);
-		PrintTextf(serv->server_session, "\00323*\tFound TLS capability, requesting TLS...");
-		tcp_sendf_now(serv, "STARTTLS\r\n");
+	case CAP_ACK:
+		if (strstr(cap->caps, "tls"))
+		{
+			cap_state_ref(cap);
+			PrintTextf(serv->server_session, "\00323*\tFound TLS capability, requesting TLS...");
+			tcp_sendf_now(serv, "STARTTLS\r\n");
+		}
+
+		break;
+	case CAP_LS:
+		if (strstr(cap->caps, "tls"))
+			cap_add_cap(cap, "tls");
+
+		break;
+	default:
+		break;
 	}
 }
 
