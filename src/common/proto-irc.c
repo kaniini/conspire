@@ -47,10 +47,8 @@ irc_login (server *serv, char *user, char *realname)
 	if (serv->password[0])
 		tcp_sendf_now (serv, "PASS %s\r\n", serv->password);
 
-	tcp_sendf_now(serv,
-				  "NICK %s\r\n"
-				  "USER %s %s %s :%s\r\n",
-				  serv->nick, user, user, serv->servername, realname);
+	tcp_sendf_now(serv, "NICK %s\r\n", serv->nick);
+	tcp_sendf_now(serv, "USER %s %s %s :%s\r\n", user, user, serv->servername, realname);
 }
 
 static void
@@ -1141,10 +1139,11 @@ static void
 process_peer_cap (gpointer *params)
 {
 	session *sess = params[0];
-	char **word_eol = params[2];
+	gchar **word = params[1];
+	gchar **word_eol = params[2];
 	server *serv = sess->server;
 
-	serv->cap = cap_state_new(serv, word_eol[4], word_eol[5]);
+	serv->cap = cap_state_new(serv, word[4], word_eol[5]);
 
 	signal_emit("cap message", 1, serv->cap);
 
