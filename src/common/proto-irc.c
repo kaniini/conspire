@@ -1150,7 +1150,7 @@ process_peer_cap (gpointer *params)
 	char **word_eol = params[2];
 	server *serv = sess->server;
 
-	serv->cap = cap_state_new(serv, word_eol[5]);
+	serv->cap = cap_state_new(serv, word_eol[4], word_eol[5]);
 
 	signal_emit("cap message", 1, serv->cap);
 

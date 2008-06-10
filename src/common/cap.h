@@ -23,14 +23,25 @@
 
 struct server;
 
+typedef enum {
+	CAP_NONE,
+	CAP_LS,
+	CAP_ACK,
+	CAP_NAK
+} CapOperation;
+
 typedef struct {
 	struct server *serv;
+	CapOperation op;
 	gchar *caps;
+	gchar caps_request[2048];
 	gint refs;
 } CapState;
 
-CapState *cap_state_new(struct server *serv, const gchar *caps);
+CapState *cap_state_new(struct server *serv, const gchar *op_token, const gchar *caps);
 void cap_state_ref(CapState *cap);
 void cap_state_unref(CapState *cap);
+void cap_add_cap(CapState *cap, const gchar *token);
+void cap_request(CapState *cap);
 
 #endif
