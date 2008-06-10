@@ -168,6 +168,9 @@ tls_process_cap(gpointer *params)
 			cap_state_ref(cap);
 			PrintTextf(serv->server_session, "\00323*\tFound TLS capability, requesting TLS...");
 			tcp_sendf_now(serv, "STARTTLS\r\n");
+
+			/* XXX: postpone any sasl operation until after TLS completes, but the way we do it sucks */
+			signal_stop("cap message");
 		}
 
 		break;
@@ -188,6 +191,15 @@ tls_process_numeric_begin(gpointer *params)
 	server *serv = sess->server;
 
 	server_ssl_handshake(serv);
+
+	/* XXX: this really sucks, but if we emit a new cap message here for SASL, it'll become a loop */
+	if (serv->cap->op == CAP_ACK)
+	{
+		signal_disconnect("cap message", tls_process_cap);
+		signal_emit("cap message", 1, serv->cap);
+		signal_attach_head("cap message", tls_process_cap);
+	}
+
 	cap_state_unref(serv->cap);
 }
 
@@ -205,6 +217,6 @@ sasl_init(void)
 	signal_attach("server numeric 907", sasl_process_numeric_abort);
 
 	/* STARTTLS counts as part of SASL */
-	signal_attach("cap message", tls_process_cap);
+	signal_attach_head("cap message", tls_process_cap);
 	signal_attach("server numeric 670", tls_process_numeric_begin);
 }
