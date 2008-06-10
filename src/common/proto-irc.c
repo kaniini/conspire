@@ -1629,6 +1629,23 @@ process_named_servermsg(gpointer *params)
 	signal_emit("server text", 3, sess->server, buf, sess->server->servername);
 }
 
+static void
+process_cap_message(gpointer *params)
+{
+	CapState *cap = params[0];
+
+	switch (cap->op)
+	{
+	case CAP_LS:
+		if (strstr(cap->caps, "multi-prefix"))
+			cap_add_cap(cap, "multi-prefix");
+
+		break;
+	default:
+		break;
+	}
+}
+
 /* irc_inline() - 1 single line received from serv */
 
 static void
@@ -1851,4 +1868,7 @@ proto_irc_init(void)
 	signal_attach("server message ping", process_message_ping);
 
 	signal_attach("server message", process_named_servermsg);
+
+	/* cap messages */
+	signal_attach("cap message", process_cap_message);
 }
