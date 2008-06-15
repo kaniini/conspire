@@ -15,7 +15,7 @@
 #include "tray.h"
 
 #include <gtk/gtk.h>
-#include <libnotify/notification.h>
+#include <libnotify/notify.h>
 
 typedef enum	/* current icon status */
 {
@@ -675,4 +675,6 @@ tray_init(void)
 	signal_attach("dcc generic offer", process_dcc);
 
 	signal_attach("gui focused", tray_focus_cb);
+
+	notify_init(PACKAGE_NAME);
 }
