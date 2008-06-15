@@ -1,3 +1,14 @@
+conspire 0.20~beta2 (06-??-2008):
+
+  * Add support for STARTTLS; this is used by InspIRCd 1.2 or later.
+    For details about the protocol, see http://inspircd.org/wiki/STARTTLS_Documentation
+  * Use NotifyNotification objects instead of spawning a process and calling
+    notify-send. This allows for superior desktop integration, but causes libnotify
+    to become a hard dependency. This seems ok though, as most users already have it.
+  * Rewrite capability negotiation subsystem to be asynchronous.
+  * Adjust height of cell renderers to fit more entries into the chanview and userlist.
+    (This idea was taken from the XChat 2.8.6 release.)
+
 conspire 0.20~beta1 (06-07-2008):
 
   * Entirely new event processing engine and signals API.
