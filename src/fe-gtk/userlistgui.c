@@ -377,12 +377,14 @@ userlist_add_columns (GtkTreeView * treeview)
 
 	/* icon column */
 	renderer = gtk_cell_renderer_pixbuf_new ();
+	g_object_set (G_OBJECT (renderer), "ypad", 0, NULL);
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
 																-1, NULL, renderer,
 																"pixbuf", 0, NULL);
 
 	/* nick column */
 	renderer = gtk_cell_renderer_text_new ();
+	g_object_set (G_OBJECT (renderer), "ypad", 0, NULL);
 	gtk_cell_renderer_text_set_fixed_height_from_font (GTK_CELL_RENDERER_TEXT (renderer), 1);
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
 																-1, NULL, renderer,
@@ -392,6 +394,7 @@ userlist_add_columns (GtkTreeView * treeview)
 	{
 		/* hostname column */
 		renderer = gtk_cell_renderer_text_new ();
+		g_object_set (G_OBJECT (renderer), "ypad", 0, NULL);
 		gtk_cell_renderer_text_set_fixed_height_from_font (GTK_CELL_RENDERER_TEXT (renderer), 1);
 		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
 																	-1, NULL, renderer,

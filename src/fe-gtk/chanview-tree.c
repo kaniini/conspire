@@ -108,6 +108,7 @@ cv_tree_init (chanview *cv)
 	if (cv->use_icons)
 	{
 		renderer = gtk_cell_renderer_pixbuf_new ();
+		g_object_set(G_OBJECT (renderer), "ypad", 0, NULL);
 		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
 																	-1, NULL, renderer,
 																	"pixbuf", COL_PIXBUF, NULL);
@@ -115,6 +116,7 @@ cv_tree_init (chanview *cv)
 
 	/* main column */
 	renderer = gtk_cell_renderer_text_new ();
+	g_object_set(G_OBJECT (renderer), "ypad", 0, NULL);
 	gtk_cell_renderer_text_set_fixed_height_from_font (GTK_CELL_RENDERER_TEXT (renderer), 1);
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
 																-1, NULL, renderer,
