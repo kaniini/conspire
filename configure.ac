@@ -188,6 +188,7 @@ dnl *********************************************************************
 
 AM_PATH_GTK_2_0(2.10.0, havegtk=yes, havegtk=no)
 PKG_CHECK_MODULES(SEXY, [libsexy], , havegtk=no)
+PKG_CHECK_MODULES(NOTIFY, [libnotify], , havegtk=no)
 
 if test "$havegtk" = no; then
 	gtkfe=no
@@ -519,8 +520,8 @@ dnl freebsd needs this
 LIBS="$LIBS $INTLLIBS"
 CFLAGS="$CFLAGS $CPPFLAGS"
 
-GUI_CFLAGS="$GTK_CFLAGS $SEXY_CFLAGS $COMMON_CFLAGS"
-GUI_LIBS="$GTK_LIBS $SEXY_LIBS $COMMON_LIBS -lm"
+GUI_CFLAGS="$GTK_CFLAGS $SEXY_CFLAGS $NOTIFY_CFLAGS $COMMON_CFLAGS"
+GUI_LIBS="$GTK_LIBS $SEXY_LIBS $NOTIFY_LIBS $COMMON_LIBS -lm"
 
 dnl make these visible to all Makefiles
 AC_SUBST(GUI_LIBS)

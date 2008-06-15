@@ -13,7 +13,9 @@
 #include "maingui.h"
 #include "menu.h"
 #include "tray.h"
+
 #include <gtk/gtk.h>
+#include <libnotify/notification.h>
 
 typedef enum	/* current icon status */
 {
@@ -113,9 +115,8 @@ void
 fe_tray_set_balloon(const char *title, const char *text)
 {
 	char *stext;
-	const char *argv[8];
-	const char *path;
 	WinStatus ws;
+	NotifyNotification *n;
 
 	/* no balloons if the window is focused */
 	ws = tray_get_window_status();
@@ -130,36 +131,14 @@ fe_tray_set_balloon(const char *title, const char *text)
 	if (!text)
 		return;
 
-	/* XXX: this is insane. we should just depend on libnotify directly, and use
-	 * the NotifyNotification object here. --nenolod.
-	 */
-	path = g_find_program_in_path ("notify-send");
-	if (path)
-	{
-		argv[0] = path;
-		argv[1] = "-i";
-		argv[2] = "gtk-dialog-info";
-		if (access (CONSPIRE_SHAREDIR"/pixmaps/conspire.png", R_OK) == 0)
-			argv[2] = CONSPIRE_SHAREDIR"/pixmaps/conspire.png";
-		argv[3] = "-t";
-		argv[4] = "20000";
-		argv[5] = title;
-		argv[6] = stext = strip_color (text, -1, STRIP_ALL);
-		argv[7] = NULL;
-		xchat_execv (argv);
-		g_free ((char *)path);
-		free (stext);
-	}
-	else
-	{
-		/* show this error only once */
-		static unsigned char said_it = FALSE;
-		if (!said_it)
-		{
-			said_it = TRUE;
-			fe_message (_("Cannot find 'notify-send' to open balloon alerts.\nPlease install libnotify."), FE_MSG_ERROR);
-		}
-	}
+	stext = strip_color(text, -1, STRIP_ALL);
+	n = notify_notification_new(stext, title, NULL, NULL);
+	notify_notification_set_icon_from_pixbuf(n, pix_conspire);
+	notify_notification_set_timeout(n, 20000);
+	notify_notification_show(n, NULL);
+
+	free(stext);
+	g_object_unref(G_OBJECT(n));
 }
 
 static void
