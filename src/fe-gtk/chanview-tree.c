@@ -23,6 +23,13 @@ cv_tree_title_cell_data_func (GtkTreeViewColumn *column,
 			      chanview *cv);
 
 static void
+cv_tree_indent_cell_data_func (GtkTreeViewColumn *column,
+			       GtkCellRenderer *cell,
+			       GtkTreeModel *model,
+			       GtkTreeIter *iter,
+			       chanview *cv);
+
+static void
 cv_tree_expander_cell_data_func (GtkTreeViewColumn *column,
 				 GtkCellRenderer *cell,
 				 GtkTreeModel *model,
@@ -86,6 +93,33 @@ cv_tree_click_cb (GtkTreeView *tree, GdkEventButton *event, chanview *cv)
 }
 
 static void
+cv_tree_cell_set_background (treeview *cv,
+			     GtkCellRenderer *cell,
+			     gboolean is_group)
+{
+	GdkColor color;
+	GtkStyle *style;
+
+	g_return_if_fail(cv != NULL);
+	g_return_if_fail(cell != NULL);
+
+	style = gtk_widget_get_style(GTK_WIDGET(cv->tree));
+
+	if (!is_group)
+		g_object_set(cell, "cell-background-gdk", NULL, NULL);
+	else
+	{
+		color = style->text_aa[GTK_STATE_INSENSITIVE];
+
+		color.red = (color.red + (style->white).red) / 2;
+		color.green = (color.green + (style->white).green) / 2;
+		color.blue = (color.blue + (style->white).blue) / 2;
+
+		g_object_set(cell, "cell-background-gdk", &color, NULL);
+	}
+}
+
+static void
 cv_tree_init (chanview *cv)
 {
 	GtkWidget *view, *win;
@@ -131,6 +165,11 @@ cv_tree_init (chanview *cv)
 
 	/* main column */
 	renderer = gtk_cell_renderer_text_new();
+	g_object_set(G_OBJECT (renderer), "ypad", 0, "visible", FALSE, NULL);
+	gtk_tree_view_column_pack_start(col, renderer, FALSE);
+	gtk_tree_view_column_set_cell_data_func(col, renderer, (GtkTreeCellDataFunc) cv_tree_indent_cell_data_func, cv, NULL);
+
+	renderer = gtk_cell_renderer_text_new();
 	g_object_set(G_OBJECT (renderer), "ypad", 0, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 	gtk_tree_view_column_pack_start(col, renderer, TRUE);
 	gtk_tree_view_column_set_attributes(col, renderer, "text", COL_NAME, "attributes", COL_ATTR, NULL);
@@ -138,6 +177,7 @@ cv_tree_init (chanview *cv)
 
 	/* expander goes at the end of the main column... */
 	renderer = gossip_cell_renderer_expander_new();
+	g_object_set(G_OBJECT (renderer), "ypad", 0, NULL);
 	gtk_tree_view_column_pack_start(col, renderer, FALSE);
 	gtk_tree_view_column_set_cell_data_func(col, renderer, (GtkTreeCellDataFunc) cv_tree_expander_cell_data_func, cv, NULL);
 
@@ -178,10 +218,28 @@ cv_tree_title_cell_data_func (GtkTreeViewColumn *column,
 			      GtkTreeIter *iter,
 			      chanview *cv)
 {
-	if (gtk_tree_model_iter_has_child(model, iter))
+	gint depth = gtk_tree_store_iter_depth(GTK_TREE_STORE(cv->store), iter);
+
+	if (depth == 0)
 		g_object_set(cell, "weight", PANGO_WEIGHT_BOLD, NULL);
 	else
 		g_object_set(cell, "weight", PANGO_WEIGHT_NORMAL, NULL);
+
+	cv_tree_cell_set_background(((treeview *)cv), cell, depth == 0);
+}
+
+static void
+cv_tree_indent_cell_data_func (GtkTreeViewColumn *column,
+	 		       GtkCellRenderer *cell,
+			       GtkTreeModel *model,
+			       GtkTreeIter *iter,
+			       chanview *cv)
+{
+	gint depth = gtk_tree_store_iter_depth(GTK_TREE_STORE(cv->store), iter);
+
+	g_object_set(cell, "text", "   ", "visible", depth >= 1, NULL);
+
+	cv_tree_cell_set_background(((treeview *)cv), cell, depth == 0);
 }
 
 static void
@@ -191,7 +249,7 @@ cv_tree_expander_cell_data_func (GtkTreeViewColumn *column,
 				 GtkTreeIter *iter,
 				 chanview *cv)
 {
-	if (gtk_tree_model_iter_has_child(model, iter))
+	if (gtk_tree_store_iter_depth(GTK_TREE_STORE(cv->store), iter) == 0)
 	{
 		GtkTreePath *path;
 		gboolean row_expanded;
@@ -201,6 +259,8 @@ cv_tree_expander_cell_data_func (GtkTreeViewColumn *column,
 		gtk_tree_path_free(path);
 
 		g_object_set(cell, "visible", TRUE, "expander-style", row_expanded ? GTK_EXPANDER_EXPANDED : GTK_EXPANDER_COLLAPSED, NULL);
+
+		cv_tree_cell_set_background(((treeview *)cv), cell, TRUE);
 	}
 	else
 		g_object_set(cell, "visible", FALSE, NULL);
