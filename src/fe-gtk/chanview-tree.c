@@ -1,16 +1,33 @@
 /* file included in chanview.c */
 
+#include "gossip-cell-renderer-expander.h"
+
 typedef struct
 {
 	GtkTreeView *tree;
 	GtkWidget *scrollw;	/* scrolledWindow */
 	int idle_tag;
+	GtkTreeViewColumn *main_col;
 } treeview;
 
 #include "../common/xchat.h"
 #include "../common/xchatc.h"
 #include "fe-gtk.h"
 #include "maingui.h"
+
+static void
+cv_tree_title_cell_data_func (GtkTreeViewColumn *column,
+			      GtkCellRenderer *cell,
+			      GtkTreeModel *model,
+			      GtkTreeIter *iter,
+			      chanview *cv);
+
+static void
+cv_tree_expander_cell_data_func (GtkTreeViewColumn *column,
+				 GtkCellRenderer *cell,
+				 GtkTreeModel *model,
+				 GtkTreeIter *iter,
+				 chanview *cv);
 
 static void 	/* row-activated, when a row is double clicked */
 cv_tree_activated_cb (GtkTreeView *view, GtkTreePath *path,
@@ -73,6 +90,8 @@ cv_tree_init (chanview *cv)
 {
 	GtkWidget *view, *win;
 	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *main_col, *col;
+
 	static const GtkTargetEntry dnd_src_target[] =
 	{
 		{"XCHAT_CHANVIEW", GTK_TARGET_SAME_APP, 75 }
@@ -83,7 +102,6 @@ cv_tree_init (chanview *cv)
 	};
 
 	win = gtk_scrolled_window_new (0, 0);
-	/*gtk_container_set_border_width (GTK_CONTAINER (win), 1);*/
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (win),
 													 GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (win),
@@ -95,28 +113,36 @@ cv_tree_init (chanview *cv)
 	gtk_widget_set_name (view, "xchat-tree");
 	if (cv->style)
 		gtk_widget_set_style (view, cv->style);
-	/*gtk_widget_modify_base (view, GTK_STATE_NORMAL, &colors[COL_BG]);*/
 	GTK_WIDGET_UNSET_FLAGS (view, GTK_CAN_FOCUS);
 	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (view), FALSE);
 	gtk_container_add (GTK_CONTAINER (win), view);
 
+	col = main_col = gtk_tree_view_column_new();
+	gtk_tree_view_column_set_expand(col, TRUE);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
+
 	/* icon column */
 	if (cv->use_icons)
 	{
-		renderer = gtk_cell_renderer_pixbuf_new ();
+		renderer = gtk_cell_renderer_pixbuf_new();
 		g_object_set(G_OBJECT (renderer), "ypad", 0, NULL);
-		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
-																	-1, NULL, renderer,
-																	"pixbuf", COL_PIXBUF, NULL);
+		gtk_tree_view_column_pack_start(col, renderer, FALSE);
 	}
 
 	/* main column */
-	renderer = gtk_cell_renderer_text_new ();
-	g_object_set(G_OBJECT (renderer), "ypad", 0, NULL);
-	gtk_cell_renderer_text_set_fixed_height_from_font (GTK_CELL_RENDERER_TEXT (renderer), 1);
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
-																-1, NULL, renderer,
-									"text", COL_NAME, "attributes", COL_ATTR, NULL);
+	renderer = gtk_cell_renderer_text_new();
+	g_object_set(G_OBJECT (renderer), "ypad", 0, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_column_pack_start(col, renderer, TRUE);
+	gtk_tree_view_column_set_attributes(col, renderer, "text", COL_NAME, "attributes", COL_ATTR, NULL);
+	gtk_tree_view_column_set_cell_data_func(col, renderer, (GtkTreeCellDataFunc) cv_tree_title_cell_data_func, cv, NULL);
+
+	/* expander goes at the end of the main column... */
+	renderer = gossip_cell_renderer_expander_new();
+	gtk_tree_view_column_pack_start(col, renderer, FALSE);
+	gtk_tree_view_column_set_cell_data_func(col, renderer, (GtkTreeCellDataFunc) cv_tree_expander_cell_data_func, cv, NULL);
+
+	/* disable the GTK+ expander because it's shite... --nenolod */
+	g_object_set(GTK_TREE_VIEW(view), "show-expanders", FALSE, NULL);
 
 	g_signal_connect (G_OBJECT (gtk_tree_view_get_selection (GTK_TREE_VIEW (view))),
 							"changed", G_CALLBACK (cv_tree_sel_cb), cv);
@@ -141,7 +167,43 @@ cv_tree_init (chanview *cv)
 	((treeview *)cv)->tree = GTK_TREE_VIEW (view);
 	((treeview *)cv)->scrollw = win;
 	((treeview *)cv)->idle_tag = 0;
+	((treeview *)cv)->main_col = main_col;
 	gtk_widget_show (view);
+}
+
+static void
+cv_tree_title_cell_data_func (GtkTreeViewColumn *column,
+			      GtkCellRenderer *cell,
+			      GtkTreeModel *model,
+			      GtkTreeIter *iter,
+			      chanview *cv)
+{
+	if (gtk_tree_model_iter_has_child(model, iter))
+		g_object_set(cell, "weight", PANGO_WEIGHT_BOLD, NULL);
+	else
+		g_object_set(cell, "weight", PANGO_WEIGHT_NORMAL, NULL);
+}
+
+static void
+cv_tree_expander_cell_data_func (GtkTreeViewColumn *column,
+				 GtkCellRenderer *cell,
+				 GtkTreeModel *model,
+				 GtkTreeIter *iter,
+				 chanview *cv)
+{
+	if (gtk_tree_model_iter_has_child(model, iter))
+	{
+		GtkTreePath *path;
+		gboolean row_expanded;
+
+		path = gtk_tree_model_get_path(model, iter);
+		row_expanded = gtk_tree_view_row_expanded(GTK_TREE_VIEW(column->tree_view), path);
+		gtk_tree_path_free(path);
+
+		g_object_set(cell, "visible", TRUE, "expander-style", row_expanded ? GTK_EXPANDER_EXPANDED : GTK_EXPANDER_COLLAPSED, NULL);
+	}
+	else
+		g_object_set(cell, "visible", FALSE, NULL);
 }
 
 static void
