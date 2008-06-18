@@ -10,11 +10,12 @@
 
 
 /* treeStore columns */
-
-#define COL_NAME 0		/* (char *) */
-#define COL_CHAN 1		/* (chan *) */
-#define COL_ATTR 2		/* (PangoAttrList *) */
-#define COL_PIXBUF 3		/* (GdkPixbuf *) */
+enum {
+	COL_NAME,
+	COL_CHAN,
+	COL_ATTR,
+	COL_PIXBUF
+};
 
 struct _chanview
 {

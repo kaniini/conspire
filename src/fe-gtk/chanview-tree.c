@@ -14,7 +14,7 @@ typedef struct
 
 static void 	/* row-activated, when a row is double clicked */
 cv_tree_activated_cb (GtkTreeView *view, GtkTreePath *path,
-							 GtkTreeViewColumn *column, gpointer data)
+		      GtkTreeViewColumn *column, gpointer data)
 {
 	if (gtk_tree_view_row_expanded (view, path))
 		gtk_tree_view_collapse_row (view, path);
@@ -98,10 +98,6 @@ cv_tree_init (chanview *cv)
 	/*gtk_widget_modify_base (view, GTK_STATE_NORMAL, &colors[COL_BG]);*/
 	GTK_WIDGET_UNSET_FLAGS (view, GTK_CAN_FOCUS);
 	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (view), FALSE);
-#if GTK_CHECK_VERSION(2,10,0)
-	if (prefs.gui_tweaks & 8)
-		gtk_tree_view_set_enable_tree_lines (GTK_TREE_VIEW (view), TRUE);
-#endif
 	gtk_container_add (GTK_CONTAINER (win), view);
 
 	/* icon column */
