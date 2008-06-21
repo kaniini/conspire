@@ -35,8 +35,6 @@
 #include <gtk/gtkcellrenderertext.h>
 
 #include "../common/xchat.h"
-#define PLUGIN_C
-typedef struct session xchat_context;
 #include "../common/util.h"
 #include "../common/outbound.h"
 #include "../common/fe.h"
@@ -48,8 +46,6 @@ typedef struct session xchat_context;
 enum
 {
 	NAME_COLUMN,
-	VERSION_COLUMN,
-	AUTHOR_COLUMN,
 	FILE_COLUMN,
 	N_COLUMNS
 };
@@ -65,14 +61,10 @@ plugingui_treeview_new (GtkWidget *box)
 	GtkTreeViewColumn *col;
 	int col_id;
 
-	store = gtk_list_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING,
-	                            G_TYPE_STRING, G_TYPE_STRING);
+	store = gtk_list_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
 	g_return_val_if_fail (store != NULL, NULL);
 	view = gtkutil_treeview_new (box, GTK_TREE_MODEL (store), NULL,
-	                             NAME_COLUMN, _("Name"),
-	                             VERSION_COLUMN, _("Version"),
-				     AUTHOR_COLUMN, _("Author"),
-	                             FILE_COLUMN, _("File"), -1);
+	                             NAME_COLUMN, _("Name"), -1);
 	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (view), TRUE);
 	for (col_id=0; (col = gtk_tree_view_get_column (GTK_TREE_VIEW (view), col_id));
 	     col_id++)
@@ -114,11 +106,20 @@ fe_pluginlist_update (void)
 	{
 		if (p->header)
 		{
-			gtk_list_store_append (store, &iter);
-			gtk_list_store_set (store, &iter, NAME_COLUMN, p->header->name,
-			                    VERSION_COLUMN, p->header->version,
-					    AUTHOR_COLUMN, p->header->author,
-			                    FILE_COLUMN, file_part(state.cur->key), -1);
+			gchar *name, *version, *desc, *data;
+
+			name = g_markup_escape_text(p->header->name, -1);
+			version = g_markup_escape_text(p->header->version, -1);
+			desc = g_markup_escape_text(p->header->author, -1);
+			data = g_strdup_printf("<b>%s</b> %s\n%s", name, version, desc);
+
+			gtk_list_store_append(store, &iter);
+			gtk_list_store_set(store, &iter, NAME_COLUMN, data, FILE_COLUMN, file_part(state.cur->key), -1);
+
+			g_free(name);
+			g_free(version);
+			g_free(desc);
+			g_free(data);
 		}
 	}
 }
@@ -172,11 +173,9 @@ plugingui_unload (GtkWidget * wid, gpointer unused)
 	if (len > 3 && strcasecmp (file + len - 3, ".so") == 0)
 #endif
 	{
-#if 0
-		if (plugin_kill (modname, FALSE) == 2)
-			fe_message (_("That plugin is refusing to unload.\n"), FE_MSG_ERROR);
-#endif
-	} else
+		plugin_close(file);
+	}
+	else
 	{
 		/* let python.so or perl.so handle it */
 		buf = malloc (strlen (file) + 10);
