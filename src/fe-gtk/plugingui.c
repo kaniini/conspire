@@ -100,7 +100,7 @@ fe_pluginlist_update (void)
 
 	view = g_object_get_data (G_OBJECT (plugin_window), "view");
 	store = GTK_LIST_STORE (gtk_tree_view_get_model (view));
-	gtk_list_store_clear (store);
+	gtk_list_store_clear(store);
 
 	MOWGLI_DICTIONARY_FOREACH(p, &state, plugin_dict)
 	{
@@ -114,7 +114,7 @@ fe_pluginlist_update (void)
 			data = g_strdup_printf("<b>%s</b> %s\n%s", name, version, desc);
 
 			gtk_list_store_append(store, &iter);
-			gtk_list_store_set(store, &iter, NAME_COLUMN, data, FILE_COLUMN, file_part(state.cur->key), -1);
+			gtk_list_store_set(store, &iter, NAME_COLUMN, data, FILE_COLUMN, state.cur->key, -1);
 
 			g_free(name);
 			g_free(version);
