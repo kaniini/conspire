@@ -33,6 +33,7 @@ struct _Plugin {
 struct _PluginHeader {
 	const gchar *name;
 	const gchar *version;
+	const gchar *desc;
 	const gchar *author;
 	gboolean (*init)(struct _Plugin *);
 	gboolean (*fini)(struct _Plugin *);
