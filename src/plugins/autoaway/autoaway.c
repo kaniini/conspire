@@ -152,4 +152,6 @@ fini(Plugin *p)
 	return TRUE;
 }
 
-PLUGIN_DECLARE("Automatic Away", PACKAGE_VERSION, "Isak Savo and William Pitcock", init, fini);
+PLUGIN_DECLARE("Automatic Away", PACKAGE_VERSION,
+	"Automatically sets your client away when the screensaver becomes active.",
+	"Isak Savo and William Pitcock", init, fini);

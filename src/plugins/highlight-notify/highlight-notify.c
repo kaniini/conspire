@@ -59,4 +59,6 @@ fini(Plugin *p)
 	return TRUE;
 }
 
-PLUGIN_DECLARE("Highlight Notifier", PACKAGE_VERSION, "William Pitcock", init, fini);
+PLUGIN_DECLARE("Highlight Notifier", PACKAGE_VERSION, 
+	"Notifies you about highlights in your currently selected buffer.",
+	"William Pitcock", init, fini);

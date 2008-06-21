@@ -55,4 +55,6 @@ fini(Plugin *p)
 	return TRUE;
 }
 
-PLUGIN_DECLARE("Hello World example", PACKAGE_VERSION, "William Pitcock", init, fini);
+PLUGIN_DECLARE("Hello World example", PACKAGE_VERSION,
+	"Example /HELLO command implementation.",
+	"William Pitcock", init, fini);
