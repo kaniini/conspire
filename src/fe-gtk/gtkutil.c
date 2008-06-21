@@ -602,7 +602,7 @@ gtkutil_treeview_new (GtkWidget *box, GtkTreeModel *model,
 			case G_TYPE_STRING:	/* fall through */
 			default:
 				renderer = gtk_cell_renderer_text_new ();
-				attr = "text";
+				attr = "markup";
 				break;
 		}
 

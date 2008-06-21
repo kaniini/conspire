@@ -110,7 +110,7 @@ fe_pluginlist_update (void)
 
 			name = g_markup_escape_text(p->header->name, -1);
 			version = g_markup_escape_text(p->header->version, -1);
-			desc = g_markup_escape_text(p->header->author, -1);
+			desc = g_markup_escape_text(p->header->desc, -1);
 			data = g_strdup_printf("<b>%s</b> %s\n%s", name, version, desc);
 
 			gtk_list_store_append(store, &iter);
