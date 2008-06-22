@@ -1,4 +1,4 @@
-conspire 0.20~beta2 (06-??-2008):
+conspire 0.20~beta2 (06-22-2008):
 
   * Add support for STARTTLS; this is used by InspIRCd 1.2 or later.
     For details about the protocol, see http://inspircd.org/wiki/STARTTLS_Documentation
@@ -10,6 +10,7 @@ conspire 0.20~beta2 (06-??-2008):
     (This idea was taken from the XChat 2.8.6 release.)
   * Implement a new TreeView widget which looks similar to that of Gossip and Pidgin.
   * Add a description field for plugins in PLUGIN_DECLARE().
+  * Improve the Plugins GUI significantly.
 
 conspire 0.20~beta1 (06-07-2008):
 
