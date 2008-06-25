@@ -586,6 +586,7 @@ server_flush_queue (server *serv)
 void
 server_ssl_handshake(server *serv)
 {
+#ifdef GNUTLS
 	gint ret;
 	static const gint cert_type_priority[2] = { GNUTLS_CRT_X509, 0 };
 
@@ -612,6 +613,7 @@ server_ssl_handshake(server *serv)
 	}
 
 	set_nonblocking(serv->sok);
+#endif
 }
 
 /* connect() successed */
