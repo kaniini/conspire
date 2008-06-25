@@ -1,3 +1,7 @@
+conspire 0.20~beta3 (07-??-2008):
+
+  * Fix compilation without GNUTLS.
+
 conspire 0.20~beta2 (06-22-2008):
 
   * Add support for STARTTLS; this is used by InspIRCd 1.2 or later.
