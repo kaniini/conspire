@@ -27,6 +27,8 @@ typedef struct {
     GQueue q;
     gpointer data;
     LineQueueWriter w;
+    gint available;
+    gint writeoffs;
 } LineQueue;
 
 LineQueue *linequeue_new(gpointer data, LineQueueWriter w);

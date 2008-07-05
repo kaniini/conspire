@@ -17,14 +17,40 @@
  */
 
 #include <glib.h>
+#include <mowgli.h>
 
 #include "linequeue.h"
 
 /*
  * TODO:
  *     - combine multiple lines into a single write
- *     - write scheduling.
  */
+
+/* list of queues to add additional write tokens to */
+static GList *queues = NULL;
+static gint lqat_tag = 0;
+
+/* replinishes the amount of write operations allowed. */
+gboolean
+linequeue_add_tokens(gpointer unused)
+{
+	GList *iter;
+
+	MOWGLI_ITER_FOREACH(iter, queues)
+	{
+		LineQueue *lq = iter->data;
+
+		if (lq->writeoffs == 0)
+			continue;
+
+		lq->writeoffs--;
+
+		if (!g_queue_is_empty(lq->q))
+			linequeue_flush(lq);
+	}
+
+	return TRUE;
+}
 
 LineQueue *
 linequeue_new(gpointer data, LineQueueWriter w)
@@ -33,6 +59,12 @@ linequeue_new(gpointer data, LineQueueWriter w)
 
 	lq->data = data;
 	lq->w = w;
+	lq->available = 5;	/* XXX: making this a config option seems like a good idea. */
+
+	queues = g_list_prepend(queues, lq);
+
+	if (!lqat_tag)
+		lqat_tag = g_timeout_add(250, linequeue_add_tokens, NULL);
 
 	return lq;
 }
@@ -56,5 +88,9 @@ linequeue_flush(LineQueue *lq)
 	{
 		lq->w(lq->data, line, strlen(line));
 		g_free(line);
+
+		lq->writeoffs++;
+		if (lq->writeoffs >= lq->available)
+			break;
 	}
 }
