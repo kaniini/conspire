@@ -18,19 +18,43 @@
 
 #include <glib.h>
 
-#ifndef __CONSPIRE_LINEQUEUE_H__GUARD
-#define __CONSPIRE_LINEQUEUE_H__GUARD
+#include "linequeue.h"
 
-typedef int (*LineQueueWriter)(gpointer data, gchar *line, gint len);
+/*
+ * TODO:
+ *     - combine multiple lines into a single write
+ *     - write scheduling.
+ */
 
-typedef struct {
-    GQueue q;
-    gpointer data;
-    LineQueueWriter w;
-} LineQueue;
+LineQueue *
+linequeue_new(gpointer data, LineQueueWriter w)
+{
+	LineQueue *lq = g_slice_new0(LineQueue);
 
-LineQueue *linequeue_new(gpointer data, LineQueueWriter w);
-void linequeue_add_line(LineQueue *lq, gchar *line);
-void linequeue_flush(LineQueue *lq);
+	lq->data = data;
+	lq->w = w;
 
-#endif
+	return lq;
+}
+
+void
+linequeue_add_line(LineQueue *lq, gchar *line)
+{
+	g_return_if_fail(lq != NULL);
+
+	g_queue_push_tail(lq->q, g_strdup(line));
+}
+
+void
+linequeue_flush(LineQueue *lq)
+{
+	gchar *line;
+
+	g_return_if_fail(lq != NULL);
+
+	while ((line = g_queue_pop_head(lq->q)) != NULL)
+	{
+		lq->w(lq->data, line, strlen(line));
+		g_free(line);
+	}
+}
