@@ -45,7 +45,7 @@ linequeue_add_tokens(gpointer unused)
 
 		lq->writeoffs--;
 
-		if (!g_queue_is_empty(lq->q))
+		if (!g_queue_is_empty(&lq->q))
 			linequeue_flush(lq);
 	}
 
@@ -74,7 +74,7 @@ linequeue_add_line(LineQueue *lq, gchar *line)
 {
 	g_return_if_fail(lq != NULL);
 
-	g_queue_push_tail(lq->q, g_strdup(line));
+	g_queue_push_tail(&lq->q, g_strdup(line));
 }
 
 void
@@ -84,7 +84,7 @@ linequeue_flush(LineQueue *lq)
 
 	g_return_if_fail(lq != NULL);
 
-	while ((line = g_queue_pop_head(lq->q)) != NULL)
+	while ((line = g_queue_pop_head(&lq->q)) != NULL)
 	{
 		lq->w(lq->data, line, strlen(line));
 		g_free(line);
