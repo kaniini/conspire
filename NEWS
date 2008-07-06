@@ -1,3 +1,7 @@
+conspire 0.20~beta4 (07-05-2008):
+
+  * Make queue more aggressive.
+
 conspire 0.20~beta3 (07-05-2008):
 
   * Fix compilation without GNUTLS.
