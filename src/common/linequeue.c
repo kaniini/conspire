@@ -50,7 +50,7 @@ linequeue_add_tokens(gpointer unused)
 
 		/* return to zero in 20 steps... this should allow a natural
                    decay while not flooding people off the server. --nenolod */
-		lq->writeoffs -= (lg->available / 20);
+		lq->writeoffs -= (lq->available / 20);
 		if (!g_queue_is_empty(&lq->q))
 			linequeue_flush(lq);
 	}
