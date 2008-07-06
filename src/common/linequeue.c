@@ -80,6 +80,8 @@ linequeue_add_line(LineQueue *lq, gchar *line)
 	g_return_if_fail(lq != NULL);
 
 	g_queue_push_tail(&lq->q, g_strdup(line));
+	if (lq->writeoffs < lq->available)
+		linequeue_flush(lq);
 }
 
 void
