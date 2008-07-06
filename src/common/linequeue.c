@@ -41,7 +41,12 @@ linequeue_add_tokens(gpointer unused)
 		LineQueue *lq = iter->data;
 
 		if (lq->writeoffs == 0)
+		{
+			if (!g_queue_is_empty(&lq->q))
+				linequeue_flush(lq);
+
 			continue;
+		}
 
 		lq->writeoffs--;
 
