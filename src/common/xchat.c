@@ -392,7 +392,7 @@ send_quit_or_part (session * killsess)
 		{
 			if (!killserv->sent_quit)
 			{
-				killserv->flush_queue (killserv);
+				linequeue_erase(killserv->lq);
 				server_sendquit (killsess);
 				killserv->sent_quit = TRUE;
 			}
