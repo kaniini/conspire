@@ -8,7 +8,7 @@ int tcp_send_len (server *serv, char *buf, int len);
 int tcp_send (server *serv, char *buf);
 void tcp_sendf (server *serv, char *fmt, ...);
 void tcp_sendf_now (server *serv, char *fmt, ...);
-int tcp_send_real (server *serv, int sok, char *encoding, int using_irc, char *buf, int len);
+int tcp_send_real (server *serv, char *buf, int len);
 
 server *server_new (void);
 int is_server (server *serv);

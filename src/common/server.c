@@ -59,54 +59,16 @@ static void server_connect (server *serv, char *hostname, int port, int no_login
    send via SSL. server/dcc both use this function. */
 
 int
-tcp_send_real (server *serv, int sok, char *encoding, int using_irc, char *buf, int len)
+tcp_send_real (server *serv, char *buf, int len)
 {
 	int ret;
-	char *locale;
-	gsize loc_len;
-
-	if (encoding == NULL)	/* system */
-	{
-		locale = NULL;
-		if (!prefs.utf8_locale)
-		{
-			const gchar *charset;
-
-			g_get_charset (&charset);
-			locale = g_convert_with_fallback (buf, len, charset, "UTF-8",
-														 "?", 0, &loc_len, 0);
-		}
-	} else
-	{
-		if (using_irc)	/* using "IRC" encoding (CP1252/UTF-8 hybrid) */
-			/* if all chars fit inside CP1252, use that. Otherwise this
-			   returns NULL and we send UTF-8. */
-			locale = g_convert (buf, len, "CP1252", "UTF-8", 0, &loc_len, 0);
-		else
-			locale = g_convert_with_fallback (buf, len, encoding, "UTF-8",
-														 "?", 0, &loc_len, 0);
-	}
-
-	if (locale)
-	{
-		len = loc_len;
 
 #ifdef GNUTLS
-		if (serv && serv->gnutls_session)
-			ret = gnutls_record_send(serv->gnutls_session, buf, len);
-		else
+	if (serv && serv->gnutls_session)
+		ret = gnutls_record_send(serv->gnutls_session, buf, len);
+	else
 #endif
-			ret = send(sok, buf, len, 0);
-		g_free (locale);
-	} else
-	{
-#ifdef GNUTLS
-		if (serv && serv->gnutls_session)
-			ret = gnutls_record_send(serv->gnutls_session, buf, len);
-		else
-#endif
-			ret = send(sok, buf, len, 0);
-	}
+		ret = send(serv->sok, buf, len, 0);
 
 	return ret;
 }
@@ -114,6 +76,8 @@ tcp_send_real (server *serv, int sok, char *encoding, int using_irc, char *buf, 
 static int
 server_send_real (server *serv, char *buf, int len)
 {
+	char *locale;
+	gsize loc_len;
 	gchar line[1024];
 
 	fe_add_rawlog (serv, buf, len, TRUE);
@@ -121,7 +85,33 @@ server_send_real (server *serv, char *buf, int len)
 	g_strlcpy(line, buf, 1024);
 	g_strlcat(line, "\r\n", 1024);
 
-	return tcp_send_real (serv, serv->sok, serv->encoding, serv->using_irc, line, strlen(line));
+	len = strlen(line);
+
+	if (serv->encoding == NULL)	/* system */
+	{
+		locale = NULL;
+
+		if (!prefs.utf8_locale)
+		{
+			const gchar *charset;
+
+			g_get_charset(&charset);
+			locale = g_convert_with_fallback (line, len, charset, "UTF-8", "?", 0, &loc_len, 0);
+		}
+	}
+	else
+	{
+		if (serv->using_irc)	/* using "IRC" encoding (CP1252/UTF-8 hybrid) */
+			/* if all chars fit inside CP1252, use that. Otherwise this
+			   returns NULL and we send UTF-8. */
+			locale = g_convert (buf, len, "CP1252", "UTF-8", 0, &loc_len, 0);
+		else
+			locale = g_convert_with_fallback (line, len, serv->encoding, "UTF-8", "?", 0, &loc_len, 0);
+	}
+
+	g_free(locale);
+
+	return tcp_send_real (serv, line, strlen(line));
 }
 
 int
