@@ -544,7 +544,7 @@ fe_set_throttle (server *serv)
 	char tbuf[64];
 	char tip[64];
 
-	per = (float) serv->sendq_len / 1024.0;
+	per = (float) linequeue_size(serv->lq) / serv->lq->available;
 	if (per > 1.0)
 		per = 1.0;
 
@@ -553,8 +553,8 @@ fe_set_throttle (server *serv)
 		sess = list->data;
 		if (sess->server == serv)
 		{
-			snprintf (tbuf, sizeof (tbuf) - 1, _("%d bytes"), serv->sendq_len);
-			snprintf (tip, sizeof (tip) - 1, _("Network send queue: %d bytes"), serv->sendq_len);
+			snprintf (tbuf, sizeof (tbuf) - 1, _("%d lines"), linequeue_size(serv->lq));
+			snprintf (tip, sizeof (tip) - 1, _("Network send queue: %d lines"), linequeue_size(serv->lq));
 
 			if (sess->res->queue_tip)
 				free (sess->res->queue_tip);
