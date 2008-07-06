@@ -1,6 +1,7 @@
-conspire 0.20~beta3 (07-??-2008):
+conspire 0.20~beta3 (07-05-2008):
 
   * Fix compilation without GNUTLS.
+  * Fix longstanding bug where the queue system is not unicode-safe.
 
 conspire 0.20~beta2 (06-22-2008):
 
