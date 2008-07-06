@@ -114,9 +114,14 @@ tcp_send_real (server *serv, int sok, char *encoding, int using_irc, char *buf, 
 static int
 server_send_real (server *serv, char *buf, int len)
 {
+	gchar line[1024];
+
 	fe_add_rawlog (serv, buf, len, TRUE);
 
-	return tcp_send_real (serv, serv->sok, serv->encoding, serv->using_irc, buf, len);
+	g_strlcpy(line, buf, 1024);
+	g_strlcat(line, "\r\n", 1024);
+
+	return tcp_send_real (serv, serv->sok, serv->encoding, serv->using_irc, line, strlen(line));
 }
 
 int
