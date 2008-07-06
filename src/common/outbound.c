@@ -1764,9 +1764,8 @@ cmd_exec (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 static CommandResult
 cmd_flushq (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	sprintf (tbuf, "Flushing server send queue, %d bytes.\n", sess->server->sendq_len);
-	PrintText (sess, tbuf);
-	sess->server->flush_queue (sess->server);
+	PrintTextf (sess, "Flushing server send queue, %d lines.\n", linequeue_size(sess->server->lq));
+	linequeue_erase(sess->server->lq);
 	return CMD_EXEC_OK;
 }
 

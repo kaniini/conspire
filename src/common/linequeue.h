@@ -34,5 +34,15 @@ typedef struct {
 LineQueue *linequeue_new(gpointer data, LineQueueWriter w);
 void linequeue_add_line(LineQueue *lq, gchar *line);
 void linequeue_flush(LineQueue *lq);
+void linequeue_destroy(LineQueue *lq);
+void linequeue_erase(LineQueue *lq);
+
+static inline gint
+linequeue_size(LineQueue *lq)
+{
+	g_return_val_if_fail(lq != NULL, -1);
+
+	return (gint) g_queue_get_length(&lq->q);
+}
 
 #endif

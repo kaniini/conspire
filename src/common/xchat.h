@@ -16,6 +16,7 @@
 #include "signal_factory.h"
 #include "signal_printer.h"
 #include "cap.h"
+#include "linequeue.h"
 
 #ifndef HAVE_SNPRINTF
 #define snprintf g_snprintf
@@ -466,10 +467,6 @@ typedef struct server
 
 	void *network;						/* points to entry in servlist.c or NULL! */
 
-	GSList *outbound_queue;
-	time_t next_send;						/* cptr->since in ircu */
-	time_t prev_now;					/* previous now-time */
-	int sendq_len;						/* queue size */
 	int lag;								/* milliseconds */
 
 	/* netsplit detection. --nenolod */
@@ -533,6 +530,7 @@ typedef struct server
 	SaslState sasl_state;
 	int sasl_timeout_tag;
 	CapState *cap;
+	LineQueue *lq;
 } server;
 
 typedef int (*cmd_callback) (struct session * sess, char *tbuf, char *word[],

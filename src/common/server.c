@@ -119,114 +119,19 @@ server_send_real (server *serv, char *buf, int len)
 	return tcp_send_real (serv, serv->sok, serv->encoding, serv->using_irc, buf, len);
 }
 
-/* new throttling system, uses the same method as the Undernet
-   ircu2.10 server; under test, a 200-line paste didn't flood
-   off the client */
-
-static int
-tcp_send_queue (server *serv)
-{
-	char *buf, *p;
-	int len, i, pri;
-	GSList *list;
-	time_t now = time (0);
-
-	/* did the server close since the timeout was added? */
-	if (!is_server (serv))
-		return 0;
-
-	/* try priority 2,1,0 */
-	pri = 2;
-	while (pri >= 0)
-	{
-		list = serv->outbound_queue;
-		while (list)
-		{
-			buf = (char *) list->data;
-			if (buf[0] == pri)
-			{
-				buf++;	/* skip the priority byte */
-				len = strlen (buf);
-
-				if (serv->next_send < now)
-					serv->next_send = now;
-				if (serv->next_send - now >= 10)
-				{
-					/* check for clock skew */
-					if (now >= serv->prev_now)
-						return 1;		  /* don't remove the timeout handler */
-					/* it is skewed, reset to something sane */
-					serv->next_send = now;
-				}
-
-				for (p = buf, i = len; i && *p != ' '; p++, i--);
-				serv->next_send += (2 + i / 120);
-				serv->sendq_len -= len;
-				serv->prev_now = now;
-				fe_set_throttle (serv);
-
-				server_send_real (serv, buf, len);
-
-				buf--;
-				serv->outbound_queue = g_slist_remove (serv->outbound_queue, buf);
-				free (buf);
-				list = serv->outbound_queue;
-			} else
-			{
-				list = list->next;
-			}
-		}
-		/* now try pri 0 */
-		pri--;
-	}
-	return 0;						  /* remove the timeout handler */
-}
-
 int
 tcp_send_len (server *serv, char *buf, int len)
 {
-	char *dbuf;
-	int noqueue = !serv->outbound_queue;
-
 	if (!prefs.throttle)
 		return server_send_real (serv, buf, len);
 
-	dbuf = malloc (len + 2);	/* first byte is the priority */
-	dbuf[0] = 2;	/* pri 2 for most things */
-	memcpy (dbuf + 1, buf, len);
-	dbuf[len + 1] = 0;
+	if (!serv->lq)
+		serv->lq = linequeue_new(serv, (LineQueueWriter) server_send_real);
 
-	/* privmsg and notice get a lower priority */
-	if (strncasecmp (dbuf + 1, "PRIVMSG", 7) == 0 ||
-		 strncasecmp (dbuf + 1, "NOTICE", 6) == 0)
-	{
-		dbuf[0] = 1;
-	}
-	else
-	{
-		/* WHO/MODE get the lowest priority */
-		if (strncasecmp (dbuf + 1, "WHO ", 4) == 0 ||
-		/* but only MODE queries, not changes */
-			(strncasecmp (dbuf + 1, "MODE", 4) == 0 &&
-			 strchr (dbuf, '-') == NULL &&
-			 strchr (dbuf, '+') == NULL))
-			dbuf[0] = 0;
-	}
-
-	serv->outbound_queue = g_slist_append (serv->outbound_queue, dbuf);
-	serv->sendq_len += len; /* tcp_send_queue uses strlen */
-
-	if (tcp_send_queue (serv) && noqueue)
-		g_timeout_add (500, (GSourceFunc) tcp_send_queue, serv);
+	linequeue_add_line(serv->lq, buf);
 
 	return 1;
 }
-
-/*int
-tcp_send (server *serv, char *buf)
-{
-	return tcp_send_len (serv, buf, strlen (buf));
-}*/
 
 void
 tcp_sendf (server *serv, char *fmt, ...)
@@ -573,14 +478,6 @@ auto_reconnect (server *serv, int send_quit, int err)
 	fe_server_event (serv, FE_SE_RECONDELAY, del);
 }
 
-static void
-server_flush_queue (server *serv)
-{
-	list_free (&serv->outbound_queue);
-	serv->sendq_len = 0;
-	fe_set_throttle (serv);
-}
-
 #define waitline2(source,buf,size) waitline(serv->childread,buf,size,0)
 
 void
@@ -835,7 +732,7 @@ server_disconnect (session * sess, int sendquit, int err)
 		shutup = TRUE;	/* won't print "disconnected" in channels */
 	}
 
-	server_flush_queue (serv);
+	linequeue_erase(serv->lq);
 
 	list = sess_list;
 	while (list)
@@ -1305,7 +1202,7 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 
 	fe_server_event (serv, FE_SE_CONNECTING, 0);
 	fe_set_away (serv);
-	server_flush_queue (serv);
+	linequeue_erase(serv->lq);
 
 	if (pipe (read_des) < 0)
 		return;
@@ -1346,7 +1243,6 @@ server_fill_her_up (server *serv)
 	serv->connect = server_connect;
 	serv->disconnect = server_disconnect;
 	serv->cleanup = server_cleanup;
-	serv->flush_queue = server_flush_queue;
 	serv->auto_reconnect = auto_reconnect;
 
 	proto_fill_her_up (serv);
@@ -1566,7 +1462,6 @@ server_free (server *serv)
 	serv_list = g_slist_remove (serv_list, serv);
 
 	dcc_notify_kill (serv);
-	serv->flush_queue (serv);
 	server_away_free_messages (serv);
 
 	free (serv->nick_modes);
@@ -1581,6 +1476,8 @@ server_free (server *serv)
 		free (serv->encoding);
 
 	fe_server_callback (serv);
+
+	linequeue_destroy (serv->lq);
 
 	free (serv);
 

@@ -94,3 +94,23 @@ linequeue_flush(LineQueue *lq)
 			break;
 	}
 }
+
+void
+linequeue_erase(LineQueue *lq)
+{
+	gchar *line;
+
+	g_return_if_fail(lq != NULL);
+
+	while ((line = g_queue_pop_head(&lq->q)) != NULL)
+		g_free(line);
+}
+
+void
+linequeue_destroy(LineQueue *lq)
+{
+	g_return_if_fail(lq != NULL);
+
+	linequeue_erase(lq);
+	g_slice_free(LineQueue, lq);
+}
