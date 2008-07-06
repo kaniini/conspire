@@ -42,13 +42,13 @@
 static void
 irc_login (server *serv, char *user, char *realname)
 {
-	tcp_sendf_now(serv, "CAP LS\r\n");
+	tcp_sendf_now(serv, "CAP LS");
 
 	if (serv->password[0])
-		tcp_sendf_now (serv, "PASS %s\r\n", serv->password);
+		tcp_sendf_now (serv, "PASS %s", serv->password);
 
-	tcp_sendf_now(serv, "NICK %s\r\n", serv->nick);
-	tcp_sendf_now(serv, "USER %s %s %s :%s\r\n", user, user, serv->servername, realname);
+	tcp_sendf_now(serv, "NICK %s", serv->nick);
+	tcp_sendf_now(serv, "USER %s %s %s :%s", user, user, serv->servername, realname);
 }
 
 static void
@@ -57,16 +57,16 @@ irc_nickserv (server *serv, char *cmd, char *arg1, char *arg2, char *arg3)
 	switch (serv->nickservtype)
 	{
 	case 0:
-		tcp_sendf (serv, "PRIVMSG NICKSERV :%s %s%s%s\r\n", cmd, arg1, arg2, arg3);
+		tcp_sendf (serv, "PRIVMSG NICKSERV :%s %s%s%s", cmd, arg1, arg2, arg3);
 		break;
 	case 1:
-		tcp_sendf (serv, "NICKSERV %s %s%s%s\r\n", cmd, arg1, arg2, arg3);
+		tcp_sendf (serv, "NICKSERV %s %s%s%s", cmd, arg1, arg2, arg3);
 		break;
 	case 2:
-		tcp_sendf (serv, "NS %s %s%s%s\r\n", cmd, arg1, arg2, arg3);
+		tcp_sendf (serv, "NS %s %s%s%s", cmd, arg1, arg2, arg3);
 		break;
 	case 3:
-		tcp_sendf (serv, "PRIVMSG NS :%s %s%s%s\r\n", cmd, arg1, arg2, arg3);
+		tcp_sendf (serv, "PRIVMSG NS :%s %s%s%s", cmd, arg1, arg2, arg3);
 	}
 }
 
@@ -86,78 +86,78 @@ static void
 irc_join (server *serv, char *channel, char *key)
 {
 	if (key[0])
-		tcp_sendf (serv, "JOIN %s %s\r\n", channel, key);
+		tcp_sendf (serv, "JOIN %s %s", channel, key);
 	else
-		tcp_sendf (serv, "JOIN %s\r\n", channel);
+		tcp_sendf (serv, "JOIN %s", channel);
 }
 
 static void
 irc_part (server *serv, char *channel, char *reason)
 {
 	if (reason[0])
-		tcp_sendf (serv, "PART %s :%s\r\n", channel, reason);
+		tcp_sendf (serv, "PART %s :%s", channel, reason);
 	else
-		tcp_sendf (serv, "PART %s\r\n", channel);
+		tcp_sendf (serv, "PART %s", channel);
 }
 
 static void
 irc_quit (server *serv, char *reason)
 {
 	if (reason[0])
-		tcp_sendf (serv, "QUIT :%s\r\n", reason);
+		tcp_sendf (serv, "QUIT :%s", reason);
 	else
-		tcp_send_len (serv, "QUIT\r\n", 6);
+		tcp_send_len (serv, "QUIT", 6);
 }
 
 static void
 irc_set_back (server *serv)
 {
-	tcp_send_len (serv, "AWAY\r\n", 6);
+	tcp_send_len (serv, "AWAY", 6);
 }
 
 static void
 irc_set_away (server *serv, char *reason)
 {
-	tcp_sendf (serv, "AWAY :%s\r\n", reason);
+	tcp_sendf (serv, "AWAY :%s", reason);
 }
 
 static void
 irc_ctcp (server *serv, char *to, char *msg)
 {
-	tcp_sendf (serv, "PRIVMSG %s :\001%s\001\r\n", to, msg);
+	tcp_sendf (serv, "PRIVMSG %s :\001%s\001", to, msg);
 }
 
 static void
 irc_nctcp (server *serv, char *to, char *msg)
 {
-	tcp_sendf (serv, "NOTICE %s :\001%s\001\r\n", to, msg);
+	tcp_sendf (serv, "NOTICE %s :\001%s\001", to, msg);
 }
 
 static void
 irc_cycle (server *serv, char *channel, char *key)
 {
-	tcp_sendf (serv, "PART %s\r\nJOIN %s %s\r\n", channel, channel, key);
+	tcp_sendf (serv, "PART %sJOIN %s %s", channel, channel, key);
 }
 
 static void
 irc_kick (server *serv, char *channel, char *nick, char *reason)
 {
 	if (reason[0])
-		tcp_sendf (serv, "KICK %s %s :%s\r\n", channel, nick, reason);
+		tcp_sendf (serv, "KICK %s %s :%s", channel, nick, reason);
 	else
-		tcp_sendf (serv, "KICK %s %s\r\n", channel, nick);
+		tcp_sendf (serv, "KICK %s %s", channel, nick);
 }
 
 static void
 irc_invite (server *serv, char *channel, char *nick)
 {
-	tcp_sendf (serv, "INVITE %s %s\r\n", nick, channel);
+	tcp_sendf (serv, "INVITE %s %s", nick, channel);
 }
 
 static void
 irc_mode (server *serv, char *target, char *mode)
 {
-	tcp_sendf (serv, "MODE %s %s\r\n", target, mode);
+	tcp_sendf (serv, "MODE %s %s", target, mode);
 }
 
 /* find channel info when joined */
@@ -165,7 +165,7 @@ irc_mode (server *serv, char *target, char *mode)
 static void
 irc_join_info (server *serv, char *channel)
 {
-	tcp_sendf (serv, "MODE %s\r\n", channel);
+	tcp_sendf (serv, "MODE %s", channel);
 }
 
 /* initiate userlist retreival */
@@ -173,7 +173,7 @@ irc_join_info (server *serv, char *channel)
 static void
 irc_user_list (server *serv, char *channel)
 {
-	tcp_sendf (serv, "WHO %s\r\n", channel);
+	tcp_sendf (serv, "WHO %s", channel);
 }
 
 /* userhost */
@@ -181,22 +181,22 @@ irc_user_list (server *serv, char *channel)
 static void
 irc_userhost (server *serv, char *nick)
 {
-	tcp_sendf (serv, "USERHOST %s\r\n", nick);
+	tcp_sendf (serv, "USERHOST %s", nick);
 }
 
 static void
 irc_away_status (server *serv, char *channel)
 {
 	if (serv->have_whox)
-		tcp_sendf (serv, "WHO %s %%ctnf,152\r\n", channel);
+		tcp_sendf (serv, "WHO %s %%ctnf,152", channel);
 	else
-		tcp_sendf (serv, "WHO %s\r\n", channel);
+		tcp_sendf (serv, "WHO %s", channel);
 }
 
 /*static void
 irc_get_ip (server *serv, char *nick)
 {
-	tcp_sendf (serv, "WHO %s\r\n", nick);
+	tcp_sendf (serv, "WHO %s", nick);
 }*/
 
 
@@ -207,36 +207,36 @@ irc_get_ip (server *serv, char *nick)
 static void
 irc_user_whois (server *serv, char *nicks)
 {
-	tcp_sendf (serv, "WHOIS %s\r\n", nicks);
+	tcp_sendf (serv, "WHOIS %s", nicks);
 }
 
 static void
 irc_message (server *serv, char *channel, char *text)
 {
-	tcp_sendf (serv, "PRIVMSG %s :%s\r\n", channel, text);
+	tcp_sendf (serv, "PRIVMSG %s :%s", channel, text);
 }
 
 static void
 irc_action (server *serv, char *channel, char *act)
 {
-	tcp_sendf (serv, "PRIVMSG %s :\001ACTION %s\001\r\n", channel, act);
+	tcp_sendf (serv, "PRIVMSG %s :\001ACTION %s\001", channel, act);
 }
 
 static void
 irc_notice (server *serv, char *channel, char *text)
 {
-	tcp_sendf (serv, "NOTICE %s :%s\r\n", channel, text);
+	tcp_sendf (serv, "NOTICE %s :%s", channel, text);
 }
 
 static void
 irc_topic (server *serv, char *channel, char *topic)
 {
 	if (!topic)
-		tcp_sendf (serv, "TOPIC %s :\r\n", channel);
+		tcp_sendf (serv, "TOPIC %s :", channel);
 	else if (topic[0])
-		tcp_sendf (serv, "TOPIC %s :%s\r\n", channel, topic);
+		tcp_sendf (serv, "TOPIC %s :%s", channel, topic);
 	else
-		tcp_sendf (serv, "TOPIC %s\r\n", channel);
+		tcp_sendf (serv, "TOPIC %s", channel);
 }
 
 static void
@@ -244,35 +244,35 @@ irc_list_channels (server *serv, char *arg, int min_users)
 {
 	if (arg[0])
 	{
-		tcp_sendf (serv, "LIST %s\r\n", arg);
+		tcp_sendf (serv, "LIST %s", arg);
 		return;
 	}
 
 	if (serv->use_listargs)
-		tcp_sendf (serv, "LIST >%d,<10000\r\n", min_users - 1);
+		tcp_sendf (serv, "LIST >%d,<10000", min_users - 1);
 	else
-		tcp_send_len (serv, "LIST\r\n", 6);
+		tcp_send_len (serv, "LIST", 6);
 }
 
 static void
 irc_names (server *serv, char *channel)
 {
-	tcp_sendf (serv, "NAMES %s\r\n", channel);
+	tcp_sendf (serv, "NAMES %s", channel);
 }
 
 static void
 irc_change_nick (server *serv, char *new_nick)
 {
-	tcp_sendf (serv, "NICK %s\r\n", new_nick);
+	tcp_sendf (serv, "NICK %s", new_nick);
 }
 
 static void
 irc_ping (server *serv, char *to, char *timestring)
 {
 	if (*to)
-		tcp_sendf (serv, "PRIVMSG %s :\001PING %s\001\r\n", to, timestring);
+		tcp_sendf (serv, "PRIVMSG %s :\001PING %s\001", to, timestring);
 	else
-		tcp_sendf_now (serv, "PING %s\r\n", timestring);
+		tcp_sendf_now (serv, "PING %s", timestring);
 }
 
 static int
@@ -283,15 +283,14 @@ irc_raw (server *serv, char *raw)
 	if (*raw)
 	{
 		len = strlen (raw);
+
 		if (len < sizeof (tbuf) - 3)
 		{
-			len = snprintf (tbuf, sizeof (tbuf), "%s\r\n", raw);
+			len = snprintf (tbuf, sizeof (tbuf), "%s", raw);
 			tcp_send_len (serv, tbuf, len);
 		} else
-		{
 			tcp_send_len (serv, raw, len);
-			tcp_send_len (serv, "\r\n", 2);
-		}
+
 		return TRUE;
 	}
 	return FALSE;
@@ -1615,7 +1614,7 @@ process_message_ping (gpointer *params)
 	char **word_eol = params[2];
 	server *serv = sess->server;
 
-	tcp_sendf(serv, "PONG %s\r\n", word_eol[2]);
+	tcp_sendf(serv, "PONG %s", word_eol[2]);
 }
 
 static void

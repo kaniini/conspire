@@ -44,7 +44,7 @@ sasl_timeout_cb(gpointer data)
 {
 	server *serv = (server *) data;
 
-	tcp_sendf(serv, "AUTHENTICATE *\r\n");
+	tcp_sendf(serv, "AUTHENTICATE *");
 	serv->sasl_state = SASL_COMPLETE;
 
 	cap_state_unref(serv->cap);
@@ -95,7 +95,7 @@ sasl_process_cap(gpointer *params)
 	                }
 
 			/* request SASL authentication from IRCd. todo: other mechanisms */
-			tcp_sendf(serv, "AUTHENTICATE PLAIN\r\n");
+			tcp_sendf(serv, "AUTHENTICATE PLAIN");
 			serv->sasl_timeout_tag = g_timeout_add(5000, sasl_timeout_cb, serv);
 
 			cap_state_ref(cap);
@@ -141,12 +141,12 @@ sasl_process_authenticate(gpointer *params)
 		base64_encode(buf, (strlen(serv->sasl_user) * 2) + strlen(serv->sasl_pass) + 2, b64buf, 1024);
 
 		/* TODO: chunk this in 400 byte increments */
-		tcp_sendf(serv, "AUTHENTICATE %s\r\n", b64buf);
+		tcp_sendf(serv, "AUTHENTICATE %s", b64buf);
 	}
 	else if (!word_eol[2])
 	{
 		g_source_remove(serv->sasl_timeout_tag);
-		tcp_sendf(serv, "AUTHENTICATE *\r\n");
+		tcp_sendf(serv, "AUTHENTICATE *");
 		serv->sasl_state = SASL_COMPLETE;
 
 		cap_state_unref(serv->cap);
@@ -167,7 +167,7 @@ tls_process_cap(gpointer *params)
 		{
 			cap_state_ref(cap);
 			PrintTextf(serv->server_session, "\00323*\tFound TLS capability, requesting TLS...");
-			tcp_sendf_now(serv, "STARTTLS\r\n");
+			tcp_sendf_now(serv, "STARTTLS");
 
 			/* XXX: postpone any sasl operation until after TLS completes, but the way we do it sucks */
 			signal_stop("cap message");

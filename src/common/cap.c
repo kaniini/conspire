@@ -74,7 +74,7 @@ cap_state_unref(CapState *cap)
 		{
 		case CAP_NAK:
 		case CAP_ACK:
-			tcp_sendf(cap->serv, "CAP END\r\n");
+			tcp_sendf(cap->serv, "CAP END");
 			break;
 
 		case CAP_LS:
@@ -103,5 +103,5 @@ cap_add_cap(CapState *cap, const gchar *token)
 void
 cap_request(CapState *cap)
 {
-	tcp_sendf_now(cap->serv, "CAP REQ :%s\r\n", cap->caps_request);
+	tcp_sendf_now(cap->serv, "CAP REQ :%s", cap->caps_request);
 }
