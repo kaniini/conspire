@@ -48,7 +48,7 @@ linequeue_add_tokens(gpointer unused)
 			continue;
 		}
 
-		lq->writeoffs -= (lq->available / 5);
+		lq->writeoffs--;
 		if (!g_queue_is_empty(&lq->q))
 			linequeue_flush(lq);
 	}
@@ -63,12 +63,12 @@ linequeue_new(gpointer data, LineQueueWriter w)
 
 	lq->data = data;
 	lq->w = w;
-	lq->available = 20;	/* XXX: making this a config option seems like a good idea. */
+	lq->available = 3;	/* XXX: making this a config option seems like a good idea. */
 
 	queues = g_list_prepend(queues, lq);
 
 	if (!lqat_tag)
-		lqat_tag = g_timeout_add(250, linequeue_add_tokens, NULL);
+		lqat_tag = g_timeout_add(500, linequeue_add_tokens, NULL);
 
 	return lq;
 }
