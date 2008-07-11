@@ -115,6 +115,8 @@ linequeue_erase(LineQueue *lq)
 void
 linequeue_destroy(LineQueue *lq)
 {
+	queues = g_list_remove(queues, lq);
+
 	g_return_if_fail(lq != NULL);
 
 	linequeue_erase(lq);
