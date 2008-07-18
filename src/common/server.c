@@ -1284,7 +1284,7 @@ server_new (void)
 	/* use server.c and proto-irc.c functions */
 	server_fill_her_up (serv);
 
-	serv->lq = linequeue_new(serv, (LineQueueWriter) server_send_real);
+	serv->lq = linequeue_new(serv, (LineQueueWriter) server_send_real, (LineQueueUpdater) fe_set_throttle);
 	serv->id = id++;
 	serv->sok = -1;
 	strcpy(serv->nick, prefs.nick1);

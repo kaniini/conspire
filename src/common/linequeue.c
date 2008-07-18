@@ -57,12 +57,13 @@ linequeue_add_tokens(gpointer unused)
 }
 
 LineQueue *
-linequeue_new(gpointer data, LineQueueWriter w)
+linequeue_new(gpointer data, LineQueueWriter w, LineQueueUpdater u)
 {
 	LineQueue *lq = g_slice_new0(LineQueue);
 
 	lq->data = data;
 	lq->w = w;
+	lq->update = u;
 	lq->available = 3;	/* XXX: making this a config option seems like a good idea. */
 
 	queues = g_list_prepend(queues, lq);
@@ -99,6 +100,9 @@ linequeue_flush(LineQueue *lq)
 		if (lq->writeoffs >= lq->available)
 			break;
 	}
+
+	if (lq->update)
+		lq->update(lq->data);
 }
 
 void

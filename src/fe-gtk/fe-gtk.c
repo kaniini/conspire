@@ -544,7 +544,7 @@ fe_set_throttle (server *serv)
 	char tbuf[64];
 	char tip[64];
 
-	per = (float) linequeue_size(serv->lq) / serv->lq->available;
+	per = (float) linequeue_size(serv->lq) / ((double) 40);
 	if (per > 1.0)
 		per = 1.0;
 

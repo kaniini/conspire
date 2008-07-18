@@ -22,16 +22,18 @@
 #define __CONSPIRE_LINEQUEUE_H__GUARD
 
 typedef int (*LineQueueWriter)(gpointer data, gchar *line, gint len);
+typedef int (*LineQueueUpdater)(gpointer data);
 
 typedef struct {
     GQueue q;
     gpointer data;
     LineQueueWriter w;
+    LineQueueUpdater update;
     gint available;
     gint writeoffs;
 } LineQueue;
 
-LineQueue *linequeue_new(gpointer data, LineQueueWriter w);
+LineQueue *linequeue_new(gpointer data, LineQueueWriter w, LineQueueUpdater u);
 void linequeue_add_line(LineQueue *lq, gchar *line);
 void linequeue_flush(LineQueue *lq);
 void linequeue_destroy(LineQueue *lq);
