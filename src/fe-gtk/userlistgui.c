@@ -96,8 +96,23 @@ get_user_icon (server *serv, struct User *user)
 }
 
 void
+fe_userlist_numbers_block (session *sess)
+{
+	sess->ul_blocked = TRUE;
+}
+
+void
+fe_userlist_numbers_unblock (session *sess)
+{
+	sess->ul_blocked = TRUE;
+}
+
+void
 fe_userlist_numbers (session *sess)
 {
+	if (sess->ul_blocked == TRUE)
+		return;
+
 	fe_set_title(sess);
 }
 

@@ -341,6 +341,8 @@ void fe_progressbar_start (struct session *sess) {}
 void fe_progressbar_end (struct server *serv) {}
 
 void fe_userlist_numbers (struct session *sess) {}
+void fe_userlist_numbers_block (struct session *sess) {}
+void fe_userlist_numbers_unblock (struct session *sess) {}
 void fe_userlist_clear (struct session *sess) {}
 void fe_userlist_set_selected (struct session *sess) {}
 

@@ -641,6 +641,8 @@ inbound_nameslist (server *serv, char *chan, char *names)
 		userlist_clear (sess);
 	}
 
+	fe_userlist_numbers_block(sess);
+
 	while (1)
 	{
 		switch (*names)
@@ -662,6 +664,10 @@ inbound_nameslist (server *serv, char *chan, char *names)
 		}
 		names++;
 	}
+
+	fe_userlist_numbers_unblock(sess);
+
+	fe_userlist_numbers(sess);
 }
 
 void
