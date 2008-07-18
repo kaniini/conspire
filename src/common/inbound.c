@@ -639,9 +639,8 @@ inbound_nameslist (server *serv, char *chan, char *names)
 	{
 		sess->end_of_names = FALSE;
 		userlist_clear (sess);
+		fe_userlist_numbers_block(sess);
 	}
-
-	fe_userlist_numbers_block(sess);
 
 	while (1)
 	{
@@ -664,10 +663,6 @@ inbound_nameslist (server *serv, char *chan, char *names)
 		}
 		names++;
 	}
-
-	fe_userlist_numbers_unblock(sess);
-
-	fe_userlist_numbers(sess);
 }
 
 void
@@ -1174,6 +1169,9 @@ inbound_nameslist_end (server *serv, char *chan)
 			{
 				sess->end_of_names = TRUE;
 				sess->ignore_names = FALSE;
+
+				fe_userlist_numbers_unblock(sess);
+				fe_userlist_numbers(sess);
 			}
 			list = list->next;
 		}
