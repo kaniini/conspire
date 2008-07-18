@@ -34,7 +34,7 @@
  * see command_factory.h for more information (you can read C code right?)
  */
 CommandResult
-cmd_hello(session *sess, char *tbuf, const gchar *word[], const gchar *word_eol[])
+cmd_hello(session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
 {
 	handle_command(sess, "SAY testing 1 2 3", FALSE);	/* FALSE = don't complain to user about failures */
 
