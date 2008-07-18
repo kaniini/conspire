@@ -104,7 +104,7 @@ fe_userlist_numbers_block (session *sess)
 void
 fe_userlist_numbers_unblock (session *sess)
 {
-	sess->ul_blocked = TRUE;
+	sess->ul_blocked = FALSE;
 }
 
 void
