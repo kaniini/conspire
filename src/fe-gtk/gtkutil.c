@@ -211,7 +211,7 @@ gtkutil_file_req (const char *title, void *callback, void *userdata, char *filte
 	}
 	else
 	{
-		if (filter && (flags & FRF_FILTERISINITIAL))
+		if (filter && (flags & FRF_FILTERISINITIAL) && !(flags & FRF_WRITE)) 
 			gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (dialog), filter);
 	}
 
