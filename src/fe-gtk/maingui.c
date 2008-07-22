@@ -227,6 +227,7 @@ fe_set_tab_color (struct session *sess, int col)
 
 			break;
 		}
+		lastact_update(sess);
 	}
 }
 
@@ -446,6 +447,7 @@ mg_focus (session *sess)
 		sess->nick_said = FALSE;
 		sess->msg_said = FALSE;
 		sess->new_data = FALSE;
+		lastact_update(sess);
 		/* when called via mg_changui_new, is_tab might be true, but
 			sess->res->tab is still NULL. */
 		if (sess->res->tab)

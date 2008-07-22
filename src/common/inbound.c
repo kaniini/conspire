@@ -290,7 +290,10 @@ is_hilight (char *from, char *text, session *sess, server *serv)
 		 FromNick (from, prefs.irc_nick_hilight))
 	{
 		if (sess != current_tab)
+		{
 			sess->nick_said = TRUE;
+			lastact_update(sess);
+		}
 		fe_set_hilight (sess);
 		return 1;
 	}
@@ -339,6 +342,7 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 			sess->msg_said = TRUE;
 			sess->new_data = FALSE;
 		}
+		lastact_update(sess);
 	}
 
 	user = userlist_find (sess, from);
@@ -405,6 +409,7 @@ inbound_chanmsg (server *serv, session *sess, char *chan, char *from, char *text
 	{
 		sess->msg_said = TRUE;
 		sess->new_data = FALSE;
+		lastact_update(sess);
 	}
 
 	user = userlist_find (sess, from);
