@@ -297,7 +297,29 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 			list = list->next;
 		}
 	}
-	else {
+	else if (!strcasecmp(word[2], "query"))
+	{
+		while (list)
+		{
+			sess = list->data;
+			if (sess->type == SESS_DIALOG && sess->channel[0] && sess->server->connected)
+				handle_command(sess, word_eol[3], FALSE);
+			list = list->next;
+		}		
+	}
+	else if (!strcasecmp(word[2], "local-query"))
+	{
+		serv = sess->server;
+		while (list)
+		{
+			sess = list->data;
+			if (sess->type == SESS_DIALOG && sess->channel[0] && sess->server->connected && (sess->server == serv))
+				handle_command(sess, word_eol[3], FALSE);
+			list = list->next;
+		}
+	}
+	else
+	{
 		PrintText(sess, "Invalid parameter for foreach");
 		return CMD_EXEC_FAIL;
 	}
@@ -3496,7 +3518,7 @@ struct commands xc_cmds[] = {
 #endif
 	{"EXIT", cmd_killall, 0, 0, 1, N_("EXIT terminates all connections and closes Conspire.")},
 	{"FLUSHQ", cmd_flushq, 0, 0, 1, N_("FLUSHQ, flushes the current server's send queue")},
-	{"FOREACH", cmd_foreach, 0, 0, 1, N_("FOREACH <[local-]channel|server> performs a given command for all items of the specified type.")},
+	{"FOREACH", cmd_foreach, 0, 0, 1, N_("FOREACH <[local-]channel|server|[local-]query> performs a given command for all items of the specified type.")},
 	{"GATE", cmd_gate, 0, 0, 1,
 	 N_("GATE <host> [<port>], proxies through a host, port defaults to 23")},
 	{"GETFILE", cmd_getfile, 0, 0, 1, "GETFILE [-folder] [-multi] [-save] <command> <title> [<initial>]"},
