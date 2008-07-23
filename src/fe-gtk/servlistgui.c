@@ -1433,6 +1433,13 @@ fe_serverlist_open (session *sess)
 {
 	servlist_sess = sess;
 
+	/* fix: don't allow multiple serverlist editors, causes issues (crash at worst) */
+	if (serverlist_win)
+	{
+		fe_message (_("Server Editor is already open."), FE_MSG_ERROR);
+		return;
+	}
+
 	serverlist_win = servlist_open_networks ();
 	gtkutil_set_icon (serverlist_win);
 
