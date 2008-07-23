@@ -270,9 +270,9 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 		while (list)
 		{
 			sess = list->data;
+			list = list->next;
 			if (sess->type == SESS_CHANNEL && sess->channel[0] && sess->server->connected)
 				handle_command(sess, word_eol[3], FALSE);
-			list = list->next;
 		}
 	}
 	else if (!strcasecmp(word[2], "local-channel"))
@@ -281,9 +281,9 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 		while (list)
 		{
 			sess = list->data;
+			list = list->next;
 			if (sess->type == SESS_CHANNEL && sess->channel[0] && sess->server->connected && (sess->server == serv))
 				handle_command(sess, word_eol[3], FALSE);
-			list = list->next;
 		}
 	}
 	else if (!strcasecmp(word[2], "server"))
@@ -292,9 +292,9 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 		while (list)
 		{
 			serv = list->data;
+			list = list->next;
 			if (serv->connected)
 				handle_command(serv->front_session, word_eol[3], FALSE);
-			list = list->next;
 		}
 	}
 	else if (!strcasecmp(word[2], "query"))
@@ -302,9 +302,9 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 		while (list)
 		{
 			sess = list->data;
+			list = list->next;
 			if (sess->type == SESS_DIALOG && sess->channel[0] && sess->server->connected)
 				handle_command(sess, word_eol[3], FALSE);
-			list = list->next;
 		}		
 	}
 	else if (!strcasecmp(word[2], "local-query"))
@@ -313,9 +313,9 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 		while (list)
 		{
 			sess = list->data;
+			list = list->next;
 			if (sess->type == SESS_DIALOG && sess->channel[0] && sess->server->connected && (sess->server == serv))
 				handle_command(sess, word_eol[3], FALSE);
-			list = list->next;
 		}
 	}
 	else
