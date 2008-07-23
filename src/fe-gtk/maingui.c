@@ -2357,9 +2357,33 @@ static void
 search_handle_change(GtkEditable *editable, session *sess)
 {
 	static textentry *last;
-	gchar *text = gtk_editable_get_chars(editable, 0, -1);
+	gchar *text = gtk_editable_get_chars(GTK_EDITABLE(sess->gui->shentry), 0, -1);
 
-	last = gtk_xtext_search (GTK_XTEXT (sess->gui->xtext), text, last, 0, 0);
+	last = gtk_xtext_search(GTK_XTEXT (sess->gui->xtext), text, last, FALSE, FALSE);
+	if (!last) {
+		g_message("didn't find shit for '%s'", text);
+	}
+}
+
+static void
+search_handle_previous(GtkWidget *button, session *sess)
+{
+	static textentry *last;
+	gchar *text = gtk_editable_get_chars(GTK_EDITABLE(sess->gui->shentry), 0, -1);
+
+	last = gtk_xtext_search(GTK_XTEXT (sess->gui->xtext), text, last, FALSE, TRUE);
+	if (!last) {
+		g_message("didn't find shit for '%s'", text);
+	}
+}
+
+static void
+search_handle_next(GtkWidget *button, session *sess)
+{
+	static textentry *last;
+	gchar *text = gtk_editable_get_chars(GTK_EDITABLE(sess->gui->shentry), 0, -1);
+
+	last = gtk_xtext_search(GTK_XTEXT (sess->gui->xtext), text, last, FALSE, FALSE);
 	if (!last) {
 		g_message("didn't find shit for '%s'", text);
 	}
@@ -2368,15 +2392,26 @@ search_handle_change(GtkEditable *editable, session *sess)
 static void
 mg_create_search(session *sess, GtkWidget *box)
 {
-	GtkWidget *entry;
+	GtkWidget *entry, *label, *next, *previous;
 	session_gui *gui = sess->gui;
 
-	gui->shbox = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(box), gui->shbox, 0, 0, 0);
+	gui->shbox = gtk_hbox_new(FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(box), gui->shbox, FALSE, FALSE, 0);
 
-	entry = gtk_entry_new();
-	gtk_box_pack_start(GTK_BOX(gui->shbox), entry, 0, 0, 0);
+	label = gtk_label_new("Find:");
+	gtk_box_pack_start(GTK_BOX(gui->shbox), label, FALSE, FALSE, 0);
+
+	gui->shentry = entry = gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(gui->shbox), entry, TRUE, TRUE, 0);
 	g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(search_handle_change), sess);
+
+	previous = gtk_button_new_from_stock(GTK_STOCK_GO_BACK);
+	gtk_box_pack_start(GTK_BOX(gui->shbox), previous, FALSE, FALSE, 0);
+	g_signal_connect(G_OBJECT(previous), "clicked", G_CALLBACK(search_handle_previous), sess);
+
+	next = gtk_button_new_from_stock(GTK_STOCK_GO_FORWARD);
+	gtk_box_pack_start(GTK_BOX(gui->shbox), next, FALSE, FALSE, 0);
+	g_signal_connect(G_OBJECT(previous), "clicked", G_CALLBACK(search_handle_next), sess);
 }
 
 static void

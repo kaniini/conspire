@@ -146,7 +146,7 @@ typedef struct session_gui
 		*limit_entry,		  /* +l */
 		*key_entry;		  /* +k */
 
-	GtkWidget *shbox;	/* search bar hbox */
+	GtkWidget *shbox, *shentry;	/* search bar hbox */
 
 #define MENU_ID_NUM 12
 	GtkWidget *menu_item[MENU_ID_NUM+1]; /* some items we may change state of */
