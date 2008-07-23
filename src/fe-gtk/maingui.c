@@ -2421,7 +2421,16 @@ mg_create_search(session *sess, GtkWidget *box)
 void
 mg_search_toggle(session *sess)
 {
-	GTK_WIDGET_VISIBLE(sess->gui->shbox) ? gtk_widget_hide(sess->gui->shbox) : gtk_widget_show(sess->gui->shbox);
+	if (GTK_WIDGET_VISIBLE(sess->gui->shbox))
+	{
+		gtk_widget_hide(sess->gui->shbox);
+		gtk_widget_grab_focus(sess->gui->input_box);
+	}
+	else
+	{
+		gtk_widget_show(sess->gui->shbox);
+		gtk_widget_grab_focus(sess->gui->shentry);
+	}
 }
 
 static void
