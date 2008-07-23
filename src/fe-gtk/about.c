@@ -36,6 +36,7 @@
 static const gchar *authors[] = {
 	"William Pitcock <nenolod@sacredspiral.co.uk>",
 	"Kiyoshi Aman <kiyoshi.aman@gmail.com>",
+	"Robin Burchell <w00t@inspircd.org>",
 	"Chris Fuenty <zimmy@zimmy.ca> (graphics)",
 	"Based on XChat by Peter Zelezny <zed@xchat.org>",
 	NULL
@@ -76,6 +77,7 @@ menu_about (GtkWidget * wid, gpointer sess)
 		"logo", about_pix,
 		"copyright", "Copyright (c) 2007-2008 William Pitcock\n"
 			     "Copyright (c) 2007-2008 Kiyoshi Aman\n"
+			     "Copyright (c) 2008 Robin Burchell\n"
 			     "Copyright (c) 1998-2007 Peter Zelezny",
 		"version", PACKAGE_VERSION,
 		"website", "http://www.nenolod.net/conspire",

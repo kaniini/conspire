@@ -715,7 +715,7 @@ static char defaultconf_urlhandlers[] =
 		"NAME Telnet\n"                     "CMD !"XTERM"telnet %s\n\n"\
 		"NAME Ping\n"                       "CMD !"XTERM"ping -c 4 %s\n\n"\
 	"NAME ENDSUB\n"                         "CMD \n\n"\
-	"NAME Connect as IRC server\n"          "CMD url %s\n\n";
+	"NAME Connect to IRC server\n"          "CMD newserver %s\n\n";
 
 #ifdef USE_SIGACTION
 /* Close and open log files on SIGUSR1. Usefull for log rotating */
