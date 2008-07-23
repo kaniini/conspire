@@ -2167,6 +2167,10 @@ mg_add_pane_signals (session_gui *gui)
 							G_CALLBACK (mg_rightpane_cb), gui);
 	g_signal_connect (G_OBJECT (gui->hpane_left), "notify::position",
 							G_CALLBACK (mg_leftpane_cb), gui);
+
+	/* XXX */
+	gtk_widget_hide(gui->shbox);
+
 	return FALSE;
 }
 
@@ -2398,7 +2402,7 @@ mg_create_search(session *sess, GtkWidget *box)
 	gui->shbox = gtk_hbox_new(FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(box), gui->shbox, FALSE, FALSE, 0);
 
-	label = gtk_label_new("Find:");
+	label = gtk_label_new(_("Find:"));
 	gtk_box_pack_start(GTK_BOX(gui->shbox), label, FALSE, FALSE, 0);
 
 	gui->shentry = entry = gtk_entry_new();
@@ -2412,6 +2416,12 @@ mg_create_search(session *sess, GtkWidget *box)
 	next = gtk_button_new_from_stock(GTK_STOCK_GO_FORWARD);
 	gtk_box_pack_start(GTK_BOX(gui->shbox), next, FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(previous), "clicked", G_CALLBACK(search_handle_next), sess);
+}
+
+void
+mg_search_toggle(session *sess)
+{
+	GTK_WIDGET_VISIBLE(sess->gui->shbox) ? gtk_widget_hide(sess->gui->shbox) : gtk_widget_show(sess->gui->shbox);
 }
 
 static void

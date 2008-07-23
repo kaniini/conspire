@@ -62,7 +62,6 @@
 #include "rawlog.h"
 #include "palette.h"
 #include "plugingui.h"
-#include "search.h"
 #include "textgui.h"
 #include "urlgrab.h"
 #include "userlistgui.h"
@@ -1012,7 +1011,7 @@ menu_quit (GtkWidget * wid, gpointer none)
 static void
 menu_search ()
 {
-	search_open (current_sess);
+	mg_search_toggle(current_sess);
 }
 
 static void

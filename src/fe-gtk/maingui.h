@@ -34,5 +34,6 @@ void mg_drag_end_cb (GtkWidget *widget, GdkDragContext *context, gpointer userda
 gboolean mg_drag_drop_cb (GtkWidget *widget, GdkDragContext *context, int x, int y, guint time, gpointer user_data);
 gboolean mg_drag_motion_cb (GtkWidget *widget, GdkDragContext *context, int x, int y, guint time, gpointer user_data); 
 void mg_quit(void);
+void mg_search_toggle (session *sess);
 
 #endif
