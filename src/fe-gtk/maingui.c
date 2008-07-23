@@ -93,6 +93,7 @@ typedef enum {
 } TagType;
 
 static void mg_create_entry (session *sess, GtkWidget *box);
+static void mg_create_search (session *sess, GtkWidget *box);
 static void mg_link_irctab (session *sess, int focus);
 
 static session_gui static_mg_gui;
@@ -2208,6 +2209,7 @@ mg_create_center (session *sess, session_gui *gui, GtkWidget *box)
 	gtk_notebook_append_page (GTK_NOTEBOOK (book), vbox, NULL);
 	mg_create_topicbar (sess, vbox);
 	mg_create_textarea (sess, vbox);
+	mg_create_search (sess, vbox);
 	mg_create_entry (sess, vbox);
 
 	g_idle_add ((GSourceFunc)mg_add_pane_signals, gui);
@@ -2349,6 +2351,32 @@ static void
 mg_inputbox_rightclick (GtkEntry *entry, GtkWidget *menu)
 {
 	mg_create_color_menu (menu, NULL);
+}
+
+static void
+search_handle_change(GtkEditable *editable, session *sess)
+{
+	static textentry *last;
+	gchar *text = gtk_editable_get_chars(editable, 0, -1);
+
+	last = gtk_xtext_search (GTK_XTEXT (sess->gui->xtext), text, last, 0, 0);
+	if (!last) {
+		g_message("didn't find shit for '%s'", text);
+	}
+}
+
+static void
+mg_create_search(session *sess, GtkWidget *box)
+{
+	GtkWidget *entry;
+	session_gui *gui = sess->gui;
+
+	gui->shbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(box), gui->shbox, 0, 0, 0);
+
+	entry = gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(gui->shbox), entry, 0, 0, 0);
+	g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(search_handle_change), sess);
 }
 
 static void
