@@ -2407,7 +2407,7 @@ mg_create_search(session *sess, GtkWidget *box)
 
 	gui->shentry = entry = gtk_entry_new();
 	gtk_box_pack_start(GTK_BOX(gui->shbox), entry, TRUE, TRUE, 0);
-	g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(search_handle_change), sess);
+	gui->search_changed_signal = g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(search_handle_change), sess);
 
 	previous = gtk_button_new_from_stock(GTK_STOCK_GO_BACK);
 	gtk_box_pack_start(GTK_BOX(gui->shbox), previous, FALSE, FALSE, 0);
@@ -2425,6 +2425,9 @@ mg_search_toggle(session *sess)
 	{
 		gtk_widget_hide(sess->gui->shbox);
 		gtk_widget_grab_focus(sess->gui->input_box);
+		g_signal_handler_block(sess->gui->shentry, sess->gui->search_changed_signal);
+		gtk_entry_set_text(GTK_ENTRY(sess->gui->shentry), "");
+		g_signal_handler_unblock(sess->gui->shentry, sess->gui->search_changed_signal);
 	}
 	else
 	{
