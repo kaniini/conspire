@@ -957,8 +957,6 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 	GtkWidget *buttonadd;
 	GtkWidget *buttonremove;
 	GtkWidget *buttonedit;
-	GtkWidget *hseparator2;
-	GtkWidget *hbuttonbox4;
 	GtkWidget *check;
 	GtkTreeModel *model;
 	GtkListStore *store;
@@ -1134,15 +1132,6 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 	gtk_container_add (GTK_CONTAINER (vbuttonbox1), buttonedit);
 	GTK_WIDGET_SET_FLAGS (buttonedit, GTK_CAN_DEFAULT);
 
-	hseparator2 = gtk_hseparator_new ();
-	gtk_widget_show (hseparator2);
-	gtk_box_pack_start (GTK_BOX (vbox5), hseparator2, FALSE, FALSE, 8);
-
-	hbuttonbox4 = gtk_hbutton_box_new ();
-	gtk_widget_show (hbuttonbox4);
-	gtk_box_pack_start (GTK_BOX (vbox5), hbuttonbox4, FALSE, FALSE, 0);
-	gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox4),
-										GTK_BUTTONBOX_END);
 	if (net->flags & FLAG_USE_GLOBAL)
 	{
 		gtk_widget_hide (edit_label_nick);
@@ -1189,10 +1178,7 @@ servlist_open_networks (void)
 	GtkWidget *button_remove;
 	GtkWidget *button_edit;
 	GtkWidget *button_sort;
-	GtkWidget *hseparator1;
-	GtkWidget *hbuttonbox1;
 	GtkWidget *button_connect;
-	GtkWidget *button_close;
 	GtkTreeModel *model;
 	GtkListStore *store;
 	GtkCellRenderer *renderer;
@@ -1374,23 +1360,7 @@ servlist_open_networks (void)
 	gtk_container_add (GTK_CONTAINER (vbuttonbox2), button_sort);
 	GTK_WIDGET_SET_FLAGS (button_sort, GTK_CAN_DEFAULT);
 
-	hseparator1 = gtk_hseparator_new ();
-	gtk_widget_show (hseparator1);
-	gtk_box_pack_start (GTK_BOX (vbox1), hseparator1, FALSE, TRUE, 4);
-
-	hbuttonbox1 = gtk_hbutton_box_new ();
-	gtk_widget_show (hbuttonbox1);
-	gtk_box_pack_start (GTK_BOX (vbox1), hbuttonbox1, FALSE, TRUE, 0);
-	gtk_container_set_border_width (GTK_CONTAINER (hbuttonbox1), 8);
-
-	button_close = gtk_button_new_from_stock ("gtk-close");
-	gtk_widget_show (button_close);
-	g_signal_connect (G_OBJECT (button_close), "clicked",
-							G_CALLBACK (servlist_close_cb), 0);
-	gtk_container_add (GTK_CONTAINER (hbuttonbox1), button_close);
-	GTK_WIDGET_SET_FLAGS (button_close, GTK_CAN_DEFAULT);
-
-	button_connect = gtkutil_button (hbuttonbox1, GTK_STOCK_CONNECT, NULL,
+	button_connect = gtkutil_button (vbuttonbox2, GTK_STOCK_CONNECT, NULL,
 												servlist_connect_cb, NULL, _("C_onnect"));
 	GTK_WIDGET_SET_FLAGS (button_connect, GTK_CAN_DEFAULT);
 
@@ -1399,7 +1369,6 @@ servlist_open_networks (void)
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label7), entry5);
 
 	gtk_widget_grab_focus (networks_tree);
-	gtk_widget_grab_default (button_close);
 	return servlist;
 }
 
