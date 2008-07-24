@@ -478,7 +478,7 @@ servlist_update_from_entry (char **str, GtkWidget *entry)
 }
 
 static void
-servlist_edit_close_cb (GtkWidget *button, gpointer userdata)
+servlist_closegui(GtkWidget *wid, session *sess)
 {
 	ircnet *net = selected_net;
 
@@ -499,13 +499,6 @@ servlist_edit_close_cb (GtkWidget *button, gpointer userdata)
 	edit_win = NULL;
 }
 
-static gint
-servlist_editwin_delete_cb (GtkWidget *win, GdkEventAny *event, gpointer none)
-{
-	servlist_edit_close_cb (NULL, NULL);
-	return FALSE;
-}
-
 static gboolean
 servlist_configure_cb (GtkWindow *win, GdkEventConfigure *event, gpointer none)
 {
@@ -520,13 +513,18 @@ servlist_edit_cb (GtkWidget *but, gpointer none)
 	if (!servlist_has_selection (GTK_TREE_VIEW (networks_tree)))
 		return;
 
+	if (edit_win)
+	{
+		/* Disallow multiple. */
+		fe_message (_("You may only edit one network at a time."), FE_MSG_ERROR);
+		return;
+	}
+
 	edit_win = servlist_open_edit (serverlist_win, selected_net);
 	gtkutil_set_icon (edit_win);
 	servlist_servers_populate (selected_net, edit_tree);
 	g_signal_connect (G_OBJECT (gtk_tree_view_get_selection (GTK_TREE_VIEW (edit_tree))),
 							"changed", G_CALLBACK (servlist_server_row_cb), NULL);
-	g_signal_connect (G_OBJECT (edit_win), "delete_event",
-						 	G_CALLBACK (servlist_editwin_delete_cb), 0);
 	g_signal_connect (G_OBJECT (edit_tree), "key_press_event",
 							G_CALLBACK (servlist_serv_keypress_cb), 0);
 	gtk_widget_show (edit_win);
@@ -961,7 +959,6 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 	GtkWidget *buttonedit;
 	GtkWidget *hseparator2;
 	GtkWidget *hbuttonbox4;
-	GtkWidget *button10;
 	GtkWidget *check;
 	GtkTreeModel *model;
 	GtkListStore *store;
@@ -969,20 +966,9 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 	char buf[128];
 	char buf2[128 + 8];
 
-	editwindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	gtk_container_set_border_width (GTK_CONTAINER (editwindow), 4);
-	snprintf (buf, sizeof (buf), _("conspire: Edit %s"), net->name);
-	gtk_window_set_title (GTK_WINDOW (editwindow), buf);
-	gtk_window_set_default_size (GTK_WINDOW (editwindow), 354, 0);
-	gtk_window_set_position (GTK_WINDOW (editwindow), GTK_WIN_POS_MOUSE);
-	gtk_window_set_transient_for (GTK_WINDOW (editwindow), GTK_WINDOW (parent));
-	gtk_window_set_modal (GTK_WINDOW (editwindow), TRUE);
-	gtk_window_set_type_hint (GTK_WINDOW (editwindow), GDK_WINDOW_TYPE_HINT_DIALOG);
-	gtk_window_set_role (GTK_WINDOW (editwindow), "editserv");
-
-	vbox5 = gtk_vbox_new (FALSE, 0);
-	gtk_widget_show (vbox5);
-	gtk_container_add (GTK_CONTAINER (editwindow), vbox5);
+	char tbuf[256];
+	snprintf (tbuf, sizeof tbuf, _("conspire: Network Editor (%s)"), net->name);
+	editwindow = mg_create_generic_tab(_("Network Editor"), tbuf, FALSE, TRUE, servlist_closegui, NULL, 550, 200, &vbox5, NULL);
 
 	table3 = gtk_table_new (17, 3, FALSE);
 	gtk_widget_show (table3);
@@ -1157,14 +1143,6 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 	gtk_box_pack_start (GTK_BOX (vbox5), hbuttonbox4, FALSE, FALSE, 0);
 	gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox4),
 										GTK_BUTTONBOX_END);
-
-	button10 = gtk_button_new_from_stock ("gtk-close");
-	g_signal_connect (G_OBJECT (button10), "clicked",
-							G_CALLBACK (servlist_edit_close_cb), 0);
-	gtk_widget_show (button10);
-	gtk_container_add (GTK_CONTAINER (hbuttonbox4), button10);
-	GTK_WIDGET_SET_FLAGS (button10, GTK_CAN_DEFAULT);
-
 	if (net->flags & FLAG_USE_GLOBAL)
 	{
 		gtk_widget_hide (edit_label_nick);
@@ -1179,9 +1157,6 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 		gtk_widget_hide (edit_label_real);
 		gtk_widget_hide (edit_entry_real);
 	}
-
-	gtk_widget_grab_focus (button10);
-	gtk_widget_grab_default (button10);
 
 	return editwindow;
 }
