@@ -157,6 +157,7 @@ sasl_process_authenticate(gpointer *params)
 static void
 tls_process_cap(gpointer *params)
 {
+#ifdef GNUTLS
 	CapState *cap = params[0];
 	server *serv = cap->serv;
 
@@ -182,6 +183,7 @@ tls_process_cap(gpointer *params)
 	default:
 		break;
 	}
+#endif
 }
 
 static void
