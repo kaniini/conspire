@@ -2768,7 +2768,7 @@ mg_add_generic_tab (char *name, char *title, void *family, GtkWidget *box)
 	gtk_notebook_append_page (GTK_NOTEBOOK (mg_gui->note_book), box, NULL);
 	gtk_widget_show (box);
 
-	ch = chanview_add (mg_gui->chanview, name, NULL, box, TRUE, TAG_UTIL, pix_util);
+	ch = chanview_add (mg_gui->chanview, name, family, box, TRUE, TAG_UTIL, pix_util);
 	chan_set_color (ch, plain_list);
 	/* FIXME: memory leak */
 	g_object_set_data (G_OBJECT (box), "title", strdup (title));
