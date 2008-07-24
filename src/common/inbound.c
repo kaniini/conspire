@@ -761,31 +761,45 @@ netsplit_display_victims(server *serv)
 {
 	GString *buffer;
 	GSList *head;
+	GSList *list = sess_list;
+	session *sess;
 
-	buffer = g_string_new("");
-
-	for (head = serv->split_list; head != NULL; head = head->next)
+	for (; list != NULL; list = list->next)
 	{
-		if (buffer->len < 420)
+		sess = (session *) list->data;
+		if (sess->server == serv && sess->type == SESS_CHANNEL)
 		{
-			g_string_append_printf(buffer, "%s%s",
-				*buffer->str != '\0' ? ", " : "",
-				(gchar *) head->data);
+			buffer = g_string_new("");
+
+			/* tab was affected by netsplit, attempt to display victims for this tab */
+			for (head = sess->split_list; head != NULL; head = head->next)
+			{
+				if (buffer->len < 420)
+				{
+					g_string_append_printf(buffer, "%s%s",
+						*buffer->str != '\0' ? ", " : "",
+						(gchar *) head->data);
+				}
+				else
+				{
+					EMIT_SIGNAL(XP_TE_NS_START, sess, serv->split_serv1, serv->split_serv2, buffer->str, NULL, 0);
+					g_string_erase(buffer, 0, -1);
+				}
+				g_free(head->data);
+			}
+
+			if (buffer->len)
+				EMIT_SIGNAL(XP_TE_NS_START, sess, serv->split_serv1, serv->split_serv2, buffer->str, NULL, 0);
+
+			/* free the list for this window */
+			g_slist_free(sess->split_list);
+			sess->split_list = NULL;
+
+			/* and clear buffer for next one */
+			g_string_free(buffer, TRUE);
 		}
-		else
-		{
-			EMIT_SIGNAL(XP_TE_NS_START, serv->front_session, serv->split_serv1, serv->split_serv2, buffer->str, NULL, 0);
-			g_string_erase(buffer, 0, -1);
-		}
-		g_free(head->data);
 	}
 
-	if (buffer->len)
-		EMIT_SIGNAL(XP_TE_NS_START, serv->front_session, serv->split_serv1, serv->split_serv2, buffer->str, NULL, 0);
-
-	g_string_free(buffer, TRUE);
-	g_slist_free(serv->split_list);
-	serv->split_list = NULL;
 	g_free(serv->split_reason);
 	g_free(serv->split_serv1);
 	g_free(serv->split_serv2);
@@ -892,7 +906,7 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 	{
 		if (netsplit)
 		{
-			if (serv->split_list)
+			if (serv->split_reason)
 			{
 				if (serv->split_timer)
 					g_source_remove(serv->split_timer);
@@ -915,16 +929,7 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 		}
 	}
 
-	if (netsplit)
-	{
-		serv->split_list = g_slist_append(serv->split_list, g_strdup(nick));
-
-		if (serv->split_timer)
-			g_source_remove(serv->split_timer);
-
-		serv->split_timer = g_timeout_add(500, (GSourceFunc) netsplit_display_victims, serv);
-	}
-	else if (prefs.strip_quits)
+	if (!netsplit && prefs.strip_quits)
 	{
 		/* strip IRCd Quit: prefix */
 		char *tmp;
@@ -942,12 +947,26 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
  				was_on_front_session = TRUE;
 			if (userlist_remove (sess, nick))
 			{
-				if (!netsplit && !sess->hide_join_part)
+				if (netsplit)
+				{
+					sess->split_list = g_slist_append(sess->split_list, g_strdup(nick));
+
+					if (serv->split_timer)
+						g_source_remove(serv->split_timer);
+
+					serv->split_timer = g_timeout_add(500, (GSourceFunc) netsplit_display_victims, serv);
+				}
+				else if (!sess->hide_join_part)
+				{
 					EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, ip, NULL, 0);
+				}
 			}
-			else if (!netsplit && sess->type == SESS_DIALOG &&
+			else if (sess->type == SESS_DIALOG &&
 				!serv->p_cmp (sess->channel, nick))
+			{
+				/* previously, this wasn't displayed for dialog sessions, I think it's a good idea. :) */
 				EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, ip, NULL, 0);
+			}
 		}
 	}
 

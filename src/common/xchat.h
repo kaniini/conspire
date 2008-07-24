@@ -342,6 +342,7 @@ typedef struct session
 	int scrollwritten;					/* number of lines written */
 
 	char lastnick[NICKLEN];			  /* last nick you /msg'ed */
+	GSList *split_list;					/* a list of netsplitted users for this tab */
 
 	struct history history;
 
@@ -485,7 +486,6 @@ typedef struct server
 	int lag;								/* milliseconds */
 
 	/* netsplit detection. --nenolod */
-	GSList *split_list;
 	guint split_timer;
 	char *split_reason;
 	char *split_serv1;
