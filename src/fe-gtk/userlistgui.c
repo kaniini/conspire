@@ -495,22 +495,6 @@ userlist_click_cb (GtkWidget *widget, GdkEventButton *event, gpointer userdata)
 	return FALSE;
 }
 
-static gboolean
-userlist_key_cb (GtkWidget *wid, GdkEventKey *evt, gpointer userdata)
-{
-	if (evt->keyval >= GDK_asterisk && evt->keyval <= GDK_z)
-	{
-		/* dirty trick to avoid auto-selection */
-		SPELL_ENTRY_SET_EDITABLE (current_sess->gui->input_box, FALSE);
-		gtk_widget_grab_focus (current_sess->gui->input_box);
-		SPELL_ENTRY_SET_EDITABLE (current_sess->gui->input_box, TRUE);
-		gtk_widget_event (current_sess->gui->input_box, (GdkEvent *)evt);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
 GtkWidget *
 userlist_create (GtkWidget *box)
 {
@@ -558,8 +542,6 @@ userlist_create (GtkWidget *box)
 							G_CALLBACK (userlist_dnd_drop), treeview);*/
 	g_signal_connect (G_OBJECT (treeview), "button_press_event",
 							G_CALLBACK (userlist_click_cb), 0);
-	g_signal_connect (G_OBJECT (treeview), "key_press_event",
-							G_CALLBACK (userlist_key_cb), 0);
 
 	g_signal_connect (G_OBJECT (treeview), "drag_begin",
 							G_CALLBACK (mg_drag_begin_cb), NULL);
@@ -572,6 +554,7 @@ userlist_create (GtkWidget *box)
 
 	userlist_add_columns (GTK_TREE_VIEW (treeview));
 
+	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeview), TRUE);
 	gtk_container_add (GTK_CONTAINER (sw), treeview);
 	gtk_widget_show (treeview);
 
