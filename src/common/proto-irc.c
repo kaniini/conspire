@@ -136,7 +136,8 @@ irc_nctcp (server *serv, char *to, char *msg)
 static void
 irc_cycle (server *serv, char *channel, char *key)
 {
-	tcp_sendf (serv, "PART %sJOIN %s %s", channel, channel, key);
+	tcp_sendf(serv, "PART %s", channel);
+	tcp_sendf(serv, "JOIN %s %s", channel, key);
 }
 
 static void
