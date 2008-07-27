@@ -24,7 +24,7 @@
 #include <unistd.h>
 #include <glib.h>
 
-#include "../../config.h"				  /* grab USE_IPV6 and LOOKUPD defines */
+#include "conspire-config.h"				  /* grab USE_IPV6 and LOOKUPD defines */
 
 #define WANTSOCKET
 #define WANTARPA

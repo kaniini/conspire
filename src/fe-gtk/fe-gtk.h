@@ -1,7 +1,7 @@
 #ifndef __FE_GTK_H__
 #define __FE_GTK_H__
 
-#include "../../config.h"
+#include "conspire-config.h"
 
 #include <glib.h>
 

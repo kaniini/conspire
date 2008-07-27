@@ -20,7 +20,7 @@
  *
  */
 
-#include <config.h>
+#include "conspire-config.h"
 #include <glib/gi18n.h>
 #include <glib.h>
 #include <dlfcn.h>

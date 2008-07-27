@@ -22,9 +22,7 @@
 #ifndef AUTOAWAY_H
 #define AUTOAWAY_H
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include "conspire-config.h"
 #include <glib.h>
 #define AUTOAWAY_VERSION "0.4"
 
