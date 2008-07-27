@@ -18,7 +18,7 @@
  *
  */
 
-#include <config.h>
+#include "conspire-config.h"
 #include "autoaway.h"
 #include "gscreensaver.h"
 
