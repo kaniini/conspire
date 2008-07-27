@@ -36,7 +36,7 @@
 #include "xchatc.h"
 #include <ctype.h>
 #include "util.h"
-#include "../../config.h"
+#include "conspire-config.h"
 
 #define WANTSOCKET
 #include "inet.h"
