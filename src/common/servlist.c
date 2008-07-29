@@ -400,7 +400,7 @@ servlist_net_add (char *name, char *comment, int prepend)
 	net = g_new0(ircnet, 1);
 	net->name = g_strdup (name);
 /*	net->comment = strdup (comment);*/
-	net->flags = FLAG_CYCLE | FLAG_USE_GLOBAL | FLAG_USE_PROXY;
+	net->flags = FLAG_CYCLE | FLAG_USE_GLOBAL | FLAG_USE_PROXY | FLAG_AUTO_CONNECT;
 
 	if (prepend)
 		network_list = g_slist_prepend (network_list, net);
