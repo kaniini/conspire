@@ -23,7 +23,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <config.h>
+#include "src/common/conspire-config.h"
 #include <math.h>
 #include "contrast.h"
 
