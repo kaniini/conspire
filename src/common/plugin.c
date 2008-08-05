@@ -35,8 +35,10 @@ plugin_load(const gchar *filename)
 		plugin_dict = mowgli_dictionary_create(g_ascii_strcasecmp);
 
 	m = g_module_open(filename, G_MODULE_BIND_LOCAL);
-	if (m == NULL)
+	if (m == NULL) {
+		printf("Failed to load plugin %s: %s\n", filename, g_module_error());
 		return;
+	}
 
 	if (!g_module_symbol(m, "conspire_get_plugin", &acquire_sym))
 		return;
