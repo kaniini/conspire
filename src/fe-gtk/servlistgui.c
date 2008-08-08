@@ -798,18 +798,30 @@ static GtkWidget *
 servlist_create_textview (GtkWidget *table, char *labeltext, int row,
 							  char *def, GtkWidget **label_ret, char *tip)
 {
-	GtkWidget *label, *entry;
+	GtkWidget *label, *entry, *scrolledwindow;
 	GtkTextBuffer *buffer;
+
+
+
+	scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+	gtk_widget_show (scrolledwindow);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow),
+											  GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow),
+													 GTK_SHADOW_IN);
+
 
 	label = gtk_label_new_with_mnemonic (labeltext);
 	if (label_ret)
 		*label_ret = label;
 	gtk_widget_show (label);
+
 	gtk_table_attach (GTK_TABLE (table), label, 1, 2, row, row+1,
 							GTK_FILL, 0, 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
 
 	entry = gtk_text_view_new ();
+	gtk_container_add (GTK_CONTAINER (scrolledwindow), entry);
 	add_tip(entry, tip);
 	gtk_widget_show (entry);
 
@@ -822,7 +834,7 @@ servlist_create_textview (GtkWidget *table, char *labeltext, int row,
 		gtk_text_buffer_set_text (buffer, def, -1);
 	}
 
-	gtk_table_attach (GTK_TABLE (table), entry, 2, 3, row, row+1,
+	gtk_table_attach (GTK_TABLE (table), scrolledwindow, 2, 3, row, row+1,
 							GTK_FILL|GTK_EXPAND, 0, 0, 0);
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), entry);
 
@@ -1057,12 +1069,12 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 	gtk_entry_set_visibility (GTK_ENTRY (edit_entry_pass), FALSE);
 
 	edit_entry_sasl_user =
-		servlist_create_entry (table3, _("SASL account username:"), 19,
+		servlist_create_entry (table3, _("SASL username:"), 19,
 									  net->sasl_user, 0,
 					_("If your network uses SASL, put your username here."));
 
 	edit_entry_sasl_pass =
-		servlist_create_entry (table3, _("SASL account password:"), 20,
+		servlist_create_entry (table3, _("SASL password:"), 20,
 									  net->sasl_pass, 0,
 					_("If your network uses SASL, put your password here."));
 	gtk_entry_set_visibility (GTK_ENTRY (edit_entry_sasl_pass), FALSE);
