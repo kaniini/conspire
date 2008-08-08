@@ -438,6 +438,26 @@ servlist_update_from_entry (char **str, GtkWidget *entry)
 }
 
 static void
+servlist_update_from_textview (char **str, GtkWidget *view)
+{
+	GtkTextIter start;
+	GtkTextIter end;
+	GtkTextBuffer *buffer;
+
+	if (*str)
+		free(*str);
+
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+
+	/* Obtain iters for the start and end of points of the buffer */
+	gtk_text_buffer_get_start_iter(buffer, &start);
+	gtk_text_buffer_get_end_iter(buffer, &end);
+
+	/* Get the entire buffer text. */
+	*str = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+}
+
+static void
 servlist_closegui(GtkWidget *wid, session *sess)
 {
 	ircnet *net = selected_net;
@@ -448,7 +468,7 @@ servlist_closegui(GtkWidget *wid, session *sess)
 	servlist_update_from_entry (&net->real, edit_entry_real);
 
 	servlist_update_from_entry (&net->autojoin, edit_entry_join);
-	servlist_update_from_entry (&net->command, edit_entry_cmd);
+	servlist_update_from_textview(&net->command, edit_entry_cmd);
 	servlist_update_from_entry (&net->nickserv, edit_entry_nickserv);
 	servlist_update_from_entry (&net->pass, edit_entry_pass);
 
@@ -774,6 +794,42 @@ servlist_create_entry (GtkWidget *table, char *labeltext, int row,
 	return entry;
 }
 
+static GtkWidget *
+servlist_create_textview (GtkWidget *table, char *labeltext, int row,
+							  char *def, GtkWidget **label_ret, char *tip)
+{
+	GtkWidget *label, *entry;
+	GtkTextBuffer *buffer;
+
+	label = gtk_label_new_with_mnemonic (labeltext);
+	if (label_ret)
+		*label_ret = label;
+	gtk_widget_show (label);
+	gtk_table_attach (GTK_TABLE (table), label, 1, 2, row, row+1,
+							GTK_FILL, 0, 0, 0);
+	gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
+
+	entry = gtk_text_view_new ();
+	add_tip(entry, tip);
+	gtk_widget_show (entry);
+
+	/* Set text. */
+	if (def)
+	{
+		/* Obtain the buffer associated with the widget. */
+		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
+		/* Set the default buffer text. */ 
+		gtk_text_buffer_set_text (buffer, def, -1);
+	}
+
+	gtk_table_attach (GTK_TABLE (table), entry, 2, 3, row, row+1,
+							GTK_FILL|GTK_EXPAND, 0, 0, 0);
+	gtk_label_set_mnemonic_widget (GTK_LABEL (label), entry);
+
+	return entry;
+}
+
+
 static gint
 servlist_delete_cb (GtkWidget *win, GdkEventAny *event, gpointer userdata)
 {
@@ -908,6 +964,7 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 	GtkWidget *label17;
 	GtkWidget *label16;
 	GtkWidget *label21;
+	GtkWidget *label22;
 	GtkWidget *label34;
 	GtkWidget *comboboxentry_charset;
 	GtkWidget *hbox1;
@@ -987,11 +1044,6 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 									  net->autojoin, 0,
 				  _("Channels to join, separated by commas, but not spaces!"));
 
-	edit_entry_cmd =
-		servlist_create_entry (table3, _("Connect command:"), 16,
-									  net->command, 0,
-					_("Extra command to execute after connecting. If you need more than one, set this to LOAD -e <filename>, where <filename> is a text-file full of commands to execute."));
-
 	edit_entry_nickserv =
 		servlist_create_entry (table3, _("Nickserv password:"), 17,
 									  net->nickserv, 0,
@@ -1030,6 +1082,22 @@ servlist_open_edit (GtkWidget *parent, ircnet *net)
 	gtk_table_attach (GTK_TABLE (table3), comboboxentry_charset, 2, 3, 21, 22,
 							(GtkAttachOptions) (GTK_FILL),
 							(GtkAttachOptions) (GTK_FILL), 0, 0);
+
+
+	label22 = bold_label (_("Perform"));
+	gtk_table_attach (GTK_TABLE (table3), label22, 0, 3, 22, 23,
+							(GtkAttachOptions) (GTK_FILL),
+							(GtkAttachOptions) (0), 0, 3);
+
+
+	edit_entry_cmd =
+		servlist_create_textview (table3, _("Connect commands:"), 24,
+									  net->command, 0,
+					_("Extra commands to execute after connecting. Alternatively, to run a large series of commands on connect, use LOAD -e <filename>, where <filename> is a text-file full of commands to execute."));
+
+
+
+	/*********** FINITO *************/
 
 	hbox1 = gtk_hbox_new (FALSE, 0);
 	gtk_widget_show (hbox1);
