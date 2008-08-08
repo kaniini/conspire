@@ -1,4 +1,7 @@
-/* X-Chat
+/* Conspire
+ * Copyright (c) 2008 Robin Burchell
+ *
+ * X-Chat
  * Copyright (C) 2004 Peter Zelezny.
  */
 
@@ -343,52 +346,9 @@ servlist_move_network (ircnet *net, int delta)
 	}
 }
 
-#if 0
-static gboolean
-servlist_auto_find (GtkWidget *wid, GdkEventKey *evt, gpointer tree)
-{
-	GtkTreeModel *model = gtk_tree_view_get_model (tree);
-	GtkTreeIter iter;
-	unsigned char c;
-	unsigned char *net_name;
-
-	if (evt->keyval > 0x7a || evt->keyval < 0x41)
-		return FALSE;
-
-	c = toupper (evt->keyval);
-
-	/* scroll to a network that starts with the letter pressed */
-	if (gtk_tree_model_get_iter_first (model, &iter))
-	{
-		do
-		{
-			gtk_tree_model_get (model, &iter, 0, &net_name, -1);
-			if (net_name)
-			{
-				if (toupper (net_name[0]) == c)
-				{
-					servlist_select_and_show (tree, &iter, GTK_LIST_STORE (model));
-					g_free (net_name);
-					return TRUE;
-				}
-				g_free (net_name);
-			}
-		}
-		while (gtk_tree_model_iter_next (model, &iter));
-	}
-
-	return FALSE;
-}
-#endif
-
 static gboolean
 servlist_net_keypress_cb (GtkWidget *wid, GdkEventKey *evt, gpointer tree)
 {
-#if 0		/* GTK's auto-find does this better */
-	if (servlist_auto_find (wid, evt, tree))
-		return TRUE;
-#endif
-
 	if (!selected_net)
 		return FALSE;
 
