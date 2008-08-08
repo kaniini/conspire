@@ -4,7 +4,7 @@
 #include "conspire-config.h"
 
 #include <glib.h>
-
+#include <gtk/gtk.h>
 
 #include <sys/types.h>
 #include <regex.h>
