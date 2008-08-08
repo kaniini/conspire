@@ -535,15 +535,21 @@ lastact_update(session *sess)
 {
 	int newidx;
 
-	/* Find the priority (for the order see before) */
+	/*
+	 * Find the priority (for the order see before).
+	 *  NOTE: we ignore new_data, because (especially with a lot of windows),
+	 *  that makes lastact essentially useless and annoying.
+	 */
 	if (sess->type == SESS_DIALOG)
 	{
 		if (sess->nick_said)
 			newidx = LACT_QUERY_HI;
 		else if (sess->msg_said)
 			newidx = LACT_QUERY;
+/*
 		else if (sess->new_data)
 			newidx = LACT_QUERY;
+*/
 		else
 			newidx = LACT_NONE;
 	}
@@ -553,8 +559,10 @@ lastact_update(session *sess)
 			newidx = LACT_CHAN_HI;
 		else if (sess->msg_said)
 			newidx = LACT_CHAN;
+/*
 		else if (sess->new_data)
 			newidx = LACT_CHAN_DATA;
+*/
 		else
 			newidx = LACT_NONE;
 	}
