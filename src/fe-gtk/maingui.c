@@ -321,21 +321,21 @@ fe_set_title (session *sess)
 	switch (type)
 	{
 	case SESS_DIALOG:
-		snprintf (tbuf, sizeof (tbuf), "conspire: %s %s @ %s",
-					 _("Dialog with"), sess->channel, server_get_network (sess->server, TRUE));
+		snprintf (tbuf, sizeof (tbuf), "%s@%s",
+					sess->channel, server_get_network (sess->server, TRUE));
 		break;
 	case SESS_SERVER:
-		snprintf (tbuf, sizeof (tbuf), "conspire: %s @ %s",
+		snprintf (tbuf, sizeof (tbuf), "%s@%s",
 					 sess->server->nick, server_get_network (sess->server, TRUE));
 		break;
 	case SESS_CHANNEL:
-		snprintf (tbuf, sizeof (tbuf), "conspire: %s @ %s / %s (%s) (%d users, %d ops, %d halfops, %d voices)",
-			 sess->server->nick, server_get_network (sess->server, TRUE),
-			 sess->channel, sess->current_modes ? sess->current_modes : "", sess->total, sess->ops, sess->hops, sess->voices);
+		snprintf (tbuf, sizeof (tbuf), "%s@%s (status: %s, %d users, %d ops, %d halfops, %d voices)",
+			 sess->channel, server_get_network (sess->server, TRUE),
+			 sess->current_modes ? sess->current_modes : "", sess->total, sess->ops, sess->hops, sess->voices);
 		break;
 	case SESS_NOTICES:
 	case SESS_SNOTICES:
-		snprintf (tbuf, sizeof (tbuf), "conspire: %s @ %s (notices)",
+		snprintf (tbuf, sizeof (tbuf), "%s@%s (notices)",
 					 sess->server->nick, server_get_network (sess->server, TRUE));
 		break;
 	default:
