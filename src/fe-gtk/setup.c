@@ -1583,7 +1583,7 @@ setup_window_open (void)
 {
 	GtkWidget *wid, *win, *vbox, *hbox, *hbbox;
 
-	win = gtkutil_window_new (_("conspire: Preferences"), "prefs", 0, 0, 3);
+	win = mg_create_generic_tab(_("Preferences"), _("Preferences"), FALSE, TRUE, setup_ok_cb, NULL, 550, 200, &vbox, NULL);
 
 	vbox = gtk_vbox_new (FALSE, 5);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
@@ -1642,9 +1642,10 @@ setup_open (void)
 
 	if (setup_window)
 	{
-		gtk_window_present (GTK_WINDOW (setup_window));
+		fe_message (_("Preferences editor is already open."), FE_MSG_ERROR);
 		return;
 	}
+
 
 	color_change = FALSE;
 	setup_window = setup_window_open ();
