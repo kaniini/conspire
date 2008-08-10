@@ -2358,39 +2358,76 @@ mg_inputbox_rightclick (GtkEntry *entry, GtkWidget *menu)
 }
 
 static void
-search_handle_change(GtkEditable *editable, session *sess)
+search_toggle_match(GtkWidget *w, int state)
+{
+	if (state == 0)
+	{
+		/* No match */
+		GdkColor c;
+
+		gdk_color_parse ("red", &c);
+		gtk_widget_modify_bg(w, GTK_STATE_NORMAL, &c);
+		gtk_widget_modify_bg(w, GTK_STATE_SELECTED, &c);
+	}
+	else
+	{
+		/* Match */
+		gtk_widget_modify_bg(w, GTK_STATE_NORMAL, NULL);
+		gtk_widget_modify_bg(w, GTK_STATE_SELECTED, NULL);
+	}
+}
+
+#define SEARCH_CHANGE		1
+#define SEARCH_NEXT			2
+#define SEARCH_PREVIOUS		3
+static void
+search_handle_event(int search_type, session *sess)
 {
 	static textentry *last;
-	gchar *text = gtk_editable_get_chars(GTK_EDITABLE(sess->gui->shentry), 0, -1);
+	gchar *text;
+	gboolean backwards = FALSE;
 
-	last = gtk_xtext_search(GTK_XTEXT (sess->gui->xtext), text, last, FALSE, FALSE);
-	if (!last) {
-		g_message("didn't find shit for '%s'", text);
+	switch (search_type)
+	{
+		case SEARCH_CHANGE:
+			/* On keypress, we want to re-search the whole buffer */
+			last = NULL;
+			break;
+		case SEARCH_NEXT:
+			break;
+		case SEARCH_PREVIOUS:
+			backwards = TRUE;
+			break;
 	}
+
+	text = gtk_editable_get_chars(GTK_EDITABLE(sess->gui->shentry), 0, -1);
+	last = gtk_xtext_search(GTK_XTEXT (sess->gui->xtext), text, last, FALSE, backwards);
+	if (!last)
+	{
+		search_toggle_match(sess->gui->shentry, 0);
+	}
+	else
+	{
+		search_toggle_match(sess->gui->shentry, 1);
+	}
+}
+
+static void
+search_handle_change(GtkEditable *editable, session *sess)
+{
+	search_handle_event(SEARCH_CHANGE, sess);
 }
 
 static void
 search_handle_previous(GtkWidget *button, session *sess)
 {
-	static textentry *last;
-	gchar *text = gtk_editable_get_chars(GTK_EDITABLE(sess->gui->shentry), 0, -1);
-
-	last = gtk_xtext_search(GTK_XTEXT (sess->gui->xtext), text, last, FALSE, TRUE);
-	if (!last) {
-		g_message("didn't find shit for '%s'", text);
-	}
+	search_handle_event(SEARCH_PREVIOUS, sess);
 }
 
 static void
 search_handle_next(GtkWidget *button, session *sess)
 {
-	static textentry *last;
-	gchar *text = gtk_editable_get_chars(GTK_EDITABLE(sess->gui->shentry), 0, -1);
-
-	last = gtk_xtext_search(GTK_XTEXT (sess->gui->xtext), text, last, FALSE, FALSE);
-	if (!last) {
-		g_message("didn't find shit for '%s'", text);
-	}
+	search_handle_event(SEARCH_NEXT, sess);
 }
 
 static void
@@ -2415,7 +2452,7 @@ mg_create_search(session *sess, GtkWidget *box)
 
 	next = gtk_button_new_from_stock(GTK_STOCK_GO_FORWARD);
 	gtk_box_pack_start(GTK_BOX(gui->shbox), next, FALSE, FALSE, 0);
-	g_signal_connect(G_OBJECT(previous), "clicked", G_CALLBACK(search_handle_next), sess);
+	g_signal_connect(G_OBJECT(next), "clicked", G_CALLBACK(search_handle_next), sess);
 }
 
 void
@@ -2431,6 +2468,10 @@ mg_search_toggle(session *sess)
 	}
 	else
 	{
+		/* Reset search state */
+		search_toggle_match(sess->gui->shentry, 1);
+
+		/* Show and focus */
 		gtk_widget_show(sess->gui->shbox);
 		gtk_widget_grab_focus(sess->gui->shentry);
 	}
