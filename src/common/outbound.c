@@ -2825,17 +2825,6 @@ cmd_reconnect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	else if (*word[2])
 	{
 		int offset = 0;
-#ifdef GNUTLS
-		int use_ssl = FALSE;
-
-		if (strcmp (word[2], "-ssl") == 0)
-		{
-			use_ssl = TRUE;
-			offset++;	/* args move up by 1 word */
-		}
-		serv->use_ssl = use_ssl;
-		serv->accept_invalid_cert = TRUE;
-#endif
 
 		if (*word[4+offset])
 			g_strlcpy (serv->password, word[4+offset], sizeof (serv->password));
