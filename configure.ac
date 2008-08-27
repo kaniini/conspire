@@ -208,7 +208,7 @@ dnl *********************************************************************
 
 PKG_CHECK_MODULES(MOWGLI, [libmowgli >= 0.6.0], mowgli=yes, mowgli=no)
 if test "$mowgli" = no; then
-	AC_MSG_ERROR("Cannot find acceptable version of mowgli. http://atheme.org/projects/mowgli.shtml")
+	AC_MSG_ERROR("Cannot find acceptable version of mowgli. http://www.atheme.org/Projects/Libmowgli")
 fi
 
 COMMON_CFLAGS="$GLIB_CFLAGS $MOWGLI_CFLAGS"
