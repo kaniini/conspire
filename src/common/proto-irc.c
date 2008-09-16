@@ -1,5 +1,7 @@
-/* X-Chat
- * Copyright (C) 2002 Peter Zelezny.
+/* Conspire
+ * Copyright (C) 1998-2007 Peter Zelezny.
+ * Copyright (C) 2007-2008 Kiyoshi Aman.
+ * Copyright (C) 2007-2008 William Pitcock.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
