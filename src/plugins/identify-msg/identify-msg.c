@@ -34,7 +34,8 @@ process_cap(gpointer *params)
 	switch (cap->op)
 	{
 	case CAP_LS:
-		cap_add_cap(cap, "identify-msg");
+		if (strstr(cap->caps, "identify-msg"))
+			cap_add_cap(cap, "identify-msg");
 		break;
 	case CAP_ACK:
 		if (strstr(cap->caps, "identify-msg"))
