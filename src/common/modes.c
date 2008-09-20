@@ -545,10 +545,6 @@ inbound_005 (server * serv, char *word[])
 			serv->supports_monitor = TRUE;
 		} else if (strncmp (word[w], "NETWORK=", 8) == 0)
 		{
-/*			if (serv->networkname)
-				free (serv->networkname);
-			serv->networkname = strdup (word[w] + 8);*/
-
 			if (serv->server_session->type == SESS_SERVER)
 			{
 				g_strlcpy (serv->server_session->channel, word[w] + 8, CHANLEN);
@@ -571,19 +567,9 @@ inbound_005 (server * serv, char *word[])
 			{
 				server_set_encoding (serv, "UTF-8");
 			}
-		} else if (strcmp (word[w], "NAMESX") == 0)
-		{
-									/* 12345678901234567 */
-			tcp_send_len (serv, "PROTOCTL NAMESX\r\n", 17);
 		} else if (strcmp (word[w], "WHOX") == 0)
 		{
 			serv->have_whox = TRUE;
-		} else if (strcmp (word[w], "CAPAB") == 0)
-		{
-			serv->have_capab = TRUE;
-									/* 12345678901234567890 */
-			tcp_send_len (serv, "CAPAB IDENTIFY-MSG\r\n", 20);
-			/* now wait for numeric 290 */	
 		} else if (strcmp (word[w], "EXCEPTS") == 0)
 		{
 			serv->have_except = TRUE;
