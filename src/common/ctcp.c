@@ -143,7 +143,14 @@ ctcp_handle (session *sess, char *to, char *nick,
 
 	if (!strcasecmp(msg, "CLIENTINFO"))
 	{
-		snprintf(outbuf, sizeof(outbuf), "CLIENTINFO CLIENTINFO PING TIME VERSION");
+		snprintf(outbuf, sizeof(outbuf), "CLIENTINFO CLIENTINFO PING TIME USERINFO VERSION");
+
+		serv->p_nctcp(serv, nick, outbuf);
+	}
+
+	if (!strcasecmp(msg, "USERINFO"))
+	{
+		snprintf(outbuf, sizeof(outbuf), "USERINFO %s", prefs.realname);
 
 		serv->p_nctcp(serv, nick, outbuf);
 	}
