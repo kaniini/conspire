@@ -195,7 +195,7 @@ tls_process_numeric_begin(gpointer *params)
 	server_ssl_handshake(serv);
 
 	/* XXX: this really sucks, but if we emit a new cap message here for SASL, it'll become a loop */
-	if (serv->cap->op == CAP_ACK)
+	if (serv->cap != NULL && serv->cap->op == CAP_ACK)
 	{
 		signal_disconnect("cap message", tls_process_cap);
 		signal_emit("cap message", 1, serv->cap);
