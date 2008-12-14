@@ -2447,10 +2447,12 @@ mg_create_search(session *sess, GtkWidget *box)
 	gui->search_changed_signal = g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(search_handle_change), sess);
 
 	previous = gtk_button_new_from_stock(GTK_STOCK_GO_BACK);
+	gtk_button_set_relief(GTK_BUTTON(previous), GTK_RELIEF_NONE);
 	gtk_box_pack_start(GTK_BOX(gui->shbox), previous, FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(previous), "clicked", G_CALLBACK(search_handle_previous), sess);
 
 	next = gtk_button_new_from_stock(GTK_STOCK_GO_FORWARD);
+	gtk_button_set_relief(GTK_BUTTON(next), GTK_RELIEF_NONE);
 	gtk_box_pack_start(GTK_BOX(gui->shbox), next, FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(next), "clicked", G_CALLBACK(search_handle_next), sess);
 }
