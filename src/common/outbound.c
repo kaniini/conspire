@@ -60,6 +60,8 @@ extern int current_mem_usage;
 #endif
 #define TBUFSIZE 4096
 
+#define IRC_MAX_LENGTH 512
+
 static void help (session *sess, char *tbuf, char *helpcmd, int quiet);
 static CommandResult cmd_server (session *sess, char *tbuf, char *word[], char *word_eol[]);
 static void handle_say (session *sess, char *text, int check_spch);
@@ -2393,88 +2395,55 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static
-GSList *split_message(const struct session *sess, const gchar *text, const gchar *event, const gsize max) {
-	GSList *list  = NULL;
-	gshort count  = 0;
-	gchar *nick   = g_strdup(sess->server->nick);
-	gchar *target = g_strdup(sess->channel);
-	gchar **str   = g_strsplit(text, " ", 0);
-	gint i        = 0;
-	gint j        = 0;
-	gint len      = 0;
-	gchar *host;
-	gchar *tempstr = "\0";
-	gchar *temp;
-	const gchar *space = g_strdup(" ");
-	gchar *note_start   = g_strdup(prefs.text_overflow_start);
-	gchar *note_end     = g_strdup(prefs.text_overflow_stop);
-	gint note_start_len = strlen(note_start);
-	gint note_end_len   = strlen(note_end);
+GQueue *split_message(const struct session *sess, const gchar *text, const gchar *event) {
+    GQueue *list   = g_queue_new();
+    gchar *nick    = g_strdup(sess->server->nick);
+    gchar *target  = g_strdup(sess->channel);
+    gchar *host, *temp;
+    gchar *tempstr = "\0";
+    gint len;
+    gchar *note_stop = g_strdup(prefs.text_overflow_stop);
+    gint stop_len    = strlen(note_stop);
 
-	if (sess->me && sess->me->hostname) {
-		host = g_strdup(sess->me->hostname);
-		temp = g_strdup_printf(":%s!%s@%s %s %s :", nick, prefs.username, host, event, target);
-		len = count = strlen(temp) + 9; /* this is for CTCP ACTION */
-	} else {
-		/* we don't have a hostname, for some reason, so just assume
-		 * it's a maximum of 64 chars
-		 */
-		temp = g_strdup_printf(":%s!%s@%s %s %s :", nick, prefs.username, "", event, target);
-		len = count = strlen(temp) + 9 + 64; /* this is for CTCP ACTION */
-	}
+    /*
+     * build the base string so we know how many bytes to subtract from the
+     * absolute maximum imposed by the IRC standard
+     */
+    if (sess->me && sess->me->hostname) {
+        host = g_strdup(sess->me->hostname);
+        temp = g_strdup_printf(":%s!%s@%s %s %s :", nick, prefs.username, host, event, target);
+        len  = strlen(temp) + 9; /* this is for CTCP ACTION */
+    } else {
+        /*
+         * we don't have a hostname, for some reason, so just assume
+         * it's a maximum of 64 chars
+         */
+        temp = g_strdup_printf(":%s!%s@%s %s %s :", nick, prefs.username, "", event, target);
+        len  = strlen(temp) + 9 + 64; /* this is for CTCP ACTION */
+    }
 
-	while (str[i]) {
-		j = strlen(str[i]);
-		if ((count + j + note_end_len + 2) > max) {
-			if (note_end_len) {
-				tempstr = g_strconcat(tempstr, space, str[i], space, note_end, NULL);
-			} else {
-				tempstr = g_strconcat(tempstr, space, str[i], NULL);
-			}
-			list = g_slist_prepend(list, g_strdup(tempstr));
-			if (note_start_len) {
-				count = len + note_start_len; /* start of next string */
-				tempstr = g_strconcat(note_start, NULL);
-			} else {
-				count = len; /* start of next string */
-				tempstr = NULL;
-			}
-		} else if (str[i+1] != NULL) {
-			if (i == 0) {
-				count += j;
-				tempstr = g_strconcat(str[i], NULL);
-			} else {
-				count += j + 1;
-				tempstr = g_strconcat(tempstr, space, str[i], NULL);
-			}
-		} else {
-			if (i == 0) {
-				tempstr = g_strconcat(str[i], NULL);
-			} else {
-				tempstr = g_strconcat(tempstr, space, str[i], NULL);
-			}
-			list = g_slist_prepend(list, g_strdup(tempstr));
-			break;
-		}
-		i++;
-	}
-	list = g_slist_reverse(list);
+    g_free(temp);
 
-	g_strfreev(str);
-	g_free(nick);
-	g_free(target);
-	g_free(temp);
-	g_free(note_start);
-	g_free(note_end);
+    /*
+     * iterate through the string and push each segment onto a list so we can
+     * later send them out one at a time.
+     */
+    while ((strlen(text) + len + stop_len) > IRC_MAX_LENGTH-1) {
+        tempstr = g_strrstr_len(text, IRC_MAX_LENGTH - (len + stop_len), " ");
+        temp = g_strndup(text, tempstr-text);
+        g_queue_push_tail(list, g_strconcat(temp, " ", note_stop, NULL));
+        text = tempstr;
+    }
+    g_queue_push_tail(list, g_strdup(text));
 
-	return list;
+    return list;
 }
 
 static CommandResult
 cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *act = word_eol[2];
-	GSList *acts = split_message(sess, act, "PRIVMSG", 512);
+	GQueue *acts = split_message(sess, act, "PRIVMSG");
 
 	if (!(*act))
 		return CMD_EXEC_FAIL;
@@ -2496,14 +2465,13 @@ cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		/* DCC CHAT failed, try through server */
 		if (sess->server->connected)
 		{
-			while (acts) {
-				act = (gchar *)acts->data;
+			while (!g_queue_is_empty(acts)) {
+				act = (gchar *)g_queue_pop_head(acts);
 				sess->server->p_action (sess->server, sess->channel, act);
 				/* print it to screen */
 				inbound_action (sess, sess->channel, sess->server->nick, act, TRUE, FALSE);
-				acts = acts->next;
 			}
-			g_slist_free(acts);
+			g_queue_free(acts);
 		} else
 		{
 			notc_msg (sess);
@@ -2536,8 +2504,8 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	char *nick = word[2];
 	char *msg = word_eol[3];
 	struct session *newsess;
-	GSList *msgs = split_message(sess, msg, word[2], 512);
-	GSList *mcopy = g_slist_copy(msgs);
+	GQueue *msgs = split_message(sess, msg, word[2]);
+	GQueue *mcopy = g_queue_copy(msgs);
 
 	if (*nick)
 	{
@@ -2567,33 +2535,29 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 					notc_msg (sess);
 					return CMD_EXEC_OK;
 				}
-				while (msgs) {
-					msg = (gchar *)msgs->data;
+				while (g_queue_is_empty(msgs)) {
+					msg = (gchar *)g_queue_pop_head(msgs);
 					sess->server->p_message (sess->server, nick, msg);
-					msgs = msgs->next;
 				}
-				msgs = g_slist_copy(mcopy);
+				msgs = g_queue_copy(mcopy);
 			}
 			newsess = find_dialog (sess->server, nick);
 			if (!newsess)
 				newsess = find_channel (sess->server, nick);
 			if (newsess) {
-				while (msgs) {
-					msg = (gchar *)msgs->data;
+				while (g_queue_is_empty(msgs)) {
+					msg = (gchar *)g_queue_pop_head(msgs);
 					inbound_chanmsg (newsess->server, NULL, newsess->channel, newsess->server->nick, msg, TRUE, FALSE);
-					msgs = msgs->next;
 				}
-				msgs = g_slist_copy(mcopy);
-			} else {
-				while (msgs) {
-					msg = (gchar *)msgs->data;
+            } else {
+				while (g_queue_is_empty(msgs)) {
+					msg = (gchar *)g_queue_pop_head(msgs);
 					EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
-					msgs = msgs->next;
 				}
 			}
 
-			g_slist_free(msgs);
-			g_slist_free(mcopy);
+			g_queue_free(msgs);
+			g_queue_free(mcopy);
 
 			return CMD_EXEC_OK;
 		}
@@ -4069,14 +4033,13 @@ handle_say (session *sess, char *text, int check_spch)
 
 	if (sess->server->connected)
 	{
-		GSList *msgs = split_message(sess, text, "PRIVMSG", 512);
-		while (msgs) {
-			text = (gchar *)msgs->data;
+		GQueue *msgs = split_message(sess, text, "PRIVMSG");
+		while (!g_queue_is_empty(msgs)) {
+			text = (gchar *)g_queue_pop_head(msgs);
 			inbound_chanmsg (sess->server, sess, sess->channel, sess->server->nick, text, TRUE, FALSE);
 			sess->server->p_message (sess->server, sess->channel, text);
-			msgs = msgs->next;
 		}
-		g_slist_free(msgs);
+        g_queue_free(msgs);
 	} else
 	{
 		notc_msg (sess);
@@ -4274,29 +4237,3 @@ handle_multiline (session *sess, char *cmd, int history, int nocommand)
 	}
 }
 
-/*void
-handle_multiline (session *sess, char *cmd, int history, int nocommand)
-{
-	char *cr;
-
-	cr = strchr (cmd, '\n');
-	if (cr)
-	{
-		while (1)
-		{
-			if (cr)
-				*cr = 0;
-			if (!handle_user_input (sess, cmd, history, nocommand))
-				return;
-			if (!cr)
-				break;
-			cmd = cr + 1;
-			if (*cmd == 0)
-				break;
-			cr = strchr (cmd, '\n');
-		}
-	} else
-	{
-		handle_user_input (sess, cmd, history, nocommand);
-	}
-}*/
