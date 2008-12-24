@@ -1037,19 +1037,26 @@ mg_chan_remove (chan *ch)
 void
 mg_close_gen (chan *ch, GtkWidget *box)
 {
-	char *title = g_object_get_data (G_OBJECT (box), "title");
+	if (box != NULL)
+	{
+		char *title = g_object_get_data(G_OBJECT (box), "title");
 
-	if (title)
-		free (title);
-	if (!ch)
-		ch = g_object_get_data (G_OBJECT (box), "ch");
-	if (ch)
+		if (title != NULL)
+			free(title);
+		if (ch == NULL)
+			ch = g_object_get_data(G_OBJECT (box), "ch");
+	}
+
+	if (ch != NULL)
 	{
 		/* remove from notebook */
-		gtk_widget_destroy (box);
+		if (box != NULL)
+			gtk_widget_destroy(box);
+
 		/* remove the tab from chanview */
 		mg_chan_remove (ch);
-	} else
+	}
+	else if (box != NULL)
 	{
 		gtk_widget_destroy (gtk_widget_get_toplevel (box));
 	}
