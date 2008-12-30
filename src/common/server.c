@@ -353,6 +353,40 @@ server_read (GIOChannel *source, GIOCondition condition, server *serv)
 	}
 }
 
+static gboolean
+server_login (server * serv)
+{
+	const gchar *username, *realname;
+
+	g_return_val_if_fail(serv != NULL, FALSE);
+
+	if (serv->network)
+	{
+		ircnet *net = (ircnet *) serv->network;
+
+		if (net->flags & FLAG_USE_GLOBAL)
+		{
+			username = prefs.username;
+			realname = prefs.realname;
+		}
+		else
+		{
+			username = net->user;
+			realname = net->real;
+		}
+	}
+	else
+	{
+		username = prefs.username;
+		realname = prefs.realname;
+	}
+
+	PrintTextf(serv->server_session, "\00323*\tLogging into server as %s (username: %s, realname: %s)", serv->nick, username, realname);
+	serv->p_login(serv, username, realname);
+
+	return FALSE;
+}
+
 static void
 server_connected (server * serv)
 {
@@ -364,25 +398,63 @@ server_connected (server * serv)
 
 	signal_emit("server connected", 1, serv);
 
-	if (serv->network)
-	{
-		serv->p_login (serv,
-							(!(((ircnet *)serv->network)->flags & FLAG_USE_GLOBAL) &&
-							 (((ircnet *)serv->network)->user)) ?
-							(((ircnet *)serv->network)->user) :
-							prefs.username,
-							(!(((ircnet *)serv->network)->flags & FLAG_USE_GLOBAL) &&
-							 (((ircnet *)serv->network)->real)) ?
-							(((ircnet *)serv->network)->real) :
-							prefs.realname);
-	}
-	else
-	{
-		serv->p_login (serv, prefs.username, prefs.realname);
-	}
+	PrintTextf(serv->server_session, "\00323*\tChecking if IRC 3.0 protocol capability negotiation is supported.");
+	tcp_sendf_now(serv, "CAP LS");
+
+	/* fallback to legacy 2.8 protocol in 5000ms */
+	serv->logintag = g_timeout_add(10000, server_login, serv);
 
 	server_set_name (serv, serv->servername);
 	fe_server_event (serv, FE_SE_CONNECT, 0);
+}
+
+static void
+server_got_cap (gpointer *params)
+{
+	CapState *cap = params[0];
+
+	g_return_if_fail(cap != NULL);
+	g_return_if_fail(cap->serv != NULL);
+
+	if (cap->serv->logintag) {
+		g_source_remove(cap->serv->logintag);
+		cap->serv->logintag = 0;
+
+		if (cap->op == CAP_LS) {
+			PrintTextf(cap->serv->server_session, "\00323*\tIRC 3.0 protocol capability negotiation supported, requesting supported capabilities.");
+		}
+	}
+}
+
+static void
+server_end_cap (gpointer *params)
+{
+	CapState *cap = params[0];
+
+	g_return_if_fail(cap != NULL);
+	g_return_if_fail(cap->serv != NULL);
+
+	PrintTextf(cap->serv->server_session, "\00323*\tIRC 3.0 protocol capability negotiation successful.");
+	server_login(cap->serv);
+}
+
+static void
+server_abort_cap (gpointer *params)
+{
+	session *sess = params[0];
+	server *serv = sess->server;
+
+	g_return_if_fail(sess != NULL);
+	g_return_if_fail(serv != NULL);
+
+	if (serv->logintag) {
+		g_source_remove(serv->logintag);
+		serv->logintag = 0;
+
+		PrintTextf(serv->server_session, "\00323*\tIRC 3.0 protocol capability negotiation failed, aborting.");
+
+		server_login(serv);
+	}
 }
 
 static void
@@ -1272,6 +1344,8 @@ server_set_encoding (server *serv, char *new_encoding)
 	}
 }
 
+static int signals_attached = 0;
+
 server *
 server_new (void)
 {
@@ -1293,6 +1367,13 @@ server_new (void)
 	serv_list = g_slist_prepend (serv_list, serv);
 
 	fe_new_server (serv);
+
+	if (!signals_attached) {
+		signals_attached++;
+		signal_attach("cap message", server_got_cap);
+		signal_attach("cap end", server_end_cap);
+		signal_attach("server numeric 451", server_abort_cap);
+	}
 
 	return serv;
 }

@@ -44,8 +44,6 @@
 static void
 irc_login (server *serv, char *user, char *realname)
 {
-	tcp_sendf_now(serv, "CAP LS");
-
 	if (serv->password[0])
 		tcp_sendf_now (serv, "PASS %s", serv->password);
 
