@@ -2504,7 +2504,7 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	char *nick = word[2];
 	char *msg = word_eol[3];
 	struct session *newsess;
-	GQueue *msgs = split_message(sess, msg, word[2]);
+	GQueue *msgs = split_message(sess, msg, "PRIVMSG");
 	GQueue *mcopy = g_queue_copy(msgs);
 
 	if (*nick)
@@ -2736,16 +2736,29 @@ cmd_query (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *nick = word[2];
 	gboolean focus = TRUE;
+        gboolean send_msg = FALSE;
 
 	if (strcmp (word[2], "-nofocus") == 0)
 	{
 		nick = word[3];
 		focus = FALSE;
+		if (word[4] != NULL)
+		{
+			send_msg = TRUE;
+                        word_eol[3] = g_strdup(word_eol[4]);
+                }
+	} else if (word[3] != NULL)
+        {
+		send_msg = TRUE;
 	}
 
 	if (*nick && !is_channel (sess->server, nick))
 	{
 		open_query (sess->server, nick, focus);
+		if (send_msg)
+		{
+			cmd_msg(sess, tbuf, word, word_eol);
+		}
 		return CMD_EXEC_OK;
 	}
 	return CMD_EXEC_FAIL;
