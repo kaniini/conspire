@@ -2535,7 +2535,7 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 					notc_msg (sess);
 					return CMD_EXEC_OK;
 				}
-				while (g_queue_is_empty(msgs)) {
+				while (!g_queue_is_empty(msgs)) {
 					msg = (gchar *)g_queue_pop_head(msgs);
 					sess->server->p_message (sess->server, nick, msg);
 				}
@@ -2545,12 +2545,12 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			if (!newsess)
 				newsess = find_channel (sess->server, nick);
 			if (newsess) {
-				while (g_queue_is_empty(msgs)) {
+				while (!g_queue_is_empty(msgs)) {
 					msg = (gchar *)g_queue_pop_head(msgs);
 					inbound_chanmsg (newsess->server, NULL, newsess->channel, newsess->server->nick, msg, TRUE, FALSE);
 				}
-            } else {
-				while (g_queue_is_empty(msgs)) {
+			} else {
+				while (!g_queue_is_empty(msgs)) {
 					msg = (gchar *)g_queue_pop_head(msgs);
 					EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
 				}
