@@ -74,7 +74,6 @@ cap_state_unref(CapState *cap)
 		{
 		case CAP_NAK:
 		case CAP_ACK:
-			signal_emit("cap end", 1, cap);
 			tcp_sendf(cap->serv, "CAP END");
 			break;
 

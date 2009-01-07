@@ -546,8 +546,6 @@ typedef struct server
 	int sasl_timeout_tag;
 	CapState *cap;
 	LineQueue *lq;
-
-	int logintag;
 } server;
 
 typedef int (*cmd_callback) (struct session * sess, char *tbuf, char *word[],
