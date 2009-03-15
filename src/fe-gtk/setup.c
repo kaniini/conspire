@@ -142,8 +142,6 @@ static const setting inputbox_settings[] =
 	{ST_TOGGLE, N_("Interpret %C, %B as Color, Bold etc"), &prefs.perc_color,0,0,0},
 
 	{ST_HEADER, N_("Text Overflow"),0,0,0},
-	{ST_ENTRY,  N_("Start indicator"), &prefs.text_overflow_start,
-		N_("Used to indicate the start of a new message due to overflow."), 0},
 	{ST_ENTRY,  N_("Stop indicator"), &prefs.text_overflow_stop,
 		N_("Used to indicate the end of any message due to overflow."), 0},
 

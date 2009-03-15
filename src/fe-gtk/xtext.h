@@ -2,6 +2,7 @@
 #define __XTEXT_H__
 
 #include <cairo.h>
+#include <glib-object.h>
 #include <gtk/gtk.h>
 
 #ifdef USE_SHM
