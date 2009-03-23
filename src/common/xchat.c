@@ -35,7 +35,6 @@
 #include "util.h"
 #include "cfgfiles.h"
 #include "ignore.h"
-#include "timer.h"
 #include "notify.h"
 #include "server.h"
 #include "servlist.h"

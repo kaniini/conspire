@@ -1,11 +1,30 @@
+/* Conspire
+ * Copyright (C) 2008 William Pitcock
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include "xchat.h"
-#include "text.h"
-#include "command_factory.h"
-#include "outbound.h"
-#include "timer.h"
+
+#include "common/plugin.h"
+#include "common/xchat.h"
+#include "common/command_factory.h"
+#include "common/outbound.h"
+#include "common/text.h"
 
 static GSList *timer_list = NULL;
 
@@ -125,13 +144,13 @@ timer_showlist (session *sess)
 	{
 		tim = list->data;
 		PrintTextf (sess, "%5d %8.1f %7d  %s\n", tim->ref, tim->timeout,
-						  tim->repeat, tim->command);
+		    tim->repeat, tim->command);
 		list = list->next;
 	}
 }
 
 CommandResult
-timer_cb (session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_timer (session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int repeat = 1;
 	float timeout;
@@ -180,3 +199,22 @@ timer_cb (session *sess, char *tbuf, char *word[], char *word_eol[])
 
 	return CMD_EXEC_OK;
 }
+
+gboolean
+init(Plugin *p)
+{
+	command_register("TIMER", HELP, 0, cmd_timer);
+	return TRUE;
+}
+
+gboolean
+fini(Plugin *p)
+{
+	command_remove_handler("TIMER", cmd_timer);
+	return TRUE;
+}
+
+PLUGIN_DECLARE("Timer", PACKAGE_VERSION,
+	"A timer plugin for Conspire",
+	"Kiyoshi Aman", init, fini);
+

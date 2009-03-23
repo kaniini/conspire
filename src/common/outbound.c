@@ -52,7 +52,6 @@
 #include "tree.h"
 #include "outbound.h"
 #include "command_factory.h"
-#include "timer.h"
 #include "plugin.h"
 
 #ifdef USE_DEBUG
@@ -3580,9 +3579,6 @@ struct commands xc_cmds[] = {
 	{"SETCURSOR", cmd_setcursor, 0, 0, 1, N_("SETCURSOR [-|+]<position>")},
 	{"SETTAB", cmd_settab, 0, 0, 1, 0},
 	{"SETTEXT", cmd_settext, 0, 0, 1, 0},
-        {"TIMER", timer_cb, 0, 0, 1,
-		N_("Usage: TIMER [-refnum <num>] [-repeat <num>] <seconds> <command>\n"
-		   "       TIMER [-quiet] -delete <num>")},
 	{"TOPIC", cmd_topic, 1, 1, 1,
 	 N_("TOPIC [<topic>], sets the topic if one is given, else shows the current topic")},
 	{"TRAY", cmd_tray, 0, 0, 1,
