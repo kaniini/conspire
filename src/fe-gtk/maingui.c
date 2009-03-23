@@ -1390,6 +1390,7 @@ mg_userlist_button (GtkWidget * box, char *label, char *cmd,
 						  int a, int b, int c, int d)
 {
 	GtkWidget *wid = gtk_button_new_with_label (label);
+	gtk_button_set_relief(GTK_BUTTON(wid), GTK_RELIEF_NONE);
 	g_signal_connect (G_OBJECT (wid), "clicked",
 							G_CALLBACK (userlist_button_cb), cmd);
 	gtk_table_attach_defaults (GTK_TABLE (box), wid, a, b, c, d);
