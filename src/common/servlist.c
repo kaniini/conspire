@@ -88,13 +88,6 @@ servlist_connect (session *sess, ircnet *net, gboolean join)
 	}
 
 	serv->dont_use_proxy = (net->flags & FLAG_USE_PROXY) ? FALSE : TRUE;
-
-#ifdef GNUTLS
-	serv->use_ssl = (net->flags & FLAG_USE_SSL) ? TRUE : FALSE;
-	serv->accept_invalid_cert =
-		(net->flags & FLAG_ALLOW_INVALID) ? TRUE : FALSE;
-#endif
-
 	serv->network = net;
 
 	port = strrchr (ircserv->hostname, '/');
@@ -107,8 +100,7 @@ servlist_connect (session *sess, ircnet *net, gboolean join)
 		{
 #ifdef GNUTLS
 			serv->use_ssl = TRUE;
-			serv->accept_invalid_cert =
-				(net->flags & FLAG_ALLOW_INVALID) ? TRUE : FALSE;
+			serv->accept_invalid_cert = TRUE;
 #endif
 			serv->connect (serv, ircserv->hostname, atoi (port + 2), FALSE);
 		} else
