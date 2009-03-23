@@ -63,8 +63,10 @@ tcp_send_real (server *serv, char *buf, int len)
 {
 	int ret;
 
+	g_return_val_if_fail(serv != NULL, -1);
+
 #ifdef GNUTLS
-	if (serv && serv->gnutls_session)
+	if (serv->gnutls_session)
 		ret = gnutls_record_send(serv->gnutls_session, buf, len);
 	else
 #endif
