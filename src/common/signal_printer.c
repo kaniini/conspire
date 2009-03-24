@@ -41,6 +41,17 @@ signal_printer_action_public(gpointer *params)
 }
 
 void
+signal_printer_user_action(gpointer *params)
+{
+	session *sess   = params[0];
+	gchar *from     = params[1];
+	gchar *text     = params[2];
+	gchar *nickchar = params[3];
+
+	EMIT_SIGNAL (XP_TE_UACTION, sess, from, text, nickchar, NULL, 0);
+}
+
+void
 signal_printer_action_public_highlight(gpointer *params)
 {
 	session *sess   = params[0];
@@ -400,6 +411,17 @@ signal_printer_message_public_highlight(gpointer *params)
 	EMIT_SIGNAL (XP_TE_HCHANMSG, sess, from, message, nickchar, idtext, 0);
 }
 
+void
+signal_printer_user_message_public(gpointer *params)
+{
+	session *sess   = params[0];
+	gchar *from     = params[1];
+	gchar *message  = params[2];
+	gchar *nickchar = params[3];
+
+	EMIT_SIGNAL (XP_TE_UCHANMSG, sess, from, message, nickchar, NULL, 0);
+}
+
 /* notices */
 
 void
@@ -699,6 +721,117 @@ signal_printer_plugin_error(gpointer *params)
 }
 
 void
+signal_printer_user_nick_changed(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	gchar *newnick = params[2];
+
+	EMIT_SIGNAL (XP_TE_UCHANGENICK, sess, nick, newnick, NULL, NULL, 0);
+}
+
+void
+signal_printer_nick_changed(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	gchar *newnick = params[2];
+
+	EMIT_SIGNAL (XP_TE_CHANGENICK, sess, nick, newnick, NULL, NULL, 0);
+}
+
+void
+signal_printer_user_joined(gpointer *params)
+{
+	session *sess  = params[0];
+        gchar *nick    = params[1];
+        gchar *channel = params[2];
+        gchar *host    = params[3];
+
+	EMIT_SIGNAL (XP_TE_UJOIN, sess, nick, channel, host, NULL, 0);
+}
+void
+signal_printer_user_kicked(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	gchar *channel = params[2];
+	gchar *kicker  = params[3];
+	gchar *reason  = params[4];
+
+	EMIT_SIGNAL (XP_TE_UKICK, sess, nick, channel, kicker, reason, 0);
+}
+
+void
+signal_printer_user_part(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	gchar *host    = params[2];
+	gchar *channel = params[3];
+	gchar *reason  = params[4];
+
+	if (*reason)
+		EMIT_SIGNAL (XP_TE_UPARTREASON, sess, nick, host, channel, reason, 0);
+	else
+		EMIT_SIGNAL (XP_TE_UPART, sess, nick, host, channel, NULL, 0);
+}
+
+void
+signal_printer_channel_users(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *channel = params[1];
+	gchar *nicks   = params[2];
+
+	EMIT_SIGNAL (XP_TE_USERSONCHAN, sess, channel, nicks, NULL, NULL, 0);
+}
+
+void
+signal_printer_channel_topic(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *channel = params[1];
+	gchar *topic   = params[2];
+
+	EMIT_SIGNAL (XP_TE_TOPIC, sess, channel, topic, NULL, NULL, 0);
+}
+
+void
+signal_printer_channel_topic_changed(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	gchar *topic   = params[2];
+	gchar *channel = params[3];
+
+	EMIT_SIGNAL (XP_TE_NEWTOPIC, sess, nick, topic, channel, NULL, 0);
+}
+
+void
+signal_printer_channel_join(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	gchar *channel = params[2];
+	gchar *host    = params[3];
+
+	EMIT_SIGNAL (XP_TE_JOIN, sess, nick, channel, host, NULL, 0);
+}
+
+void
+signal_printer_channel_kick(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *kicker  = params[1];
+	gchar *nick    = params[2];
+	gchar *channel = params[3];
+	gchar *reason  = params[4];
+
+	EMIT_SIGNAL (XP_TE_KICK, sess, kicker, nick, channel, reason, 0);
+}
+
+void
 signal_printer_init(void)
 {
 	/* actions */
@@ -707,11 +840,16 @@ signal_printer_init(void)
 
 	/* channels */
 	signal_attach("channel created",    signal_printer_channel_created);
+	signal_attach("channel invited",    signal_printer_channel_invited);
+	signal_attach("channel join error", signal_printer_channel_join_error);
+	signal_attach("channel join",       signal_printer_channel_join);
+	signal_attach("channel kick",       signal_printer_channel_kick);
 	signal_attach("channel list head",  signal_printer_channel_list_head);
 	signal_attach("channel list entry", signal_printer_channel_list_entry);
 	signal_attach("channel modes",      signal_printer_channel_modes);
-	signal_attach("channel join error", signal_printer_channel_join_error);
-	signal_attach("channel invited",    signal_printer_channel_invited);
+	signal_attach("channel topic",      signal_printer_channel_topic);
+	signal_attach("channel topic changed", signal_printer_channel_topic);
+	signal_attach("channel users",      signal_printer_channel_users);
 
 	/* DCC */
 	signal_attach("dcc abort",          signal_printer_dcc_abort);
@@ -743,6 +881,9 @@ signal_printer_init(void)
 	/* channel messages */
 	signal_attach("message public",     signal_printer_message_public);
 	signal_attach("message public highlight", signal_printer_message_public_highlight);
+
+	/* nick stuff */
+	signal_attach("nick changed",       signal_printer_nick_changed);
 
 	/* notices */
 	signal_attach("notice public",      signal_printer_notice_public);
@@ -780,7 +921,13 @@ signal_printer_init(void)
 	signal_attach("ctcp inbound",       signal_printer_ctcp_inbound);
 
 	/* user-sent signals */
+        signal_attach("user action",        signal_printer_user_action);
 	signal_attach("user invite",        signal_printer_user_invite);
+	signal_attach("user joined",        signal_printer_user_joined);
+	signal_attach("user kicked",        signal_printer_user_kicked);
+	signal_attach("user message public", signal_printer_user_message_public);
+	signal_attach("user nick changed",  signal_printer_user_nick_changed);
+        signal_attach("user part",          signal_printer_user_part);
 
 	/* plugins */
 	signal_attach("plugin loaded",      signal_printer_plugin_loaded);
