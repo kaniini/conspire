@@ -75,8 +75,6 @@ plugin_close(const gchar *filename)
 	g_module_close(p->handle);
 
 	mowgli_dictionary_delete(plugin_dict, filename);
-
-	fe_pluginlist_update();		/* XXX: this should be a signal!!!! */
 }
 
 void
