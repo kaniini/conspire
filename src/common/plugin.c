@@ -36,7 +36,7 @@ plugin_load(const gchar *filename)
 
 	m = g_module_open(filename, G_MODULE_BIND_LOCAL);
 	if (m == NULL) {
-		printf("Failed to load plugin %s: %s\n", filename, g_module_error());
+		signal_emit("plugin error", filename, g_module_error());
 		return;
 	}
 
@@ -55,7 +55,7 @@ plugin_load(const gchar *filename)
 
 	mowgli_dictionary_add(plugin_dict, filename, p);
 
-	fe_pluginlist_update();		/* XXX: this should be a signal!!!! */
+	signal_emit("plugin loaded", 2, p->header->name, p->header->version);
 }
 
 void
@@ -67,7 +67,10 @@ plugin_close(const gchar *filename)
 		return;
 
 	if (p->header->fini)
+	{
+		signal_emit("plugin unloaded", 1, p->header->name);
 		p->header->fini(p);
+	}
 
 	g_module_close(p->handle);
 

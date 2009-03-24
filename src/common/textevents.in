@@ -723,3 +723,22 @@ XP_TE_SASL_AUTH
 pevt_saslauth_help
 %C23*%O$t%C23You have successfully authenticated to account '$1'.
 1
+
+Plugin Loaded
+XP_TE_PLUGIN_LOADED
+pevt_plugin_loaded_help
+%C23*%O$t%C23Plugin $1 version $2 successfully loaded.
+2
+
+Plugin Unloaded
+XP_TE_PLUGIN_UNLOADED
+pevt_plugin_unloaded_help
+%C23*%O$t%C23Plugin $1 successfully unloaded.
+1
+
+Plugin Error
+XP_TE_PLUGIN_ERROR
+pevt_plugin_error_help
+%C23*%O$t%C23Couldn't load plugin $1: $2
+2
+

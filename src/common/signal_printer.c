@@ -20,6 +20,7 @@
 #include "text.h"
 #include "modes.h"
 #include "xchatc.h"
+#include "fe.h"
 
 /* DCC */
 #include "dcc.h"
@@ -668,6 +669,36 @@ signal_printer_user_invite(gpointer *params)
 }
 
 void
+signal_printer_plugin_loaded(gpointer *params)
+{
+	gchar *name    = params[0];
+	gchar *version = params[1];
+
+	fe_pluginlist_update();
+
+	EMIT_SIGNAL (XP_TE_PLUGIN_LOADED, current_sess, name, version, NULL, NULL, 0);
+}
+
+void
+signal_printer_plugin_unloaded(gpointer *params)
+{
+	gchar *name    = params[0];
+
+	fe_pluginlist_update();
+
+	EMIT_SIGNAL (XP_TE_PLUGIN_UNLOADED, current_sess, name, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_plugin_error(gpointer *params)
+{
+	gchar *name    = params[0];
+	gchar *message = params[1];
+
+	EMIT_SIGNAL (XP_TE_PLUGIN_ERROR, current_sess, name, message, NULL, NULL, 0);
+}
+
+void
 signal_printer_init(void)
 {
 	/* actions */
@@ -750,5 +781,10 @@ signal_printer_init(void)
 
 	/* user-sent signals */
 	signal_attach("user invite",        signal_printer_user_invite);
+
+	/* plugins */
+	signal_attach("plugin loaded",      signal_printer_plugin_loaded);
+	signal_attach("plugin unloaded",    signal_printer_plugin_unloaded);
+	signal_attach("plugin error",       signal_printer_plugin_error);
 }
 

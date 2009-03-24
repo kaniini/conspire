@@ -364,4 +364,13 @@ N_("%C23*%O$t%C23Netsplit: $1 <-> $2, quits: $3")},
 
 {"Authenticated to Account", pevt_saslauth_help, 1, 
 N_("%C23*%O$t%C23You have successfully authenticated to account '$1'.")},
+
+{"Plugin Loaded", pevt_plugin_loaded_help, 2, 
+N_("%C23*%O$t%C23Plugin $1 version $2 successfully loaded.")},
+
+{"Plugin Unloaded", pevt_plugin_unloaded_help, 1, 
+N_("%C23*%O$t%C23Plugin $1 successfully unloaded.")},
+
+{"Plugin Error", pevt_plugin_error_help, 2, 
+N_("%C23*%O$t%C23Couldn't load plugin $1: $2")},
 };

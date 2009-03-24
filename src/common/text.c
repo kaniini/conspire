@@ -1346,6 +1346,20 @@ static char * const pevt_saslauth_help[] = {
 	N_("SASL account name"),
 };
 
+static char * const pevt_plugin_loaded_help[] = {
+	N_("Plugin name"),
+	N_("Plugin version"),
+};
+
+static char * const pevt_plugin_unloaded_help[] = {
+	N_("Plugin name"),
+};
+
+static char * const pevt_plugin_error_help[] = {
+	N_("Plugin filename"),
+	N_("Error message"),
+};
+
 #include "textevents.h"
 
 static void
