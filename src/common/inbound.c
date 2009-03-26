@@ -377,7 +377,7 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 	}
 
 	if (fromme)
-		EMIT_SIGNAL (XP_TE_UACTION, sess, from, text, nickchar, NULL, 0);
+		signal_emit("user action", 4, sess, from, text, nickchar);
 	else
 		signal_emit("action public", 4, sess, from, text, nickchar);
 }
@@ -423,7 +423,7 @@ inbound_chanmsg (server *serv, session *sess, char *chan, char *from, char *text
 	{
   		if (prefs.auto_unmark_away && serv->is_away)
 			sess->server->p_set_back (sess->server);
-		EMIT_SIGNAL (XP_TE_UCHANMSG, sess, from, text, nickchar, NULL, 0);
+		signal_emit("user message public", sess, from, text, nickchar, NULL, 0);
 		return;
 	}
 
@@ -481,11 +481,9 @@ inbound_newnick (server *serv, char *nick, char *newnick, int quiet)
 				if (!quiet)
 				{
 					if (me)
-						EMIT_SIGNAL (XP_TE_UCHANGENICK, sess, nick, newnick, NULL,
-										 NULL, 0);
+						signal_emit("user nick changed", 3, sess, nick, newnick);
 					else
-						EMIT_SIGNAL (XP_TE_CHANGENICK, sess, nick, newnick, NULL,
-										 NULL, 0);
+						signal_emit("nick changed", 3, sess, nick, newnick);
 				}
 			}
 			if (sess->type == SESS_DIALOG && !serv->p_cmp (sess->channel, nick))
@@ -582,7 +580,7 @@ inbound_ujoin (server *serv, char *chan, char *nick, char *ip)
 	/* sends a MODE */
 	serv->p_join_info (sess->server, chan);
 
-	EMIT_SIGNAL (XP_TE_UJOIN, sess, nick, chan, ip, NULL, 0);
+	signal_emit("user joined", 4, sess, nick, chan, ip);
 
 	if (prefs.userhost)
 	{
@@ -598,7 +596,7 @@ inbound_ukick (server *serv, char *chan, char *kicker, char *reason)
 	session *sess = find_channel (serv, chan);
 	if (sess)
 	{
-		EMIT_SIGNAL (XP_TE_UKICK, sess, serv->nick, chan, kicker, reason, 0);
+		signal_emit("user kicked", 5, sess, serv->nick, chan, kicker, reason);
 		clear_channel (sess);
 		if (prefs.autorejoin)
 		{
@@ -614,11 +612,7 @@ inbound_upart (server *serv, char *chan, char *ip, char *reason)
 	session *sess = find_channel (serv, chan);
 	if (sess)
 	{
-		if (*reason)
-			EMIT_SIGNAL (XP_TE_UPARTREASON, sess, serv->nick, ip, chan, reason,
-							 0);
-		else
-			EMIT_SIGNAL (XP_TE_UPART, sess, serv->nick, ip, chan, NULL, 0);
+		signal_emit("user part", 5, sess, serv->nick, ip, chan, reason);
 		clear_channel (sess);
 	}
 }
@@ -633,12 +627,11 @@ inbound_nameslist (server *serv, char *chan, char *names)
 	sess = find_channel (serv, chan);
 	if (!sess)
 	{
-		EMIT_SIGNAL (XP_TE_USERSONCHAN, serv->server_session, chan, names, NULL,
-						 NULL, 0);
+		signal_emit("users in channel", 3, serv->server_session, chan, names);
 		return;
 	}
 	if (!sess->ignore_names)
-		EMIT_SIGNAL (XP_TE_USERSONCHAN, sess, chan, names, NULL, NULL, 0);
+		signal_emit("users in channel", 3, sess, chan, names);
 
 	if (sess->end_of_names)
 	{
@@ -684,7 +677,7 @@ inbound_topic (server *serv, char *chan, char *topic_text)
 	} else
 		sess = serv->server_session;
 
-	EMIT_SIGNAL (XP_TE_TOPIC, sess, chan, topic_text, NULL, NULL, 0);
+	signal_emit("channel topic", 3, sess, chan, topic_text);
 }
 
 void
@@ -699,7 +692,7 @@ inbound_topicnew (server *serv, char *nick, char *chan, char *topic)
 		new_topic = strip_color (topic, -1, STRIP_ALL);
 		set_topic (sess, new_topic);
 		free (new_topic);
-		EMIT_SIGNAL (XP_TE_NEWTOPIC, sess, nick, topic, chan, NULL, 0);
+		signal_emit("channel topic changed", 4, sess, nick, topic, chan);
 	}
 }
 
@@ -710,7 +703,7 @@ inbound_join (server *serv, char *chan, char *user, char *ip)
 	if (sess)
 	{
 		if (!sess->hide_join_part)
-			EMIT_SIGNAL (XP_TE_JOIN, sess, user, chan, ip, NULL, 0);
+			signal_emit("channel join", 4, sess, user, chan, ip);
 		userlist_add (sess, user, ip);
 	}
 }
@@ -721,7 +714,7 @@ inbound_kick (server *serv, char *chan, char *user, char *kicker, char *reason)
 	session *sess = find_channel (serv, chan);
 	if (sess)
 	{
-		EMIT_SIGNAL (XP_TE_KICK, sess, kicker, user, chan, reason, 0);
+		signal_emit("channel kick", 5, sess, kicker, user, chan, reason);
 		userlist_remove (sess, user);
 	}
 }
@@ -734,10 +727,7 @@ inbound_part (server *serv, char *chan, char *user, char *ip, char *reason)
 	{
 		if (!sess->hide_join_part)
 		{
-			if (*reason)
-				EMIT_SIGNAL (XP_TE_PARTREASON, sess, user, ip, chan, reason, 0);
-			else
-				EMIT_SIGNAL (XP_TE_PART, sess, user, ip, chan, NULL, 0);
+			signal_emit("channel part", 5, sess, user, ip, chan, reason);
 		}
 		userlist_remove (sess, user);
 	}
@@ -753,7 +743,7 @@ inbound_topictime (server *serv, char *chan, char *nick, time_t stamp)
 		sess = serv->server_session;
 
 	tim[24] = 0;	/* get rid of the \n */
-	EMIT_SIGNAL (XP_TE_TOPICDATE, sess, chan, nick, tim, NULL, 0);
+	signal_emit("channel topic date", 4, sess, chan, nick, tim);
 }
 
 static gboolean
@@ -782,14 +772,14 @@ netsplit_display_victims(server *serv)
 				}
 				else
 				{
-					EMIT_SIGNAL(XP_TE_NS_START, sess, serv->split_serv1, serv->split_serv2, buffer->str, NULL, 0);
+					signal_emit("server netsplit", 3, sess, serv, buffer->str);
 					g_string_erase(buffer, 0, -1);
 				}
 				g_free(head->data);
 			}
 
 			if (buffer->len)
-				EMIT_SIGNAL(XP_TE_NS_START, sess, serv->split_serv1, serv->split_serv2, buffer->str, NULL, 0);
+				signal_emit("server netsplit", 3, sess, serv, buffer->str);
 
 			/* free the list for this window */
 			g_slist_free(sess->split_list);
@@ -958,14 +948,14 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 				}
 				else if (!sess->hide_join_part)
 				{
-					EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, ip, NULL, 0);
+					signal_emit("channel quit", 4, sess, nick, reason, ip);
 				}
 			}
 			else if (sess->type == SESS_DIALOG &&
 				!serv->p_cmp (sess->channel, nick))
 			{
 				/* previously, this wasn't displayed for dialog sessions, I think it's a good idea. :) */
-				EMIT_SIGNAL (XP_TE_QUIT, sess, nick, reason, ip, NULL, 0);
+				signal_emit("query quit", 4, sess, nick, reason, ip);
 			}
 		}
 	}
@@ -1005,11 +995,11 @@ inbound_ping_reply (session *sess, char *timestring, char *from)
 		if (sess->server->lag_sent)
 			sess->server->lag_sent = 0;
 		else
-			EMIT_SIGNAL (XP_TE_PINGREP, sess, from, "?", NULL, NULL, 0);
+			signal_attach("server ping reply", 3, sess, from, "?");
 	} else
 	{
 		snprintf (outbuf, sizeof (outbuf), "%ld.%ld%ld", dif / 1000000, (dif / 100000) % 10, dif % 10);
-		EMIT_SIGNAL (XP_TE_PINGREP, sess, from, outbuf, NULL, NULL, 0);
+		signal_attach("server ping reply", 3, sess, from, outbuf);
 	}
 }
 
@@ -1035,7 +1025,9 @@ inbound_ctcp_reply (struct session *sess, char *msg, char *nick)
 	char *type = strtok(temp, " ");
 	short len = strlen(type);
 	msg[strlen(msg)-1] = 0;
-	EMIT_SIGNAL (XP_TE_CTCP_REPLY, sess, nick, type, msg+(len+1), NULL, 0);
+
+	signal_emit("ctcp reply", 4, sess, nick, type, msg+(len+1));
+
 	g_free(temp);
 }
 
@@ -1140,7 +1132,7 @@ inbound_notice (server *serv, char *to, char *nick, char *msg, char *ip, int id)
 		po[0] = 0;
 
 	if (server_notice)
-		EMIT_SIGNAL (XP_TE_SERVNOTICE, sess, msg, nick, NULL, NULL, 0);
+		signal_emit("server notice", 3, sess, msg, nick);
 	else if (ptr)
 		signal_emit("notice public", 4, sess, nick, to, msg);
 	else
@@ -1165,7 +1157,7 @@ inbound_away (server *serv, char *nick, char *msg)
 
 	sess = serv->front_session;
 
-	EMIT_SIGNAL (XP_TE_WHOIS_AWAY, sess, nick, msg, NULL, NULL, 0);
+	signal_emit("whois away", 3, sess, nick, msg);
 
 	list = sess_list;
 	while (list)
@@ -1267,17 +1259,17 @@ inbound_next_nick (session *sess, char *nick)
 		if (net && !(net->flags & FLAG_USE_GLOBAL) && net->nick2)
 			newnick = g_strdup(net->nick2);
 		serv->p_change_nick (serv, newnick);
-		EMIT_SIGNAL (XP_TE_NICKCLASH, sess, nick, newnick, NULL, NULL, 0);
+		signal_emit("nick clash", 3, sess, nick, newnick);
 		break;
 
 	case 3:
 		newnick = g_strdup(prefs.nick3);
 		serv->p_change_nick (serv, prefs.nick3);
-		EMIT_SIGNAL (XP_TE_NICKCLASH, sess, nick, newnick, NULL, NULL, 0);
+		signal_emit("nick clash", 3, sess, nick, newnick);
 		break;
 
 	default:
-		EMIT_SIGNAL (XP_TE_NICKFAIL, sess, NULL, NULL, NULL, NULL, 0);
+		signal_emit("nick error", 1, sess);
 	}
 }
 
@@ -1376,9 +1368,9 @@ inbound_foundip (session *sess, char *ip)
 	if (HostAddr)
 	{
 		prefs.dcc_ip = ((struct in_addr *) HostAddr->h_addr)->s_addr;
-		EMIT_SIGNAL (XP_TE_FOUNDIP, sess,
-						 inet_ntoa (*((struct in_addr *) HostAddr->h_addr)),
-						 NULL, NULL, NULL, 0);
+
+		/* RPL_USERHOST */
+                signal_emit("server numeric 302", 2, sess, inet_ntoa (*((struct in_addr *) HostAddr->h_addr)));
 	}
 }
 
@@ -1456,7 +1448,7 @@ nowindow:
 		if (is_exemption)
 			return FALSE;
 
-		EMIT_SIGNAL (XP_TE_BANLIST, sess, chan, mask, banner, time_str, 0);
+		signal_emit("channel bans", 5, sess, chan, mask, banner, time_str);
 		return TRUE;
 	}
 
@@ -1515,12 +1507,9 @@ inbound_login_end (session *sess, char *text)
 	if (prefs.skipmotd && !serv->motd_skipped)
 	{
 		serv->motd_skipped = TRUE;
-		EMIT_SIGNAL (XP_TE_MOTDSKIP, serv->server_session, NULL, NULL,
-						 NULL, NULL, 0);
 		return;
 	}
-	EMIT_SIGNAL (XP_TE_MOTD, serv->server_session, text, NULL,
-					 NULL, NULL, 0);
+        signal_emit("server motd", 2, serv->server_session, text);
 }
 
 void
