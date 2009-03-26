@@ -17,7 +17,6 @@
 #include "signal_printer.h"
 #include "cap.h"
 #include "linequeue.h"
-#include "session.h"
 
 #ifndef HAVE_SNPRINTF
 #define snprintf g_snprintf
@@ -389,6 +388,8 @@ typedef struct session
 	gboolean immutable;	/* don't close me. */
 	gboolean ul_blocked;	/* don't update the GUI */
 } session;
+
+#include "session.h"
 
 struct msproxy_state_t
 {
