@@ -8,7 +8,6 @@
 struct text_event
 {
 	char *name;
-	char * const *help;
 	int num_args;
 	char *def;
 };
