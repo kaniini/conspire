@@ -102,6 +102,7 @@ formatter_process(const gchar *key, ...)
 	{
 		va_list va;
 		gchar *data[(f->args + 1)];
+		gchar *signame;
 
 		memset(&data, '\0', (sizeof(gpointer) * f->args + 1));
 		g_strlcpy(buf, f->format, 4096);
@@ -112,6 +113,10 @@ formatter_process(const gchar *key, ...)
 			data[i] = va_arg(va, gchar *);
 
 		va_end(va);
+
+		signame = g_strdup_printf("format %s", key);
+		signal_emit(signame, 2, f->args, data);
+		g_free(signame);
 
 		for (i = 1; i <= f->args; i++)
 		{
