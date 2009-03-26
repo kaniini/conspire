@@ -447,7 +447,26 @@ signal_printer_dcc_stoned(gpointer *params)
 	dcc_close(dcc, STAT_ABORTED, FALSE);
 }
 
+void
+signal_printer_dcc_not_found(gpointer *params)
+{
+	session *sess = params[0];
+
+	EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
+}
+
+
 /* non-query private messages */
+
+void
+signal_printer_user_message_private(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	gchar *message = params[2];
+
+	EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
+}
 
 void
 signal_printer_message_private(gpointer *params)
@@ -463,7 +482,6 @@ signal_printer_message_private(gpointer *params)
 		EMIT_SIGNAL (XP_TE_PRIVMSG, sess, nick, message, idtext, NULL, 0);
 	}
 }
-
 
 void
 signal_printer_query_quit(gpointer *params)
@@ -955,6 +973,16 @@ signal_printer_ctcp_reply(gpointer *params)
 }
 
 void
+signal_printer_ctcp_send(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *target  = params[1];
+	gchar *message = params[2];
+
+	EMIT_SIGNAL (XP_TE_CTCPSEND, sess, target, message, NULL, NULL, 0);
+}
+
+void
 signal_printer_channel_bans(gpointer *params)
 {
 	session *sess   = params[0];
@@ -977,6 +1005,70 @@ signal_printer_channel_modes_raw(gpointer *params)
 }
 
 void
+signal_printer_exec_already_running(gpointer *params)
+{
+	session *sess = params[0];
+
+	EMIT_SIGNAL (XP_TE_ALREADYPROCESS, sess, NULL, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_ignore_added(gpointer *params)
+{
+	session *sess = params[0];
+        gchar **word  = params[1];
+
+	EMIT_SIGNAL (XP_TE_IGNOREADD, sess, word[2], NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_ignore_changed(gpointer *params)
+{
+	session *sess = params[0];
+        gchar **word  = params[1];
+
+	EMIT_SIGNAL (XP_TE_IGNORECHANGE, sess, word[2], NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_ignore_removed(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *mask   = params[1];
+
+	EMIT_SIGNAL (XP_TE_IGNOREREMOVE, sess, mask, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_user_notice(gpointer *params)
+{
+	session *sess    = params[0];
+	gchar **word     = params[1];
+	gchar **word_eol = params[2];
+
+	EMIT_SIGNAL (XP_TE_NOTICESEND, sess, word[2], word_eol[3], NULL, NULL, 0);
+}
+
+/* /notify stuff */
+void
+signal_printer_notify_removed(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *nick   = params[1];
+
+	EMIT_SIGNAL (XP_TE_DELNOTIFY, sess, nick, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_notify_removed(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *nick   = params[1];
+
+	EMIT_SIGNAL (XP_TE_ADDNOTIFY, sess, nick, NULL, NULL, NULL, 0);
+}
+
+void
 signal_printer_init(void)
 {
 	/* actions */
@@ -984,6 +1076,7 @@ signal_printer_init(void)
 	signal_attach("action public highlight", signal_printer_action_public_highlight);
 
 	/* CTCPs */
+	signal_attach("ctcp inbound",       signal_printer_ctcp_inbound);
 	signal_attach("ctcp reply",         signal_printer_ctcp_reply);
 
 	/* channels */
@@ -1021,16 +1114,23 @@ signal_printer_init(void)
 	signal_attach("dcc invalid",        signal_printer_dcc_invalid);
 	signal_attach("dcc list start",     signal_printer_dcc_list_start);
 	signal_attach("dcc malformed",      signal_printer_dcc_malformed);
+	signal_attach("dcc not found",      signal_printer_dcc_not_found);
 	signal_attach("dcc recv error",     signal_printer_dcc_recv_error);
 	signal_attach("dcc send complete",  signal_printer_dcc_send_complete);
 	signal_attach("dcc send failed",    signal_printer_dcc_send_failed);
 	signal_attach("dcc send request",   signal_printer_dcc_send_request);
 	signal_attach("dcc stoned",         signal_printer_dcc_stoned);
 
-	/* non-query messages */
-	signal_attach("message private",    signal_printer_message_private);
+	/* exec */
+	signal_attach("exec already running", signal_printer_exec_already_running);
 
-	/* channel messages */
+	/* ignore */
+	signal_attach("ignore added",       signal_printer_ignore_added);
+	signal_attach("ignore changed",     signal_printer_ignore_changed);
+	signal_attach("ignore removed",     signal_printer_ignore_removed);
+
+	/* messages */
+	signal_attach("message private",    signal_printer_message_private);
 	signal_attach("message public",     signal_printer_message_public);
 	signal_attach("message public highlight", signal_printer_message_public_highlight);
 
@@ -1043,6 +1143,10 @@ signal_printer_init(void)
 	signal_attach("notice public",      signal_printer_notice_public);
 	signal_attach("notice private",     signal_printer_notice_private);
 
+	/* notify */
+	signal_attach("notify added",       signal_printer_notify_added);
+	signal_attach("notify removed",     signal_printer_notify_removed);
+
 	/* queries */
 	signal_attach("query open",         signal_printer_query_open);
 	signal_attach("query quit",         signal_printer_query_quit);
@@ -1050,40 +1154,39 @@ signal_printer_init(void)
 	/* server */
 	signal_attach("server connected",   signal_printer_server_connected);
 	signal_attach("server dns lookup",  signal_printer_server_dns_lookup);
-	signal_attach("server stoned",      signal_printer_server_stoned);
-	signal_attach("server text",        signal_printer_server_text);
-	signal_attach("server motd",        signal_printer_server_motd);
-	signal_attach("server wallops",     signal_printer_server_wallops);
 	signal_attach("server error",       signal_printer_server_error);
+	signal_attach("server motd",        signal_printer_server_motd);
 	signal_attach("server notice",      signal_printer_server_notice);
 	signal_attach("server ping reply",  signal_printer_server_ping_reply);
+	signal_attach("server stoned",      signal_printer_server_stoned);
+	signal_attach("server text",        signal_printer_server_text);
+	signal_attach("server wallops",     signal_printer_server_wallops);
 
 	/* whois */
-	signal_attach("whois server",        signal_printer_whois_server);
-	signal_attach("whois name",          signal_printer_whois_name);
-	signal_attach("whois idle",          signal_printer_whois_idle);
-	signal_attach("whois idle signon",   signal_printer_whois_idle_signon);
-	signal_attach("whois end",           signal_printer_whois_end);
-	signal_attach("whois oper",          signal_printer_whois_oper);
-	signal_attach("whois channels",      signal_printer_whois_channels);
 	signal_attach("whois authenticated", signal_printer_whois_authenticated);
-	signal_attach("whois identified",    signal_printer_whois_identified);
+	signal_attach("whois channels",      signal_printer_whois_channels);
+	signal_attach("whois end",           signal_printer_whois_end);
 	signal_attach("whois generic",       signal_printer_whois_generic);
+	signal_attach("whois identified",    signal_printer_whois_identified);
+	signal_attach("whois idle signon",   signal_printer_whois_idle_signon);
+	signal_attach("whois idle",          signal_printer_whois_idle);
+	signal_attach("whois name",          signal_printer_whois_name);
+	signal_attach("whois oper",          signal_printer_whois_oper);
+	signal_attach("whois server",        signal_printer_whois_server);
 
 	/* sasl */
 	signal_attach("sasl complete",      signal_printer_sasl_complete);
 
-	/* ctcp */
-	signal_attach("ctcp inbound",       signal_printer_ctcp_inbound);
-
-	/* user-sent signals */
+	/* outbound user-produced signals */
         signal_attach("user action",        signal_printer_user_action);
 	signal_attach("user invite",        signal_printer_user_invite);
 	signal_attach("user joined",        signal_printer_user_joined);
 	signal_attach("user kicked",        signal_printer_user_kicked);
+      	signal_attach("user message private", signal_printer_user_message_private);
 	signal_attach("user message public", signal_printer_user_message_public);
 	signal_attach("user nick changed",  signal_printer_user_nick_changed);
-        signal_attach("user part",          signal_printer_user_part);
+	signal_attach("user notice",        signal_printer_user_notice);
+	signal_attach("user part",          signal_printer_user_part);
 
 	/* plugins */
 	signal_attach("plugin loaded",      signal_printer_plugin_loaded);

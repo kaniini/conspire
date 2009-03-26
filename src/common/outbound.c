@@ -709,7 +709,7 @@ cmd_ctcp (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 			sess->server->p_ctcp (sess->server, to, msg);
 
-			EMIT_SIGNAL (XP_TE_CTCPSEND, sess, to, msg, NULL, NULL, 0);
+			signal_emit("ctcp send", 3, sess, to, msg);
 
 			return CMD_EXEC_OK;
 		}
@@ -799,7 +799,7 @@ cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 					return CMD_EXEC_FAIL;
 
 				if (!dcc)
-					EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
+					signal_emit("dcc not found", 1, sess);
 
 				return CMD_EXEC_OK;
 
@@ -833,7 +833,7 @@ cmd_dcc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				if (dcc)
 					dcc_get (dcc);
 				else
-					EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
+					signal_emit("dcc not found", 1, sess);
 			}
 			return CMD_EXEC_OK;
 		}
@@ -1379,88 +1379,6 @@ exec_check_process (struct session *sess)
 	}
 }
 
-#ifndef __EMX__
-static CommandResult
-cmd_execs (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	int r;
-
-	exec_check_process (sess);
-	if (sess->running_exec == NULL)
-	{
-		EMIT_SIGNAL (XP_TE_NOCHILD, sess, NULL, NULL, NULL, NULL, 0);
-		return CMD_EXEC_FAIL;
-	}
-	r = kill (sess->running_exec->childpid, SIGSTOP);
-	if (r == -1)
-		PrintText (sess, "Error in kill(2)\n");
-
-	return CMD_EXEC_OK;
-}
-
-static CommandResult
-cmd_execc (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	int r;
-
-	exec_check_process (sess);
-	if (sess->running_exec == NULL)
-	{
-		EMIT_SIGNAL (XP_TE_NOCHILD, sess, NULL, NULL, NULL, NULL, 0);
-		return CMD_EXEC_FAIL;
-	}
-	r = kill (sess->running_exec->childpid, SIGCONT);
-	if (r == -1)
-		PrintText (sess, "Error in kill(2)\n");
-
-	return CMD_EXEC_OK;
-}
-
-static CommandResult
-cmd_execk (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	int r;
-
-	exec_check_process (sess);
-	if (sess->running_exec == NULL)
-	{
-		EMIT_SIGNAL (XP_TE_NOCHILD, sess, NULL, NULL, NULL, NULL, 0);
-		return CMD_EXEC_FAIL;
-	}
-	if (strcmp (word[2], "-9") == 0)
-		r = kill (sess->running_exec->childpid, SIGKILL);
-	else
-		r = kill (sess->running_exec->childpid, SIGTERM);
-	if (r == -1)
-		PrintText (sess, "Error in kill(2)\n");
-
-	return CMD_EXEC_OK;
-}
-
-/* OS/2 Can't have the /EXECW command because it uses pipe(2) not socketpair
-   and thus it is simplex --AGL */
-static CommandResult
-cmd_execw (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	int len;
-	char *temp;
-	exec_check_process (sess);
-	if (sess->running_exec == NULL)
-	{
-		EMIT_SIGNAL (XP_TE_NOCHILD, sess, NULL, NULL, NULL, NULL, 0);
-		return CMD_EXEC_FAIL;
-	}
-	len = strlen(word_eol[2]);
-	temp = malloc(len + 2);
-	sprintf(temp, "%s\n", word_eol[2]);
-	PrintText(sess, temp);
-	write(sess->running_exec->myfd, temp, len + 1);
-	free(temp);
-
-	return CMD_EXEC_OK;
-}
-#endif /* !__EMX__ */
-
 /* convert ANSI escape color codes to mIRC codes */
 
 static short escconv[] =
@@ -1680,7 +1598,7 @@ cmd_exec (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		exec_check_process (sess);
 		if (sess->running_exec != NULL)
 		{
-			EMIT_SIGNAL (XP_TE_ALREADYPROCESS, sess, NULL, NULL, NULL, NULL, 0);
+			signal_emit("exec already running", 1, sess);
 			return CMD_EXEC_OK;
 		}
 
@@ -2148,11 +2066,10 @@ cmd_ignore (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			switch (i)
 			{
 			case 1:
-				EMIT_SIGNAL (XP_TE_IGNOREADD, sess, word[2], NULL, NULL, NULL, 0);
+				signal_emit("ignore added", 2, sess, word);
 				break;
 			case 2:	/* old ignore changed */
-				EMIT_SIGNAL (XP_TE_IGNORECHANGE, sess, word[2], NULL, NULL,
-								 NULL, 0);
+				signal_emit("ignore changed", 2, sess, word);
 			}
 			return CMD_EXEC_OK;
 		}
@@ -2524,7 +2441,7 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				nick++;
 				if (!dcc_write_chat (nick, msg))
 				{
-					EMIT_SIGNAL (XP_TE_NODCC, sess, NULL, NULL, NULL, NULL, 0);
+					signal_emit("dcc not found", 1, sess);
 					return CMD_EXEC_OK;
 				}
 			} else
@@ -2551,7 +2468,7 @@ cmd_msg (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 			} else {
 				while (!g_queue_is_empty(msgs)) {
 					msg = (gchar *)g_queue_pop_head(msgs);
-					EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
+                                        signal_emit("user message private", 3, sess, nick, msg);
 				}
 			}
 
@@ -2621,7 +2538,7 @@ cmd_notice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (*word[2] && *word_eol[3])
 	{
 		sess->server->p_notice (sess->server, word[2], word_eol[3]);
-		EMIT_SIGNAL (XP_TE_NOTICESEND, sess, word[2], word_eol[3], NULL, NULL, 0);
+		signal_emit("user notice", 3, sess, word, word_eol);
 		return CMD_EXEC_OK;
 	}
 	return CMD_EXEC_FAIL;
@@ -2648,11 +2565,11 @@ cmd_notify (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 				break;
 			if (notify_deluser (word[i]))
 			{
-				EMIT_SIGNAL (XP_TE_DELNOTIFY, sess, word[i], NULL, NULL, NULL, 0);
+				signal_emit("notify removed", 2, sess, word[i]);
 				return CMD_EXEC_OK;
 			}
 			notify_adduser (word[i], net);
-			EMIT_SIGNAL (XP_TE_ADDNOTIFY, sess, word[i], NULL, NULL, NULL, 0);
+			signal_emit("notify added", 2, sess, word[i]);
 		}
 	} else
 		notify_showlist (sess);
@@ -3127,7 +3044,7 @@ cmd_unignore (struct session *sess, char *tbuf, char *word[],
 		if (ignore_del (mask, NULL))
 		{
 			if (strcasecmp (arg, "QUIET"))
-				EMIT_SIGNAL (XP_TE_IGNOREREMOVE, sess, mask, NULL, NULL, NULL, 0);
+				signal_emit("ignore removed", 2, sess, mask);
 		}
 		return CMD_EXEC_OK;
 	}
@@ -3472,15 +3389,6 @@ struct commands xc_cmds[] = {
 	{"ECHO", cmd_echo, 0, 0, 1, N_("ECHO <text>, Prints text locally")},
 	{"EXEC", cmd_exec, 0, 0, 1,
 	 N_("EXEC [-o] <command>, runs the command. If -o flag is used then output is sent to current channel, else is printed to current text box")},
-#ifndef __EMX__
-	{"EXECCONT", cmd_execc, 0, 0, 1, N_("EXECCONT, sends the process SIGCONT")},
-#endif
-	{"EXECKILL", cmd_execk, 0, 0, 1,
-	 N_("EXECKILL [-9], kills a running exec in the current session. If -9 is given the process is SIGKILL'ed")},
-#ifndef __EMX__
-	{"EXECSTOP", cmd_execs, 0, 0, 1, N_("EXECSTOP, sends the process SIGSTOP")},
-	{"EXECWRITE", cmd_execw, 0, 0, 1, N_("EXECWRITE, sends data to the processes stdin")},
-#endif
 	{"EXIT", cmd_killall, 0, 0, 1, N_("EXIT terminates all connections and closes Conspire.")},
 	{"FLUSHQ", cmd_flushq, 0, 0, 1, N_("FLUSHQ, flushes the current server's send queue")},
 	{"FOREACH", cmd_foreach, 0, 0, 1, N_("FOREACH <[local-]channel|server|[local-]query> performs a given command for all items of the specified type.")},
