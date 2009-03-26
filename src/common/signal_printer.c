@@ -465,7 +465,7 @@ signal_printer_user_message_private(gpointer *params)
 	gchar *nick    = params[1];
 	gchar *message = params[2];
 
-	EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
+	EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, message, NULL, NULL, 0);
 }
 
 void
@@ -756,6 +756,10 @@ signal_printer_whois_generic(gpointer *params)
 void
 signal_printer_whois_away(gpointer *params)
 {
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	gchar *msg     = params[2];
+
 	EMIT_SIGNAL (XP_TE_WHOIS_AWAY, sess, nick, msg, NULL, NULL, 0);
 }
 
@@ -953,15 +957,6 @@ signal_printer_server_numeric_302(gpointer *params)
 }
 
 void
-signal_printer_server_motd(gpointer *params)
-{
-	session *sess = params[0];
-        gchar *text   = params[1];
-
-	EMIT_SIGNAL (XP_TE_MOTD, serv->server_session, text, NULL, NULL, NULL, 0);
-}
-
-void
 signal_printer_ctcp_reply(gpointer *params)
 {
 	session *sess  = params[0];
@@ -1001,7 +996,7 @@ signal_printer_channel_modes_raw(gpointer *params)
         gchar *nick   = params[1];
         gchar *modes  = params[2];
 
-	EMIT_SIGNAL (XP_TE_RAWMODES, sess, nick, word_eol[offset + 1], 0, 0, 0);
+	EMIT_SIGNAL (XP_TE_RAWMODES, sess, nick, modes, 0, 0, 0);
 }
 
 void
@@ -1060,7 +1055,7 @@ signal_printer_notify_removed(gpointer *params)
 }
 
 void
-signal_printer_notify_removed(gpointer *params)
+signal_printer_notify_added(gpointer *params)
 {
 	session *sess = params[0];
 	gchar *nick   = params[1];
