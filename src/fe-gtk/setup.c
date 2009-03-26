@@ -1595,33 +1595,6 @@ setup_window_open (void)
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
-	/* prepare the button box */
-	hbbox = gtk_hbutton_box_new ();
-	gtk_box_set_spacing (GTK_BOX (hbbox), 4);
-	gtk_box_pack_end (GTK_BOX (hbox), hbbox, FALSE, FALSE, 0);
-
-	/* standard buttons */
-	/* GNOME doesn't like apply */
-#if 0
-	wid = gtk_button_new_from_stock (GTK_STOCK_APPLY);
-	g_signal_connect (G_OBJECT (wid), "clicked",
-							G_CALLBACK (setup_apply_cb), win);
-	gtk_box_pack_start (GTK_BOX (hbbox), wid, FALSE, FALSE, 0);
-#endif
-
-	cancel_button = wid = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-	g_signal_connect (G_OBJECT (wid), "clicked",
-							G_CALLBACK (gtkutil_destroy), win);
-	gtk_box_pack_start (GTK_BOX (hbbox), wid, FALSE, FALSE, 0);
-
-	wid = gtk_button_new_from_stock (GTK_STOCK_OK);
-	g_signal_connect (G_OBJECT (wid), "clicked",
-							G_CALLBACK (setup_ok_cb), win);
-	gtk_box_pack_start (GTK_BOX (hbbox), wid, FALSE, FALSE, 0);
-
-	wid = gtk_hseparator_new ();
-	gtk_box_pack_end (GTK_BOX (vbox), wid, FALSE, FALSE, 0);
-
 	gtk_widget_show_all (win);
 
 	return win;
