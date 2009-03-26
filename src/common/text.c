@@ -862,8 +862,8 @@ pevent_load (char *filename)
 void
 load_text_events ()
 {
-	if (pevent_load(NULL))
-		pevent_load_defaults();
+	pevent_load_defaults();
+	pevent_load(NULL);
 }
 
 #if 0
