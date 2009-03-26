@@ -89,17 +89,6 @@ void *xchat_realloc (char *old, int len, char *file, int line);
 
 #include <mowgli.h>
 
-struct nbexec
-{
-	int myfd;
-	int childpid;
-	int tochannel;					  /* making this int keeps the struct 4-byte aligned */
-	int iotag;
-	char *linebuf;
-	int buffill;
-	struct session *sess;
-};
-
 struct xchatprefs
 {
 	char *nick1;
@@ -358,7 +347,6 @@ typedef struct session
 	int mode_timeout_tag;
 
 	struct session *lastlog_sess;
-	struct nbexec *running_exec;
 
 	struct session_gui *gui;		/* initialized by fe_new_window */
 	struct restore_gui *res;
@@ -526,7 +514,7 @@ typedef struct server
 	int dont_use_proxy:1;		/* to proxy or not to proxy */
 	int supports_watch:1;		/* supports the WATCH command */
 	int supports_monitor:1;		/* supports the MONITOR command */
-	int inside_monitor:1;	
+	int inside_monitor:1;
 	int bad_prefix:1;				/* gave us a bad PREFIX= 005 number */
 	unsigned int have_namesx:1;	/* 005 tokens NAMESX and UHNAMES */
 	unsigned int have_uhnames:1;
