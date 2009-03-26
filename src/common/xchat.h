@@ -17,6 +17,7 @@
 #include "signal_printer.h"
 #include "cap.h"
 #include "linequeue.h"
+#include "session.h"
 
 #ifndef HAVE_SNPRINTF
 #define snprintf g_snprintf
