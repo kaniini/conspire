@@ -682,7 +682,7 @@ process_numeric_323 (gpointer *params)
 	server *serv = sess->server;
 
 	if (!fe_is_chanwindow(serv))
-		signal_emit("server text", 3, serv, text, word[1]);
+		signal_emit("server text", 3, serv->server_session, text, word[1]);
 	else
 		fe_chan_list_end(serv);
 }
