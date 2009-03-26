@@ -119,6 +119,7 @@ formatter_process(Formatter *f, gchar **data)
 	formatter_replace(buf, 4096, "%B", "\x02");
 	formatter_replace(buf, 4096, "%C", "\x03");
 	formatter_replace(buf, 4096, "%O", "\x0F");
+	formatter_replace(buf, 4096, "%U", "\x1F");
 	formatter_replace(buf, 4096, "$t", prefs.indent_nicks ? "\t" : " ");
 	formatter_replace(buf, 4096, "%H", prefs.indent_nicks ? "\x08" : " ");	/* XXX: maybe we should always do this? */
 
