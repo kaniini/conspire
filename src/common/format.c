@@ -57,11 +57,16 @@ static gchar *
 formatter_replace(gchar *s, int size, const gchar *old, const gchar *new)
 {
 	gchar *ptr = s;
-	int left = strlen(s);
-	int avail = size - (left + 1);
-	int oldlen = strlen(old);
-	int newlen = strlen(new);
-	int diff = newlen - oldlen;
+	gint left, avail, oldlen, newlen, diff;
+
+	if (old == NULL || new == NULL)
+		return s;
+
+	left = strlen(s);
+	avail = size - (left + 1);
+	oldlen = strlen(old);
+	newlen = strlen(new);
+	diff = newlen - oldlen;
 
 	while (left >= oldlen)
 	{
@@ -115,6 +120,7 @@ formatter_process(Formatter *f, gchar **data)
 	formatter_replace(buf, 4096, "%C", "\x03");
 	formatter_replace(buf, 4096, "%O", "\x0F");
 	formatter_replace(buf, 4096, "$t", prefs.indent_nicks ? "\t" : " ");
+	formatter_replace(buf, 4096, "%H", prefs.indent_nicks ? "\x08" : " ");	/* XXX: maybe we should always do this? */
 
 	return g_strdup(buf);
 }
