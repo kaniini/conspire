@@ -21,6 +21,7 @@
 #include "modes.h"
 #include "xchatc.h"
 #include "fe.h"
+#include "server.h"
 
 /* DCC */
 #include "dcc.h"
@@ -465,7 +466,7 @@ signal_printer_user_message_private(gpointer *params)
 	gchar *nick    = params[1];
 	gchar *message = params[2];
 
-	EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
+	EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, message, NULL, NULL, 0);
 }
 
 void
@@ -957,15 +958,6 @@ signal_printer_server_numeric_302(gpointer *params)
 }
 
 void
-signal_printer_server_motd(gpointer *params)
-{
-	session *sess = params[0];
-        gchar *text   = params[1];
-
-	EMIT_SIGNAL (XP_TE_MOTD, serv->server_session, text, NULL, NULL, NULL, 0);
-}
-
-void
 signal_printer_server_unknown(gpointer *params)
 {
 	session *sess = params[0];
@@ -1182,8 +1174,8 @@ signal_printer_notify_online(gpointer *params)
 	gchar *nick    = params[1];
 	server *serv   = params[2];
 
-	gchar *servername = g_strdup(serv->servername);
-	gchar *network    = g_strdup(server_get_network(serv, TRUE));
+	gchar *servername = g_strdup((gchar *)serv->servername);
+	gchar *network    = g_strdup((gchar *)server_get_network(serv, TRUE));
 
 	EMIT_SIGNAL (XP_TE_NOTIFYONLINE, sess, nick, servername, network, NULL, 0);
 

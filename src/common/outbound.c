@@ -3356,7 +3356,6 @@ struct commands xc_cmds[] = {
 	{"DEVOICE", cmd_devoice, 1, 1, 1,
 	 N_("DEVOICE <nick>, removes voice status from the nick on the current channel (needs chanop)")},
 	{"DISCONNECT", cmd_discon, 0, 0, 1, N_("DISCON, Disconnects from server")},
-	{"DNS", cmd_dns, 0, 0, 1, N_("DNS <nick|host|ip>, Finds a users IP number")},
 	{"ECHO", cmd_echo, 0, 0, 1, N_("ECHO <text>, Prints text locally")},
 	{"EXEC", cmd_exec, 0, 0, 1,
 	 N_("EXEC [-o] <command>, runs the command. If -o flag is used then output is sent to current channel, else is printed to current text box")},
