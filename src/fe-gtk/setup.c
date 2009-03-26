@@ -56,7 +56,6 @@ GtkStyle *create_input_style (GtkStyle *);
 
 static int last_selected_page = 0;
 static gboolean color_change;
-static GtkWidget *cancel_button;
 
 enum
 {
@@ -1579,7 +1578,7 @@ setup_ok_cb (GtkWidget *but, GtkWidget *win)
 static GtkWidget *
 setup_window_open (void)
 {
-	GtkWidget *wid, *win, *vbox, *hbox, *hbbox;
+	GtkWidget *win, *vbox, *hbox;
 
 	win = mg_create_generic_tab(_("Preferences"), _("Preferences"), FALSE, TRUE, setup_ok_cb, NULL, 550, 200, &vbox, NULL);
 
