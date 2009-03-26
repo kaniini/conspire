@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
-#define _GNU_SOURCE	/* for memrchr */
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -63,7 +62,7 @@ extern int current_mem_usage;
 
 static void help (session *sess, char *tbuf, char *helpcmd, int quiet);
 static CommandResult cmd_server (session *sess, char *tbuf, char *word[], char *word_eol[]);
-static void handle_say (session *sess, char *text, int check_spch);
+static void handle_say(session *sess, char *text, gboolean check_spch, gboolean check_lastlog, gboolean check_completion);
 
 
 static void
@@ -2408,12 +2407,12 @@ cmd_recv (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static CommandResult
-cmd_say (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_say(struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *speech = word_eol[2];
 	if (*speech)
 	{
-		handle_say (sess, speech, FALSE);
+		handle_say(sess, speech, FALSE, TRUE, TRUE);
 		return CMD_EXEC_OK;
 	}
 	return CMD_EXEC_FAIL;
@@ -3542,10 +3541,9 @@ user_command (session * sess, char *tbuf, char *cmd, char *word[],
 	handle_command (sess, tbuf, TRUE);
 }
 
-/* handle text entered without a CMDchar prefix */
-
+/* This seems some serious refactoring. -impl */
 static void
-handle_say (session *sess, char *text, int check_spch)
+handle_say(session *sess, char *text, gboolean check_spch, gboolean check_lastlog, gboolean check_completion)
 {
 	struct DCC *dcc;
 	char *word[PDIWORDS];
@@ -3557,39 +3555,39 @@ handle_say (session *sess, char *text, int check_spch)
 	int len;
 	int newcmdlen = sizeof newcmd_static;
 
-	if (strcmp (sess->channel, "(lastlog)") == 0)
+	if(check_lastlog && strcmp(sess->channel, "(lastlog)") == 0)
 	{
-		lastlog (sess->lastlog_sess, text, sess->lastlog_regexp);
+		lastlog(sess->lastlog_sess, text, sess->lastlog_regexp);
 		return;
 	}
 
 	len = strlen (text);
-	if (len >= sizeof pdibuf_static)
-		pdibuf = malloc (len + 1);
+	if(len >= sizeof pdibuf_static)
+		pdibuf = malloc(len + 1);
 
-	if (len + NICKLEN >= newcmdlen)
-		newcmd = malloc (newcmdlen = len + NICKLEN + 1);
+	if(len + NICKLEN >= newcmdlen)
+		newcmd = malloc(newcmdlen = len + NICKLEN + 1);
 
-	if (check_spch && prefs.perc_color)
-		check_special_chars (text, prefs.perc_ascii);
+	if(check_spch && prefs.perc_color)
+		check_special_chars(text, prefs.perc_ascii);
 
 	/* split the text into words and word_eol */
-	process_data_init (pdibuf, text, word, word_eol, TRUE, FALSE);
+	process_data_init(pdibuf, text, word, word_eol, TRUE, FALSE);
 
 	/* incase a plugin did /close */
-	if (!is_session (sess))
+	if (!is_session(sess))
 		goto xit;
 
 	if (!sess->channel[0] || sess->type == SESS_SERVER || sess->type == SESS_NOTICES || sess->type == SESS_SNOTICES)
 	{
-		notj_msg (sess);
+		notj_msg(sess);
 		goto xit;
 	}
 
-	if (prefs.nickcompletion)
-		perform_nick_completion (sess, text, newcmd);
+	if(check_completion && prefs.nickcompletion)
+		perform_nick_completion(sess, text, newcmd);
 	else
-		g_strlcpy (newcmd, text, newcmdlen);
+		g_strlcpy(newcmd, text, newcmdlen);
 
 	text = newcmd;
 
@@ -3631,7 +3629,7 @@ xit:
 /* handle a command, without the '/' prefix */
 
 int
-handle_command (session *sess, char *cmd, int check_spch)
+handle_command(session *sess, char *cmd, int check_spch)
 {
 	struct popup *pop;
 	int user_cmd = FALSE;
@@ -3766,14 +3764,14 @@ handle_user_input (session *sess, char *text, int history, int nocommand)
 	/* is it NOT a command, just text? */
 	if (nocommand || text[0] != prefs.cmdchar[0])
 	{
-		handle_say (sess, text, TRUE);
+		handle_say(sess, text, TRUE, TRUE, TRUE);
 		return 1;
 	}
 
 	/* check for // */
 	if (text[0] == prefs.cmdchar[0] && text[1] == prefs.cmdchar[0])
 	{
-		handle_say (sess, text + 1, TRUE);
+		handle_say(sess, text + 1, TRUE, TRUE, TRUE);
 		return 1;
 	}
 
@@ -3787,12 +3785,12 @@ handle_user_input (session *sess, char *text, int history, int nocommand)
 		for (i = 0; unix_dirs[i] != NULL; i++)
 			if (strncmp (text, unix_dirs[i], strlen (unix_dirs[i]))==0)
 			{
-				handle_say (sess, text, TRUE);
+				handle_say(sess, text, TRUE, TRUE, TRUE);
 				return 1;
 			}
 	}
 
-	return handle_command (sess, text + 1, TRUE);
+	return handle_command(sess, text + 1, TRUE);
 }
 
 /* changed by Steve Green. Macs sometimes paste with imbedded \r */
@@ -3801,14 +3799,29 @@ handle_multiline (session *sess, char *cmd, int history, int nocommand)
 {
 	while (*cmd)
 	{
-		char *cr = cmd + strcspn (cmd, "\n\r");
+		char *cr = cmd + strcspn(cmd, "\n\r");
 		int end_of_string = *cr == 0;
 		*cr = 0;
-		if (!handle_user_input (sess, cmd, history, nocommand))
+		if(!handle_user_input(sess, cmd, history, nocommand))
 			return;
-		if (end_of_string)
+		if(end_of_string)
 			break;
 		cmd = cr + 1;
 	}
 }
 
+void
+handle_multiline_raw(session *sess, char *text)
+{
+	while(*text)
+	{
+		char *cr = text + strcspn(text, "\n\r");
+		int end_of_string = (*cr == 0);
+		*cr = 0;
+
+		handle_say(sess, text, TRUE, FALSE, FALSE);
+		if(end_of_string)
+			break;
+		text = cr + 1;
+	}
+}

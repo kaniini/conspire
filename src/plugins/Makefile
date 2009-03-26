@@ -1,4 +1,4 @@
 include ../../buildsys.mk
 include ../../extra.mk
 
-SUBDIRS = autoaway highlight-notify helloworld identify-msg timer
+SUBDIRS = autoaway exec highlight-notify helloworld identify-msg timer
