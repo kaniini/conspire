@@ -47,8 +47,8 @@ struct exec_process
 	struct session *session;
 };
 
-mowgli_heap_t *exec_process_heap = NULL;
-mowgli_list_t *exec_processes = NULL;
+static mowgli_heap_t *exec_process_heap = NULL;
+static mowgli_list_t *exec_processes = NULL;
 
 static void
 exec_process_cancel(struct exec_process *process, int signal)
@@ -115,7 +115,7 @@ exec_data(GIOChannel *source, GIOCondition condition, struct exec_process *proce
 	ssize_t size;
 	char *rest = NULL;
 
-	if(process->buffer.length) {
+	if(process->buffer.length > 0) {
 		char *bt;
 
 		bt = realloc(process->buffer.text, process->buffer.length + (sizeof(char) * 2048));
@@ -157,6 +157,8 @@ exec_data(GIOChannel *source, GIOCondition condition, struct exec_process *proce
 
 	if(rest)
 		process->buffer.start = process->buffer.text - rest + 1;
+	else
+		process->buffer.start = process->buffer.length + 1;
 
 	return CMD_EXEC_OK;
 }
