@@ -347,7 +347,7 @@ const struct text_event te[] = {
 {"You Part with Reason", 4, 
 "%C27*$t%C27You have left channel $3: $4"},
 
-{"Your Action", 0, 
+{"Your Action", 3, 
 "%C18*$t$1%O $2"},
 
 {"Your Invitation", 3, 
