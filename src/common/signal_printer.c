@@ -1131,7 +1131,7 @@ signal_printer_notify_list_header(gpointer *params)
 {
 	session *sess = params[0];
 
-	session_print_format(sess, XP_TE_NOTIFYHEAD, NULL, NULL, NULL);
+	session_print_format(sess, "notify header", NULL, NULL, NULL);
 }
 
 void
@@ -1140,7 +1140,7 @@ signal_printer_notify_list_total(gpointer *params)
 	session *sess = params[0];
 	gchar *total  = params[1];
 
-	session_print_format(sess, XP_TE_NOTIFYNUMBER, total, NULL, NULL);
+	session_print_format(sess, "notify number", total, NULL, NULL);
 }
 
 void
@@ -1148,7 +1148,7 @@ signal_printer_notify_list_empty(gpointer *params)
 {
 	session *sess = params[0];
 
-	session_print_format(sess, XP_TE_NOTIFYEMPTY, NULL, NULL, NULL);
+	session_print_format(sess, "notify empty", NULL, NULL, NULL);
 }
 
 void
@@ -1161,7 +1161,7 @@ signal_printer_notify_offline(gpointer *params)
 	gchar *servername = g_strdup(serv->servername);
 	gchar *network    = g_strdup(server_get_network(serv, TRUE));
 
-	session_print_format(sess, XP_TE_NOTIFYOFFLINE, nick, servername, network);
+	session_print_format(sess, "notify offline", nick, servername, network);
 
 	g_free(servername);
 	g_free(network);
@@ -1177,7 +1177,7 @@ signal_printer_notify_online(gpointer *params)
 	gchar *servername = g_strdup((gchar *)serv->servername);
 	gchar *network    = g_strdup((gchar *)server_get_network(serv, TRUE));
 
-	session_print_format(sess, XP_TE_NOTIFYONLINE, nick, servername, network);
+	session_print_format(sess, "notify online", nick, servername, network);
 
 	g_free(servername);
 	g_free(network);
