@@ -36,14 +36,6 @@
 #include "xchatc.h"
 #include "text.h"
 
-struct pevt_stage1
-{
-	int len;
-	char *data;
-	struct pevt_stage1 *next;
-};
-
-
 static void mkdir_p (char *dir);
 
 
