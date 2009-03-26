@@ -1277,8 +1277,7 @@ server_new (void)
 	static int id = 0;
 	server *serv;
 
-	serv = malloc (sizeof (struct server));
-	memset (serv, 0, sizeof (struct server));
+	serv = g_new0(struct server, 1);
 
 	/* use server.c and proto-irc.c functions */
 	server_fill_her_up (serv);
@@ -1471,7 +1470,7 @@ server_free (server *serv)
 
 	linequeue_destroy (serv->lq);
 
-	free (serv);
+	g_free (serv);
 
 	notify_cleanup ();
 }
