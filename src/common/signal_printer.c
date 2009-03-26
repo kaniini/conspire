@@ -1208,7 +1208,8 @@ signal_printer_init(void)
 	signal_attach("channel part",       signal_printer_channel_part);
 	signal_attach("channel quit",       signal_printer_channel_quit);
 	signal_attach("channel topic",      signal_printer_channel_topic);
-	signal_attach("channel topic changed", signal_printer_channel_topic);
+	signal_attach("channel topic date", signal_printer_channel_topic_date);
+	signal_attach("channel topic changed", signal_printer_channel_topic_changed);
 	signal_attach("channel users",      signal_printer_channel_users);
 
 	/* DCC */
