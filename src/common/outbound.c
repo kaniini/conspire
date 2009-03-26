@@ -1327,35 +1327,6 @@ cmd_discon (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static CommandResult
-cmd_dns (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	char *nick = word[2];
-	struct User *user;
-
-	if (*nick)
-	{
-		if (strchr (nick, '.') == NULL)
-		{
-			user = userlist_find (sess, nick);
-			if (user && user->hostname)
-			{
-				do_dns (sess, user->nick, user->hostname);
-			} else
-			{
-				sess->server->p_get_ip (sess->server, nick);
-				sess->server->doing_dns = TRUE;
-			}
-		} else
-		{
-			snprintf (tbuf, TBUFSIZE, "exec -d %s %s", prefs.dnsprogram, nick);
-			handle_command (sess, tbuf, FALSE);
-		}
-		return CMD_EXEC_OK;
-	}
-	return CMD_EXEC_FAIL;
-}
-
-static CommandResult
 cmd_echo (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	PrintText (sess, word_eol[2]);

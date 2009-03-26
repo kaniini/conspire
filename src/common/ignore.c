@@ -31,7 +31,7 @@
 #include "text.h"
 #include "util.h"
 #include "xchatc.h"
-
+#include "signal_factory.h"
 
 int ignored_ctcp = 0;			  /* keep a count of all we ignore */
 int ignored_priv = 0;
@@ -108,7 +108,7 @@ ignore_showlist (session *sess)
 	char tbuf[256];
 	int i = 0;
 
-	EMIT_SIGNAL (XP_TE_IGNOREHEADER, sess, 0, 0, 0, 0, 0);
+	signal_emit("ignore list header", 1, sess);
 
 	while (list)
 	{
@@ -146,15 +146,15 @@ ignore_showlist (session *sess)
 			strcat (tbuf, _("NO   "));
 		strcat (tbuf, "\n");
 		PrintText (sess, tbuf);
-		/*EMIT_SIGNAL (XP_TE_IGNORELIST, sess, ig->mask, 0, 0, 0, 0); */
-		/* use this later, when TE's support 7 args */
+		/* XXX - Uncomment this and make the above not retarded. */
+		/* signal_emit("ignore list entry", 7, sess, ...); */
 		list = list->next;
 	}
 
 	if (!i)
-		EMIT_SIGNAL (XP_TE_IGNOREEMPTY, sess, 0, 0, 0, 0, 0);
+		signal_emit("ignore list empty", 1, sess);
 
-	EMIT_SIGNAL (XP_TE_IGNOREFOOTER, sess, 0, 0, 0, 0, 0);
+	signal_emit("ignore list footer", 1, sess);
 }
 
 /* ignore_del()
