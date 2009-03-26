@@ -967,6 +967,16 @@ signal_printer_channel_bans(gpointer *params)
 }
 
 void
+signal_printer_channel_modes_raw(gpointer *params)
+{
+	session *sess = params[0];
+        gchar *nick   = params[1];
+        gchar *modes  = params[2];
+
+	EMIT_SIGNAL (XP_TE_RAWMODES, sess, nick, word_eol[offset + 1], 0, 0, 0);
+}
+
+void
 signal_printer_init(void)
 {
 	/* actions */
@@ -986,6 +996,7 @@ signal_printer_init(void)
 	signal_attach("channel list head",  signal_printer_channel_list_head);
 	signal_attach("channel list entry", signal_printer_channel_list_entry);
 	signal_attach("channel modes",      signal_printer_channel_modes);
+	signal_attach("channel modes raw",  signal_printer_channel_modes_raw);
 	signal_attach("channel part",       signal_printer_channel_part);
 	signal_attach("channel quit",       signal_printer_channel_quit);
 	signal_attach("channel topic",      signal_printer_channel_topic);

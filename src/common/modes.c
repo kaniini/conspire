@@ -431,7 +431,7 @@ handle_mode (server * serv, char *word[], char *word_eol[],
 	}
 
 	if (!numeric_324)
-		EMIT_SIGNAL (XP_TE_RAWMODES, sess, nick, word_eol[offset + 1], 0, 0, 0);
+		signal_emit("channel modes raw", 3, sess, nick, word_eol[offset + 1]);
 
 	if (fwd)
 		word_eol[offset + 1]--;
