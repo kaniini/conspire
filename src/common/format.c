@@ -126,6 +126,10 @@ formatter_process(const gchar *key, ...)
 
 			g_free(token);
 		}
+
+		formatter_replace(buf, 4096, "%B", "\002");
+		formatter_replace(buf, 4096, "%C", "\003");
+		formatter_replace(buf, 4096, "%O", "\015");
 	}
 
 	return g_strdup(buf);
