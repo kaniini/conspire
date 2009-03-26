@@ -19,6 +19,8 @@
 #define _GNU_SOURCE	/* for memrchr */
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <limits.h>
 
 #include <mowgli.h>
 
@@ -202,7 +204,7 @@ exec_cmd_exec(session *sess, char *tbuf, char *word[], char *word_eol[])
 			}
 		}
 
-		if (socketpair(PF_UNIX, SOCK_STREAM, 0, out) == -1)
+		if(socketpair(PF_UNIX, SOCK_STREAM, 0, out) == -1)
 		{
 			PrintText(sess, "socketpair(2) failed\n");
 			return CMD_EXEC_FAIL;
@@ -218,9 +220,9 @@ exec_cmd_exec(session *sess, char *tbuf, char *word[], char *word_eol[])
 		if(pid == 0)
 		{
 			/* This is the child's context */
-			close(0);
-			close(1);
-			close(2);
+			close(STDIN_FILENO);
+			close(STDOUT_FILENO);
+			close(STDERR_FILENO);
 
 			/* Close parent's end of pipe */
 			close(process->descriptor);
@@ -232,7 +234,8 @@ exec_cmd_exec(session *sess, char *tbuf, char *word[], char *word_eol[])
 			/* Now close all open file descriptors except stdin, stdout and stderr */
 			{
 				int fd;
-				for(fd = 3; fd < 1024; fd++) close(fd);
+				int max = sysconf(_SC_OPEN_MAX);
+				for(fd = 3; fd < max; fd++) close(fd);
 			}
 
 			/* Now we call /bin/sh to run our cmd ; made it more friendly -DC1 */
