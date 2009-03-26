@@ -16,7 +16,7 @@ INCLUDES = \
 base64.h  cap.h ctcp.h   history.h  modes.h     plugin.h     servlist.h        textevents.h  upnp.h      xchatc.h \
 cfgfiles.h         dcc.h    ignore.h  linequeue.h  network.h   proto-irc.h  signal_factory.h  text.h        url.h       xchat.h \
 command_factory.h  debug.h  inbound.h  notify.h    sasl.h       signal_printer.h  userlist.h \
-fe.h     inet.h     outbound.h  server.h     textenums.h       tree.h        util.h	conspire-config.h
+fe.h     inet.h     outbound.h  server.h     tree.h        util.h	conspire-config.h
 
 include ../../buildsys.mk
 include ../../extra.mk
