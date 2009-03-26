@@ -776,107 +776,15 @@ PrintTextf (session *sess, char *format, ...)
 	g_free (buf);
 }
 
-/* Print Events stuff here --AGL */
-
-/* Consider the following a NOTES file:
-
-   The main upshot of this is:
-   * Plugins and Perl scripts (when I get round to signaling perl.c) can intercept text events and do what they like
-   * The default text engine can be config'ed
-
-   By default it should appear *exactly* the same (I'm working hard not to change the default style) but if you go into Settings->Edit Event Texts you can change the text's. The format is thus:
-
-   The normal %Cx (color) and %B (bold) etc work
-
-   $x is replaced with the data in var x (e.g. $1 is often the nick)
-
-   $axxx is replace with a single byte of value xxx (in base 10)
-
-   AGL (990507)
- */
-
-/* These lists are thus:
-   pntevts_text[] are the strings the user sees (WITH %x etc)
-   pntevts[] are the data strings with \000 etc
- */
-
-/* To add a new event:
-
-   Think up a name (like "Join")
-   Make up a pevt_name_help struct
-	Add an entry to textevents.in
-	Type: make textevents
- */
-
-/* Internals:
-
-   On startup ~/.xchat/printevents.conf is loaded if it doesn't exist the
-   defaults are loaded. Any missing events are filled from defaults.
-   Each event is parsed by pevt_build_string and a binary output is produced
-   which looks like:
-
-   (byte) value: 0 = {
-   (int) numbers of bytes
-   (char []) that number of byte to be memcpy'ed into the buffer
-   }
-   1 =
-   (byte) number of varable to insert
-   2 = end of buffer
-
-   Each XP_TE_* signal is hard coded to call text_emit which calls
-   display_event which decodes the data
-
-   This means that this system *should be faster* than snprintf because
-   it always 'knows' that format of the string (basically is preparses much
-   of the work)
-
-   --AGL
- */
-
-char *pntevts[NUM_XP];
-
 #include "textevents.h"
 
 static void
 pevent_load_defaults ()
 {
-	int i;
+	gint i;
 
-	for (i = 0; i < G_ARRAY_SIZE(te); i++)
-	{
-		format_register();
-	}
-}
-
-void
-pevent_make_pntevts ()
-{
-	int i, m;
-	char out[1024];
-
-	for (i = 0; i < NUM_XP; i++)
-	{
-		if (pntevts[i] != NULL)
-			free (pntevts[i]);
-		if (pevt_build_string (pntevts_text[i], &(pntevts[i]), &m) != 0)
-		{
-			snprintf (out, sizeof (out),
-						 _("Error parsing event %s.\nLoading default."), te[i].name);
-			fe_message (out, FE_MSG_WARN);
-			free (pntevts_text[i]);
-			/* make-te.c sets this 128 flag (DON'T call gettext() flag) */
-			if (te[i].num_args & 128)
-				pntevts_text[i] = strdup (te[i].def);
-			else
-				pntevts_text[i] = strdup (_(te[i].def));
-			if (pevt_build_string (pntevts_text[i], &(pntevts[i]), &m) != 0)
-			{
-				fprintf (stderr,
-							"XChat CRITICAL *** default event text failed to build!\n");
-				abort ();
-			}
-		}
-	}
+	for (i = 0; i < G_N_ELEMENTS(te); i++)
+		formatter_register(te[i].name, te[i].def, te[i].num_args);
 }
 
 /* Loading happens at 2 levels:
@@ -884,53 +792,6 @@ pevent_make_pntevts ()
    2) Pe block is parsed and loaded
 
    --AGL */
-
-/* Better hope you pass good args.. --AGL */
-
-static void
-pevent_trigger_load (int *i_penum, char **i_text, char **i_snd)
-{
-	int penum = *i_penum, len;
-	char *text = *i_text, *snd = *i_snd;
-
-	if (penum != -1 && text != NULL)
-	{
-		len = strlen (text) + 1;
-		if (pntevts_text[penum])
-			free (pntevts_text[penum]);
-		pntevts_text[penum] = malloc (len);
-		memcpy (pntevts_text[penum], text, len);
-	}
-
-	if (text)
-		free (text);
-	if (snd)
-		free (snd);
-	*i_text = NULL;
-	*i_snd = NULL;
-	*i_penum = 0;
-}
-
-static int
-pevent_find (char *name, int *i_i)
-{
-	int i = *i_i, j;
-
-	j = i + 1;
-	while (1)
-	{
-		if (j == NUM_XP)
-			j = 0;
-		if (strcmp (te[j].name, name) == 0)
-		{
-			*i_i = j;
-			return j;
-		}
-		if (j == i)
-			return -1;
-		j++;
-	}
-}
 
 int
 pevent_load (char *filename)
@@ -940,11 +801,10 @@ pevent_load (char *filename)
 	 *      //David H
 	 */
 	char *buf, *ibuf;
-	int fd, i = 0, pnt = 0;
+	int fd, pnt = 0;
 	struct stat st;
-	char *text = NULL, *snd = NULL;
-	int penum = 0;
 	char *ofs;
+	Formatter *f = NULL;
 
 	if (filename == NULL)
 		fd = xchat_open_file ("pevents.conf", O_RDONLY, 0, 0);
@@ -976,44 +836,18 @@ pevent_load (char *filename)
 
 		if (strcmp (buf, "event_name") == 0)
 		{
-			if (penum >= 0)
-				pevent_trigger_load (&penum, &text, &snd);
-			penum = pevent_find (ofs, &i);
+			f = formatter_get(ofs);
 			continue;
-		} else if (strcmp (buf, "event_text") == 0)
+		}
+		else if (strcmp (buf, "event_text") == 0)
 		{
-			if (text)
-				free (text);
+			if (f == NULL)
+				continue;
 
-#if 0
-			/* This allows updating of old strings. We don't use new defaults
-				if the user has customized the strings (.e.g a text theme).
-				Hash of the old default is enough to identify and replace it.
-				This only works in English. */
+			if (f->format)
+				g_free(f->format);
 
-			switch (g_str_hash (ofs))
-			{
-			case 0x526743a4:
-		/* %C08,02 Hostmask                  PRIV NOTI CHAN CTCP INVI UNIG %O */
-				text = strdup (te[XP_TE_IGNOREHEADER].def);
-				break;
-
-			case 0xe91bc9c2:
-		/* %C08,02                                                         %O */
-				text = strdup (te[XP_TE_IGNOREFOOTER].def);
-				break;
-
-			case 0x1fbfdf22:
-		/* -%C10-%C11-%O$tDCC RECV: Cannot open $1 for writing - aborting. */
-				text = strdup (te[XP_TE_DCCFILEERR].def);
-				break;
-
-			default:
-				text = strdup (ofs);
-			}
-#else
-			text = strdup (ofs);
-#endif
+			f->format = g_strdup(ofs);
 
 			continue;
 		}
@@ -1021,317 +855,18 @@ pevent_load (char *filename)
 		continue;
 	}
 
-	pevent_trigger_load (&penum, &text, &snd);
 	free (ibuf);
 	return 0;
-}
-
-static void
-pevent_check_all_loaded ()
-{
-	int i;
-
-	for (i = 0; i < NUM_XP; i++)
-	{
-		if (pntevts_text[i] == NULL)
-		{
-			/*printf ("%s\n", te[i].name);
-			snprintf(out, sizeof(out), "The data for event %s failed to load. Reverting to defaults.\nThis may be because a new version of XChat is loading an old config file.\n\nCheck all print event texts are correct", evtnames[i]);
-			   gtkutil_simpledialog(out); */
-			/* make-te.c sets this 128 flag (DON'T call gettext() flag) */
-			if (te[i].num_args & 128)
-				pntevts_text[i] = strdup (te[i].def);
-			else
-				pntevts_text[i] = strdup (_(te[i].def));
-		}
-	}
 }
 
 void
 load_text_events ()
 {
-	memset (&pntevts_text, 0, sizeof (char *) * (NUM_XP));
-	memset (&pntevts, 0, sizeof (char *) * (NUM_XP));
-
-	if (pevent_load (NULL))
-		pevent_load_defaults ();
-	pevent_check_all_loaded ();
-	pevent_make_pntevts ();
+	if (pevent_load(NULL))
+		pevent_load_defaults();
 }
 
-/*
-	CL: format_event now handles filtering of arguments:
-	1) if prefs.stripcolor is set, filter all style control codes from arguments
-	2) always strip \010 (ATTR_HIDDEN) from arguments: it is only for use in the format string itself
-*/
-#define ARG_FLAG(argn) (1 << (argn))
-
-void
-format_event (session *sess, int index, char **args, char *o, int sizeofo, unsigned int stripcolor_args)
-{
-	int len, oi, ii, numargs;
-	char *i, *ar, d, a, done_all = FALSE;
-
-	i = pntevts[index];
-	numargs = te[index].num_args & 0x7f;
-
-	oi = ii = len = d = a = 0;
-	o[0] = 0;
-
-	if (i == NULL)
-		return;
-
-	while (done_all == FALSE)
-	{
-		d = i[ii++];
-		switch (d)
-		{
-		case 0:
-			memcpy (&len, &(i[ii]), sizeof (int));
-			ii += sizeof (int);
-			if (oi + len > sizeofo)
-			{
-				printf ("Overflow in display_event (%s)\n", i);
-				o[0] = 0;
-				return;
-			}
-			memcpy (&(o[oi]), &(i[ii]), len);
-			oi += len;
-			ii += len;
-			break;
-		case 1:
-			a = i[ii++];
-			if (a > numargs)
-			{
-				fprintf (stderr,
-							"XChat DEBUG: display_event: arg > numargs (%d %d %s)\n",
-							a, numargs, i);
-				break;
-			}
-			ar = args[(int) a + 1];
-			if (ar == NULL)
-			{
-				printf ("arg[%d] is NULL in print event\n", a + 1);
-			} else
-			{
-				if (stripcolor_args & ARG_FLAG(a + 1)) len = strip_color2 (ar, -1, &o[oi], STRIP_ALL);
-				else len = strip_hidden_attribute (ar, &o[oi]);
-				oi += len;
-			}
-			break;
-		case 2:
-			o[oi++] = '\n';
-			o[oi++] = 0;
-			done_all = TRUE;
-			continue;
-		case 3:
-/*			if (sess->type == SESS_DIALOG)
-			{
-				if (prefs.dialog_indent_nicks)
-					o[oi++] = '\t';
-				else
-					o[oi++] = ' ';
-			} else
-			{*/
-				if (prefs.indent_nicks)
-					o[oi++] = '\t';
-				else
-					o[oi++] = ' ';
-			/*}*/
-			break;
-		}
-	}
-	o[oi] = 0;
-	if (*o == '\n')
-		o[0] = 0;
-}
-
-static void
-display_event (session *sess, int event, char **args, unsigned int stripcolor_args)
-{
-	char o[4096];
-	format_event (sess, event, args, o, sizeof (o), stripcolor_args);
-	if (o[0])
-		PrintText (sess, o);
-}
-
-int
-pevt_build_string (const char *input, char **output, int *max_arg)
-{
-	struct pevt_stage1 *s = NULL, *base = NULL, *last = NULL, *next;
-	int clen;
-	char o[4096], d, *obuf, *i;
-	int oi, ii, max = -1, len, x;
-
-	len = strlen (input);
-	i = malloc (len + 1);
-	memcpy (i, input, len + 1);
-	check_special_chars (i, TRUE);
-
-	len = strlen (i);
-
-	clen = oi = ii = 0;
-
-	for (;;)
-	{
-		if (ii == len)
-			break;
-		d = i[ii++];
-		if (d != '$')
-		{
-			o[oi++] = d;
-			continue;
-		}
-		if (i[ii] == '$')
-		{
-			o[oi++] = '$';
-			continue;
-		}
-		if (oi > 0)
-		{
-			s = (struct pevt_stage1 *) malloc (sizeof (struct pevt_stage1));
-			if (base == NULL)
-				base = s;
-			if (last != NULL)
-				last->next = s;
-			last = s;
-			s->next = NULL;
-			s->data = malloc (oi + sizeof (int) + 1);
-			s->len = oi + sizeof (int) + 1;
-			clen += oi + sizeof (int) + 1;
-			s->data[0] = 0;
-			memcpy (&(s->data[1]), &oi, sizeof (int));
-			memcpy (&(s->data[1 + sizeof (int)]), o, oi);
-			oi = 0;
-		}
-		if (ii == len)
-		{
-			fe_message ("String ends with a $", FE_MSG_WARN);
-			return 1;
-		}
-		d = i[ii++];
-		if (d == 'a')
-		{								  /* Hex value */
-			x = 0;
-			if (ii == len)
-				goto a_len_error;
-			d = i[ii++];
-			d -= '0';
-			x = d * 100;
-			if (ii == len)
-				goto a_len_error;
-			d = i[ii++];
-			d -= '0';
-			x += d * 10;
-			if (ii == len)
-				goto a_len_error;
-			d = i[ii++];
-			d -= '0';
-			x += d;
-			if (x > 255)
-				goto a_range_error;
-			o[oi++] = x;
-			continue;
-
-		 a_len_error:
-			fe_message ("String ends in $a", FE_MSG_WARN);
-			return 1;
-		 a_range_error:
-			fe_message ("$a value is greater than 255", FE_MSG_WARN);
-			return 1;
-		}
-		if (d == 't')
-		{
-			/* Tab - if tabnicks is set then write '\t' else ' ' */
-			s = (struct pevt_stage1 *) malloc (sizeof (struct pevt_stage1));
-			if (base == NULL)
-				base = s;
-			if (last != NULL)
-				last->next = s;
-			last = s;
-			s->next = NULL;
-			s->data = malloc (1);
-			s->len = 1;
-			clen += 1;
-			s->data[0] = 3;
-
-			continue;
-		}
-		if (d < '1' || d > '9')
-		{
-			snprintf (o, sizeof (o), "Error, invalid argument $%c\n", d);
-			fe_message (o, FE_MSG_WARN);
-			return 1;
-		}
-		d -= '0';
-		if (max < d)
-			max = d;
-		s = (struct pevt_stage1 *) malloc (sizeof (struct pevt_stage1));
-		if (base == NULL)
-			base = s;
-		if (last != NULL)
-			last->next = s;
-		last = s;
-		s->next = NULL;
-		s->data = malloc (2);
-		s->len = 2;
-		clen += 2;
-		s->data[0] = 1;
-		s->data[1] = d - 1;
-	}
-	if (oi > 0)
-	{
-		s = (struct pevt_stage1 *) malloc (sizeof (struct pevt_stage1));
-		if (base == NULL)
-			base = s;
-		if (last != NULL)
-			last->next = s;
-		last = s;
-		s->next = NULL;
-		s->data = malloc (oi + sizeof (int) + 1);
-		s->len = oi + sizeof (int) + 1;
-		clen += oi + sizeof (int) + 1;
-		s->data[0] = 0;
-		memcpy (&(s->data[1]), &oi, sizeof (int));
-		memcpy (&(s->data[1 + sizeof (int)]), o, oi);
-		oi = 0;
-	}
-	s = (struct pevt_stage1 *) malloc (sizeof (struct pevt_stage1));
-	if (base == NULL)
-		base = s;
-	if (last != NULL)
-		last->next = s;
-	last = s;
-	s->next = NULL;
-	s->data = malloc (1);
-	s->len = 1;
-	clen += 1;
-	s->data[0] = 2;
-
-	oi = 0;
-	s = base;
-	obuf = malloc (clen);
-	while (s)
-	{
-		next = s->next;
-		memcpy (&obuf[oi], s->data, s->len);
-		oi += s->len;
-		free (s->data);
-		free (s);
-		s = next;
-	}
-
-	free (i);
-
-	if (max_arg)
-		*max_arg = max;
-	if (output)
-		*output = obuf;
-
-	return 0;
-}
-
-
+#if 0
 /* black n white(0/1) are bad colors for nicks, and we'll use color 2 for us */
 /* also light/dark gray (14/15) */
 /* 5,7,8 are all shades of yellow which happen to look dman near the same */
@@ -1348,73 +883,13 @@ color_of (char *name)
 	sum %= sizeof (rcolors) / sizeof (char);
 	return rcolors[sum];
 }
-
+#endif
 
 /* called by EMIT_SIGNAL macro */
-
-void
-text_emit (int index, session *sess, char *a, char *b, char *c, char *d)
-{
-	char *word[PDIWORDS];
-	int i;
-	unsigned int stripcolor_args = (prefs.stripcolor ? 0xFFFFFFFF : 0);
-	char tbuf[NICKLEN + 4];
-
-	if (prefs.colorednicks && (index == XP_TE_CHANACTION || index == XP_TE_CHANMSG || index == XP_TE_DPRIVMSG))
-	{
-		snprintf (tbuf, sizeof (tbuf), "\003%d%s", color_of (a), a);
-		a = tbuf;
-		stripcolor_args &= ~ARG_FLAG(1);	/* don't strip color from this argument */
-	} else if (prefs.colorednicks && prefs.coloredhnicks && (index == XP_TE_HCHANACTION || index == XP_TE_HCHANMSG)) {
-		snprintf(tbuf, sizeof(tbuf), "\003%d%s", color_of(a), a);
-		a = tbuf;
-		stripcolor_args &= ~ARG_FLAG(1);
-	}
-
-	word[0] = te[index].name;
-	word[1] = (a ? a : "\000");
-	word[2] = (b ? b : "\000");
-	word[3] = (c ? c : "\000");
-	word[4] = (d ? d : "\000");
-	for (i = 5; i < PDIWORDS; i++)
-		word[i] = "\000";
-
-	/* If a plugin's callback executes "/close", 'sess' may be invalid */
-	if (is_session (sess))
-		display_event (sess, index, word, stripcolor_args);
-}
-
-char *
-text_find_format_string (char *name)
-{
-	int i = 0;
-
-	i = pevent_find (name, &i);
-	if (i >= 0)
-		return pntevts_text[i];
-
-	return NULL;
-}
-
-int
-text_emit_by_name (char *name, session *sess, char *a, char *b, char *c, char *d)
-{
-	int i = 0;
-
-	i = pevent_find (name, &i);
-	if (i >= 0)
-	{
-		text_emit (i, sess, a, b, c, d);
-		return 1;
-	}
-
-	return 0;
-}
-
 void
 pevent_save (char *fn)
 {
-	int fd, i;
+	int fd;
 	char buf[1024];
 
 	if (!fn)
@@ -1435,6 +910,7 @@ pevent_save (char *fn)
 		return;
 	}
 
+#if 0
 	for (i = 0; i < NUM_XP; i++)
 	{
 		write (fd, buf, snprintf (buf, sizeof (buf),
@@ -1442,6 +918,7 @@ pevent_save (char *fn)
 		write (fd, buf, snprintf (buf, sizeof (buf),
 										  "event_text=%s\n\n", pntevts_text[i]));
 	}
+#endif
 
 	close (fd);
 }
