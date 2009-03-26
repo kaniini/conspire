@@ -1352,12 +1352,7 @@ inbound_foundip (session *sess, char *ip)
 
 	HostAddr = gethostbyname (ip);
 	if (HostAddr)
-	{
 		prefs.dcc_ip = ((struct in_addr *) HostAddr->h_addr)->s_addr;
-
-		/* RPL_USERHOST */
-                signal_emit("server numeric 302", 2, sess, inet_ntoa (*((struct in_addr *) HostAddr->h_addr)));
-	}
 }
 
 void

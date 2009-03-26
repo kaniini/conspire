@@ -1275,6 +1275,7 @@ signal_printer_init(void)
 	signal_attach("query quit",         signal_printer_query_quit);
 
 	/* server */
+	signal_attach("server connect",   signal_printer_server_connect);
 	signal_attach("server connected",   signal_printer_server_connected);
 	signal_attach("server dns lookup",  signal_printer_server_dns_lookup);
 	signal_attach("server error",       signal_printer_server_error);
