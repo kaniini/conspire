@@ -104,7 +104,6 @@ formatter_process(const gchar *key, gchar **data)
 	{
 		gchar *signame;
 
-		memset(&data, '\0', (sizeof(gpointer) * f->args + 1));
 		g_strlcpy(buf, f->format, 4096);
 
 		signame = g_strdup_printf("format %s", key);
