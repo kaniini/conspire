@@ -218,13 +218,13 @@ signal_printer_dcc_abort(gpointer *params)
 	switch (dcc->type) {
 		case TYPE_CHATSEND:
 		case TYPE_CHATRECV:
-			EMIT_SIGNAL (XP_TE_DCCCHATABORT, serv->front_session, dcc->nick, NULL, NULL);
+			session_print_format(serv->front_session, "dcc chat abort", dcc->nick, NULL, NULL);
 			break;
 		case TYPE_SEND:
-			EMIT_SIGNAL (XP_TE_DCCSENDABORT, serv->front_session, dcc->nick, NULL, NULL);
+			session_print_format(serv->front_session, "dcc send abort", dcc->nick, NULL, NULL);
 			break;
 		case TYPE_RECV:
-			EMIT_SIGNAL (XP_TE_DCCRECVABORT, serv->front_session, dcc->nick, NULL, NULL);
+			session_print_format(serv->front_session, "dcc recv abort", dcc->nick, NULL, NULL);
 			break;
 	}
 }
@@ -245,7 +245,7 @@ signal_printer_dcc_chat_failed(gpointer *params)
 	gchar *portbuf = params[1];
 	gchar *error = params[2];
 
-	EMIT_SIGNAL (XP_TE_DCCCHATF, serv->front_session, dcc->nick, net_ip(dcc->addr), portbuf, error, 0);
+	session_print_format(serv->front_session, "dcc chat failed", dcc->nick, net_ip(dcc->addr), portbuf, error, 0);
 	dcc_close(dcc, STAT_FAILED, FALSE);
 }
 
@@ -262,7 +262,7 @@ signal_printer_dcc_chat_request(gpointer *params)
 {
 	struct session *sess = params[0];
 	gchar *nick = params[1];
-	EMIT_SIGNAL (XP_TE_DCCCHATOFFER, sess->server->front_session, nick, NULL, NULL);
+	session_print_format(sess->server->front_session, "dcc chat offer", nick, NULL, NULL);
 }
 
 void
@@ -274,13 +274,13 @@ signal_printer_dcc_connected(gpointer *params)
 
 	switch (dcc->type) {
 		case TYPE_SEND:
-			EMIT_SIGNAL (XP_TE_DCCCONSEND, serv->front_session, dcc->nick, host, dcc->file);
+			session_print_format(serv->front_session, "dcc send connect", dcc->nick, host, dcc->file);
 			break;
 		case TYPE_RECV:
-			EMIT_SIGNAL (XP_TE_DCCCONRECV, serv->front_session, dcc->nick, host, dcc->file);
+			session_print_format(serv->front_session, "dcc recv connect", dcc->nick, host, dcc->file);
 			break;
 		case TYPE_CHATRECV:
-			EMIT_SIGNAL (XP_TE_DCCCONCHAT, serv->front_session, dcc->nick, host, NULL);
+			session_print_format(serv->front_session, "dcc chat connect", dcc->nick, host, NULL);
 			break;
 	}
 }
@@ -293,7 +293,7 @@ signal_printer_dcc_failed(gpointer *params)
 	server *serv = dcc->serv;
 	gchar *type = g_strdup(dcctypes[dcc->type]);
 
-	EMIT_SIGNAL (XP_TE_DCCCONFAIL, serv->front_session, type, dcc->nick, error);
+	session_print_format(serv->front_session, "dcc connection failed", type, dcc->nick, error);
 	g_free(type);
 }
 
@@ -308,7 +308,7 @@ signal_printer_dcc_file_complete(gpointer *params)
 	dcc_calc_average_cps (dcc);	/* this must be done _after_ dcc_close, or dcc_remove_from_sum will see the wrong value in dcc->cps */
 	buf = g_strdup_printf("%d", dcc->cps);
 
-	EMIT_SIGNAL (XP_TE_DCCRECVCOMP, serv->front_session, dcc->file, dcc->destfile, dcc->nick, buf, 0);
+	session_print_format(serv->front_session, "dcc recv complete", dcc->file, dcc->destfile, dcc->nick, buf, 0);
 	g_free(buf);
 }
 
@@ -385,7 +385,7 @@ signal_printer_dcc_malformed(gpointer *params)
 	struct session *sess = params[0];
 	gchar *nick = params[1];
 	gchar *data = params[2];
-	session_print_format(sess, XP_TE_MALFORMED, nick, data, NULL);
+	session_print_format(sess, "dcc malformed", nick, data, NULL);
 }
 
 void
@@ -395,7 +395,7 @@ signal_printer_dcc_recv_error(gpointer *params)
 	server *serv = dcc->serv;
 	gchar *error = params[1];
 
-	EMIT_SIGNAL (XP_TE_DCCRECVERR, serv->front_session, dcc->file, dcc->destfile, dcc->nick, error, 0);
+	session_print_format(serv->front_session, "dcc recv failed", dcc->file, dcc->destfile, dcc->nick, error, 0);
 	dcc_close (dcc, STAT_FAILED, FALSE);
 }
 
@@ -412,7 +412,7 @@ signal_printer_dcc_send_complete(gpointer *params)
 	dcc_calc_average_cps (dcc);
 
 	buf = g_strdup_printf("%d", dcc->cps);
-	EMIT_SIGNAL (XP_TE_DCCSENDCOMP, serv->front_session, file_part(dcc->file), dcc->nick, buf);
+	session_print_format(serv->front_session, "dcc send complete", file_part(dcc->file), dcc->nick, buf);
 	g_free(buf);
 }
 
@@ -423,7 +423,7 @@ signal_printer_dcc_send_failed(gpointer *params)
 	server *serv = dcc->serv;
 	gchar *error = params[1];
 
-	EMIT_SIGNAL (XP_TE_DCCSENDFAIL, serv->front_session, file_part(dcc->file), dcc->nick, error);
+	session_print_format(serv->front_session, "dcc send failed", file_part(dcc->file), dcc->nick, error);
 	dcc_close (dcc, STAT_FAILED, FALSE);
 }
 
@@ -434,7 +434,7 @@ signal_printer_dcc_send_request(gpointer *params)
 	struct DCC *dcc = params[1];
 	gchar *to = params[2];
 
-	session_print_format(sess, XP_TE_DCCOFFER, file_part(dcc->file), to, dcc->file);
+	session_print_format(sess, "dcc send offer", file_part(dcc->file), to, dcc->file);
 }
 
 void
@@ -444,7 +444,7 @@ signal_printer_dcc_stoned(gpointer *params)
 	server *serv = dcc->serv;
 	gchar *type = g_strdup(dcctypes[dcc->type]);
 
-	EMIT_SIGNAL (XP_TE_DCCTOUT, serv->front_session, type, file_part(dcc->file), dcc->nick);
+	session_print_format(serv->front_session, "dcc timeout", type, file_part(dcc->file), dcc->nick);
 	dcc_close(dcc, STAT_ABORTED, FALSE);
 }
 
@@ -453,7 +453,7 @@ signal_printer_dcc_not_found(gpointer *params)
 {
 	session *sess = params[0];
 
-	session_print_format(sess, XP_TE_NODCC, NULL, NULL, NULL);
+	session_print_format(sess, "no dcc", NULL, NULL, NULL);
 }
 
 
@@ -466,7 +466,7 @@ signal_printer_user_message_private(gpointer *params)
 	gchar *nick    = params[1];
 	gchar *message = params[2];
 
-	session_print_format(sess, XP_TE_MSGSEND, nick, message, NULL);
+	session_print_format(sess, "message send", nick, message, NULL);
 }
 
 void
@@ -478,9 +478,9 @@ signal_printer_message_private(gpointer *params)
 	gchar *idtext  = params[3];
 
 	if (sess->type == SESS_DIALOG) {
-		session_print_format(sess, XP_TE_DPRIVMSG, nick, message, idtext);
+		session_print_format(sess, "private message to dialog", nick, message, idtext);
 	} else {
-		session_print_format(sess, XP_TE_PRIVMSG, nick, message, idtext);
+		session_print_format(sess, "private message", nick, message, idtext);
 	}
 }
 
@@ -492,7 +492,7 @@ signal_printer_query_quit(gpointer *params)
 	gchar *reason = params[2];
 	gchar *host   = params[3];
 
-	session_print_format(sess, XP_TE_QUIT, nick, reason, host);
+	session_print_format(sess, "quit", nick, reason, host);
 }
 
 /* channel messages */
@@ -551,7 +551,7 @@ signal_printer_query_open(gpointer *params)
 {
 	session *sess = params[0];
 
-	session_print_format(sess, XP_TE_OPENDIALOG, NULL, NULL, NULL);
+	session_print_format(sess, "open dialog", NULL, NULL, NULL);
 }
 
 /* server */
@@ -785,7 +785,7 @@ signal_printer_ctcp_inbound(gpointer *params)
 
 	if(!is_channel(sess->server, to))
 	{
-		EMIT_SIGNAL(XP_TE_CTCPGEN, sess->server->front_session, msg, nick, NULL);
+		session_print_format(sess->server->front_session, "ctcp generic", msg, nick, NULL);
 	}
 	else
 	{
@@ -793,7 +793,7 @@ signal_printer_ctcp_inbound(gpointer *params)
 		if (!chansess)
 			chansess = sess;
 
-		EMIT_SIGNAL(XP_TE_CTCPGENC, chansess, msg, nick, to);
+		session_print_format(chansess, "ctcp generic to channel", msg, nick, to);
 	}
 }
 
@@ -888,7 +888,7 @@ signal_printer_plugin_loaded(gpointer *params)
 
 	fe_pluginlist_update();
 
-	EMIT_SIGNAL (XP_TE_PLUGIN_LOADED, current_sess, name, version, NULL);
+	session_print_format(current_sess, "plugin loaded", name, version, NULL);
 }
 
 void
@@ -898,7 +898,7 @@ signal_printer_plugin_unloaded(gpointer *params)
 
 	fe_pluginlist_update();
 
-	EMIT_SIGNAL (XP_TE_PLUGIN_UNLOADED, current_sess, name, NULL, NULL);
+	session_print_format(current_sess, "plugin unloaded", name, NULL, NULL);
 }
 
 void
@@ -907,7 +907,7 @@ signal_printer_plugin_error(gpointer *params)
 	gchar *name    = params[0];
 	gchar *message = params[1];
 
-	EMIT_SIGNAL (XP_TE_PLUGIN_ERROR, current_sess, name, message, NULL);
+	session_print_format(current_sess, "plugin error", name, message, NULL);
 }
 
 void
@@ -917,7 +917,7 @@ signal_printer_nick_changed(gpointer *params)
 	gchar *nick    = params[1];
 	gchar *newnick = params[2];
 
-	session_print_format(sess, XP_TE_CHANGENICK, nick, newnick, NULL);
+	session_print_format(sess, "change nick", nick, newnick, NULL);
 }
 
 void
@@ -927,7 +927,7 @@ signal_printer_nick_clash(gpointer *params)
 	gchar *nick    = params[1];
 	gchar *newnick = params[2];
 
-	session_print_format(sess, XP_TE_NICKCLASH, nick, newnick, NULL);
+	session_print_format(sess, "nick clash", nick, newnick, NULL);
 }
 
 void
@@ -935,7 +935,7 @@ signal_printer_nick_error(gpointer *params)
 {
 	session *sess  = params[0];
 
-	session_print_format(sess, XP_TE_NICKFAIL, NULL, NULL, NULL);
+	session_print_format(sess, "nick failed", NULL, NULL, NULL);
 }
 
 void
@@ -945,7 +945,7 @@ signal_printer_server_ping_reply(gpointer *params)
 	gchar *from    = params[1];
 	gchar *content = params[2];
 
-	session_print_format(sess, XP_TE_PINGREP, from, content, NULL);
+	session_print_format(sess, "ping reply", from, content, NULL);
 }
 
 void
@@ -954,7 +954,7 @@ signal_printer_server_numeric_302(gpointer *params)
 	session *sess   = params[0];
         gchar *hostname = params[1];
 
-	session_print_format(sess, XP_TE_FOUNDIP, hostname, NULL, NULL);
+	session_print_format(sess, "found ip", hostname, NULL, NULL);
 }
 
 void
@@ -962,7 +962,7 @@ signal_printer_server_unknown(gpointer *params)
 {
 	session *sess = params[0];
 
-	session_print_format(sess, XP_TE_UKNHOST, NULL, NULL, NULL);
+	session_print_format(sess, "unknown host", NULL, NULL, NULL);
 }
 
 void
@@ -973,7 +973,7 @@ signal_printer_server_connect(gpointer *params)
 	gchar *ip     = params[2];
 	gchar *data   = params[3];
 
-	session_print_format(sess, XP_TE_CONNECT, host, ip, data);
+	session_print_format(sess, "connecting", host, ip, data);
 }
 
 void
@@ -982,7 +982,7 @@ signal_printer_server_connect_halted(gpointer *params)
 	session *sess = params[0];
 	gchar *data   = params[1];
 
-	session_print_format(sess, XP_TE_STOPCONNECT, data, NULL, NULL);
+	session_print_format(sess, "stop connection", data, NULL, NULL);
 }
 
 void
@@ -991,7 +991,7 @@ signal_printer_server_disconnected(gpointer *params)
 	session *sess = params[0];
 	gchar *error  = params[1];
 
-	session_print_format(sess, XP_TE_DISCON, error, NULL, NULL);
+	session_print_format(sess, "disconnected", error, NULL, NULL);
 }
 
 void
@@ -1002,7 +1002,7 @@ signal_printer_ctcp_reply(gpointer *params)
 	gchar *type    = params[2];
         gchar *content = params[3];
 
-	session_print_format(sess, XP_TE_CTCP_REPLY, nick, type, content);
+	session_print_format(sess, "ctcp reply generic", nick, type, content);
 }
 
 void
@@ -1012,7 +1012,7 @@ signal_printer_ctcp_send(gpointer *params)
 	gchar *target  = params[1];
 	gchar *message = params[2];
 
-	session_print_format(sess, XP_TE_CTCPSEND, target, message, NULL);
+	session_print_format(sess, "ctcp send", target, message, NULL);
 }
 
 void
@@ -1024,7 +1024,7 @@ signal_printer_channel_bans(gpointer *params)
         gchar *nick     = params[3];
         gchar *time_set = params[4];
 
-	session_print_format(sess, XP_TE_BANLIST, channel, mask, nick, time_set, 0);
+	session_print_format(sess, "ban list", channel, mask, nick, time_set, 0);
 }
 
 void
@@ -1034,7 +1034,7 @@ signal_printer_channel_modes_raw(gpointer *params)
         gchar *nick   = params[1];
         gchar *modes  = params[2];
 
-	session_print_format(sess, XP_TE_RAWMODES, nick, modes, 0, 0, 0);
+	session_print_format(sess, "raw modes", nick, modes, 0, 0, 0);
 }
 
 void
@@ -1042,7 +1042,7 @@ signal_printer_exec_already_running(gpointer *params)
 {
 	session *sess = params[0];
 
-	session_print_format(sess, XP_TE_ALREADYPROCESS, NULL, NULL, NULL);
+	session_print_format(sess, "process already running", NULL, NULL, NULL);
 }
 
 void
@@ -1051,7 +1051,7 @@ signal_printer_ignore_added(gpointer *params)
 	session *sess = params[0];
         gchar **word  = params[1];
 
-	session_print_format(sess, XP_TE_IGNOREADD, word[2], NULL, NULL);
+	session_print_format(sess, "ignore add", word[2], NULL, NULL);
 }
 
 void
@@ -1060,7 +1060,7 @@ signal_printer_ignore_changed(gpointer *params)
 	session *sess = params[0];
         gchar **word  = params[1];
 
-	session_print_format(sess, XP_TE_IGNORECHANGE, word[2], NULL, NULL);
+	session_print_format(sess, "ignore changed", word[2], NULL, NULL);
 }
 
 void
@@ -1068,7 +1068,7 @@ signal_printer_ignore_list_empty(gpointer *params)
 {
 	session *sess = params[0];
 
-	session_print_format(sess, XP_TE_IGNOREEMPTY, 0, 0, 0, 0, 0);
+	session_print_format(sess, "ignorelist empty", 0, 0, 0, 0, 0);
 }
 
 
@@ -1077,7 +1077,7 @@ signal_printer_ignore_list_footer(gpointer *params)
 {
 	session *sess = params[0];
 
-	session_print_format(sess, XP_TE_IGNOREFOOTER, 0, 0, 0, 0, 0);
+	session_print_format(sess, "ignorelist footer", 0, 0, 0, 0, 0);
 }
 
 void
@@ -1085,7 +1085,7 @@ signal_printer_ignore_list_header(gpointer *params)
 {
 	session *sess = params[0];
 
-	session_print_format(sess, XP_TE_IGNOREHEADER, NULL, NULL, NULL);
+	session_print_format(sess, "ignorelist header", NULL, NULL, NULL);
 }
 
 void
@@ -1094,7 +1094,7 @@ signal_printer_ignore_removed(gpointer *params)
 	session *sess = params[0];
 	gchar *mask   = params[1];
 
-	session_print_format(sess, XP_TE_IGNOREREMOVE, mask, NULL, NULL);
+	session_print_format(sess, "ignore remove", mask, NULL, NULL);
 }
 
 void
@@ -1104,7 +1104,7 @@ signal_printer_user_notice(gpointer *params)
 	gchar **word     = params[1];
 	gchar **word_eol = params[2];
 
-	session_print_format(sess, XP_TE_NOTICESEND, word[2], word_eol[3], NULL);
+	session_print_format(sess, "notice send", word[2], word_eol[3], NULL);
 }
 
 /* /notify stuff */
@@ -1114,7 +1114,7 @@ signal_printer_notify_removed(gpointer *params)
 	session *sess = params[0];
 	gchar *nick   = params[1];
 
-	session_print_format(sess, XP_TE_DELNOTIFY, nick, NULL, NULL);
+	session_print_format(sess, "delete notify", nick, NULL, NULL);
 }
 
 void
@@ -1123,7 +1123,7 @@ signal_printer_notify_added(gpointer *params)
 	session *sess = params[0];
 	gchar *nick   = params[1];
 
-	session_print_format(sess, XP_TE_ADDNOTIFY, nick, NULL, NULL);
+	session_print_format(sess, "add notify", nick, NULL, NULL);
 }
 
 void
