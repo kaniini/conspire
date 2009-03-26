@@ -465,7 +465,7 @@ signal_printer_user_message_private(gpointer *params)
 	gchar *nick    = params[1];
 	gchar *message = params[2];
 
-	EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, message, NULL, NULL, 0);
+	EMIT_SIGNAL (XP_TE_MSGSEND, sess, nick, msg, NULL, NULL, 0);
 }
 
 void
@@ -758,9 +758,9 @@ signal_printer_whois_away(gpointer *params)
 {
 	session *sess  = params[0];
 	gchar *nick    = params[1];
-	gchar *msg     = params[2];
+	gchar *message = params[2];
 
-	EMIT_SIGNAL (XP_TE_WHOIS_AWAY, sess, nick, msg, NULL, NULL, 0);
+	EMIT_SIGNAL (XP_TE_WHOIS_AWAY, sess, nick, message, NULL, NULL, 0);
 }
 
 /* sasl -- temporary */
@@ -957,6 +957,52 @@ signal_printer_server_numeric_302(gpointer *params)
 }
 
 void
+signal_printer_server_motd(gpointer *params)
+{
+	session *sess = params[0];
+        gchar *text   = params[1];
+
+	EMIT_SIGNAL (XP_TE_MOTD, serv->server_session, text, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_server_unknown(gpointer *params)
+{
+	session *sess = params[0];
+
+	EMIT_SIGNAL (XP_TE_UKNHOST, sess, NULL, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_server_connect(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *host   = params[1];
+	gchar *ip     = params[2];
+	gchar *data   = params[3];
+
+	EMIT_SIGNAL (XP_TE_CONNECT, sess, host, ip, data, NULL, 0);
+}
+
+void
+signal_printer_server_connect_halted(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *data   = params[1];
+
+	EMIT_SIGNAL (XP_TE_STOPCONNECT, sess, data, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_server_disconnected(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *error  = params[1];
+
+	EMIT_SIGNAL (XP_TE_DISCON, sess, error, NULL, NULL, NULL, 0);
+}
+
+void
 signal_printer_ctcp_reply(gpointer *params)
 {
 	session *sess  = params[0];
@@ -1026,6 +1072,31 @@ signal_printer_ignore_changed(gpointer *params)
 }
 
 void
+signal_printer_ignore_list_empty(gpointer *params)
+{
+	session *sess = params[0];
+
+	EMIT_SIGNAL (XP_TE_IGNOREEMPTY, sess, 0, 0, 0, 0, 0);
+}
+
+
+void
+signal_printer_ignore_list_footer(gpointer *params)
+{
+	session *sess = params[0];
+
+	EMIT_SIGNAL (XP_TE_IGNOREFOOTER, sess, 0, 0, 0, 0, 0);
+}
+
+void
+signal_printer_ignore_list_header(gpointer *params)
+{
+	session *sess = params[0];
+
+	EMIT_SIGNAL (XP_TE_IGNOREHEADER, sess, NULL, NULL, NULL, NULL, 0);
+}
+
+void
 signal_printer_ignore_removed(gpointer *params)
 {
 	session *sess = params[0];
@@ -1061,6 +1132,63 @@ signal_printer_notify_added(gpointer *params)
 	gchar *nick   = params[1];
 
 	EMIT_SIGNAL (XP_TE_ADDNOTIFY, sess, nick, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_notify_list_header(gpointer *params)
+{
+	session *sess = params[0];
+
+	EMIT_SIGNAL (XP_TE_NOTIFYHEAD, sess, NULL, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_notify_list_total(gpointer *params)
+{
+	session *sess = params[0];
+	gchar *total  = params[1];
+
+	EMIT_SIGNAL (XP_TE_NOTIFYNUMBER, sess, total, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_notify_list_empty(gpointer *params)
+{
+	session *sess = params[0];
+
+	EMIT_SIGNAL (XP_TE_NOTIFYEMPTY, sess, NULL, NULL, NULL, NULL, 0);
+}
+
+void
+signal_printer_notify_offline(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	server *serv   = params[2];
+
+	gchar *servername = g_strdup(serv->servername);
+	gchar *network    = g_strdup(server_get_network(serv, TRUE));
+
+	EMIT_SIGNAL (XP_TE_NOTIFYOFFLINE, sess, nick, servername, network, NULL, 0);
+
+	g_free(servername);
+	g_free(network);
+}
+
+void
+signal_printer_notify_online(gpointer *params)
+{
+	session *sess  = params[0];
+	gchar *nick    = params[1];
+	server *serv   = params[2];
+
+	gchar *servername = g_strdup(serv->servername);
+	gchar *network    = g_strdup(server_get_network(serv, TRUE));
+
+	EMIT_SIGNAL (XP_TE_NOTIFYONLINE, sess, nick, servername, network, NULL, 0);
+
+	g_free(servername);
+	g_free(network);
 }
 
 void
@@ -1122,6 +1250,9 @@ signal_printer_init(void)
 	/* ignore */
 	signal_attach("ignore added",       signal_printer_ignore_added);
 	signal_attach("ignore changed",     signal_printer_ignore_changed);
+	signal_attach("ignore list header", signal_printer_ignore_list_header);
+	signal_attach("ignore list empty",  signal_printer_ignore_list_empty);
+	signal_attach("ignore list footer", signal_printer_ignore_list_footer);
 	signal_attach("ignore removed",     signal_printer_ignore_removed);
 
 	/* messages */
@@ -1140,6 +1271,11 @@ signal_printer_init(void)
 
 	/* notify */
 	signal_attach("notify added",       signal_printer_notify_added);
+	signal_attach("notify list empty",  signal_printer_notify_list_empty);
+	signal_attach("notify list header", signal_printer_notify_list_header);
+	signal_attach("notify list total",  signal_printer_notify_list_total);
+	signal_attach("notify offline",     signal_printer_notify_offline);
+	signal_attach("notify online",      signal_printer_notify_online);
 	signal_attach("notify removed",     signal_printer_notify_removed);
 
 	/* queries */
