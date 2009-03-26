@@ -173,6 +173,7 @@ pevent_dialog_close (GtkWidget *wid, gpointer arg)
 static void
 pevent_dialog_update (GtkWidget * wid, GtkWidget * twid)
 {
+#if 0
 	int len, m;
 	const char *text;
 	char *out;
@@ -224,31 +225,9 @@ pevent_dialog_update (GtkWidget * wid, GtkWidget * twid)
 
 	PrintTextRaw (GTK_XTEXT (twid)->buffer, out, 0, 0);
 	free (out);
-
+#endif
 	/* save this when we exit */
 	prefs.save_pevents = 1;
-}
-
-static void
-pevent_dialog_hfill (GtkWidget * list, int e)
-{
-	int i = 0;
-	char *text;
-	GtkTreeIter iter;
-	GtkListStore *store;
-
-	store = (GtkListStore *)gtk_tree_view_get_model (GTK_TREE_VIEW (pevent_dialog_hlist));
-	gtk_list_store_clear (store);
-	while (i < (te[e].num_args & 0x7f))
-	{
-		text = _(te[e].help[i]);
-		i++;
-		if (text[0] == '\001')
-			text++;
-		gtk_list_store_insert_with_values (store, &iter, -1,
-													  0, i,
-													  1, text, -1);
-	}
 }
 
 static void
@@ -275,16 +254,17 @@ pevent_dialog_select (GtkTreeSelection *sel, gpointer store)
 		gtk_tree_model_get (store, &iter, COL_EVENT_TEXT, &text, -1);
 		gtk_entry_set_text (GTK_ENTRY (pevent_dialog_entry), text);
 		g_free (text);
-		pevent_dialog_hfill (pevent_dialog_hlist, sig);
 	}
 }
 
 static void
 pevent_dialog_fill (GtkWidget * list)
 {
+#if 0
 	int i;
 	GtkListStore *store;
 	GtkTreeIter iter;
+
 
 	store = (GtkListStore *)gtk_tree_view_get_model (GTK_TREE_VIEW (list));
 	gtk_list_store_clear (store);
@@ -299,6 +279,7 @@ pevent_dialog_fill (GtkWidget * list)
 													  COL_ROW, i, -1);
 	}
 	while (i != 0);
+#endif
 }
 
 static void
@@ -326,7 +307,6 @@ pevent_load_req_cb (void *arg1, char *file)
 	if (file)
 	{
 		pevent_load (file);
-		pevent_make_pntevts ();
 		pevent_dialog_fill (pevent_dialog_list);
 		pevent_dialog_unselect ();
 		prefs.save_pevents = 1;
@@ -351,6 +331,7 @@ pevent_test_cb (GtkWidget * wid, GtkWidget * twid)
 	int len, n;
 	char *out, *text;
 
+#if 0
 	for (n = 0; n < NUM_XP; n++)
 	{
 		text = _(pntevts_text[n]);
@@ -365,6 +346,7 @@ pevent_test_cb (GtkWidget * wid, GtkWidget * twid)
 		PrintTextRaw (GTK_XTEXT (twid)->buffer, out, 0, 0);
 		free (out);
 	}
+#endif
 }
 
 void
