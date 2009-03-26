@@ -140,7 +140,7 @@ lagcheck_update (void)
 {
 	server *serv;
 	GSList *list = serv_list;
-	
+
 	if (!prefs.lagometer)
 		return;
 
@@ -364,24 +364,6 @@ new_ircwindow (server *serv, char *name, int type, int focus)
 }
 
 static void
-exec_notify_kill (session * sess)
-{
-	struct nbexec *re;
-	if (sess->running_exec != NULL)
-	{
-		re = sess->running_exec;
-		sess->running_exec = NULL;
-		kill (re->childpid, SIGKILL);
-		waitpid (re->childpid, NULL, WNOHANG);
-		g_source_remove (re->iotag);
-		close (re->myfd);
-		if (re->linebuf)
-			free(re->linebuf);
-		free (re);
-	}
-}
-
-static void
 send_quit_or_part (session * killsess)
 {
 	int willquit = TRUE;
@@ -467,8 +449,6 @@ session_free (session *killsess)
 
 	if (killsess->type == SESS_CHANNEL)
 		userlist_free (killsess);
-
-	exec_notify_kill (killsess);
 
 	log_close (killsess);
 	scrollback_close (killsess);
@@ -569,7 +549,7 @@ lastact_update(session *sess)
 	}
 
 	/* Check if this update is a no-op */
-	if (sess->lastact_idx == newidx && 
+	if (sess->lastact_idx == newidx &&
 			((newidx != LACT_NONE && sess->lastact_elem == sess_list_by_lastact[newidx]) ||
 			 (newidx == LACT_NONE)))
 		return;
@@ -631,7 +611,7 @@ lastact_getfirst(int (*filter) (session *sess))
 			sess->lastact_idx = LACT_NONE;
 		}
 	}
-	
+
 	return sess;
 }
 
@@ -729,7 +709,7 @@ static char defaultconf_urlhandlers[] =
 #ifdef USE_SIGACTION
 /* Close and open log files on SIGUSR1. Usefull for log rotating */
 
-static void 
+static void
 sigusr1_handler (int signal, siginfo_t *si, void *un)
 {
 	GSList *list = sess_list;
@@ -984,7 +964,7 @@ main (int argc, char *argv[])
 #ifdef GNUTLS
 	gnutls_global_init ();
 #endif
-	
+
 	srand (time (0));	/* CL: do this only once! */
 
 #ifdef SOCKS
@@ -994,7 +974,7 @@ main (int argc, char *argv[])
 	ret = fe_args (argc, argv);
 	if (ret != -1)
 		return ret;
-	
+
 	load_config ();
 
 	fe_init ();

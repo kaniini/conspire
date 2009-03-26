@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
-#define _GNU_SOURCE	/* for memrchr */
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -63,7 +62,7 @@ extern int current_mem_usage;
 
 static void help (session *sess, char *tbuf, char *helpcmd, int quiet);
 static CommandResult cmd_server (session *sess, char *tbuf, char *word[], char *word_eol[]);
-static void handle_say (session *sess, char *text, int check_spch);
+static void handle_say(session *sess, char *text, gboolean check_spch, gboolean check_lastlog, gboolean check_completion);
 
 
 static void
@@ -306,7 +305,7 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 			list = list->next;
 			if (sess->type == SESS_DIALOG && sess->channel[0] && sess->server->connected)
 				handle_command(sess, word_eol[3], FALSE);
-		}		
+		}
 	}
 	else if (!strcasecmp(word[2], "local-query"))
 	{
@@ -1332,346 +1331,6 @@ cmd_echo (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	PrintText (sess, word_eol[2]);
 	return CMD_EXEC_OK;
 }
-
-static void
-exec_check_process (struct session *sess)
-{
-	int val;
-
-	if (sess->running_exec == NULL)
-		return;
-	val = waitpid (sess->running_exec->childpid, NULL, WNOHANG);
-	if (val == -1 || val > 0)
-	{
-		close (sess->running_exec->myfd);
-		g_source_remove (sess->running_exec->iotag);
-		free (sess->running_exec);
-		sess->running_exec = NULL;
-	}
-}
-
-/* convert ANSI escape color codes to mIRC codes */
-
-static short escconv[] =
-/* 0 1 2 3 4 5  6 7  0 1 2 3 4  5  6  7 */
-{  1,4,3,5,2,10,6,1, 1,7,9,8,12,11,13,1 };
-
-static void
-exec_handle_colors (char *buf, int len)
-{
-	char numb[16];
-	char *nbuf;
-	int i = 0, j = 0, k = 0, firstn = 0, col, colf = 0, colb = 0;
-	int esc = FALSE, backc = FALSE, bold = FALSE;
-
-	/* any escape codes in this text? */
-	if (strchr (buf, 27) == 0)
-		return;
-
-	nbuf = malloc (len + 1);
-
-	while (i < len)
-	{
-		switch (buf[i])
-		{
-		case '\r':
-			break;
-		case 27:
-			esc = TRUE;
-			break;
-		case ';':
-			if (!esc)
-				goto norm;
-			backc = TRUE;
-			numb[k] = 0;
-			firstn = atoi (numb);
-			k = 0;
-			break;
-		case '[':
-			if (!esc)
-				goto norm;
-			break;
-		default:
-			if (esc)
-			{
-				if (buf[i] >= 'A' && buf[i] <= 'z')
-				{
-					if (buf[i] == 'm')
-					{
-						/* ^[[0m */
-						if (k == 0 || (numb[0] == '0' && k == 1))
-						{
-							nbuf[j] = '\017';
-							j++;
-							bold = FALSE;
-							goto cont;
-						}
-
-						numb[k] = 0;
-						col = atoi (numb);
-						backc = FALSE;
-
-						if (firstn == 1)
-							bold = TRUE;
-
-						if (firstn >= 30 && firstn <= 37)
-							colf = firstn - 30;
-
-						if (col >= 40)
-						{
-							colb = col - 40;
-							backc = TRUE;
-						}
-
-						if (col >= 30 && col <= 37)
-							colf = col - 30;
-
-						if (bold)
-							colf += 8;
-
-						if (backc)
-						{
-							colb = escconv[colb % 14];
-							colf = escconv[colf % 14];
-							j += sprintf (&nbuf[j], "\003%d,%02d", colf, colb);
-						} else
-						{
-							colf = escconv[colf % 14];
-							j += sprintf (&nbuf[j], "\003%02d", colf);
-						}
-					}
-cont:				esc = FALSE;
-					backc = FALSE;
-					k = 0;
-				} else
-				{
-					if (isdigit ((unsigned char) buf[i]) && k < (sizeof (numb) - 1))
-					{
-						numb[k] = buf[i];
-						k++;
-					}
-				}
-			} else
-			{
-norm:			nbuf[j] = buf[i];
-				j++;
-			}
-		}
-		i++;
-	}
-
-	nbuf[j] = 0;
-	memcpy (buf, nbuf, j + 1);
-	free (nbuf);
-}
-
-#ifndef HAVE_MEMRCHR
-static void *
-memrchr (const void *block, int c, size_t size)
-{
-	unsigned char *p;
-
-	for (p = (unsigned char *)block + size; p != block; p--)
-		if (*p == c)
-			return p;
-	return 0;
-}
-#endif
-
-static gboolean
-exec_data (GIOChannel *source, GIOCondition condition, struct nbexec *s)
-{
-	char *buf, *readpos, *rest;
-	int rd, len;
-	int sok = s->myfd;
-
-	len = s->buffill;
-	if (len) {
-		/* append new data to buffered incomplete line */
-		buf = malloc(len + 2050);
-		memcpy(buf, s->linebuf, len);
-		readpos = buf + len;
-		free(s->linebuf);
-		s->linebuf = NULL;
-	}
-	else
-		readpos = buf = malloc(2050);
-
-	rd = read (sok, readpos, 2048);
-	if (rd < 1)
-	{
-		/* The process has died */
-		kill(s->childpid, SIGKILL);
-		if (len) {
-			buf[len] = '\0';
-			exec_handle_colors(buf, len);
-			if (s->tochannel)
-			{
-				/* must turn off auto-completion temporarily */
-				unsigned int old = prefs.nickcompletion;
-				prefs.nickcompletion = 0;
-				handle_multiline (s->sess, buf, FALSE, TRUE);
-				prefs.nickcompletion = old;
-			}
-			else
-				PrintText (s->sess, buf);
-		}
-		free(buf);
-		waitpid (s->childpid, NULL, 0);
-		s->sess->running_exec = NULL;
-		g_source_remove (s->iotag);
-		close (sok);
-		free (s);
-		return CMD_EXEC_OK;
-	}
-	len += rd;
-	buf[len] = '\0';
-
-	rest = memrchr(buf, '\n', len);
-	if (rest)
-		rest++;
-	else
-		rest = buf;
-	if (*rest) {
-		s->buffill = len - (rest - buf); /* = strlen(rest) */
-		s->linebuf = malloc(s->buffill);
-		memcpy(s->linebuf, rest, s->buffill);
-		*rest = '\0';
-		len -= s->buffill; /* possibly 0 */
-	}
-	else
-		s->buffill = 0;
-
-	if (len) {
-		exec_handle_colors (buf, len);
-		if (s->tochannel)
-			handle_multiline (s->sess, buf, FALSE, TRUE);
-		else
-			PrintText (s->sess, buf);
-	}
-
-	free(buf);
-	return CMD_EXEC_OK;
-}
-
-static CommandResult
-cmd_exec (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	int tochannel = FALSE;
-	char *cmd = word_eol[2];
-	int fds[2], pid = 0;
-	struct nbexec *s;
-	int shell = TRUE;
-	int fd;
-
-	if (*cmd)
-	{
-		exec_check_process (sess);
-		if (sess->running_exec != NULL)
-		{
-			signal_emit("exec already running", 1, sess);
-			return CMD_EXEC_OK;
-		}
-
-		if (!strcmp (word[2], "-d"))
-		{
-			if (!*word[3])
-				return CMD_EXEC_FAIL;
-			cmd = word_eol[3];
-			shell = FALSE;
-		}
-		else if (!strcmp (word[2], "-o"))
-		{
-			if (!*word[3])
-				return CMD_EXEC_FAIL;
-			cmd = word_eol[3];
-			tochannel = TRUE;
-		}
-
-		if (shell)
-		{
-			if (access ("/bin/sh", X_OK) != 0)
-			{
-				fe_message (_("I need /bin/sh to run!\n"), FE_MSG_ERROR);
-				return CMD_EXEC_OK;
-			}
-		}
-
-#ifdef __EMX__						  /* if os/2 */
-		if (pipe (fds) < 0)
-		{
-			PrintText (sess, "Pipe create error\n");
-			return CMD_EXEC_FAIL;
-		}
-		setmode (fds[0], O_BINARY);
-		setmode (fds[1], O_BINARY);
-#else
-		if (socketpair (PF_UNIX, SOCK_STREAM, 0, fds) == -1)
-		{
-			PrintText (sess, "socketpair(2) failed\n");
-			return CMD_EXEC_FAIL;
-		}
-#endif
-		s = (struct nbexec *) malloc (sizeof (struct nbexec));
-		memset(s, 0, sizeof(*s));
-		s->myfd = fds[0];
-		s->tochannel = tochannel;
-		s->sess = sess;
-
-		pid = fork ();
-		if (pid == 0)
-		{
-			/* This is the child's context */
-			close (0);
-			close (1);
-			close (2);
-			/* Close parent's end of pipe */
-			close(s->myfd);
-			/* Copy the child end of the pipe to stdout and stderr */
-			dup2 (fds[1], 1);
-			dup2 (fds[1], 2);
-			/* Also copy it to stdin so we can write to it */
-			dup2 (fds[1], 0);
-			/* Now close all open file descriptors except stdin, stdout and stderr */
-			for (fd = 3; fd < 1024; fd++) close(fd);
-			/* Now we call /bin/sh to run our cmd ; made it more friendly -DC1 */
-			if (shell)
-			{
-				execl ("/bin/sh", "sh", "-c", cmd, NULL);
-			} else
-			{
-				char **argv;
-				int argc;
-
-				my_poptParseArgvString (cmd, &argc, &argv);
-				execvp (argv[0], argv);
-			}
-			/* not reached unless error */
-			/*printf("exec error\n");*/
-			fflush (stdout);
-			fflush (stdin);
-			_exit (0);
-		}
-		if (pid == -1)
-		{
-			/* Parent context, fork() failed */
-
-			PrintText (sess, "Error in fork(2)\n");
-			close(fds[0]);
-			close(fds[1]);
-		} else
-		{
-			/* Parent path */
-			close(fds[1]);
-			s->childpid = pid;
-			s->iotag = fe_input_add (s->myfd, FIA_READ|FIA_EX, exec_data, s);
-			sess->running_exec = s;
-			return CMD_EXEC_OK;
-		}
-	}
-	return CMD_EXEC_FAIL;
-}
-
 
 static CommandResult
 cmd_flushq (struct session *sess, char *tbuf, char *word[], char *word_eol[])
@@ -2719,12 +2378,12 @@ cmd_recv (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static CommandResult
-cmd_say (struct session *sess, char *tbuf, char *word[], char *word_eol[])
+cmd_say(struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *speech = word_eol[2];
 	if (*speech)
 	{
-		handle_say (sess, speech, FALSE);
+		handle_say(sess, speech, FALSE, TRUE, TRUE);
 		return CMD_EXEC_OK;
 	}
 	return CMD_EXEC_FAIL;
@@ -3357,8 +3016,6 @@ struct commands xc_cmds[] = {
 	 N_("DEVOICE <nick>, removes voice status from the nick on the current channel (needs chanop)")},
 	{"DISCONNECT", cmd_discon, 0, 0, 1, N_("DISCON, Disconnects from server")},
 	{"ECHO", cmd_echo, 0, 0, 1, N_("ECHO <text>, Prints text locally")},
-	{"EXEC", cmd_exec, 0, 0, 1,
-	 N_("EXEC [-o] <command>, runs the command. If -o flag is used then output is sent to current channel, else is printed to current text box")},
 	{"EXIT", cmd_killall, 0, 0, 1, N_("EXIT terminates all connections and closes Conspire.")},
 	{"FLUSHQ", cmd_flushq, 0, 0, 1, N_("FLUSHQ, flushes the current server's send queue")},
 	{"FOREACH", cmd_foreach, 0, 0, 1, N_("FOREACH <[local-]channel|server|[local-]query> performs a given command for all items of the specified type.")},
@@ -3854,10 +3511,9 @@ user_command (session * sess, char *tbuf, char *cmd, char *word[],
 	handle_command (sess, tbuf, TRUE);
 }
 
-/* handle text entered without a CMDchar prefix */
-
+/* This seems some serious refactoring. -impl */
 static void
-handle_say (session *sess, char *text, int check_spch)
+handle_say(session *sess, char *text, gboolean check_spch, gboolean check_lastlog, gboolean check_completion)
 {
 	struct DCC *dcc;
 	char *word[PDIWORDS];
@@ -3869,39 +3525,39 @@ handle_say (session *sess, char *text, int check_spch)
 	int len;
 	int newcmdlen = sizeof newcmd_static;
 
-	if (strcmp (sess->channel, "(lastlog)") == 0)
+	if(check_lastlog && strcmp(sess->channel, "(lastlog)") == 0)
 	{
-		lastlog (sess->lastlog_sess, text, sess->lastlog_regexp);
+		lastlog(sess->lastlog_sess, text, sess->lastlog_regexp);
 		return;
 	}
 
 	len = strlen (text);
-	if (len >= sizeof pdibuf_static)
-		pdibuf = malloc (len + 1);
+	if(len >= sizeof pdibuf_static)
+		pdibuf = malloc(len + 1);
 
-	if (len + NICKLEN >= newcmdlen)
-		newcmd = malloc (newcmdlen = len + NICKLEN + 1);
+	if(len + NICKLEN >= newcmdlen)
+		newcmd = malloc(newcmdlen = len + NICKLEN + 1);
 
-	if (check_spch && prefs.perc_color)
-		check_special_chars (text, prefs.perc_ascii);
+	if(check_spch && prefs.perc_color)
+		check_special_chars(text, prefs.perc_ascii);
 
 	/* split the text into words and word_eol */
-	process_data_init (pdibuf, text, word, word_eol, TRUE, FALSE);
+	process_data_init(pdibuf, text, word, word_eol, TRUE, FALSE);
 
 	/* incase a plugin did /close */
-	if (!is_session (sess))
+	if (!is_session(sess))
 		goto xit;
 
 	if (!sess->channel[0] || sess->type == SESS_SERVER || sess->type == SESS_NOTICES || sess->type == SESS_SNOTICES)
 	{
-		notj_msg (sess);
+		notj_msg(sess);
 		goto xit;
 	}
 
-	if (prefs.nickcompletion)
-		perform_nick_completion (sess, text, newcmd);
+	if(check_completion && prefs.nickcompletion)
+		perform_nick_completion(sess, text, newcmd);
 	else
-		g_strlcpy (newcmd, text, newcmdlen);
+		g_strlcpy(newcmd, text, newcmdlen);
 
 	text = newcmd;
 
@@ -3943,7 +3599,7 @@ xit:
 /* handle a command, without the '/' prefix */
 
 int
-handle_command (session *sess, char *cmd, int check_spch)
+handle_command(session *sess, char *cmd, int check_spch)
 {
 	struct popup *pop;
 	int user_cmd = FALSE;
@@ -4078,14 +3734,14 @@ handle_user_input (session *sess, char *text, int history, int nocommand)
 	/* is it NOT a command, just text? */
 	if (nocommand || text[0] != prefs.cmdchar[0])
 	{
-		handle_say (sess, text, TRUE);
+		handle_say(sess, text, TRUE, TRUE, TRUE);
 		return 1;
 	}
 
 	/* check for // */
 	if (text[0] == prefs.cmdchar[0] && text[1] == prefs.cmdchar[0])
 	{
-		handle_say (sess, text + 1, TRUE);
+		handle_say(sess, text + 1, TRUE, TRUE, TRUE);
 		return 1;
 	}
 
@@ -4099,12 +3755,12 @@ handle_user_input (session *sess, char *text, int history, int nocommand)
 		for (i = 0; unix_dirs[i] != NULL; i++)
 			if (strncmp (text, unix_dirs[i], strlen (unix_dirs[i]))==0)
 			{
-				handle_say (sess, text, TRUE);
+				handle_say(sess, text, TRUE, TRUE, TRUE);
 				return 1;
 			}
 	}
 
-	return handle_command (sess, text + 1, TRUE);
+	return handle_command(sess, text + 1, TRUE);
 }
 
 /* changed by Steve Green. Macs sometimes paste with imbedded \r */
@@ -4113,14 +3769,29 @@ handle_multiline (session *sess, char *cmd, int history, int nocommand)
 {
 	while (*cmd)
 	{
-		char *cr = cmd + strcspn (cmd, "\n\r");
+		char *cr = cmd + strcspn(cmd, "\n\r");
 		int end_of_string = *cr == 0;
 		*cr = 0;
-		if (!handle_user_input (sess, cmd, history, nocommand))
+		if(!handle_user_input(sess, cmd, history, nocommand))
 			return;
-		if (end_of_string)
+		if(end_of_string)
 			break;
 		cmd = cr + 1;
 	}
 }
 
+void
+handle_multiline_raw(session *sess, char *text)
+{
+	while(*text)
+	{
+		char *cr = text + strcspn(text, "\n\r");
+		int end_of_string = (*cr == 0);
+		*cr = 0;
+
+		handle_say(sess, text, TRUE, FALSE, FALSE);
+		if(end_of_string)
+			break;
+		text = cr + 1;
+	}
+}

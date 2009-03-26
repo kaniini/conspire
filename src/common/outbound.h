@@ -9,6 +9,7 @@ int auto_insert (char *dest, int destlen, unsigned char *src, char *word[], char
 int handle_command (session *sess, char *cmd, int check_spch);
 void process_data_init (char *buf, char *cmd, char *word[], char *word_eol[], gboolean handle_quotes, gboolean allow_escape_quotes);
 void handle_multiline (session *sess, char *cmd, int history, int nocommand);
+void handle_multiline_raw(session *sess, char *text);
 void check_special_chars (char *cmd, int do_ascii);
 void notc_msg (session *sess);
 void server_sendpart (server * serv, char *channel, char *reason);
