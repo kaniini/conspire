@@ -518,7 +518,7 @@ signal_printer_message_public_highlight(gpointer *params)
 	gchar *nickchar = params[3];
 	gchar *idtext   = params[4];
 
-	session_print_format(sess, "channel message highlight", from, message, nickchar, idtext, 0);
+	session_print_format(sess, "channel msg highlight", from, message, nickchar, idtext, 0);
 }
 
 /* notices */
