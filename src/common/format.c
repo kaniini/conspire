@@ -23,16 +23,6 @@
 #include "signal_factory.h"
 #include "xchatc.h"
 
-#if 0
-
-typedef struct {
-	gchar *key;
-	gchar *format;
-	int args;
-} Formatter;
-
-#endif
-
 static int formatter_initialized = 0;
 static mowgli_dictionary_t *formatters = NULL;
 
@@ -55,6 +45,12 @@ formatter_register(const gchar *key, const gchar *format, int args)
 	mowgli_dictionary_add(formatters, key, f);
 
 	return f;
+}
+
+Formatter *
+formatter_get(const gchar *key)
+{
+	return mowgli_dictionary_retrieve(formatters, key);
 }
 
 static gchar *
@@ -91,39 +87,34 @@ formatter_replace(gchar *s, int size, const gchar *old, const gchar *new)
 }
 
 gchar *
-formatter_process(const gchar *key, gchar **data)
+formatter_process(Formatter *f, gchar **data)
 {
-	Formatter *f;
 	gint i;
 	gchar buf[4096];
+	gchar *signame;
 
-	f = mowgli_dictionary_retrieve(formatters, key);
-	if (f == NULL)
-		return NULL;
-	else
+	g_return_val_if_fail(f != NULL, NULL);
+	g_return_val_if_fail(data != NULL, NULL);
+
+	g_strlcpy(buf, f->format, 4096);
+
+	signame = g_strdup_printf("format %s", key);
+	signal_emit(signame, 2, f->args, data);
+	g_free(signame);
+
+	for (i = 1; i <= f->args; i++)
 	{
-		gchar *signame;
+		gchar *token = g_strdup_printf("$%d", i);
 
-		g_strlcpy(buf, f->format, 4096);
+		formatter_replace(buf, 4096, token, data[i - 1]);
 
-		signame = g_strdup_printf("format %s", key);
-		signal_emit(signame, 2, f->args, data);
-		g_free(signame);
-
-		for (i = 1; i <= f->args; i++)
-		{
-			gchar *token = g_strdup_printf("$%d", i);
-
-			formatter_replace(buf, 4096, token, data[i - 1]);
-
-			g_free(token);
-		}
-
-		formatter_replace(buf, 4096, "%B", "\x02");
-		formatter_replace(buf, 4096, "%C", "\x03");
-		formatter_replace(buf, 4096, "%O", "\x0F");
-		formatter_replace(buf, 4096, "$t", prefs.indent_nicks ? "\t" : " ");
+		g_free(token);
 	}
+
+	formatter_replace(buf, 4096, "%B", "\x02");
+	formatter_replace(buf, 4096, "%C", "\x03");
+	formatter_replace(buf, 4096, "%O", "\x0F");
+	formatter_replace(buf, 4096, "$t", prefs.indent_nicks ? "\t" : " ");
 
 	return g_strdup(buf);
 }
