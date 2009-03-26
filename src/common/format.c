@@ -21,6 +21,7 @@
 
 #include "format.h"
 #include "signal_factory.h"
+#include "xchatc.h"
 
 #if 0
 
@@ -131,6 +132,7 @@ formatter_process(const gchar *key, ...)
 		formatter_replace(buf, 4096, "%B", "\x02");
 		formatter_replace(buf, 4096, "%C", "\x03");
 		formatter_replace(buf, 4096, "%O", "\x0F");
+		formatter_replace(buf, 4096, "$t", prefs.indent_nicks ? "\t" : " ");
 	}
 
 	return g_strdup(buf);
