@@ -495,8 +495,7 @@ server_ssl_handshake(server *serv)
 	{
 		char *err = g_strdup(gnutls_strerror(ret));
 
-		EMIT_SIGNAL (XP_TE_CONNFAIL, serv->server_session, err, NULL,
-						 NULL, NULL, 0);
+		signal_emit("server error", 2, serv->server_session, err);
 
 		g_free(err);
 		server_cleanup (serv);	/* ->connecting = FALSE */
@@ -552,7 +551,7 @@ server_read_child (GIOChannel *source, GIOCondition condition, server *serv)
 		if (serv->proxy_sok6 != -1)
 			closesocket (serv->proxy_sok6);
 #endif
-		EMIT_SIGNAL (XP_TE_UKNHOST, sess, NULL, NULL, NULL, NULL, 0);
+		signal_emit("server unknown", 1, sess);
 		if (!servlist_cycle (serv))
 			if (prefs.autoreconnectonfail)
 				auto_reconnect (serv, FALSE, -1);
@@ -569,8 +568,7 @@ server_read_child (GIOChannel *source, GIOCondition condition, server *serv)
 		if (serv->proxy_sok6 != -1)
 			closesocket (serv->proxy_sok6);
 #endif
-		EMIT_SIGNAL (XP_TE_CONNFAIL, sess, errorstring (atoi (tbuf)), NULL,
-						 NULL, NULL, 0);
+		signal_emit("server error", 2, sess, errorstring (atoi (tbuf)));
 		if (!servlist_cycle (serv))
 			if (prefs.autoreconnectonfail)
 				auto_reconnect (serv, FALSE, -1);
@@ -579,7 +577,7 @@ server_read_child (GIOChannel *source, GIOCondition condition, server *serv)
 		waitline2 (source, host, sizeof host);
 		waitline2 (source, ip, sizeof ip);
 		waitline2 (source, outbuf, sizeof outbuf);
-		EMIT_SIGNAL (XP_TE_CONNECT, sess, host, ip, outbuf, NULL, 0);
+		signal_emit("server connect", 4, sess, host, ip, outbuf);
 		snprintf (outbuf, sizeof (outbuf), "%s/auth/xchat_auth",
 					 g_get_home_dir ());
 		if (access (outbuf, X_OK) == 0)
@@ -719,7 +717,7 @@ server_disconnect (session * sess, int sendquit, int err)
 		return;
 	case 1:							  /* it was in the process of connecting */
 		sprintf (tbuf, "%d", sess->server->childpid);
-		EMIT_SIGNAL (XP_TE_STOPCONNECT, sess, tbuf, NULL, NULL, NULL, 0);
+		signal_emit("server connect halted", 2, sess, tbuf);
 		return;
 	case 3:
 		shutup = TRUE;	/* won't print "disconnected" in channels */
@@ -735,7 +733,7 @@ server_disconnect (session * sess, int sendquit, int err)
 		{
 			if (!shutup || sess->type == SESS_SERVER)
 				/* print "Disconnected" to each window using this server */
-				EMIT_SIGNAL (XP_TE_DISCON, sess, errorstring (err), NULL, NULL, NULL, 0);
+				signal_emit("server disconnected", 2, sess, errorstring(err));
 
 			if (!sess->channel[0] || sess->type == SESS_CHANNEL)
 				clear_channel (sess);

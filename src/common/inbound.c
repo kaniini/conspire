@@ -1273,20 +1273,6 @@ inbound_next_nick (session *sess, char *nick)
 	}
 }
 
-void
-do_dns (session *sess, char *nick, char *host)
-{
-	char *po;
-	char tbuf[1024];
-
-	po = strrchr (host, '@');
-	if (po)
-		host = po + 1;
-	EMIT_SIGNAL (XP_TE_RESOLVINGUSER, sess, nick, host, NULL, NULL, 0);
-	snprintf (tbuf, sizeof (tbuf), "exec -d %s %s", prefs.dnsprogram, host);
-	handle_command (sess, tbuf, FALSE);
-}
-
 static void
 set_default_modes (server *serv)
 {
@@ -1414,12 +1400,6 @@ inbound_user_info (session *sess, char *chan, char *user, char *host,
 					return 0;
 			}
 		}
-	} else
-	{
-		if (!serv->doing_dns)
-			return 0;
-		if (nick && host)
-			do_dns (sess, nick, host);
 	}
 	return 1;
 }

@@ -33,11 +33,10 @@
 #include "text.h"
 #include "util.h"
 #include "xchatc.h"
-
+#include "signal_factory.h"
 
 GSList *notify_list = 0;
 int notify_tag = 0;
-
 
 static char *
 despacify_dup (char *str)
@@ -209,8 +208,7 @@ notify_announce_offline (server * serv, struct notify_per_server *servnot,
 	servnot->ison = FALSE;
 	servnot->lastoff = time (0);
 	if (!quiet)
-		EMIT_SIGNAL (XP_TE_NOTIFYOFFLINE, sess, nick, serv->servername,
-						 server_get_network (serv, TRUE), NULL, 0);
+		signal_emit("notify offline", 3, sess, nick, serv);
 	fe_notify_update (nick);
 	fe_notify_update (0);
 }
@@ -229,8 +227,7 @@ notify_announce_online (server * serv, struct notify_per_server *servnot,
 
 	servnot->ison = TRUE;
 	servnot->laston = time (0);
-	EMIT_SIGNAL (XP_TE_NOTIFYONLINE, sess, nick, serv->servername,
-					 server_get_network (serv, TRUE), NULL, 0);
+	signal_emit("notify online", 3, sess, nick, serv);
 	fe_notify_update (nick);
 	fe_notify_update (0);
 
@@ -537,7 +534,7 @@ notify_showlist (struct session *sess)
 	struct notify_per_server *servnot;
 	int i = 0;
 
-	EMIT_SIGNAL (XP_TE_NOTIFYHEAD, sess, NULL, NULL, NULL, NULL, 0);
+	signal_emit("notify list header", 1, sess);
 	while (list)
 	{
 		i++;
@@ -553,9 +550,9 @@ notify_showlist (struct session *sess)
 	if (i)
 	{
 		sprintf (outbuf, "%d", i);
-		EMIT_SIGNAL (XP_TE_NOTIFYNUMBER, sess, outbuf, NULL, NULL, NULL, 0);
+		signal_emit("notify list total", 2, sess, outbuf);
 	} else
-		EMIT_SIGNAL (XP_TE_NOTIFYEMPTY, sess, NULL, NULL, NULL, NULL, 0);
+		signal_emit("notify list empty", 1, sess);
 }
 
 int
