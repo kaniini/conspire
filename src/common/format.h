@@ -26,7 +26,7 @@ typedef struct {
 } Formatter;
 
 Formatter *formatter_register(const gchar *key, const gchar *format, int args);
-gchar *formatter_process(const gchar *key, ...);
+gchar *formatter_process(const gchar *key, gchar **data);
 void formatter_remove(const gchar *key);
 
 #endif
