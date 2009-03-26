@@ -202,21 +202,11 @@ exec_cmd_exec(session *sess, char *tbuf, char *word[], char *word_eol[])
 			}
 		}
 
-#ifdef __EMX__						  /* if os/2 */
-		if (pipe(out) < 0)
-		{
-			PrintText(sess, "Pipe creation error\n");
-			return CMD_EXEC_FAIL;
-		}
-		setmode(out[0], O_BINARY);
-		setmode(out[1], O_BINARY);
-#else
 		if (socketpair(PF_UNIX, SOCK_STREAM, 0, out) == -1)
 		{
 			PrintText(sess, "socketpair(2) failed\n");
 			return CMD_EXEC_FAIL;
 		}
-#endif
 
 		process = exec_process_create();
 		process->session = sess;
