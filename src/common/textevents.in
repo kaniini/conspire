@@ -1,744 +1,496 @@
 Add Notify
-XP_TE_ADDNOTIFY
-pevt_generic_nick_help
 %C27*$t%C27$1 added to notify list.
 1
 
 Ban List
-XP_TE_BANLIST
-pevt_banlist_help
 %C27*$t%C27$1 Banlist: %C3$4 %C4$2 %C5$3%O
 4
 
 Beep
-XP_TE_BEEP
-pevt_generic_none_help
 
 0
 
 Change Nick
-XP_TE_CHANGENICK
-pevt_changenick_help
 %C27*$t%C27$1 is now known as $2
 2
 
 Channel Action
-XP_TE_CHANACTION
-pevt_chanaction_help
 %C13*%O$t$1 $2%O
 2
 
 Channel Action Hilight
-XP_TE_HCHANACTION
-pevt_chanaction_help
 %C13*%O$t%C8%B$1%B%O $2%O
 2
 
 Channel Creation
-XP_TE_CHANDATE
-pevt_chandate_help
 %C27*$t%C27Channel $1 created on $2
 2
 
 Channel Join Error
-XP_TE_CHANNEL_JOIN_ERROR
-pevt_generic_channel_join_error_help
 %C27*$t%C27Cannot join%C11 %B$1%O ($2).
 2
 
 Channel List
-XP_TE_CHANLISTHEAD
-pevt_generic_none_help
 
 0
 
 Channel List Entry
-XP_TE_CHANLISTENTRY
-pevt_chanlistentry_help
 %C27*$t%O%B$1%O%C27/%O$2%C27: %O$3%O
 3
 
 Channel Message
-XP_TE_CHANMSG
-pevt_chanmsg_help
 %C2%H<%H$1%H>%H%O$t$2%O
 4
 
 Channel Mode Generic
-XP_TE_CHANMODEGEN
-pevt_chanmodegen_help
 %C27*$t%C27$1 sets mode $2$3 $4
 4
 
 Channel Modes
-XP_TE_CHANMODES
-pevt_chanmodes_help
 %C27*$t%C27Channel $1 modes: $2
 2
 
 Channel Msg Hilight
-XP_TE_HCHANMSG
-pevt_chanmsg_help
 %C8%B%H<%H$1%H>%H%O$t$2%O
 4
 
 Channel Notice
-XP_TE_CHANNOTICE
-pevt_channotice_help
 %C12-%C13$1/$2%C12-%O$t$3%O
 3
 
 Connected
-XP_TE_CONNECTED
-pevt_generic_none_help
 %C27*$t%C27Connected. Now logging in..
 0
 
 Connecting
-XP_TE_CONNECT
-pevt_connect_help
 %C27*$t%C27Connecting to %C11$1 %C14(%C11$2%C14)%C11 port %C11$3%C..
 3
 
 Connection Failed
-XP_TE_CONNFAIL
-pevt_connfail_help
 %C27*$t%C27Connection failed. Error: $1
 1
 
 CTCP Generic
-XP_TE_CTCPGEN
-pevt_ctcpgen_help
 %C27*$t%C27Received a CTCP $1 from $2
 2
 
 CTCP Generic to Channel
-XP_TE_CTCPGENC
-pevt_ctcpgenc_help
 %C27*$t%C27Received a CTCP $1 from $2 (to $3)
 3
 
 CTCP Reply Generic
-XP_TE_CTCP_REPLY
-pevt_ctcpreply_help
 %C27*$t%C27Received a CTCP reply $2 from $1: $3
 3
 
 CTCP Send
-XP_TE_CTCPSEND
-pevt_ctcpsend_help
 %C3>%O$1%C3<%O$tCTCP $2%O
 2
 
 DCC CHAT Abort
-XP_TE_DCCCHATABORT
-pevt_dccchatabort_help
 %C27*$t%C27DCC CHAT to %C11$1%O aborted.
 1
 
 DCC CHAT Connect
-XP_TE_DCCCONCHAT
-pevt_dccchatcon_help
 %C27*$t%C27DCC CHAT connection established to %C11$1 %C14[%O$2%C14]%O
 2
 
 DCC CHAT Failed
-XP_TE_DCCCHATF
-pevt_dccchaterr_help
 %C27*$t%C27DCC CHAT failed. Connection to $1 %C14[%O$2:$3%C14]%O lost.
 4
 
 DCC CHAT Offer
-XP_TE_DCCCHATOFFER
-pevt_generic_nick_help
 %C27*$t%C27Received a DCC CHAT offer from $1
 1
 
 DCC CHAT Offering
-XP_TE_DCCCHATOFFERING
-pevt_generic_nick_help
 %C27*$t%C27Offering DCC CHAT to $1
 1
 
 DCC CHAT Reoffer
-XP_TE_DCCCHATREOFFER
-pevt_generic_nick_help
 %C27*$t%C27Already offering CHAT to $1
 1
 
 DCC Conection Failed
-XP_TE_DCCCONFAIL
-pevt_dccconfail_help
 %C27*$t%C27DCC $1 connect attempt to %C11$2%O failed (err=$3).
 3
 
 DCC Generic Offer
-XP_TE_DCCGENERICOFFER
-pevt_dccgenericoffer_help
 %C27*$t%C27Received '$1%O' from $2
 2
 
 DCC Header
-XP_TE_DCCHEAD
-pevt_generic_none_help
 %C24,18 Type  To/From    Status  Size    Pos     File         
 0
 
 DCC Malformed
-XP_TE_MALFORMED
-pevt_malformed_help
 %C27*$t%C27Received a malformed DCC request from %C11$1%O.%010%C27*$t%C27Contents of packet: $2
 2
 
 DCC Offer
-XP_TE_DCCOFFER
-pevt_dccoffer_help
 %C27*$t%C27Offering %C11$1 %Cto %C11$2%O
 3
 
 DCC Offer Not Valid
-XP_TE_DCCIVAL
-pevt_generic_none_help
 %C27*$t%C27No such DCC offer.
 0
 
 DCC RECV Abort
-XP_TE_DCCRECVABORT
-pevt_dccfileabort_help
 %C27*$t%C27DCC RECV %C11$2%O to %C11$1%O aborted.
 2
 
 DCC RECV Complete
-XP_TE_DCCRECVCOMP
-pevt_dccrecvcomp_help
 %C27*$t%C27DCC RECV %C11$1%O from %C11$3%O complete %C14[%C11$4%O cps%C14]%O.
 4
 
 DCC RECV Connect
-XP_TE_DCCCONRECV
-pevt_dcccon_help
 %C27*$t%C27DCC RECV connection established to %C11$1 %C14[%O$2%C14]%O
 3
 
 DCC RECV Failed
-XP_TE_DCCRECVERR
-pevt_dccrecverr_help
 %C27*$t%C27DCC RECV $1 ($2) failed. Connection to $3 lost.
 4
 
 DCC RECV File Open Error
-XP_TE_DCCFILEERR
-pevt_generic_file_help
 %C27*$t%C27DCC RECV: Cannot open $1 for writing ($2).
 2
 
 DCC Rename
-XP_TE_DCCRENAME
-pevt_dccrename_help
 %C27*$t%C27The file %C11$1%C already exists, saving it as %C11$2%O instead.
 2
 
 DCC RESUME Request
-XP_TE_DCCRESUMEREQUEST
-pevt_dccresumeoffer_help
 %C27*$t%C27%C11$1 %Chas requested to resume %C11$2 %Cfrom %C11$3%C.
 3
 
 DCC SEND Abort
-XP_TE_DCCSENDABORT
-pevt_dccfileabort_help
 %C27*$t%C27DCC SEND %C11$2%O to %C11$1%O aborted.
 2
 
 DCC SEND Complete
-XP_TE_DCCSENDCOMP
-pevt_dccsendcomp_help
 %C27*$t%C27DCC SEND %C11$1%O to %C11$2%O complete %C14[%C11$3%O cps%C14]%O.
 3
 
 DCC SEND Connect
-XP_TE_DCCCONSEND
-pevt_dcccon_help
 %C27*$t%C27DCC SEND connection established to %C11$1 %C14[%O$2%C14]%O
 3
 
 DCC SEND Failed
-XP_TE_DCCSENDFAIL
-pevt_dccsendfail_help
 %C27*$t%C27DCC SEND %C11$1%O failed. Connection to %C11$2%O lost.
 3
 
 DCC SEND Offer
-XP_TE_DCCSENDOFFER
-pevt_dccsendoffer_help
 %C27*$t%C27%C11$1 %Chas offered %C11$2 %C(%C11$3 %Cbytes)
 4
 
 DCC Stall
-XP_TE_DCCSTALL
-pevt_dccstall_help
 %C27*$t%C27DCC $1 %C11$2 %Cto %C11$3 %Cstalled - aborting.
 3
 
 DCC Timeout
-XP_TE_DCCTOUT
-pevt_dccstall_help
 %C27*$t%C27DCC $1 %C11$2 %Cto %C11$3 %Ctimed out - aborting.
 3
 
 Delete Notify
-XP_TE_DELNOTIFY
-pevt_generic_nick_help
 %C27*$t%C27$1 deleted from notify list.
 1
 
 Disconnected
-XP_TE_DISCON
-pevt_discon_help
 %C27*$t%C27Disconnected ($1).
 1
 
 Found IP
-XP_TE_FOUNDIP
-pevt_foundip_help
 %C27*$t%C27The IRC server is reporting your IP as $1.
 1
 
 Generic Message
-XP_TE_GENMSG
-pevt_genmsg_help
 $1$t$2
 2
 
 Ignore Add
-XP_TE_IGNOREADD
-pevt_ignoreaddremove_help
 %C27*$t%C27$1 removed from ignore list.
 1
 
 Ignore Changed
-XP_TE_IGNORECHANGE
-pevt_ignoreaddremove_help
 %C27*$t%C27Ignore on $1 has been changed.
 1
 
 Ignore Footer
-XP_TE_IGNOREFOOTER
-pevt_generic_none_help
 %C24,18                                                              
 0
 
 Ignore Header
-XP_TE_IGNOREHEADER
-pevt_generic_none_help
 %C24,18 Hostmask                  PRIV NOTI CHAN CTCP DCC  INVI UNIG 
 0
 
 Ignore Remove
-XP_TE_IGNOREREMOVE
-pevt_ignoreaddremove_help
 %C27*$t%C27$1 removed from ignore list.
 1
 
 Ignorelist Empty
-XP_TE_IGNOREEMPTY
-pevt_generic_none_help
-  Ignore list is empty.
+%C27*$t%C27Ignore list is empty.
 0
 
 Invited
-XP_TE_INVITED
-pevt_invited_help
 %C27*$t%C27You have been invited to $1 by $2 ($3).
 3
 
 Join
-XP_TE_JOIN
-pevt_join_help
 %C27*$t%C27$1 ($3) has joined $2
 3
 
 Kick
-XP_TE_KICK
-pevt_kick_help
 %C27*$t%C27$1 has kicked $2 from $3: $4
 4
 
 Killed
-XP_TE_KILL
-pevt_kill_help
 %C27*$t%C27You have been killed by $1: $2
 2
 
 Message Send
-XP_TE_MSGSEND
-pevt_ctcpsend_help
 %C3>%O$1%C3<%O$t$2%O
 2
 
 Motd
-XP_TE_MOTD
-pevt_servertext_help
 %C27*$t%O$1
 1
 
 MOTD Skipped
-XP_TE_MOTDSKIP
-pevt_generic_none_help
 %C27*$t%C27MOTD Skipped.
 0
 
 Nick Clash
-XP_TE_NICKCLASH
-pevt_nickclash_help
 %C27*$t%O$1 already in use. Retrying with $2..
 2
 
 Nick Failed
-XP_TE_NICKFAIL
-pevt_generic_none_help
 %C27*$t%ONickname already in use. Use /NICK to try another.
 0
 
 No DCC
-XP_TE_NODCC
-pevt_generic_none_help
 %C27*$t%C27No such DCC.
 0
 
 No Running Process
-XP_TE_NOCHILD
-pevt_generic_none_help
 %C27*$t%C27No process is currently running
 0
 
 Notice
-XP_TE_NOTICE
-pevt_notice_help
 %C12-%C13$1%C12-%O$t$2%O
 2
 
 Notice Send
-XP_TE_NOTICESEND
-pevt_ctcpsend_help
 %C3>%O$1%C3<%O$t$2%O
 2
 
 Notify Empty
-XP_TE_NOTIFYEMPTY
-pevt_generic_none_help
 %C27*$t%C27Notify list is empty.
 0
 
 Notify Header
-XP_TE_NOTIFYHEAD
-pevt_generic_none_help
 %C24,18 %B  Notify List                           
 0
 
 Notify Number
-XP_TE_NOTIFYNUMBER
-pevt_notifynumber_help
 %C27*$t%C27$1 users in notify list.
 1
 
 Notify Offline
-XP_TE_NOTIFYOFFLINE
-pevt_generic_nick_help
 %C27*$t%C27Notify: $1 is offline ($2).
 2
 
 Notify Online
-XP_TE_NOTIFYONLINE
-pevt_generic_nick_help
 %C27*$t%C27Notify: $1 is online ($2).
 2
 
 Open Dialog
-XP_TE_OPENDIALOG
-pevt_generic_none_help
 
 0
 
 Part
-XP_TE_PART
-pevt_part_help
 %C27*$t%C27$1 %C14(%O$2%C14)%C has left $3
 3
 
 Part with Reason
-XP_TE_PARTREASON
-pevt_partreason_help
 %C27*$t%C27$1 %C14(%O$2%C14)%C has left $3: $4
 4
 
 Ping Reply
-XP_TE_PINGREP
-pevt_pingrep_help
 %C27*$t%C27Ping reply from $1: $2 second(s)
 2
 
 Ping Timeout
-XP_TE_PINGTIMEOUT
-pevt_pingtimeout_help
 %C27*$t%C27No ping reply for $1 seconds, disconnecting.
 1
 
 Private Message
-XP_TE_PRIVMSG
-pevt_privmsg_help
 %C12*%C13$1%C12*$t%O$2%O
 3
 
 Private Message to Dialog
-XP_TE_DPRIVMSG
-pevt_privmsg_help
 %C2%H<%H$1%H>%H%O$t$2%O
 3
 
 Process Already Running
-XP_TE_ALREADYPROCESS
-pevt_generic_none_help
 %C27*$t%C27A process is already running
 0
 
 Quit
-XP_TE_QUIT
-pevt_quit_help
 %C27*$t%C27$1 ($3) has quit: $2
 3
 
 Raw Modes
-XP_TE_RAWMODES
-pevt_rawmodes_help
 %C27*$t%C27$1 sets mode: $2
 2
 
 Receive Wallops
-XP_TE_WALLOPS
-pevt_privmsg_help
 %C12-%C13$1/Wallops%C12-%O$t$2%O
 2
 
 Resolving User
-XP_TE_RESOLVINGUSER
-pevt_resolvinguser_help
 %C27*$t%C27Looking up IP number for%C11 $1%O..
 2
 
 Server Connected
-XP_TE_SERVERCONNECTED
-pevt_generic_none_help
 %C27*$t%C27Connected.
 0
 
 Server Error
-XP_TE_SERVERERROR
-pevt_servererror_help
 %C27*$t%C27$1%O
 1
 
 Server Lookup
-XP_TE_SERVERLOOKUP
-pevt_serverlookup_help
 %C27*$t%C27Looking up %C11$1%C..
 1
 
 Server Notice
-XP_TE_SERVNOTICE
-pevt_servertext_help
 %C27*%O$t$1
 2
 
 Server Text
-XP_TE_SERVTEXT
-pevt_servertext_help
 %C27*$t%O$1%O
 2
 
 Stop Connection
-XP_TE_STOPCONNECT
-pevt_sconnect_help
 %C27*$t%C27Stopped previous connection attempt (pid=$1)
 1
 
 Topic
-XP_TE_TOPIC
-pevt_topic_help
 %C27*$t%C27Topic for $1 is $2
 2
 
 Topic Change
-XP_TE_NEWTOPIC
-pevt_newtopic_help
 %C27*$t%C27$1 has changed the topic to: $2
 3
 
 Topic Creation
-XP_TE_TOPICDATE
-pevt_topicdate_help
 %C27*$t%C27Topic for $1 set by $2 at $3
 3
 
 Unknown Host
-XP_TE_UKNHOST
-pevt_generic_none_help
 %C27*$t%C27Unknown host. Maybe you misspelled it?
 0
 
 Users On Channel
-XP_TE_USERSONCHAN
-pevt_usersonchan_help
 %C27*$t%C27%C11Users on $1:%C $2
 2
 
 WhoIs Authenticated
-XP_TE_WHOIS_AUTH
-pevt_whois_auth_help
 %C22*%O$t%C28[%O$1%C28] %O$2%C27 $3
 3
 
 WhoIs Away Line
-XP_TE_WHOIS_AWAY
-pevt_whois_away_help
 %C27*$t%C27%C12[%O$1%C12] is away: $2
 2
 
 WhoIs Channel/Oper Line
-XP_TE_WHOIS_CHANNELS
-pevt_whois_channels_help
 %C27*$t%C27%C12[%O$1%C12]%C $2
 2
 
 WhoIs Oper Line
-XP_TE_WHOIS_OPER
-pevt_whois_oper_help
 %C27*$t%C27%C12[%O$1%C12]%C $2
 2
 
 WhoIs End
-XP_TE_WHOIS_END
-pevt_whois_end_help
 %C27*$t%C27%C12[%O$1%C12] %CEnd of WHOIS list.
 1
 
 WhoIs Identified
-XP_TE_WHOIS_ID
-pevt_whoisid_help
 %C27*$t%C27%C12[%O$1%C12] %C$2
 2
 
 WhoIs Idle Line
-XP_TE_WHOIS_IDLE
-pevt_whois_idle_help
 %C27*$t%C27%C12[%O$1%C12]%O idle %C11$2%O
 2
 
 WhoIs Idle Line with Signon
-XP_TE_WHOIS_IDLE_SIGNON
-pevt_whois_idle_signon_help
 %C27*$t%C27%C12[%O$1%C12]%O idle %C11$2%O, signon: %C11$3%O
 3
 
 WhoIs Name Line
-XP_TE_WHOIS_NAME
-pevt_whois_name_help
 %C27*$t%C27%C12[%O$1%C12] %C14(%O$2@$3%C14) %O: $4%O
 4
 
 WhoIs Real Host
-XP_TE_WHOIS_REALHOST
-pevt_whoisrealhost_help
 %C27*$t%C27%C12[%O$1%C12] %Oreal user@host %C11$2%O, real IP %C11$3%O
 4
 
 WhoIs Server Line
-XP_TE_WHOIS_SERVER
-pevt_whois_server_help
 %C27*$t%C27%C12[%O$1%C12]%O $2
 2
 
 WhoIs Special
-XP_TE_WHOIS_SPECIAL
-pevt_whoisid_help
 %C22*%O$t%C28[%O$1%C28]%O $2
 3
 
 You Join
-XP_TE_UJOIN
-pevt_ukick_help
 %C27*$t%C27Now talking on %C11$2%O
 4
 
 You Kicked
-XP_TE_UKICK
-pevt_ukick_help
 %C27*$t%C27You have been kicked from $2 by $3: $4
 4
 
 You Part
-XP_TE_UPART
-pevt_part_help
 %C27*$t%C27You have left channel $3
 3
 
 You Part with Reason
-XP_TE_UPARTREASON
-pevt_partreason_help
 %C27*$t%C27You have left channel $3: $4
 4
 
 Your Action
-XP_TE_UACTION
-pevt_chanaction_help
 %C18*$t$1%O $2
 n3
 
 Your Invitation
-XP_TE_UINVITE
-pevt_uinvite_help
 %C27*$t%C27You've invited %C11$1%C to %C11$2%C (%C11$3%C)
 3
 
 Your Message
-XP_TE_UCHANMSG
-pevt_chanmsg_help
 %C31%H<%H$1%H>%H%O$t$2%O
 4
 
 Your Nick Changing
-XP_TE_UCHANGENICK
-pevt_uchangenick_help
 %C27*$t%C27You are now known as $2
 2
 
 Netsplit
-XP_TE_NS_START
-pevt_netsplit1_help
 %C23*%O$t%C23Netsplit: $1 <-> $2, quits: $3
 3
 
 Authenticated to Account
-XP_TE_SASL_AUTH
-pevt_saslauth_help
 %C23*%O$t%C23You have successfully authenticated to account '$1'.
 1
 
 Plugin Loaded
-XP_TE_PLUGIN_LOADED
-pevt_plugin_loaded_help
 %C23*%O$t%C23Plugin $1 version $2 successfully loaded.
 2
 
 Plugin Unloaded
-XP_TE_PLUGIN_UNLOADED
-pevt_plugin_unloaded_help
 %C23*%O$t%C23Plugin $1 successfully unloaded.
 1
 
 Plugin Error
-XP_TE_PLUGIN_ERROR
-pevt_plugin_error_help
 %C23*%O$t%C23Couldn't load plugin $1: $2
 2
 
