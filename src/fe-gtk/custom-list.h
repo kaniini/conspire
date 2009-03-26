@@ -81,5 +81,6 @@ CustomList *custom_list_new (void);
 void custom_list_append (CustomList *, chanlistrow *);
 void custom_list_resort (CustomList *);
 void custom_list_clear (CustomList *);
+GType custom_list_get_type (void);
 
 #endif /* _custom_list_h_included_ */
