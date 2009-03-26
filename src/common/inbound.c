@@ -423,7 +423,7 @@ inbound_chanmsg (server *serv, session *sess, char *chan, char *from, char *text
 	{
   		if (prefs.auto_unmark_away && serv->is_away)
 			sess->server->p_set_back (sess->server);
-		signal_emit("user message public", sess, from, text, nickchar, NULL, 0);
+		signal_emit("user message public", 6, sess, from, text, nickchar, NULL, 0);
 		return;
 	}
 
@@ -995,11 +995,11 @@ inbound_ping_reply (session *sess, char *timestring, char *from)
 		if (sess->server->lag_sent)
 			sess->server->lag_sent = 0;
 		else
-			signal_attach("server ping reply", 3, sess, from, "?");
+			signal_emit("server ping reply", 3, sess, from, "?");
 	} else
 	{
 		snprintf (outbuf, sizeof (outbuf), "%ld.%ld%ld", dif / 1000000, (dif / 100000) % 10, dif % 10);
-		signal_attach("server ping reply", 3, sess, from, outbuf);
+		signal_emit("server ping reply", 3, sess, from, outbuf);
 	}
 }
 
