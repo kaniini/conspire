@@ -36,7 +36,7 @@ plugin_load(const gchar *filename)
 
 	m = g_module_open(filename, G_MODULE_BIND_LOCAL);
 	if (m == NULL) {
-		signal_emit("plugin error", filename, g_module_error());
+		signal_emit("plugin error", 2, filename, g_module_error());
 		return;
 	}
 
