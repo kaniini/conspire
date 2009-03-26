@@ -463,6 +463,8 @@ session_free (session *killsess)
 
 	sess_list = g_slist_remove (sess_list, killsess);
 
+	signal_emit("session destroy", 1, killsess);
+
 	if (killsess->type == SESS_CHANNEL)
 		userlist_free (killsess);
 
