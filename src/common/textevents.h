@@ -2,375 +2,375 @@
 
 const struct text_event te[] = {
 
-{"Add Notify", pevt_generic_nick_help, 1, 
-N_("%C27*$t%C27$1 added to notify list.")},
+{"Add Notify", 1, 
+"%C27*$t%C27$1 added to notify list."},
 
-{"Ban List", pevt_banlist_help, 4, 
-N_("%C27*$t%C27$1 Banlist: %C3$4 %C4$2 %C5$3%O")},
+{"Ban List", 4, 
+"%C27*$t%C27$1 Banlist: %C3$4 %C4$2 %C5$3%O"},
 
-{"Beep", pevt_generic_none_help, 0, 
-N_("")},
+{"Beep", 0, 
+""},
 
-{"Change Nick", pevt_changenick_help, 2, 
-N_("%C27*$t%C27$1 is now known as $2")},
+{"Change Nick", 2, 
+"%C27*$t%C27$1 is now known as $2"},
 
-{"Channel Action", pevt_chanaction_help, 2, 
-N_("%C13*%O$t$1 $2%O")},
+{"Channel Action", 2, 
+"%C13*%O$t$1 $2%O"},
 
-{"Channel Action Hilight", pevt_chanaction_help, 2, 
-N_("%C13*%O$t%C8%B$1%B%O $2%O")},
+{"Channel Action Hilight", 2, 
+"%C13*%O$t%C8%B$1%B%O $2%O"},
 
-{"Channel Creation", pevt_chandate_help, 2, 
-N_("%C27*$t%C27Channel $1 created on $2")},
+{"Channel Creation", 2, 
+"%C27*$t%C27Channel $1 created on $2"},
 
-{"Channel Join Error", pevt_generic_channel_join_error_help, 2, 
-N_("%C27*$t%C27Cannot join%C11 %B$1%O ($2).")},
+{"Channel Join Error", 2, 
+"%C27*$t%C27Cannot join%C11 %B$1%O ($2)."},
 
-{"Channel List", pevt_generic_none_help, 0, 
-N_("")},
+{"Channel List", 0, 
+""},
 
-{"Channel List Entry", pevt_chanlistentry_help, 3, 
-N_("%C27*$t%O%B$1%O%C27/%O$2%C27: %O$3%O")},
+{"Channel List Entry", 3, 
+"%C27*$t%O%B$1%O%C27/%O$2%C27: %O$3%O"},
 
-{"Channel Message", pevt_chanmsg_help, 4, 
-N_("%C2%H<%H$1%H>%H%O$t$2%O")},
+{"Channel Message", 4, 
+"%C2%H<%H$1%H>%H%O$t$2%O"},
 
-{"Channel Mode Generic", pevt_chanmodegen_help, 4, 
-N_("%C27*$t%C27$1 sets mode $2$3 $4")},
+{"Channel Mode Generic", 4, 
+"%C27*$t%C27$1 sets mode $2$3 $4"},
 
-{"Channel Modes", pevt_chanmodes_help, 2, 
-N_("%C27*$t%C27Channel $1 modes: $2")},
+{"Channel Modes", 2, 
+"%C27*$t%C27Channel $1 modes: $2"},
 
-{"Channel Msg Hilight", pevt_chanmsg_help, 4, 
-N_("%C8%B%H<%H$1%H>%H%O$t$2%O")},
+{"Channel Msg Hilight", 4, 
+"%C8%B%H<%H$1%H>%H%O$t$2%O"},
 
-{"Channel Notice", pevt_channotice_help, 3, 
-N_("%C12-%C13$1/$2%C12-%O$t$3%O")},
+{"Channel Notice", 3, 
+"%C12-%C13$1/$2%C12-%O$t$3%O"},
 
-{"Connected", pevt_generic_none_help, 0, 
-N_("%C27*$t%C27Connected. Now logging in..")},
+{"Connected", 0, 
+"%C27*$t%C27Connected. Now logging in.."},
 
-{"Connecting", pevt_connect_help, 3, 
-N_("%C27*$t%C27Connecting to %C11$1 %C14(%C11$2%C14)%C11 port %C11$3%C..")},
+{"Connecting", 3, 
+"%C27*$t%C27Connecting to %C11$1 %C14(%C11$2%C14)%C11 port %C11$3%C.."},
 
-{"Connection Failed", pevt_connfail_help, 1, 
-N_("%C27*$t%C27Connection failed. Error: $1")},
+{"Connection Failed", 1, 
+"%C27*$t%C27Connection failed. Error: $1"},
 
-{"CTCP Generic", pevt_ctcpgen_help, 2, 
-N_("%C27*$t%C27Received a CTCP $1 from $2")},
+{"CTCP Generic", 2, 
+"%C27*$t%C27Received a CTCP $1 from $2"},
 
-{"CTCP Generic to Channel", pevt_ctcpgenc_help, 3, 
-N_("%C27*$t%C27Received a CTCP $1 from $2 (to $3)")},
+{"CTCP Generic to Channel", 3, 
+"%C27*$t%C27Received a CTCP $1 from $2 (to $3)"},
 
-{"CTCP Reply Generic", pevt_ctcpreply_help, 3, 
-N_("%C27*$t%C27Received a CTCP reply $2 from $1: $3")},
+{"CTCP Reply Generic", 3, 
+"%C27*$t%C27Received a CTCP reply $2 from $1: $3"},
 
-{"CTCP Send", pevt_ctcpsend_help, 2, 
-N_("%C3>%O$1%C3<%O$tCTCP $2%O")},
+{"CTCP Send", 2, 
+"%C3>%O$1%C3<%O$tCTCP $2%O"},
 
-{"DCC CHAT Abort", pevt_dccchatabort_help, 1, 
-N_("%C27*$t%C27DCC CHAT to %C11$1%O aborted.")},
+{"DCC CHAT Abort", 1, 
+"%C27*$t%C27DCC CHAT to %C11$1%O aborted."},
 
-{"DCC CHAT Connect", pevt_dccchatcon_help, 2, 
-N_("%C27*$t%C27DCC CHAT connection established to %C11$1 %C14[%O$2%C14]%O")},
+{"DCC CHAT Connect", 2, 
+"%C27*$t%C27DCC CHAT connection established to %C11$1 %C14[%O$2%C14]%O"},
 
-{"DCC CHAT Failed", pevt_dccchaterr_help, 4, 
-N_("%C27*$t%C27DCC CHAT failed. Connection to $1 %C14[%O$2:$3%C14]%O lost.")},
+{"DCC CHAT Failed", 4, 
+"%C27*$t%C27DCC CHAT failed. Connection to $1 %C14[%O$2:$3%C14]%O lost."},
 
-{"DCC CHAT Offer", pevt_generic_nick_help, 1, 
-N_("%C27*$t%C27Received a DCC CHAT offer from $1")},
+{"DCC CHAT Offer", 1, 
+"%C27*$t%C27Received a DCC CHAT offer from $1"},
 
-{"DCC CHAT Offering", pevt_generic_nick_help, 1, 
-N_("%C27*$t%C27Offering DCC CHAT to $1")},
+{"DCC CHAT Offering", 1, 
+"%C27*$t%C27Offering DCC CHAT to $1"},
 
-{"DCC CHAT Reoffer", pevt_generic_nick_help, 1, 
-N_("%C27*$t%C27Already offering CHAT to $1")},
+{"DCC CHAT Reoffer", 1, 
+"%C27*$t%C27Already offering CHAT to $1"},
 
-{"DCC Conection Failed", pevt_dccconfail_help, 3, 
-N_("%C27*$t%C27DCC $1 connect attempt to %C11$2%O failed (err=$3).")},
+{"DCC Conection Failed", 3, 
+"%C27*$t%C27DCC $1 connect attempt to %C11$2%O failed (err=$3)."},
 
-{"DCC Generic Offer", pevt_dccgenericoffer_help, 2, 
-N_("%C27*$t%C27Received '$1%O' from $2")},
+{"DCC Generic Offer", 2, 
+"%C27*$t%C27Received '$1%O' from $2"},
 
-{"DCC Header", pevt_generic_none_help, 0, 
-N_("%C24,18 Type  To/From    Status  Size    Pos     File         ")},
+{"DCC Header", 0, 
+"%C24,18 Type  To/From    Status  Size    Pos     File         "},
 
-{"DCC Malformed", pevt_malformed_help, 2, 
-N_("%C27*$t%C27Received a malformed DCC request from %C11$1%O.%010%C27*$t%C27Contents of packet: $2")},
+{"DCC Malformed", 2, 
+"%C27*$t%C27Received a malformed DCC request from %C11$1%O.%010%C27*$t%C27Contents of packet: $2"},
 
-{"DCC Offer", pevt_dccoffer_help, 3, 
-N_("%C27*$t%C27Offering %C11$1 %Cto %C11$2%O")},
+{"DCC Offer", 3, 
+"%C27*$t%C27Offering %C11$1 %Cto %C11$2%O"},
 
-{"DCC Offer Not Valid", pevt_generic_none_help, 0, 
-N_("%C27*$t%C27No such DCC offer.")},
+{"DCC Offer Not Valid", 0, 
+"%C27*$t%C27No such DCC offer."},
 
-{"DCC RECV Abort", pevt_dccfileabort_help, 2, 
-N_("%C27*$t%C27DCC RECV %C11$2%O to %C11$1%O aborted.")},
+{"DCC RECV Abort", 2, 
+"%C27*$t%C27DCC RECV %C11$2%O to %C11$1%O aborted."},
 
-{"DCC RECV Complete", pevt_dccrecvcomp_help, 4, 
-N_("%C27*$t%C27DCC RECV %C11$1%O from %C11$3%O complete %C14[%C11$4%O cps%C14]%O.")},
+{"DCC RECV Complete", 4, 
+"%C27*$t%C27DCC RECV %C11$1%O from %C11$3%O complete %C14[%C11$4%O cps%C14]%O."},
 
-{"DCC RECV Connect", pevt_dcccon_help, 3, 
-N_("%C27*$t%C27DCC RECV connection established to %C11$1 %C14[%O$2%C14]%O")},
+{"DCC RECV Connect", 3, 
+"%C27*$t%C27DCC RECV connection established to %C11$1 %C14[%O$2%C14]%O"},
 
-{"DCC RECV Failed", pevt_dccrecverr_help, 4, 
-N_("%C27*$t%C27DCC RECV $1 ($2) failed. Connection to $3 lost.")},
+{"DCC RECV Failed", 4, 
+"%C27*$t%C27DCC RECV $1 ($2) failed. Connection to $3 lost."},
 
-{"DCC RECV File Open Error", pevt_generic_file_help, 2, 
-N_("%C27*$t%C27DCC RECV: Cannot open $1 for writing ($2).")},
+{"DCC RECV File Open Error", 2, 
+"%C27*$t%C27DCC RECV: Cannot open $1 for writing ($2)."},
 
-{"DCC Rename", pevt_dccrename_help, 2, 
-N_("%C27*$t%C27The file %C11$1%C already exists, saving it as %C11$2%O instead.")},
+{"DCC Rename", 2, 
+"%C27*$t%C27The file %C11$1%C already exists, saving it as %C11$2%O instead."},
 
-{"DCC RESUME Request", pevt_dccresumeoffer_help, 3, 
-N_("%C27*$t%C27%C11$1 %Chas requested to resume %C11$2 %Cfrom %C11$3%C.")},
+{"DCC RESUME Request", 3, 
+"%C27*$t%C27%C11$1 %Chas requested to resume %C11$2 %Cfrom %C11$3%C."},
 
-{"DCC SEND Abort", pevt_dccfileabort_help, 2, 
-N_("%C27*$t%C27DCC SEND %C11$2%O to %C11$1%O aborted.")},
+{"DCC SEND Abort", 2, 
+"%C27*$t%C27DCC SEND %C11$2%O to %C11$1%O aborted."},
 
-{"DCC SEND Complete", pevt_dccsendcomp_help, 3, 
-N_("%C27*$t%C27DCC SEND %C11$1%O to %C11$2%O complete %C14[%C11$3%O cps%C14]%O.")},
+{"DCC SEND Complete", 3, 
+"%C27*$t%C27DCC SEND %C11$1%O to %C11$2%O complete %C14[%C11$3%O cps%C14]%O."},
 
-{"DCC SEND Connect", pevt_dcccon_help, 3, 
-N_("%C27*$t%C27DCC SEND connection established to %C11$1 %C14[%O$2%C14]%O")},
+{"DCC SEND Connect", 3, 
+"%C27*$t%C27DCC SEND connection established to %C11$1 %C14[%O$2%C14]%O"},
 
-{"DCC SEND Failed", pevt_dccsendfail_help, 3, 
-N_("%C27*$t%C27DCC SEND %C11$1%O failed. Connection to %C11$2%O lost.")},
+{"DCC SEND Failed", 3, 
+"%C27*$t%C27DCC SEND %C11$1%O failed. Connection to %C11$2%O lost."},
 
-{"DCC SEND Offer", pevt_dccsendoffer_help, 4, 
-N_("%C27*$t%C27%C11$1 %Chas offered %C11$2 %C(%C11$3 %Cbytes)")},
+{"DCC SEND Offer", 4, 
+"%C27*$t%C27%C11$1 %Chas offered %C11$2 %C(%C11$3 %Cbytes)"},
 
-{"DCC Stall", pevt_dccstall_help, 3, 
-N_("%C27*$t%C27DCC $1 %C11$2 %Cto %C11$3 %Cstalled - aborting.")},
+{"DCC Stall", 3, 
+"%C27*$t%C27DCC $1 %C11$2 %Cto %C11$3 %Cstalled - aborting."},
 
-{"DCC Timeout", pevt_dccstall_help, 3, 
-N_("%C27*$t%C27DCC $1 %C11$2 %Cto %C11$3 %Ctimed out - aborting.")},
+{"DCC Timeout", 3, 
+"%C27*$t%C27DCC $1 %C11$2 %Cto %C11$3 %Ctimed out - aborting."},
 
-{"Delete Notify", pevt_generic_nick_help, 1, 
-N_("%C27*$t%C27$1 deleted from notify list.")},
+{"Delete Notify", 1, 
+"%C27*$t%C27$1 deleted from notify list."},
 
-{"Disconnected", pevt_discon_help, 1, 
-N_("%C27*$t%C27Disconnected ($1).")},
+{"Disconnected", 1, 
+"%C27*$t%C27Disconnected ($1)."},
 
-{"Found IP", pevt_foundip_help, 1, 
-N_("%C27*$t%C27The IRC server is reporting your IP as $1.")},
+{"Found IP", 1, 
+"%C27*$t%C27The IRC server is reporting your IP as $1."},
 
-{"Generic Message", pevt_genmsg_help, 2, 
-N_("$1$t$2")},
+{"Generic Message", 2, 
+"$1$t$2"},
 
-{"Ignore Add", pevt_ignoreaddremove_help, 1, 
-N_("%C27*$t%C27$1 removed from ignore list.")},
+{"Ignore Add", 1, 
+"%C27*$t%C27$1 removed from ignore list."},
 
-{"Ignore Changed", pevt_ignoreaddremove_help, 1, 
-N_("%C27*$t%C27Ignore on $1 has been changed.")},
+{"Ignore Changed", 1, 
+"%C27*$t%C27Ignore on $1 has been changed."},
 
-{"Ignore Footer", pevt_generic_none_help, 0, 
-N_("%C24,18                                                              ")},
+{"Ignore Footer", 0, 
+"%C24,18                                                              "},
 
-{"Ignore Header", pevt_generic_none_help, 0, 
-N_("%C24,18 Hostmask                  PRIV NOTI CHAN CTCP DCC  INVI UNIG ")},
+{"Ignore Header", 0, 
+"%C24,18 Hostmask                  PRIV NOTI CHAN CTCP DCC  INVI UNIG "},
 
-{"Ignore Remove", pevt_ignoreaddremove_help, 1, 
-N_("%C27*$t%C27$1 removed from ignore list.")},
+{"Ignore Remove", 1, 
+"%C27*$t%C27$1 removed from ignore list."},
 
-{"Ignorelist Empty", pevt_generic_none_help, 0, 
-N_("  Ignore list is empty.")},
+{"Ignorelist Empty", 0, 
+"%C27*$t%C27Ignore list is empty."},
 
-{"Invited", pevt_invited_help, 3, 
-N_("%C27*$t%C27You have been invited to $1 by $2 ($3).")},
+{"Invited", 3, 
+"%C27*$t%C27You have been invited to $1 by $2 ($3)."},
 
-{"Join", pevt_join_help, 3, 
-N_("%C27*$t%C27$1 ($3) has joined $2")},
+{"Join", 3, 
+"%C27*$t%C27$1 ($3) has joined $2"},
 
-{"Kick", pevt_kick_help, 4, 
-N_("%C27*$t%C27$1 has kicked $2 from $3: $4")},
+{"Kick", 4, 
+"%C27*$t%C27$1 has kicked $2 from $3: $4"},
 
-{"Killed", pevt_kill_help, 2, 
-N_("%C27*$t%C27You have been killed by $1: $2")},
+{"Killed", 2, 
+"%C27*$t%C27You have been killed by $1: $2"},
 
-{"Message Send", pevt_ctcpsend_help, 2, 
-N_("%C3>%O$1%C3<%O$t$2%O")},
+{"Message Send", 2, 
+"%C3>%O$1%C3<%O$t$2%O"},
 
-{"Motd", pevt_servertext_help, 1, 
-N_("%C27*$t%O$1")},
+{"Motd", 1, 
+"%C27*$t%O$1"},
 
-{"MOTD Skipped", pevt_generic_none_help, 0, 
-N_("%C27*$t%C27MOTD Skipped.")},
+{"MOTD Skipped", 0, 
+"%C27*$t%C27MOTD Skipped."},
 
-{"Nick Clash", pevt_nickclash_help, 2, 
-N_("%C27*$t%O$1 already in use. Retrying with $2..")},
+{"Nick Clash", 2, 
+"%C27*$t%O$1 already in use. Retrying with $2.."},
 
-{"Nick Failed", pevt_generic_none_help, 0, 
-N_("%C27*$t%ONickname already in use. Use /NICK to try another.")},
+{"Nick Failed", 0, 
+"%C27*$t%ONickname already in use. Use /NICK to try another."},
 
-{"No DCC", pevt_generic_none_help, 0, 
-N_("%C27*$t%C27No such DCC.")},
+{"No DCC", 0, 
+"%C27*$t%C27No such DCC."},
 
-{"No Running Process", pevt_generic_none_help, 0, 
-N_("%C27*$t%C27No process is currently running")},
+{"No Running Process", 0, 
+"%C27*$t%C27No process is currently running"},
 
-{"Notice", pevt_notice_help, 2, 
-N_("%C12-%C13$1%C12-%O$t$2%O")},
+{"Notice", 2, 
+"%C12-%C13$1%C12-%O$t$2%O"},
 
-{"Notice Send", pevt_ctcpsend_help, 2, 
-N_("%C3>%O$1%C3<%O$t$2%O")},
+{"Notice Send", 2, 
+"%C3>%O$1%C3<%O$t$2%O"},
 
-{"Notify Empty", pevt_generic_none_help, 0, 
-N_("%C27*$t%C27Notify list is empty.")},
+{"Notify Empty", 0, 
+"%C27*$t%C27Notify list is empty."},
 
-{"Notify Header", pevt_generic_none_help, 0, 
-N_("%C24,18 %B  Notify List                           ")},
+{"Notify Header", 0, 
+"%C24,18 %B  Notify List                           "},
 
-{"Notify Number", pevt_notifynumber_help, 1, 
-N_("%C27*$t%C27$1 users in notify list.")},
+{"Notify Number", 1, 
+"%C27*$t%C27$1 users in notify list."},
 
-{"Notify Offline", pevt_generic_nick_help, 2, 
-N_("%C27*$t%C27Notify: $1 is offline ($2).")},
+{"Notify Offline", 2, 
+"%C27*$t%C27Notify: $1 is offline ($2)."},
 
-{"Notify Online", pevt_generic_nick_help, 2, 
-N_("%C27*$t%C27Notify: $1 is online ($2).")},
+{"Notify Online", 2, 
+"%C27*$t%C27Notify: $1 is online ($2)."},
 
-{"Open Dialog", pevt_generic_none_help, 0, 
-N_("")},
+{"Open Dialog", 0, 
+""},
 
-{"Part", pevt_part_help, 3, 
-N_("%C27*$t%C27$1 %C14(%O$2%C14)%C has left $3")},
+{"Part", 3, 
+"%C27*$t%C27$1 %C14(%O$2%C14)%C has left $3"},
 
-{"Part with Reason", pevt_partreason_help, 4, 
-N_("%C27*$t%C27$1 %C14(%O$2%C14)%C has left $3: $4")},
+{"Part with Reason", 4, 
+"%C27*$t%C27$1 %C14(%O$2%C14)%C has left $3: $4"},
 
-{"Ping Reply", pevt_pingrep_help, 2, 
-N_("%C27*$t%C27Ping reply from $1: $2 second(s)")},
+{"Ping Reply", 2, 
+"%C27*$t%C27Ping reply from $1: $2 second(s)"},
 
-{"Ping Timeout", pevt_pingtimeout_help, 1, 
-N_("%C27*$t%C27No ping reply for $1 seconds, disconnecting.")},
+{"Ping Timeout", 1, 
+"%C27*$t%C27No ping reply for $1 seconds, disconnecting."},
 
-{"Private Message", pevt_privmsg_help, 3, 
-N_("%C12*%C13$1%C12*$t%O$2%O")},
+{"Private Message", 3, 
+"%C12*%C13$1%C12*$t%O$2%O"},
 
-{"Private Message to Dialog", pevt_privmsg_help, 3, 
-N_("%C2%H<%H$1%H>%H%O$t$2%O")},
+{"Private Message to Dialog", 3, 
+"%C2%H<%H$1%H>%H%O$t$2%O"},
 
-{"Process Already Running", pevt_generic_none_help, 0, 
-N_("%C27*$t%C27A process is already running")},
+{"Process Already Running", 0, 
+"%C27*$t%C27A process is already running"},
 
-{"Quit", pevt_quit_help, 3, 
-N_("%C27*$t%C27$1 ($3) has quit: $2")},
+{"Quit", 3, 
+"%C27*$t%C27$1 ($3) has quit: $2"},
 
-{"Raw Modes", pevt_rawmodes_help, 2, 
-N_("%C27*$t%C27$1 sets mode: $2")},
+{"Raw Modes", 2, 
+"%C27*$t%C27$1 sets mode: $2"},
 
-{"Receive Wallops", pevt_privmsg_help, 2, 
-N_("%C12-%C13$1/Wallops%C12-%O$t$2%O")},
+{"Receive Wallops", 2, 
+"%C12-%C13$1/Wallops%C12-%O$t$2%O"},
 
-{"Resolving User", pevt_resolvinguser_help, 2, 
-N_("%C27*$t%C27Looking up IP number for%C11 $1%O..")},
+{"Resolving User", 2, 
+"%C27*$t%C27Looking up IP number for%C11 $1%O.."},
 
-{"Server Connected", pevt_generic_none_help, 0, 
-N_("%C27*$t%C27Connected.")},
+{"Server Connected", 0, 
+"%C27*$t%C27Connected."},
 
-{"Server Error", pevt_servererror_help, 1, 
-N_("%C27*$t%C27$1%O")},
+{"Server Error", 1, 
+"%C27*$t%C27$1%O"},
 
-{"Server Lookup", pevt_serverlookup_help, 1, 
-N_("%C27*$t%C27Looking up %C11$1%C..")},
+{"Server Lookup", 1, 
+"%C27*$t%C27Looking up %C11$1%C.."},
 
-{"Server Notice", pevt_servertext_help, 2, 
-N_("%C27*%O$t$1")},
+{"Server Notice", 2, 
+"%C27*%O$t$1"},
 
-{"Server Text", pevt_servertext_help, 2, 
-N_("%C27*$t%O$1%O")},
+{"Server Text", 2, 
+"%C27*$t%O$1%O"},
 
-{"Stop Connection", pevt_sconnect_help, 1, 
-N_("%C27*$t%C27Stopped previous connection attempt (pid=$1)")},
+{"Stop Connection", 1, 
+"%C27*$t%C27Stopped previous connection attempt (pid=$1)"},
 
-{"Topic", pevt_topic_help, 2, 
-N_("%C27*$t%C27Topic for $1 is $2")},
+{"Topic", 2, 
+"%C27*$t%C27Topic for $1 is $2"},
 
-{"Topic Change", pevt_newtopic_help, 3, 
-N_("%C27*$t%C27$1 has changed the topic to: $2")},
+{"Topic Change", 3, 
+"%C27*$t%C27$1 has changed the topic to: $2"},
 
-{"Topic Creation", pevt_topicdate_help, 3, 
-N_("%C27*$t%C27Topic for $1 set by $2 at $3")},
+{"Topic Creation", 3, 
+"%C27*$t%C27Topic for $1 set by $2 at $3"},
 
-{"Unknown Host", pevt_generic_none_help, 0, 
-N_("%C27*$t%C27Unknown host. Maybe you misspelled it?")},
+{"Unknown Host", 0, 
+"%C27*$t%C27Unknown host. Maybe you misspelled it?"},
 
-{"Users On Channel", pevt_usersonchan_help, 2, 
-N_("%C27*$t%C27%C11Users on $1:%C $2")},
+{"Users On Channel", 2, 
+"%C27*$t%C27%C11Users on $1:%C $2"},
 
-{"WhoIs Authenticated", pevt_whois_auth_help, 3, 
-N_("%C22*%O$t%C28[%O$1%C28] %O$2%C27 $3")},
+{"WhoIs Authenticated", 3, 
+"%C22*%O$t%C28[%O$1%C28] %O$2%C27 $3"},
 
-{"WhoIs Away Line", pevt_whois_away_help, 2, 
-N_("%C27*$t%C27%C12[%O$1%C12] is away: $2")},
+{"WhoIs Away Line", 2, 
+"%C27*$t%C27%C12[%O$1%C12] is away: $2"},
 
-{"WhoIs Channel/Oper Line", pevt_whois_channels_help, 2, 
-N_("%C27*$t%C27%C12[%O$1%C12]%C $2")},
+{"WhoIs Channel/Oper Line", 2, 
+"%C27*$t%C27%C12[%O$1%C12]%C $2"},
 
-{"WhoIs Oper Line", pevt_whois_oper_help, 2, 
-N_("%C27*$t%C27%C12[%O$1%C12]%C $2")},
+{"WhoIs Oper Line", 2, 
+"%C27*$t%C27%C12[%O$1%C12]%C $2"},
 
-{"WhoIs End", pevt_whois_end_help, 1, 
-N_("%C27*$t%C27%C12[%O$1%C12] %CEnd of WHOIS list.")},
+{"WhoIs End", 1, 
+"%C27*$t%C27%C12[%O$1%C12] %CEnd of WHOIS list."},
 
-{"WhoIs Identified", pevt_whoisid_help, 2, 
-N_("%C27*$t%C27%C12[%O$1%C12] %C$2")},
+{"WhoIs Identified", 2, 
+"%C27*$t%C27%C12[%O$1%C12] %C$2"},
 
-{"WhoIs Idle Line", pevt_whois_idle_help, 2, 
-N_("%C27*$t%C27%C12[%O$1%C12]%O idle %C11$2%O")},
+{"WhoIs Idle Line", 2, 
+"%C27*$t%C27%C12[%O$1%C12]%O idle %C11$2%O"},
 
-{"WhoIs Idle Line with Signon", pevt_whois_idle_signon_help, 3, 
-N_("%C27*$t%C27%C12[%O$1%C12]%O idle %C11$2%O, signon: %C11$3%O")},
+{"WhoIs Idle Line with Signon", 3, 
+"%C27*$t%C27%C12[%O$1%C12]%O idle %C11$2%O, signon: %C11$3%O"},
 
-{"WhoIs Name Line", pevt_whois_name_help, 4, 
-N_("%C27*$t%C27%C12[%O$1%C12] %C14(%O$2@$3%C14) %O: $4%O")},
+{"WhoIs Name Line", 4, 
+"%C27*$t%C27%C12[%O$1%C12] %C14(%O$2@$3%C14) %O: $4%O"},
 
-{"WhoIs Real Host", pevt_whoisrealhost_help, 4, 
-N_("%C27*$t%C27%C12[%O$1%C12] %Oreal user@host %C11$2%O, real IP %C11$3%O")},
+{"WhoIs Real Host", 4, 
+"%C27*$t%C27%C12[%O$1%C12] %Oreal user@host %C11$2%O, real IP %C11$3%O"},
 
-{"WhoIs Server Line", pevt_whois_server_help, 2, 
-N_("%C27*$t%C27%C12[%O$1%C12]%O $2")},
+{"WhoIs Server Line", 2, 
+"%C27*$t%C27%C12[%O$1%C12]%O $2"},
 
-{"WhoIs Special", pevt_whoisid_help, 3, 
-N_("%C22*%O$t%C28[%O$1%C28]%O $2")},
+{"WhoIs Special", 3, 
+"%C22*%O$t%C28[%O$1%C28]%O $2"},
 
-{"You Join", pevt_ukick_help, 4, 
-N_("%C27*$t%C27Now talking on %C11$2%O")},
+{"You Join", 4, 
+"%C27*$t%C27Now talking on %C11$2%O"},
 
-{"You Kicked", pevt_ukick_help, 4, 
-N_("%C27*$t%C27You have been kicked from $2 by $3: $4")},
+{"You Kicked", 4, 
+"%C27*$t%C27You have been kicked from $2 by $3: $4"},
 
-{"You Part", pevt_part_help, 3, 
-N_("%C27*$t%C27You have left channel $3")},
+{"You Part", 3, 
+"%C27*$t%C27You have left channel $3"},
 
-{"You Part with Reason", pevt_partreason_help, 4, 
-N_("%C27*$t%C27You have left channel $3: $4")},
+{"You Part with Reason", 4, 
+"%C27*$t%C27You have left channel $3: $4"},
 
-{"Your Action", pevt_chanaction_help, 131, 
+{"Your Action", 0, 
 "%C18*$t$1%O $2"},
 
-{"Your Invitation", pevt_uinvite_help, 3, 
-N_("%C27*$t%C27You've invited %C11$1%C to %C11$2%C (%C11$3%C)")},
+{"Your Invitation", 3, 
+"%C27*$t%C27You've invited %C11$1%C to %C11$2%C (%C11$3%C)"},
 
-{"Your Message", pevt_chanmsg_help, 4, 
-N_("%C31%H<%H$1%H>%H%O$t$2%O")},
+{"Your Message", 4, 
+"%C31%H<%H$1%H>%H%O$t$2%O"},
 
-{"Your Nick Changing", pevt_uchangenick_help, 2, 
-N_("%C27*$t%C27You are now known as $2")},
+{"Your Nick Changing", 2, 
+"%C27*$t%C27You are now known as $2"},
 
-{"Netsplit", pevt_netsplit1_help, 3, 
-N_("%C23*%O$t%C23Netsplit: $1 <-> $2, quits: $3")},
+{"Netsplit", 3, 
+"%C23*%O$t%C23Netsplit: $1 <-> $2, quits: $3"},
 
-{"Authenticated to Account", pevt_saslauth_help, 1, 
-N_("%C23*%O$t%C23You have successfully authenticated to account '$1'.")},
+{"Authenticated to Account", 1, 
+"%C23*%O$t%C23You have successfully authenticated to account '$1'."},
 
-{"Plugin Loaded", pevt_plugin_loaded_help, 2, 
-N_("%C23*%O$t%C23Plugin $1 version $2 successfully loaded.")},
+{"Plugin Loaded", 2, 
+"%C23*%O$t%C23Plugin $1 version $2 successfully loaded."},
 
-{"Plugin Unloaded", pevt_plugin_unloaded_help, 1, 
-N_("%C23*%O$t%C23Plugin $1 successfully unloaded.")},
+{"Plugin Unloaded", 1, 
+"%C23*%O$t%C23Plugin $1 successfully unloaded."},
 
-{"Plugin Error", pevt_plugin_error_help, 2, 
-N_("%C23*%O$t%C23Couldn't load plugin $1: $2")},
+{"Plugin Error", 2, 
+"%C23*%O$t%C23Couldn't load plugin $1: $2"},
 };

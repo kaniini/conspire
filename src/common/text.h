@@ -1,4 +1,4 @@
-#include "textenums.h"
+#include "format.h"
 
 #ifndef XCHAT_TEXT_H
 #define XCHAT_TEXT_H

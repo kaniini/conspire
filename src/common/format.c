@@ -98,7 +98,7 @@ formatter_process(Formatter *f, gchar **data)
 
 	g_strlcpy(buf, f->format, 4096);
 
-	signame = g_strdup_printf("format %s", key);
+	signame = g_strdup_printf("format %s", f->key);
 	signal_emit(signame, 2, f->args, data);
 	g_free(signame);
 
