@@ -20,6 +20,7 @@
 #include <glib.h>
 
 #include "format.h"
+#include "signal_factory.h"
 
 #if 0
 
