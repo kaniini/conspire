@@ -20,13 +20,13 @@
 #define __LIBCONSPIRE__COMMON__FORMAT__H__GUARD
 
 typedef struct {
-	char *key;
-	char *format;
+	gchar *key;
+	gchar *format;
 	int args;
 } Formatter;
 
-Formatter *formatter_register(char *key, char *format, int args);
-char *formatter_process(char *key, ...);
-void formatter_remove(char *key);
+Formatter *formatter_register(const gchar *key, const gchar *format, int args);
+gchar *formatter_process(const gchar *key, ...);
+void formatter_remove(const gchar *key);
 
 #endif
