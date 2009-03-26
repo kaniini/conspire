@@ -6,7 +6,7 @@ LIB = ${LIB_PREFIX}conspire${LIB_SUFFIX}
 LIB_MAJOR=0
 LIB_MINOR=1
 
-SRCS = base64.c cap.c cfgfiles.c ctcp.c command_factory.c dcc.c history.c ignore.c \
+SRCS = base64.c cap.c cfgfiles.c ctcp.c command_factory.c dcc.c format.c history.c ignore.c \
 	inbound.c linequeue.c modes.c network.c notify.c outbound.c \
 	plugin.c proto-irc.c sasl.c server.c servlist.c signal_factory.c signal_printer.c \
 	text.c tree.c upnp.c url.c userlist.c util.c xchat.c \
