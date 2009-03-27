@@ -46,7 +46,8 @@ session_print_format(session *sess, const gchar *key, ...)
 	va_end(va);
 
 	line = formatter_process(f, data);
-	PrintText(sess, line);
+	if (*line)
+		PrintText(sess, line);
 
 	g_free(line);
 	g_free(data);
