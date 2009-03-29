@@ -9,6 +9,7 @@ Library files and development headers for the following libraries are required:
 * Glib (2.0 or higher)
 * GTK+ (2.0 or higher)
 * libsexy
+* libnotify
 * libmowgli
 * build essentials (automake, gmake)
 
@@ -20,9 +21,9 @@ For internationalization, the following libraries are required:
 
 * GNU gettext
 
-Optional software:
+Optionally, for outbound regex substitution support, the following libraries are required:
 
-* Python (2.2 or higher)
+* Glib (2.14 or higher)
 
 Compilation
 -----------
