@@ -364,7 +364,7 @@ server_connected (server * serv)
 	set_nonblocking (serv->sok);
 	serv->iotag = fe_input_add (serv->sok, FIA_READ|FIA_EX, server_read, serv);
 
-	signal_emit("server connected", 1, serv);
+	signal_emit("server connected", 1, serv->server_session);
 
 	if (serv->network)
 	{

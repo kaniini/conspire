@@ -423,7 +423,7 @@ inbound_chanmsg (server *serv, session *sess, char *chan, char *from, char *text
 	{
   		if (prefs.auto_unmark_away && serv->is_away)
 			sess->server->p_set_back (sess->server);
-		signal_emit("user message public", 6, sess, from, text, nickchar, NULL, 0);
+		signal_emit("user message public", 4, sess, from, text, nickchar);
 		return;
 	}
 

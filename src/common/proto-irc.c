@@ -656,7 +656,7 @@ process_numeric_321 (gpointer *params)
 	server *serv = sess->server;
 
 	if (!fe_is_chanwindow(serv))
-		signal_emit("channel list head", 1, serv);
+		signal_emit("channel list head", 1, serv->server_session);
 }
 
 static void
@@ -668,7 +668,7 @@ process_numeric_322 (gpointer *params)
 	server *serv = sess->server;
 
 	if (!fe_is_chanwindow(serv))
-		signal_emit("channel list entry", 3, sess, word, word_eol);
+		signal_emit("channel list entry", 3, serv->server_session, word, word_eol);
 	else
 		fe_add_chan_list(serv, word[4], word[5], word_eol[6] + 1);
 }
