@@ -10,7 +10,7 @@ Library files and development headers for the following libraries are required:
 * GTK+ (2.0 or higher)
 * libsexy
 * libnotify
-* libmowgli
+* libmowgli (0.6 or higher)
 * build essentials (automake, gmake)
 
 For SSL support, the following libraries are required:
