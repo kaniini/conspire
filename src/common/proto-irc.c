@@ -1628,7 +1628,7 @@ process_named_servermsg(gpointer *params)
 	server *serv = sess->server;
 	sess = serv->server_session;
 
-	signal_emit("server text", 3, sess->server, buf, sess->server->servername);
+	signal_emit("server text", 3, sess->server->server_session, buf, sess->server->servername);
 }
 
 static void
