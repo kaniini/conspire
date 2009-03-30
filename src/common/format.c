@@ -24,7 +24,7 @@
 #include "xchatc.h"
 
 static int formatter_initialized = 0;
-static mowgli_dictionary_t *formatters = NULL;
+mowgli_dictionary_t *formatters = NULL;
 
 Formatter *
 formatter_register(const gchar *key, const gchar *format, int args)

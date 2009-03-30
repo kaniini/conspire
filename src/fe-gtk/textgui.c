@@ -41,6 +41,7 @@
 #include "../common/cfgfiles.h"
 #include "../common/outbound.h"
 #include "../common/fe.h"
+#include "../common/format.h"
 #include "../common/text.h"
 #include "gtkutil.h"
 #include "xtext.h"
@@ -48,19 +49,14 @@
 #include "palette.h"
 #include "textgui.h"
 
-extern struct text_event te[];
-extern char *pntevts_text[];
-extern char *pntevts[];
-
 static GtkWidget *pevent_dialog = NULL, *pevent_dialog_twid,
 	*pevent_dialog_entry,
-	*pevent_dialog_list, *pevent_dialog_hlist;
+	*pevent_dialog_list;
 
 enum
 {
 	COL_EVENT_NAME,
 	COL_EVENT_TEXT,
-	COL_ROW,
 	N_COLUMNS
 };
 
@@ -173,59 +169,31 @@ pevent_dialog_close (GtkWidget *wid, gpointer arg)
 static void
 pevent_dialog_update (GtkWidget * wid, GtkWidget * twid)
 {
-#if 0
-	int len, m;
+	int len;
 	const char *text;
-	char *out;
-	int sig;
+	char *sig;
 	GtkTreeIter iter;
 	GtkListStore *store;
+	Formatter *f;
 
-	if (!gtkutil_treeview_get_selected (GTK_TREE_VIEW (pevent_dialog_list),
-													&iter, COL_ROW, &sig, -1))
+	if (!gtkutil_treeview_get_selected(GTK_TREE_VIEW(pevent_dialog_list),
+		&iter, COL_EVENT_NAME, &sig, -1))
 		return;
 
-	text = gtk_entry_get_text (GTK_ENTRY (wid));
-	len = strlen (text);
-
-	if (pevt_build_string (text, &out, &m) != 0)
-	{
-		fe_message (_("There was an error parsing the string"), FE_MSG_ERROR);
-		return;
-	}
-	if (m > (te[sig].num_args & 0x7f))
-	{
-		free (out);
-		out = malloc (4096);
-		snprintf (out, 4096,
-					 _("This signal is only passed %d args, $%d is invalid"),
-					 te[sig].num_args & 0x7f, m);
-		fe_message (out, FE_MSG_WARN);
-		free (out);
-		return;
-	}
+	text = gtk_entry_get_text(GTK_ENTRY(wid));
+	len = strlen(text);
 
 	store = (GtkListStore *)gtk_tree_view_get_model (GTK_TREE_VIEW (pevent_dialog_list));
-	gtk_list_store_set (store, &iter, COL_EVENT_TEXT, text, -1);
+	gtk_list_store_set(store, &iter, COL_EVENT_TEXT, text, -1);
 
-	if (pntevts_text[sig])
-		free (pntevts_text[sig]);
-	if (pntevts[sig])
-		free (pntevts[sig]);
+	f = formatter_get(sig);
+	if (f->format)
+		g_free(f->format);
 
-	pntevts_text[sig] = malloc (len + 1);
-	memcpy (pntevts_text[sig], text, len + 1);
-	pntevts[sig] = out;
+	f->format = g_strdup(text);
 
-	out = malloc (len + 2);
-	memcpy (out, text, len + 1);
-	out[len] = '\n';
-	out[len + 1] = 0;
-	check_special_chars (out, TRUE);
+	PrintTextRaw (GTK_XTEXT (twid)->buffer, f->format, 0, 0);
 
-	PrintTextRaw (GTK_XTEXT (twid)->buffer, out, 0, 0);
-	free (out);
-#endif
 	/* save this when we exit */
 	prefs.save_pevents = 1;
 }
@@ -234,18 +202,17 @@ static void
 pevent_dialog_unselect (void)
 {
 	gtk_entry_set_text (GTK_ENTRY (pevent_dialog_entry), "");
-	gtk_list_store_clear ((GtkListStore *)gtk_tree_view_get_model (GTK_TREE_VIEW (pevent_dialog_hlist)));
 }
 
 static void
 pevent_dialog_select (GtkTreeSelection *sel, gpointer store)
 {
 	char *text;
-	int sig;
+	char *sig;
 	GtkTreeIter iter;
 
 	if (!gtkutil_treeview_get_selected (GTK_TREE_VIEW (pevent_dialog_list),
-													&iter, COL_ROW, &sig, -1))
+		&iter, COL_EVENT_NAME, &sig, -1))
 	{
 		pevent_dialog_unselect ();
 	}
@@ -260,26 +227,23 @@ pevent_dialog_select (GtkTreeSelection *sel, gpointer store)
 static void
 pevent_dialog_fill (GtkWidget * list)
 {
-#if 0
-	int i;
+	mowgli_dictionary_iteration_state_t state;
 	GtkListStore *store;
 	GtkTreeIter iter;
-
+	Formatter *f;
 
 	store = (GtkListStore *)gtk_tree_view_get_model (GTK_TREE_VIEW (list));
 	gtk_list_store_clear (store);
 
-	i = NUM_XP;
-	do
+	MOWGLI_DICTIONARY_FOREACH(f, &state, formatters)
 	{
-		i--;
+		gchar *text = g_markup_escape_text(f->format, -1);
 		gtk_list_store_insert_with_values (store, &iter, 0,
-													  COL_EVENT_NAME, te[i].name,
-													  COL_EVENT_TEXT, pntevts_text[i],
-													  COL_ROW, i, -1);
+						  COL_EVENT_NAME, f->key,
+						  COL_EVENT_TEXT, text,
+						  -1);
+		g_free(text);
 	}
-	while (i != 0);
-#endif
 }
 
 static void
@@ -320,40 +284,20 @@ pevent_load_cb (GtkWidget * wid, void *data)
 }
 
 static void
-pevent_ok_cb (GtkWidget * wid, void *data)
-{
-	gtk_widget_destroy (pevent_dialog);
-}
-
-static void
 pevent_test_cb (GtkWidget * wid, GtkWidget * twid)
 {
-	int len, n;
-	char *out, *text;
+	mowgli_dictionary_iteration_state_t state;
+	Formatter *f;
 
-#if 0
-	for (n = 0; n < NUM_XP; n++)
-	{
-		text = _(pntevts_text[n]);
-		len = strlen (text);
-
-		out = malloc (len + 2);
-		memcpy (out, text, len + 1);
-		out[len] = '\n';
-		out[len + 1] = 0;
-		check_special_chars (out, TRUE);
-
-		PrintTextRaw (GTK_XTEXT (twid)->buffer, out, 0, 0);
-		free (out);
-	}
-#endif
+	MOWGLI_DICTIONARY_FOREACH(f, &state, formatters)
+		PrintTextRaw(GTK_XTEXT (twid)->buffer, f->format, 0, 0);
 }
 
 void
 pevent_dialog_show ()
 {
 	GtkWidget *vbox, *hbox, *tbox, *wid, *bh, *th;
-	GtkListStore *store, *hstore;
+	GtkListStore *store;
 	GtkTreeSelection *sel;
 
 	if (pevent_dialog)
@@ -378,10 +322,10 @@ pevent_dialog_show ()
 	gtk_widget_show (wid);
 
 	store = gtk_list_store_new (N_COLUMNS, G_TYPE_STRING,
-	                            G_TYPE_STRING, G_TYPE_INT);
+	                            G_TYPE_STRING);
 	pevent_dialog_list = gtkutil_treeview_new (th, GTK_TREE_MODEL (store), NULL,
-															 COL_EVENT_NAME, _("Event"),
-															 COL_EVENT_TEXT, _("Text"), -1);
+						 COL_EVENT_NAME, _("Event"),
+						 COL_EVENT_TEXT, _("Text"), -1);
 	sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (pevent_dialog_list));
 	g_signal_connect (G_OBJECT (sel), "changed",
 							G_CALLBACK (pevent_dialog_select), store);
@@ -407,13 +351,6 @@ pevent_dialog_show ()
 
 	gtk_widget_show (pevent_dialog_twid);
 
-	hstore = gtk_list_store_new (2, G_TYPE_INT, G_TYPE_STRING);
-	pevent_dialog_hlist = gtkutil_treeview_new (bh, GTK_TREE_MODEL (hstore),
-															  NULL,
-															  0, _("$ Number"),
-															  1, _("Description"), -1);
-	gtk_widget_show (pevent_dialog_hlist);
-
 	pevent_dialog_fill (pevent_dialog_list);
 	gtk_widget_show (pevent_dialog_list);
 
@@ -432,12 +369,6 @@ pevent_dialog_show ()
 	gtk_box_pack_end (GTK_BOX (hbox), wid, 0, 0, 0);
 	g_signal_connect (G_OBJECT (wid), "clicked",
 							G_CALLBACK (pevent_test_cb), pevent_dialog_twid);
-	gtk_widget_show (wid);
-
-	wid = gtk_button_new_from_stock (GTK_STOCK_OK);
-	gtk_box_pack_start (GTK_BOX (hbox), wid, 0, 0, 0);
-	g_signal_connect (G_OBJECT (wid), "clicked",
-							G_CALLBACK (pevent_ok_cb), NULL);
 	gtk_widget_show (wid);
 
 	gtk_widget_show (hbox);

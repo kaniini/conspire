@@ -30,4 +30,6 @@ Formatter *formatter_get(const gchar *key);
 gchar *formatter_process(Formatter *f, gchar **data);
 void formatter_remove(const gchar *key);
 
+extern mowgli_dictionary_t *formatters;
+
 #endif
