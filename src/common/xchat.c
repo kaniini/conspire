@@ -322,6 +322,8 @@ session_new (server *serv, char *from, int type, int focus)
 	sess->lastact_elem = NULL;
 	sess->lastact_idx = LACT_NONE;
 
+	signal_emit("session create", 1, sess);
+
 	fe_new_window (sess, focus);
 
 	return sess;
