@@ -386,7 +386,6 @@ void
 inbound_chanmsg (server *serv, session *sess, char *chan, char *from, char *text, char fromme, int id)
 {
 	struct User *user;
-	int hilight = FALSE;
 	char nickchar[2] = "\000";
 	char idtext[64];
 
@@ -438,22 +437,24 @@ inbound_chanmsg (server *serv, session *sess, char *chan, char *from, char *text
 			fe_tray_set_icon (FE_ICON_MESSAGE);
 	}
 
-	if (is_hilight (from, text, sess, serv))
-	{
-		hilight = TRUE;
-		if (prefs.input_beep_hilight)
-			sound_beep (sess);
-	}
-	else
-	{
-		if (sess->type != SESS_DIALOG && prefs.input_flash_chans)
-			fe_flash_window (sess);
-	}
+	if (prefs.hilight_enable)
+        {
+		if (is_hilight (from, text, sess, serv))
+		{
+			if (prefs.input_beep_hilight)
+				sound_beep (sess);
+			signal_emit("message public highlight", 5, sess, from, text, nickchar, idtext);
+        	        return;
+		}
+		else
+		{
+			if (sess->type != SESS_DIALOG && prefs.input_flash_chans)
+				fe_flash_window (sess);
+		}
+        }
 
 	if (sess->type == SESS_DIALOG)
 		signal_emit("message private", 4, sess, from, text, idtext);
-	else if (hilight)
-		signal_emit("message public highlight", 5, sess, from, text, nickchar, idtext);
 	else
 		signal_emit("message public", 5, sess, from, text, nickchar, idtext);
 }
