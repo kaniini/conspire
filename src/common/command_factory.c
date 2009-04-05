@@ -80,7 +80,7 @@ command_execute(struct session *sess, const gchar *name, char *tbuf, char *word[
 	Command *cmd;
 	GList *node;
 
-	if (!(cmd = mowgli_dictionary_retrieve(cmd_dict_, name)))
+	if (!(cmd = mowgli_dictionary_retrieve(cmd_dict_, name)) || g_list_length(cmd->handlers) == 0)
 		return COMMAND_EXEC_NOCMD;
 
 	MOWGLI_ITER_FOREACH(node, cmd->handlers)
@@ -106,5 +106,5 @@ command_lookup(const gchar *name)
 {
 	g_return_val_if_fail(name != NULL, NULL);
 
-	return mowgli_dictionary_retrieve(cmd_dict_, name);	
+	return mowgli_dictionary_retrieve(cmd_dict_, name);
 }
