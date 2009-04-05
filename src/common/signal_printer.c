@@ -506,7 +506,7 @@ signal_printer_message_public(gpointer *params)
 	gchar *nickchar = params[3];
 	gchar *idtext   = params[4];
 
-	session_print_format(sess, "channel message", from, message, nickchar, idtext, 0);
+	session_print_format(sess, "channel message", from, message, nickchar, idtext);
 }
 
 void
@@ -518,7 +518,7 @@ signal_printer_message_public_highlight(gpointer *params)
 	gchar *nickchar = params[3];
 	gchar *idtext   = params[4];
 
-	session_print_format(sess, "channel msg hilight", from, message, nickchar, idtext, 0);
+	session_print_format(sess, "channel msg hilight", from, message, nickchar, idtext);
 }
 
 /* notices */
@@ -671,7 +671,7 @@ signal_printer_whois_name(gpointer *params)
 	gchar **word  = params[1];
 	gchar **line  = params[2];
 
-	session_print_format(sess, "whois name line", word[4], word[5], word[6], line[8] + 1, 0);
+	session_print_format(sess, "whois name line", word[4], word[5], word[6], line[8] + 1);
 }
 
 void
@@ -861,7 +861,7 @@ signal_printer_user_kicked(gpointer *params)
 	gchar *kicker  = params[3];
 	gchar *reason  = params[4];
 
-	session_print_format(sess, "you kicked", nick, channel, kicker, reason, 0);
+	session_print_format(sess, "you kicked", nick, channel, kicker, reason);
 }
 
 void
@@ -874,7 +874,7 @@ signal_printer_user_part(gpointer *params)
 	gchar *reason  = params[4];
 
 	if (*reason)
-		session_print_format(sess, "you part with reason", nick, host, channel, reason, 0);
+		session_print_format(sess, "you part with reason", nick, host, channel, reason);
 	else
 		session_print_format(sess, "you part", nick, host, channel);
 }
@@ -1024,7 +1024,7 @@ signal_printer_channel_bans(gpointer *params)
         gchar *nick     = params[3];
         gchar *time_set = params[4];
 
-	session_print_format(sess, "ban list", channel, mask, nick, time_set, 0);
+	session_print_format(sess, "ban list", channel, mask, nick, time_set);
 }
 
 void
@@ -1034,7 +1034,7 @@ signal_printer_channel_modes_raw(gpointer *params)
         gchar *nick   = params[1];
         gchar *modes  = params[2];
 
-	session_print_format(sess, "raw modes", nick, modes, 0, 0, 0);
+	session_print_format(sess, "raw modes", nick, modes);
 }
 
 void
@@ -1068,7 +1068,7 @@ signal_printer_ignore_list_empty(gpointer *params)
 {
 	session *sess = params[0];
 
-	session_print_format(sess, "ignorelist empty", 0, 0, 0, 0, 0);
+	session_print_format(sess, "ignorelist empty");
 }
 
 
@@ -1077,7 +1077,7 @@ signal_printer_ignore_list_footer(gpointer *params)
 {
 	session *sess = params[0];
 
-	session_print_format(sess, "ignorelist footer", 0, 0, 0, 0, 0);
+	session_print_format(sess, "ignorelist footer");
 }
 
 void
@@ -1186,136 +1186,143 @@ signal_printer_notify_online(gpointer *params)
 void
 signal_printer_init(void)
 {
-	/* actions */
-	signal_attach("action public",      signal_printer_action_public);
-	signal_attach("action public highlight", signal_printer_action_public_highlight);
+	/* Actions */
+	signal_attach("action public",          signal_printer_action_public);
+	signal_attach("action public hilight",  signal_printer_action_public_highlight);
+
+	/* Channel events */
+	signal_attach("channel bans",           signal_printer_channel_bans);
+	signal_attach("channel created",        signal_printer_channel_created);
+	signal_attach("channel invited",        signal_printer_channel_invited);
+	signal_attach("channel join",           signal_printer_channel_join);
+	signal_attach("channel join error",     signal_printer_channel_join_error);
+	signal_attach("channel kick",           signal_printer_channel_kick);
+	signal_attach("channel list entry",     signal_printer_channel_list_entry);
+	signal_attach("channel list head",      signal_printer_channel_list_head);
+	signal_attach("channel modes",          signal_printer_channel_modes);
+	signal_attach("channel modes raw",      signal_printer_channel_modes_raw);
+	signal_attach("channel part",           signal_printer_channel_part);
+	signal_attach("channel quit",           signal_printer_channel_quit);
+	signal_attach("channel topic",          signal_printer_channel_topic);
+	signal_attach("channel topic changed",  signal_printer_channel_topic_changed);
+	signal_attach("channel topic date",     signal_printer_channel_topic_date);
+	signal_attach("channel users",          signal_printer_channel_users);
 
 	/* CTCPs */
-	signal_attach("ctcp inbound",       signal_printer_ctcp_inbound);
-	signal_attach("ctcp reply",         signal_printer_ctcp_reply);
+	signal_attach("ctcp inbound",           signal_printer_ctcp_inbound);
+	signal_attach("ctcp reply",             signal_printer_ctcp_reply);
+	signal_attach("ctcp send",              signal_printer_ctcp_send);
 
-	/* channels */
-	signal_attach("channel created",    signal_printer_channel_created);
-	signal_attach("channel bans",       signal_printer_channel_bans);
-	signal_attach("channel invited",    signal_printer_channel_invited);
-	signal_attach("channel join error", signal_printer_channel_join_error);
-	signal_attach("channel join",       signal_printer_channel_join);
-	signal_attach("channel kick",       signal_printer_channel_kick);
-	signal_attach("channel list head",  signal_printer_channel_list_head);
-	signal_attach("channel list entry", signal_printer_channel_list_entry);
-	signal_attach("channel modes",      signal_printer_channel_modes);
-	signal_attach("channel modes raw",  signal_printer_channel_modes_raw);
-	signal_attach("channel part",       signal_printer_channel_part);
-	signal_attach("channel quit",       signal_printer_channel_quit);
-	signal_attach("channel topic",      signal_printer_channel_topic);
-	signal_attach("channel topic date", signal_printer_channel_topic_date);
-	signal_attach("channel topic changed", signal_printer_channel_topic_changed);
-	signal_attach("channel users",      signal_printer_channel_users);
+	/* DCCs */
+	signal_attach("dcc abort",              signal_printer_dcc_abort);
+	signal_attach("dcc chat duplicate",     signal_printer_dcc_chat_duplicate);
+	signal_attach("dcc chat failed",        signal_printer_dcc_chat_failed);
+	signal_attach("dcc chat offer",         signal_printer_dcc_chat_offer);
+	signal_attach("dcc chat request",       signal_printer_dcc_chat_request);
+	signal_attach("dcc connected",          signal_printer_dcc_connected);
+	signal_attach("dcc failed",             signal_printer_dcc_failed);
+	signal_attach("dcc file complete",      signal_printer_dcc_file_complete);
+	signal_attach("dcc file error",         signal_printer_dcc_file_error);
+	signal_attach("dcc file renamed",       signal_printer_dcc_file_renamed);
+	signal_attach("dcc file request",       signal_printer_dcc_file_request);
+	signal_attach("dcc file resume",        signal_printer_dcc_file_resume);
+	signal_attach("dcc generic offer",      signal_printer_dcc_generic_offer);
+	signal_attach("dcc invalid",            signal_printer_dcc_invalid);
+	signal_attach("dcc list start",         signal_printer_dcc_list_start);
+	signal_attach("dcc malformed",          signal_printer_dcc_malformed);
+	signal_attach("dcc not found",          signal_printer_dcc_not_found);
+	signal_attach("dcc recv error",         signal_printer_dcc_recv_error);
+	signal_attach("dcc send complete",      signal_printer_dcc_send_complete);
+	signal_attach("dcc send failed",        signal_printer_dcc_send_failed);
+	signal_attach("dcc send request",       signal_printer_dcc_send_request);
+	signal_attach("dcc stoned",             signal_printer_dcc_stoned);
 
-	/* DCC */
-	signal_attach("dcc abort",          signal_printer_dcc_abort);
-	signal_attach("dcc chat duplicate", signal_printer_dcc_chat_duplicate);
-	signal_attach("dcc chat failed",    signal_printer_dcc_chat_failed);
-	signal_attach("dcc chat offer",     signal_printer_dcc_chat_offer);
-	signal_attach("dcc chat request",   signal_printer_dcc_chat_request);
-	signal_attach("dcc connected",      signal_printer_dcc_connected);
-	signal_attach("dcc failed",         signal_printer_dcc_failed);
-	signal_attach("dcc file complete",  signal_printer_dcc_file_complete);
-	signal_attach("dcc file error",     signal_printer_dcc_file_error);
-	signal_attach("dcc file request",   signal_printer_dcc_file_request);
-	signal_attach("dcc file renamed",   signal_printer_dcc_file_renamed);
-	signal_attach("dcc file resume",    signal_printer_dcc_file_resume);
-	/* if anyone can figure out why this would be necessary, I'd love to know. */
-	signal_attach("dcc generic offer",  signal_printer_dcc_generic_offer);
-	signal_attach("dcc invalid",        signal_printer_dcc_invalid);
-	signal_attach("dcc list start",     signal_printer_dcc_list_start);
-	signal_attach("dcc malformed",      signal_printer_dcc_malformed);
-	signal_attach("dcc not found",      signal_printer_dcc_not_found);
-	signal_attach("dcc recv error",     signal_printer_dcc_recv_error);
-	signal_attach("dcc send complete",  signal_printer_dcc_send_complete);
-	signal_attach("dcc send failed",    signal_printer_dcc_send_failed);
-	signal_attach("dcc send request",   signal_printer_dcc_send_request);
-	signal_attach("dcc stoned",         signal_printer_dcc_stoned);
+	/* Exec - XXX - this needs to be moved into the exec plugin */
+	signal_attach("exec already running",   signal_printer_exec_already_running);
 
-	/* exec */
-	signal_attach("exec already running", signal_printer_exec_already_running);
+	/* Ignore list */
+	signal_attach("ignore added",           signal_printer_ignore_added);
+	signal_attach("ignore changed",         signal_printer_ignore_changed);
+	signal_attach("ignore list empty",      signal_printer_ignore_list_empty);
+	signal_attach("ignore list footer",     signal_printer_ignore_list_footer);
+	signal_attach("ignore list header",     signal_printer_ignore_list_header);
+	signal_attach("ignore removed",         signal_printer_ignore_removed);
 
-	/* ignore */
-	signal_attach("ignore added",       signal_printer_ignore_added);
-	signal_attach("ignore changed",     signal_printer_ignore_changed);
-	signal_attach("ignore list header", signal_printer_ignore_list_header);
-	signal_attach("ignore list empty",  signal_printer_ignore_list_empty);
-	signal_attach("ignore list footer", signal_printer_ignore_list_footer);
-	signal_attach("ignore removed",     signal_printer_ignore_removed);
+	/* Messages */
+	signal_attach("message private",        signal_printer_message_private);
+	signal_attach("message public",         signal_printer_message_public);
+	signal_attach("message public hilight", signal_printer_message_public_highlight);
 
-	/* messages */
-	signal_attach("message private",    signal_printer_message_private);
-	signal_attach("message public",     signal_printer_message_public);
-	signal_attach("message public highlight", signal_printer_message_public_highlight);
+	/* Nicks */
+	signal_attach("nick changed",           signal_printer_nick_changed);
+	signal_attach("nick clash",             signal_printer_nick_clash);
+	signal_attach("nick error",             signal_printer_nick_error);
 
-	/* nick stuff */
-	signal_attach("nick changed",       signal_printer_nick_changed);
-	signal_attach("nick clash",         signal_printer_nick_clash);
-	signal_attach("nick error",         signal_printer_nick_error);
+	/* Notices */
+	signal_attach("notice private",         signal_printer_notice_private);
+	signal_attach("notice public",          signal_printer_notice_public);
 
-	/* notices */
-	signal_attach("notice public",      signal_printer_notice_public);
-	signal_attach("notice private",     signal_printer_notice_private);
+	/* Notify list */
+	signal_attach("notify added",           signal_printer_notify_added);
+	signal_attach("notify list empty",      signal_printer_notify_list_empty);
+	signal_attach("notify list header",     signal_printer_notify_list_header);
+	signal_attach("notify list total",      signal_printer_notify_list_total);
+	signal_attach("notify offline",         signal_printer_notify_offline);
+	signal_attach("notify online",          signal_printer_notify_online);
+	signal_attach("notify removed",         signal_printer_notify_removed);
 
-	/* notify */
-	signal_attach("notify added",       signal_printer_notify_added);
-	signal_attach("notify list empty",  signal_printer_notify_list_empty);
-	signal_attach("notify list header", signal_printer_notify_list_header);
-	signal_attach("notify list total",  signal_printer_notify_list_total);
-	signal_attach("notify offline",     signal_printer_notify_offline);
-	signal_attach("notify online",      signal_printer_notify_online);
-	signal_attach("notify removed",     signal_printer_notify_removed);
+	/* Plugins */
+	signal_attach("plugin error",           signal_printer_plugin_error);
+	signal_attach("plugin loaded",          signal_printer_plugin_loaded);
+	signal_attach("plugin unloaded",        signal_printer_plugin_unloaded);
 
-	/* queries */
-	signal_attach("query open",         signal_printer_query_open);
-	signal_attach("query quit",         signal_printer_query_quit);
+	/* Queries */
+	signal_attach("query open",             signal_printer_query_open);
+	signal_attach("query quit",             signal_printer_query_quit);
 
-	/* server */
-	signal_attach("server connect",     signal_printer_server_connect);
-	signal_attach("server connected",   signal_printer_server_connected);
-	signal_attach("server dns lookup",  signal_printer_server_dns_lookup);
-	signal_attach("server error",       signal_printer_server_error);
-	signal_attach("server motd",        signal_printer_server_motd);
-	signal_attach("server notice",      signal_printer_server_notice);
-	signal_attach("server ping reply",  signal_printer_server_ping_reply);
-	signal_attach("server stoned",      signal_printer_server_stoned);
-	signal_attach("server text",        signal_printer_server_text);
-	signal_attach("server wallops",     signal_printer_server_wallops);
+	/* SASL */
+	signal_attach("sasl complete",          signal_printer_sasl_complete);
 
-	/* whois */
-	signal_attach("whois authenticated", signal_printer_whois_authenticated);
-	signal_attach("whois channels",      signal_printer_whois_channels);
-	signal_attach("whois end",           signal_printer_whois_end);
-	signal_attach("whois generic",       signal_printer_whois_generic);
-	signal_attach("whois identified",    signal_printer_whois_identified);
-	signal_attach("whois idle signon",   signal_printer_whois_idle_signon);
-	signal_attach("whois idle",          signal_printer_whois_idle);
-	signal_attach("whois name",          signal_printer_whois_name);
-	signal_attach("whois oper",          signal_printer_whois_oper);
-	signal_attach("whois server",        signal_printer_whois_server);
+	/* Server events */
+	signal_attach("server connect",         signal_printer_server_connect);
+	signal_attach("server connect halted",  signal_printer_server_connect_halted);
+	signal_attach("server connected",       signal_printer_server_connected);
+	signal_attach("server disconnected",    signal_printer_server_disconnected);
+	signal_attach("server dns lookup",      signal_printer_server_dns_lookup);
+	signal_attach("server error",           signal_printer_server_error);
+	signal_attach("server kill",            signal_printer_server_kill);
+	signal_attach("server motd",            signal_printer_server_motd);
+	signal_attach("server netsplit",        signal_printer_server_netsplit);
+	signal_attach("server notice",          signal_printer_server_notice);
+	signal_attach("server numeric 302",     signal_printer_server_numeric_302);
+	signal_attach("server ping reply",      signal_printer_server_ping_reply);
+	signal_attach("server stoned",          signal_printer_server_stoned);
+	signal_attach("server text",            signal_printer_server_text);
+	signal_attach("server unknown",         signal_printer_server_unknown);
+	signal_attach("server wallops",         signal_printer_server_wallops);
 
-	/* sasl */
-	signal_attach("sasl complete",      signal_printer_sasl_complete);
+	/* User-generated or related events */
+	signal_attach("user action",            signal_printer_user_action);
+	signal_attach("user invite",            signal_printer_user_invite);
+	signal_attach("user joined",            signal_printer_user_joined);
+	signal_attach("user kicked",            signal_printer_user_kicked);
+	signal_attach("user message private",   signal_printer_user_message_private);
+	signal_attach("user message public",    signal_printer_user_message_public);
+	signal_attach("user nick changed",      signal_printer_user_nick_changed);
+	signal_attach("user notice",            signal_printer_user_notice);
+	signal_attach("user part",              signal_printer_user_part);
 
-	/* outbound user-produced signals */
-        signal_attach("user action",        signal_printer_user_action);
-	signal_attach("user invite",        signal_printer_user_invite);
-	signal_attach("user joined",        signal_printer_user_joined);
-	signal_attach("user kicked",        signal_printer_user_kicked);
-      	signal_attach("user message private", signal_printer_user_message_private);
-	signal_attach("user message public", signal_printer_user_message_public);
-	signal_attach("user nick changed",  signal_printer_user_nick_changed);
-	signal_attach("user notice",        signal_printer_user_notice);
-	signal_attach("user part",          signal_printer_user_part);
-
-	/* plugins */
-	signal_attach("plugin loaded",      signal_printer_plugin_loaded);
-	signal_attach("plugin unloaded",    signal_printer_plugin_unloaded);
-	signal_attach("plugin error",       signal_printer_plugin_error);
+	/* Whois */
+	signal_attach("whois authenticated",    signal_printer_whois_authenticated);
+	signal_attach("whois away",             signal_printer_whois_away);
+	signal_attach("whois channels",         signal_printer_whois_channels);
+	signal_attach("whois end",              signal_printer_whois_end);
+	signal_attach("whois generic",          signal_printer_whois_generic);
+	signal_attach("whois identified",       signal_printer_whois_identified);
+	signal_attach("whois idle",             signal_printer_whois_idle);
+	signal_attach("whois idle signon",      signal_printer_whois_idle_signon);
+	signal_attach("whois name",             signal_printer_whois_name);
+	signal_attach("whois oper",             signal_printer_whois_oper);
+	signal_attach("whois server",           signal_printer_whois_server);
 }
 

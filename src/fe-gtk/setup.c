@@ -327,6 +327,8 @@ static const setting alert_settings[] =
 	{ST_HEADER,	N_("Highlighted Messages"),0,0,0},
 	{ST_LABEL,	N_("Highlighted messages are ones where your nickname is mentioned, but also:"), 0, 0, 0, 1},
 
+        {ST_TOGGLE,	N_("Enable highlighting:"), &prefs.hilight_enable, 0, 0},
+
 	{ST_ENTRY,	N_("Extra words to highlight:"), &prefs.irc_extra_hilight, 0, 0},
 	{ST_ENTRY,	N_("Nick names not to highlight:"), &prefs.irc_no_hilight, 0, 0},
 	{ST_ENTRY,	N_("Nick names to always highlight:"), &prefs.irc_nick_hilight, 0, 0},

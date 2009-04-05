@@ -541,6 +541,8 @@ PrefsEntry vars[] = {
 	{"input_tray_hilight", PREFS_TYPE_BOOL, &prefs.input_tray_hilight},
 	{"input_tray_priv", PREFS_TYPE_BOOL, &prefs.input_tray_priv},
 
+        {"hilight_enable", PREFS_TYPE_BOOL, &prefs.hilight_enable},
+
 	{"irc_auto_rejoin", PREFS_TYPE_BOOL, &prefs.autorejoin},
 	{"irc_ban_type", PREFS_TYPE_INT, &prefs.bantype},
 	{"irc_conf_mode", PREFS_TYPE_BOOL, &prefs.confmode},
@@ -768,6 +770,8 @@ load_config (void)
 	prefs.dnsprogram = strdup("host");
 	prefs.irc_no_hilight = strdup("NickServ,ChanServ");
 	prefs.irc_time_format = strdup("%a %b %e %T %Z %Y");
+
+	prefs.hilight_enable = TRUE;
 
 	prefs.text_overflow_start = strdup("");
 	prefs.text_overflow_stop  = strdup("");

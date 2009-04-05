@@ -297,6 +297,7 @@ struct xchatprefs
 
 	gboolean redundant_nickstamps;
 	gboolean strip_quits;
+        gboolean hilight_enable;
 };
 
 /* Session types */
