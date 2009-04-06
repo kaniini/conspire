@@ -647,7 +647,7 @@ signal_printer_server_netsplit(gpointer *params)
 {
 	session *sess  = params[0];
         server *serv   = params[1];
-        gchar *victims = params[3];
+        gchar *victims = params[2];
 
 	session_print_format(sess, "netsplit", serv->split_serv1, serv->split_serv2, victims);
 }
