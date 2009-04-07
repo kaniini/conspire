@@ -14,11 +14,11 @@ const struct text_event te[] = {
 {"Change Nick", 2, 
 "%C27*$t%C27$1 is now known as $2"},
 
-{"Channel Action", 2, 
-"%C13*%O$t$1 $2%O"},
+{"Channel Action", 3, 
+"%C13*%O$t$1 $3%O"},
 
-{"Channel Action Hilight", 2, 
-"%C13*%O$t%C8%B$1%B%O $2%O"},
+{"Channel Action Hilight", 3, 
+"%C13*%O$t%C8%B$1%B%O $3%O"},
 
 {"Channel Creation", 2, 
 "%C27*$t%C27Channel $1 created on $2"},
@@ -33,7 +33,7 @@ const struct text_event te[] = {
 "%C27*$t%O%B$1%O%C27/%O$2%C27: %O$3%O"},
 
 {"Channel Message", 4, 
-"%C2%H<%H$1%H>%H%O$t$2%O"},
+"%C2%H<%H$1%H>%H%O$t$4%O"},
 
 {"Channel Mode Generic", 4, 
 "%C27*$t%C27$1 sets mode $2$3 $4"},
@@ -42,7 +42,7 @@ const struct text_event te[] = {
 "%C27*$t%C27Channel $1 modes: $2"},
 
 {"Channel Msg Hilight", 4, 
-"%C8%B%H<%H$1%H>%H%O$t$2%O"},
+"%C8%B%H<%H$1%H>%H%O$t$4%O"},
 
 {"Channel Notice", 3, 
 "%C12-%C13$1/$2%C12-%O$t$3%O"},

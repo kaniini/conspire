@@ -38,7 +38,7 @@ signal_printer_action_public(gpointer *params)
 	gchar *text     = params[2];
 	gchar *nickchar = params[3];
 
-	session_print_format(sess, "channel action", from, text, nickchar);
+	session_print_format(sess, "channel action", from, nickchar, text);
 }
 
 void
@@ -49,7 +49,7 @@ signal_printer_action_public_highlight(gpointer *params)
 	gchar *text     = params[2];
 	gchar *nickchar = params[3];
 
-	session_print_format(sess, "channel action hilight", from, text, nickchar);
+	session_print_format(sess, "channel action hilight", from, nickchar, text);
 }
 
 /* Channels */
@@ -506,7 +506,7 @@ signal_printer_message_public(gpointer *params)
 	gchar *nickchar = params[3];
 	gchar *idtext   = params[4];
 
-	session_print_format(sess, "channel message", from, message, nickchar, idtext);
+	session_print_format(sess, "channel message", from, nickchar, idtext, message);
 }
 
 void
@@ -518,7 +518,7 @@ signal_printer_message_public_highlight(gpointer *params)
 	gchar *nickchar = params[3];
 	gchar *idtext   = params[4];
 
-	session_print_format(sess, "channel msg hilight", from, message, nickchar, idtext);
+	session_print_format(sess, "channel msg hilight", from, nickchar, idtext, message);
 }
 
 /* notices */

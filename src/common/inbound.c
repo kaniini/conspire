@@ -369,7 +369,7 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 			fe_flash_window (sess);
 
 		/* XXX this isn't necessarily a public action */
-		if (hilight)
+		if (hilight && prefs.hilight_enable)
 		{
 			signal_emit("action public highlight", 4, sess, from, text, nickchar);
 			return;
@@ -628,11 +628,11 @@ inbound_nameslist (server *serv, char *chan, char *names)
 	sess = find_channel (serv, chan);
 	if (!sess)
 	{
-		signal_emit("users in channel", 3, serv->server_session, chan, names);
+		signal_emit("channel users", 3, serv->server_session, chan, names);
 		return;
 	}
 	if (!sess->ignore_names)
-		signal_emit("users in channel", 3, sess, chan, names);
+		signal_emit("channel users", 3, sess, chan, names);
 
 	if (sess->end_of_names)
 	{

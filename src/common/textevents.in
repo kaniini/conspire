@@ -15,12 +15,12 @@ Change Nick
 2
 
 Channel Action
-%C13*%O$t$1 $2%O
-2
+%C13*%O$t$1 $3%O
+3
 
 Channel Action Hilight
-%C13*%O$t%C8%B$1%B%O $2%O
-2
+%C13*%O$t%C8%B$1%B%O $3%O
+3
 
 Channel Creation
 %C27*$t%C27Channel $1 created on $2
@@ -39,7 +39,7 @@ Channel List Entry
 3
 
 Channel Message
-%C2%H<%H$1%H>%H%O$t$2%O
+%C2%H<%H$1%H>%H%O$t$4%O
 4
 
 Channel Mode Generic
@@ -51,7 +51,7 @@ Channel Modes
 2
 
 Channel Msg Hilight
-%C8%B%H<%H$1%H>%H%O$t$2%O
+%C8%B%H<%H$1%H>%H%O$t$4%O
 4
 
 Channel Notice
