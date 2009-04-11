@@ -23,7 +23,6 @@
 #include <sys/utsname.h>
 #include <time.h>
 
-#include "conspire-config.h"
 #include "xchat.h"
 #include "cfgfiles.h"
 #include "util.h"

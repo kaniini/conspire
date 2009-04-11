@@ -19,7 +19,6 @@
 #include <glib.h>
 
 #include "common/plugin.h"
-#include "common/conspire-config.h"
 #include "common/xchat.h"
 #include "common/signal_factory.h"
 #include "common/text.h"

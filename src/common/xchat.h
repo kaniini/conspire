@@ -1,3 +1,5 @@
+#include "conspire-config.h"
+
 #include <glib/gslist.h>
 #include <glib/glist.h>
 #include <glib/gutils.h>

@@ -17,7 +17,6 @@
  */
 
 #include "plugin.h"
-#include "conspire-config.h"
 #include "xchat.h"
 #include "fe.h"
 #include "util.h"

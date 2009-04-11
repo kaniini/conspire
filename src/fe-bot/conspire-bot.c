@@ -19,7 +19,6 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "../common/conspire-config.h"
 #include "../common/xchat.h"
 #include "../common/fe.h"
 #include "../common/util.h"
