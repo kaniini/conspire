@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "conspire-config.h"
 #include "xchat.h"
 #include "cfgfiles.h"
 #include "util.h"

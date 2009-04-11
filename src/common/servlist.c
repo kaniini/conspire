@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "conspire-config.h"
 #include "xchat.h"
 #include <glib/ghash.h>
 

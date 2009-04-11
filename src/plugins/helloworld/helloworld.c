@@ -20,6 +20,7 @@
 
 /* outside of the tree, use <conspire/foo.h> instead. */
 #include "common/plugin.h"
+#include "common/conspire-config.h"
 #include "common/xchat.h"
 #include "common/command_factory.h"
 #include "common/outbound.h"

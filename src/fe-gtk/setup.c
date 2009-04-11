@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "../common/conspire-config.h"
 #include "../common/xchat.h"
 #include "../common/cfgfiles.h"
 #include "../common/fe.h"

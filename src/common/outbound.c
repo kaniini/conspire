@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "conspire-config.h"
 #include "xchat.h"
 #include "ignore.h"
 #include "util.h"
