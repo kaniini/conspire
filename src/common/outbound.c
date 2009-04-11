@@ -3105,7 +3105,7 @@ struct commands xc_cmds[] = {
 #endif
 #ifdef GNUTLS
 	{"SERVER", cmd_server, 0, 0, 1,
-	 N_("SERVER [-ssl] <host> [<port>] [<password>], connects to a server, the default port is 6667 for normal connections, and 9999 for ssl connections")},
+	 N_("SERVER [-ssl] <host> [[+]<port>] [<password>], connects to a server, the default port is 6667 for normal connections, and 9999 for ssl connections. Note that the + flag is required for SSL usage in the network editor.")},
 #else
 	{"SERVER", cmd_server, 0, 0, 1,
 	 N_("SERVER <host> [<port>] [<password>], connects to a server, the default port is 6667")},
