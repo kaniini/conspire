@@ -6,12 +6,11 @@ int main()
 {
 	char name[512];
 	char num[512];
-	char help[512];
 	char def[512];
 	char args[512];
 	char buf[512];
 	char *defines[512];
-  	int i = 0, max;
+  	int i = 0;
 
 	printf("/* this file is auto generated, edit textevents.in instead! */\n\nconst struct text_event te[] = {\n");
 	while(fgets(name, sizeof(name), stdin))
