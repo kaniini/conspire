@@ -1,4 +1,3 @@
-#include "conspire-config.h"
 
 #include <glib/gslist.h>
 #include <glib/glist.h>
@@ -18,12 +17,16 @@
 #include "cap.h"
 #include "linequeue.h"
 
+#ifdef _CONSPIRE_INTERNAL
+#include "conspire-config.h"
+
 #ifndef HAVE_SNPRINTF
 #define snprintf g_snprintf
 #endif
 
 #ifndef HAVE_VSNPRINTF
 #define vsnprintf g_vsnprintf
+#endif
 #endif
 
 #ifdef GNUTLS
