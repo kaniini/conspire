@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
+#include "conspire-config.h"
 #include "xchat.h"
 
 #ifndef __CONSPIRE__LIBCONSPIRE__CAP_H__GUARD
