@@ -137,8 +137,8 @@ const struct text_event te[] = {
 {"DCC SEND Failed", 3, 
 "%C27*$t%C27DCC SEND %C11$1%O failed. Connection to %C11$2%O lost."},
 
-{"DCC SEND Offer", 4, 
-"%C27*$t%C27%C11$1 %Chas offered %C11$2 %C(%C11$3 %Cbytes)"},
+{"DCC SEND Offer", 3, 
+"%C27*$t%C27You have offered %C11$3 %C14(%C11$1 %C27bytes%C14)%C27 to %C11$2%C27."},
 
 {"DCC Stall", 3, 
 "%C27*$t%C27DCC $1 %C11$2 %Cto %C11$3 %Cstalled - aborting."},
