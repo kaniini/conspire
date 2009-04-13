@@ -1580,13 +1580,22 @@ setup_ok_cb (GtkWidget *but, GtkWidget *win)
 static GtkWidget *
 setup_window_open (void)
 {
-	GtkWidget *win, *vbox, *hbox;
+	GtkWidget *win, *vbox, *hbox, *scrolledwindow;
 
-	win = mg_create_generic_tab(_("Preferences"), _("Preferences"), FALSE, TRUE, setup_ok_cb, NULL, 550, 200, &vbox, NULL);
+	win = mg_create_generic_tab(_("Preferences"), _("Preferences"), FALSE, TRUE, setup_ok_cb, NULL, 0, 0, &vbox, NULL);
+
+	scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+	gtk_widget_show (scrolledwindow);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow),
+											  GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow),
+													 GTK_SHADOW_IN);
+
+	gtk_container_add (GTK_CONTAINER (win), scrolledwindow);
 
 	vbox = gtk_vbox_new (FALSE, 5);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
-	gtk_container_add (GTK_CONTAINER (win), vbox);
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW (scrolledwindow), vbox);
 
 	hbox = gtk_hbox_new (FALSE, 4);
 	gtk_container_add (GTK_CONTAINER (vbox), hbox);
