@@ -952,7 +952,7 @@ void
 signal_printer_server_numeric_302(gpointer *params)
 {
 	session *sess   = params[0];
-        gchar *hostname = params[1];
+        gchar *hostname = params[3];
 
 	session_print_format(sess, "found ip", hostname);
 }
