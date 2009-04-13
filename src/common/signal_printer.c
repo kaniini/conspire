@@ -951,10 +951,13 @@ signal_printer_server_ping_reply(gpointer *params)
 void
 signal_printer_server_numeric_302(gpointer *params)
 {
-	session *sess   = params[0];
-        gchar *hostname = params[3];
+	session *sess = params[0];
+	gchar *text   = params[3];
+	gchar **stuff = g_strsplit(text, "@", 1);
 
-	session_print_format(sess, "found ip", hostname);
+	session_print_format(sess, "found ip", stuff[1]);
+
+        g_strfreev(stuff);
 }
 
 void
