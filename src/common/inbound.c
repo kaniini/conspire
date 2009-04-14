@@ -1354,6 +1354,8 @@ inbound_foundip (session *sess, char *ip)
 	HostAddr = gethostbyname (ip);
 	if (HostAddr)
 		prefs.dcc_ip = ((struct in_addr *) HostAddr->h_addr)->s_addr;
+
+	signal_emit("server found ip", 2, sess, ip);
 }
 
 void

@@ -949,15 +949,12 @@ signal_printer_server_ping_reply(gpointer *params)
 }
 
 void
-signal_printer_server_numeric_302(gpointer *params)
+signal_printer_server_found_ip(gpointer *params)
 {
 	session *sess = params[0];
-	gchar *text   = params[3];
-	gchar **stuff = g_strsplit(text, "@", 1);
+	gchar *host   = params[1];
 
-	session_print_format(sess, "found ip", stuff[1]);
-
-        g_strfreev(stuff);
+	session_print_format(sess, "found ip", host);
 }
 
 void
@@ -1297,7 +1294,7 @@ signal_printer_init(void)
 	signal_attach("server motd",            signal_printer_server_motd);
 	signal_attach("server netsplit",        signal_printer_server_netsplit);
 	signal_attach("server notice",          signal_printer_server_notice);
-	signal_attach("server numeric 302",     signal_printer_server_numeric_302);
+	signal_attach("server found ip",        signal_printer_server_found_ip);
 	signal_attach("server ping reply",      signal_printer_server_ping_reply);
 	signal_attach("server stoned",          signal_printer_server_stoned);
 	signal_attach("server text",            signal_printer_server_text);
