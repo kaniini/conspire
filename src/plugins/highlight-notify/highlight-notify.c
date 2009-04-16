@@ -44,8 +44,8 @@ process_message(gpointer *params)
 gboolean
 init(Plugin *p)
 {
-	signal_attach("action public highlight", process_message);
-	signal_attach("message public highlight", process_message);
+	signal_attach("action public hilight", process_message);
+	signal_attach("message public hilight", process_message);
 
 	return TRUE;
 }
@@ -53,8 +53,8 @@ init(Plugin *p)
 gboolean
 fini(Plugin *p)
 {
-	signal_disconnect("action public highlight", process_message);
-	signal_disconnect("message public highlight", process_message);
+	signal_disconnect("action public hilight", process_message);
+	signal_disconnect("message public hilight", process_message);
 
 	return TRUE;
 }

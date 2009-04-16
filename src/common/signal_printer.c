@@ -519,6 +519,8 @@ signal_printer_message_public_highlight(gpointer *params)
 	gchar *idtext   = params[4];
 
 	session_print_format(sess, "channel msg hilight", from, nickchar, idtext, message);
+
+	g_print("SIGNAL CALLED WOW\n");
 }
 
 /* notices */

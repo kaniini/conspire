@@ -658,8 +658,8 @@ tray_apply_setup(void)
 void
 tray_init(void)
 {
-	signal_attach("action public highlight", process_message_highlight);
-	signal_attach("message public highlight", process_message_highlight);
+	signal_attach("action public hilight", process_message_highlight);
+	signal_attach("message public hilight", process_message_highlight);
 
 	signal_attach("action public", process_message);
 	signal_attach("message public", process_message);

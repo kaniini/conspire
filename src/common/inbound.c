@@ -371,7 +371,7 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 		/* XXX this isn't necessarily a public action */
 		if (hilight && prefs.hilight_enable)
 		{
-			signal_emit("action public highlight", 4, sess, from, text, nickchar);
+			signal_emit("action public hilight", 4, sess, from, text, nickchar);
 			return;
 		}
 	}
@@ -443,7 +443,7 @@ inbound_chanmsg (server *serv, session *sess, char *chan, char *from, char *text
 		{
 			if (prefs.input_beep_hilight)
 				sound_beep (sess);
-			signal_emit("message public highlight", 5, sess, from, text, nickchar, idtext);
+			signal_emit("message public hilight", 5, sess, from, text, nickchar, idtext);
         	        return;
 		}
 		else
