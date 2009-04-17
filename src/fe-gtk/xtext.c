@@ -2518,8 +2518,6 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			xtext->backcolor = TRUE;
 		else
 			xtext->backcolor = FALSE;
-
-		mark = FALSE;
 	}
 
 	/* draw background to the right of the text */
