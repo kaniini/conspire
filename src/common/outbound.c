@@ -1923,10 +1923,6 @@ cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	if (len > 3 && strcasecmp (".so", word[2] + len - 3) == 0)
 #endif
 	{
-		arg = NULL;
-		if (word_eol[3][0])
-			arg = word_eol[3];
-
 		file = expand_homedir (word[2]);
 		plugin_load(file);
 		free (file);
