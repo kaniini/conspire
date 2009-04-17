@@ -395,7 +395,7 @@ handle_mode (server * serv, char *word[], char *word_eol[],
 	int offset = 3;
 	int all_modes_have_args = FALSE;
 	int using_front_tab = FALSE;
-	gboolean fwd;
+	gboolean fwd = FALSE;
 	mode_run mr;
 
 	mr.serv = serv;
