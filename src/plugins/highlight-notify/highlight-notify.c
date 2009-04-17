@@ -32,6 +32,10 @@ process_message(gpointer *params)
 	gchar *from    = params[1];
 	gchar *message = params[2];
 
+	g_return_if_fail(sess != NULL);
+	g_return_if_fail(from != NULL);
+	g_return_if_fail(message != NULL);
+
 	if (sess == current_sess)
 		return;
 
