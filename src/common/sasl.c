@@ -123,7 +123,6 @@ sasl_process_authenticate(gpointer *params)
 	session *sess = params[0];
 	gchar **word_eol = params[2];
 	server *serv = sess->server;
-	sess = serv->server_session;
 
 	if (*word_eol[2] == '+')
 	{
