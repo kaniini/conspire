@@ -330,7 +330,7 @@ signal_printer_dcc_file_request(gpointer *params)
 	gchar *nick = params[1];
 	gchar *file = params[2];
 	gchar *tbuf = params[3];
-	session_print_format(sess->server->front_session, "dcc send offer", nick, file, tbuf, tbuf + 24, 0);
+	session_print_format(sess->server->front_session, "dcc recv offer", nick, file, tbuf, tbuf + 24, 0);
 }
 
 void
