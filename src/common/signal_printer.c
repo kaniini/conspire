@@ -191,7 +191,7 @@ signal_printer_channel_part(gpointer *params)
 	gchar *reason  = params[4];
 
 	if (*reason)
-		session_print_format(sess, "part reason", nick, host, channel, reason, 0);
+		session_print_format(sess, "part with reason", nick, host, channel, reason, 0);
 	else
 		session_print_format(sess, "part", nick, host, channel);
 }
