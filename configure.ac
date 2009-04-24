@@ -554,6 +554,8 @@ dnl USING RPATHS IS WRONG -nenolod
 conspire_libdir=${libdir}/conspire
 AC_SUBST(conspire_libdir)
 
+BUILDSYS_TOUCH_DEPS
+
 AC_OUTPUT([
 po/Makefile.in
 buildsys.mk
