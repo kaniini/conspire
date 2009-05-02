@@ -1,5 +1,7 @@
 TODO
 - Implement an awaylog for storing hilighted messages.
+- Separate IRC code from IRC-inspecific code.
+- Python plugin.
 
 IDEAS
 - Implement a sane theme engine

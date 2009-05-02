@@ -55,11 +55,7 @@
 #include "base64.h"
 #include "upnp.h"
 
-#ifdef USE_DCC64
 #define BIG_STR_TO_INT(x) strtoull(x,NULL,10)
-#else
-#define BIG_STR_TO_INT(x) strtoul(x,NULL,10)
-#endif
 
 struct dccstat_info dccstat[] = {
 	{N_("Waiting"), 1 /*black */ },
@@ -1440,12 +1436,10 @@ dcc_handle_new_ack (struct DCC *dcc)
 		dcc_send_data (NULL, 0, (gpointer)dcc);
 	}
 
-#ifdef USE_DCC64
 	/* take the top 32 of "bytes send" and bottom 32 of "ack" */
 	dcc->ack = (dcc->pos & G_GINT64_CONSTANT (0xffffffff00000000)) |
 					(dcc->ack & 0xffffffff);
 	/* dcc->ack is only used for CPS and PERCENTAGE calcs from now on... */
-#endif
 
 	return done;
 }
@@ -1714,14 +1708,6 @@ dcc_send (struct session *sess, char *to, char *file, int maxcps, int passive)
 
 	if (stat (file_fs, &st) != -1)
 	{
-
-#ifndef USE_DCC64
-		if (sizeof (st.st_size) > 4 && st.st_size > 4294967295U)
-		{
-			PrintText (sess, "Cannot send files larger than 4 GB.\n");
-			goto xit;
-		}
-#endif
 
 		if (!(*file_part (file_fs)) || S_ISDIR (st.st_mode) || st.st_size < 1)
 		{

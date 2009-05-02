@@ -19,16 +19,9 @@
 
 #define CPS_AVG_WINDOW 10
 
-/* can we do 64-bit dcc? */
-#if defined(G_GINT64_FORMAT)
-#define USE_DCC64
 /* we really get only 63 bits, since st_size is signed */
 #define DCC_SIZE gint64
 #define DCC_SFMT G_GINT64_FORMAT
-#else
-#define DCC_SIZE unsigned int
-#define DCC_SFMT "u"
-#endif
 
 struct DCC
 {
