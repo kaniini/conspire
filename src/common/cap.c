@@ -84,7 +84,7 @@ cap_state_unref(CapState *cap)
 		default:
 			break;
 		}
-		
+
 
 		serv->cap = NULL;
 
