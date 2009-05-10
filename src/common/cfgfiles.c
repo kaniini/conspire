@@ -20,7 +20,7 @@
  */
 
 #include <fcntl.h>
-#include <unistd.h>
+#include "stdinc.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

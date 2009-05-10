@@ -31,7 +31,7 @@
 #include <time.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include "stdinc.h"
 #include <fcntl.h>
 
 #define WANTSOCKET

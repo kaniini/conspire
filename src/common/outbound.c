@@ -29,7 +29,7 @@
 
 #include <sys/wait.h>
 
-#include <unistd.h>
+#include "stdinc.h"
 #include <time.h>
 #include <signal.h>
 #include <sys/stat.h>

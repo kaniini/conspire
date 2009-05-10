@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
+#include "stdinc.h"
 #include <ctype.h>
 #include <time.h>
 #include <sys/types.h>

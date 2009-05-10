@@ -20,7 +20,7 @@
 
 #define _FILE_OFFSET_BITS 64
 #include <stdio.h>
-#include <unistd.h>
+#include "stdinc.h"
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>

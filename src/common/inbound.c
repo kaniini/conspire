@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
-#include <unistd.h>
+#include "stdinc.h"
 #include <time.h>
 
 #define WANTARPA
