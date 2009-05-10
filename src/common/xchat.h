@@ -10,6 +10,10 @@
 #ifndef XCHAT_H
 #define XCHAT_H
 
+#ifdef _MSC_VER
+# pragma warning (disable: 4996)
+#endif
+
 #include "debug.h"
 #include "history.h"
 #include "signal_factory.h"
