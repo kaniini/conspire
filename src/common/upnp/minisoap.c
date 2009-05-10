@@ -9,7 +9,7 @@
  */
 #include <stdio.h>
 #include <string.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #include <winsock2.h>
 #define snprintf _snprintf
@@ -23,7 +23,7 @@
 /* only for malloc */
 #include <stdlib.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #define PRINT_SOCKET_ERROR(x)    printf("Socket error: %s, %d\n", x, WSAGetLastError());
 #else
 #define PRINT_SOCKET_ERROR(x) perror(x)
@@ -56,7 +56,7 @@ httpWrite(int fd, const char * body, int bodysize,
 	/* disable send on the socket */
 	/* draytek routers dont seems to like that... */
 #if 0
-#ifdef WIN32
+#ifdef _WIN32
 	if(shutdown(fd, SD_SEND)<0) {
 #else
 	if(shutdown(fd, SHUT_WR)<0)	{ /*SD_SEND*/
