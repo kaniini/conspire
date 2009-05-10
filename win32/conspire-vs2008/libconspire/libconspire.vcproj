@@ -450,6 +450,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\common\stdinc.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\common\text.h"
 				>
 			</File>

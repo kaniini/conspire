@@ -8,6 +8,10 @@
 #ifndef __MINIUPNPC_H__
 #define __MINIUPNPC_H__
 
+#ifdef _MSC_VER
+# pragma warning (disable: 4996)
+#endif
+
 #define NDEBUG
 
 #include "declspec.h"

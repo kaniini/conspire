@@ -22,6 +22,10 @@
 #ifndef __CONSPIRE_STDINC_H__GUARD
 #define __CONSPIRE_STDINC_H__GUARD
 
+#ifdef _MSC_VER
+# pragma warning (disable: 4996)
+#endif
+
 #ifndef _WIN32
 # include <unistd.h>
 #endif
