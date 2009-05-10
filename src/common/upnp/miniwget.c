@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "miniupnpc.h"
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <io.h>
 #define MAXHOSTNAMELEN 64

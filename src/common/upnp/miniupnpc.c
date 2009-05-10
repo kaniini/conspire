@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 #include <io.h>
@@ -38,7 +38,7 @@
  * comment this out. */
 /* #define TX_FROM_UPNP_PORT */
 
-#ifdef WIN32
+#ifdef _WIN32
 #define PRINT_SOCKET_ERROR(x)    printf("Socket error: %s, %d\n", x, WSAGetLastError());
 #else
 #define PRINT_SOCKET_ERROR(x) perror(x)
@@ -384,7 +384,7 @@ struct UPNPDev * upnpDiscover(int delay, const char * multicastif,
 	deviceIndex = 0;
 #endif
 	/* fallback to direct discovery */
-#ifdef WIN32
+#ifdef _WIN32
 	sudp = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 #else
 	sudp = socket(PF_INET, SOCK_DGRAM, 0);
@@ -407,7 +407,7 @@ struct UPNPDev * upnpDiscover(int delay, const char * multicastif,
     sockudp_w.sin_port = htons(PORT);
     sockudp_w.sin_addr.s_addr = inet_addr(UPNP_MCAST_ADDR);
 
-#ifdef WIN32
+#ifdef _WIN32
 	if (setsockopt(sudp, SOL_SOCKET, SO_REUSEADDR, (const char *)&opt, sizeof (opt)) < 0)
 #else
 	if (setsockopt(sudp, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof (opt)) < 0)
