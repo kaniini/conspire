@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "miniupnpc.h"
 #include "upnpreplyparse.h"
 #include "minixml.h"
 
