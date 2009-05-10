@@ -24,6 +24,7 @@
 
 #ifndef _WIN32
 # include <unistd.h>
+# include <pwd.h>
 #endif
 
 #endif
