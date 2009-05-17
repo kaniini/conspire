@@ -22,7 +22,7 @@
 #include <stdarg.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include "../common/stdinc.h"
 #include <fcntl.h>
 #include "fe-gtk.h"
 
