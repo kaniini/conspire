@@ -23,7 +23,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "src/common/conspire-config.h"
+#ifdef _MSC_VER
+# define roundf(a) ((fmod(a, 1) < 0.5) ? floor(a) : ceil(a))
+#endif
+
+#include "conspire-config.h"
 #include <math.h>
 #include "contrast.h"
 
