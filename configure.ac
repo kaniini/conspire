@@ -187,7 +187,16 @@ dnl ** GTK **************************************************************
 dnl *********************************************************************
 
 AM_PATH_GTK_2_0(2.10.0, havegtk=yes, havegtk=no)
-PKG_CHECK_MODULES(SEXY, [libsexy], , havegtk=no)
+
+PKG_CHECK_MODULES(SEXY, [libsexy],
+	[
+		AC_DEFINE([HAVE_LIBSEXY], [], [Use libsexy])
+	],
+	[
+		havegtk=no
+	]
+)
+
 PKG_CHECK_MODULES(NOTIFY, [libnotify], , havegtk=no)
 
 if test "$havegtk" = no; then
