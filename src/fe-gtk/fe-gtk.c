@@ -299,7 +299,11 @@ fe_input_add (int sok, int flags, void *func, void *data)
 	int tag, type = 0;
 	GIOChannel *channel;
 
+#ifndef _WIN32
 	channel = g_io_channel_unix_new (sok);
+#else
+	channel = g_io_channel_win32_new_socket (sok);
+#endif
 
 	if (flags & FIA_READ)
 		type |= G_IO_IN | G_IO_HUP | G_IO_ERR;
