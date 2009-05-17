@@ -193,9 +193,6 @@ key_init ()
 			fe_message (_("There was an error loading key"
 							" bindings configuration"), FE_MSG_ERROR);
 	}
-#ifdef _WIN32
-	keys_root = NULL;
-#endif
 }
 
 static char *
@@ -954,6 +951,7 @@ key_load_kbs (char *filename)
 	struct stat st;
 	struct key_binding *kb = NULL, *last = NULL;
 	int fd, len, pnt = 0, state = 0, n;
+	int secondtime = -1;
 
 	if (filename == NULL)
 		fd = xchat_open_file ("keybindings.conf", O_RDONLY, 0, 0);
@@ -963,7 +961,7 @@ key_load_kbs (char *filename)
 		return 1;
 	if (fstat (fd, &st) != 0)
 		return 1;
-	ibuf = malloc (st.st_size);
+	ibuf = malloc (st.st_size + 1);
 	read (fd, ibuf, st.st_size);
 	close (fd);
 
@@ -972,14 +970,22 @@ key_load_kbs (char *filename)
 		if (buf[0] == '#')
 			continue;
 		if (strlen (buf) == 0)
+		{
+			if (secondtime++ > 0)
+				break;
+
 			continue;
+		}
 
 		switch (state)
 		{
 		case KBSTATE_MOD:
 			kb = (struct key_binding *) malloc (sizeof (struct key_binding));
 			if (key_load_kbs_helper_mod (buf, &kb->mod))
+			{
+				g_print("corrupt here MOD\n");
 				goto corrupt_file;
+			}
 			state = KBSTATE_KEY;
 			continue;
 		case KBSTATE_KEY:
@@ -1071,13 +1077,20 @@ key_load_kbs (char *filename)
 			{
 			case '1':
 				if (state != KBSTATE_DT1)
+				{
+					g_print("corrupt here DT1\n");
 					goto corrupt_file;
+				}
 				break;
 			case '2':
 				if (state != KBSTATE_DT2)
+				{
+					g_print("corrupt here DT2\n");
 					goto corrupt_file;
+				}
 				break;
 			default:
+				g_print("corrupt here DT default\n");
 				goto corrupt_file;
 			}
 

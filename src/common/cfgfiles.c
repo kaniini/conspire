@@ -395,8 +395,8 @@ char *
 get_xdir_fs (void)
 {
 	if (!xdir_fs)
-		xdir_fs = g_strdup_printf ("%s/" XCHAT_DIR, g_get_home_dir ());
-
+		xdir_fs = g_build_filename(g_get_home_dir(), XCHAT_DIR, NULL);
+	
 	return xdir_fs;
 }
 
@@ -1115,16 +1115,21 @@ cmd_set (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 int
 xchat_open_file (char *file, int flags, int mode, int xof_flags)
 {
-	char buf[1024];
+	int ret;
+	char *buf;
 
 	if (xof_flags & XOF_FULLPATH)
 		return open (file, flags | OFLAGS);
 
-	snprintf (buf, sizeof (buf), "%s/%s", get_xdir_fs (), file);
+	buf = g_build_filename(get_xdir_fs(), file, NULL);
 	if (xof_flags & XOF_DOMODE)
-		return open (buf, flags | OFLAGS, mode);
+		ret = open (buf, flags | OFLAGS, mode);
 	else
-		return open (buf, flags | OFLAGS);
+		ret = open (buf, flags | OFLAGS);
+
+	g_free(buf);
+
+	return ret;
 }
 
 FILE *
