@@ -7,6 +7,6 @@ SRCS = contrast.c
 include ../../buildsys.mk
 include ../../extra.mk
 
-CPPFLAGS += $(COMMON_CFLAGS) $(GUI_CFLAGS) -I../..
+CPPFLAGS += $(COMMON_CFLAGS) $(GUI_CFLAGS) -I../.. -I../../common
 CFLAGS += $(LIB_CFLAGS)
 LIBS += $(COMMON_LIBS)
