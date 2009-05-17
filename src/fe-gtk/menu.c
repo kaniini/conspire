@@ -430,18 +430,18 @@ menu_create (GtkWidget *menu, GSList *list, char *target, int check_path)
 	{
 		pop = (struct popup *) list->data;
 
-		if (!strncasecmp (pop->name, "SUB", 3))
+		if (!g_ascii_strncasecmp (pop->name, "SUB", 3))
 		{
 			childcount = 0;
 			tempmenu = menu_quick_sub (pop->cmd, tempmenu, &subitem, XCMENU_DOLIST, -1);
 
-		} else if (!strncasecmp (pop->name, "TOGGLE", 6))
+		} else if (!g_ascii_strncasecmp (pop->name, "TOGGLE", 6))
 		{
 			childcount++;
 			menu_toggle_item (pop->name + 7, tempmenu, toggle_cb, pop->cmd,
 									cfg_get_bool (pop->cmd));
 
-		} else if (!strncasecmp (pop->name, "ENDSUB", 6))
+		} else if (!g_ascii_strncasecmp (pop->name, "ENDSUB", 6))
 		{
 			/* empty sub menu due to no programs in PATH? */
 			if (check_path && childcount < 1)
@@ -452,7 +452,7 @@ menu_create (GtkWidget *menu, GSList *list, char *target, int check_path)
 				tempmenu = menu_quick_endsub ();
 			/* If we get here and tempmenu equals menu that means we havent got any submenus to exit from */
 
-		} else if (!strncasecmp (pop->name, "SEP", 3))
+		} else if (!g_ascii_strncasecmp (pop->name, "SEP", 3))
 		{
 			menu_quick_item (0, 0, tempmenu, XCMENU_SHADED, 0, 0);
 
