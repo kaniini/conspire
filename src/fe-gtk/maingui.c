@@ -68,7 +68,9 @@
 #include "xtext.h"
 #include "sync-menu.h"
 
-#include <libsexy/sexy.h>
+#ifdef HAVE_LIBSEXY
+# include <libsexy/sexy.h>
+#endif
 
 #define GUI_SPACING (3)
 #define GUI_BORDER (0)
@@ -1305,7 +1307,7 @@ mg_dnd_drop_file (session *sess, char *target, char *uri)
 	while (*p)
 	{
 		next = strchr (p, '\r');
-		if (strncasecmp ("file:", p, 5) == 0)
+		if (g_ascii_strncasecmp ("file:", p, 5) == 0)
 		{
 			if (next)
 				*next = 0;
@@ -2496,8 +2498,12 @@ mg_create_entry (session *sess, GtkWidget *box)
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), hbox, 0, 0, 0);
 
+#ifdef HAVE_LIBSEXY
 	gui->input_box = entry = sexy_spell_entry_new ();
 	sexy_spell_entry_set_checked ((SexySpellEntry *)entry, prefs.gui_input_spell);
+#else
+	gui->input_box = entry = gtk_entry_new();
+#endif
 
 	gtk_entry_set_max_length (GTK_ENTRY (gui->input_box), 2048);
 	g_signal_connect (G_OBJECT (entry), "activate",
