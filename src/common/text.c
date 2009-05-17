@@ -258,7 +258,7 @@ scrollback_load (session *sess)
 			if (sizeof (time_t) == 4)
 				stamp = strtoul (buf + 2, NULL, 10);
 			else
-				stamp = strtoull (buf + 2, NULL, 10); /* just incase time_t is 64 bits */
+				stamp = BIG_STR_TO_INT(buf + 2); /* just incase time_t is 64 bits */
 			text = strchr (buf + 3, ' ');
 			if (text)
 			{

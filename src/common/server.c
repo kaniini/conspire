@@ -27,8 +27,7 @@
 #define WANTARPA
 #include "inet.h"
 
-#include <signal.h>
-#include <sys/wait.h>
+#include "stdinc.h"
 
 #include "xchat.h"
 #include "fe.h"
@@ -387,6 +386,20 @@ server_connected (server * serv)
 	fe_server_event (serv, FE_SE_CONNECT, 0);
 }
 
+#ifdef _WIN32
+
+static gboolean
+server_close_pipe(int *pipefd)
+{
+	close(pipefd[0]);
+	close(pipefd[1]);
+	g_free(pipefd);
+
+	return FALSE;
+}
+
+#endif
+
 static void
 server_stopconnecting (server * serv)
 {
@@ -402,12 +415,25 @@ server_stopconnecting (server * serv)
 		serv->joindelay_tag = 0;
 	}
 
+#ifndef WIN32
 	/* kill the child process trying to connect */
 	kill (serv->childpid, SIGKILL);
 	waitpid (serv->childpid, NULL, 0);
 
 	close (serv->childwrite);
 	close (serv->childread);
+#else
+	PostThreadMessage(serv->childpid, WM_QUIT, 0, 0);
+
+	{
+		int *pipefd = g_new(int, 2);
+
+		pipefd[0] = serv->childwrite;
+		pipefd[1] = serv->childread;
+
+		g_idle_add((GSourceFunc) server_close_pipe, pipefd);
+	}
+#endif
 
 	fe_progressbar_end (serv);
 
@@ -580,12 +606,14 @@ server_read_child (GIOChannel *source, GIOCondition condition, server *serv)
 		signal_emit("server connect", 4, sess, host, ip, outbuf);
 		snprintf (outbuf, sizeof (outbuf), "%s/auth/xchat_auth",
 					 g_get_home_dir ());
+#ifndef _WIN32
 		if (access (outbuf, X_OK) == 0)
 		{
 			snprintf (outbuf, sizeof (outbuf), "exec -d %s/auth/xchat_auth %s",
 						 g_get_home_dir (), prefs.username);
 			handle_command (serv->server_session, outbuf, FALSE);
 		}
+#endif
 		break;
 	case '4':						  /* success */
 		waitline2 (source, tbuf, sizeof (tbuf));
@@ -1195,7 +1223,11 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 	fe_set_away (serv);
 	linequeue_erase(serv->lq);
 
+#ifdef _WIN32
+	if (_pipe (read_des, 4096, _O_BINARY) < 0)
+#else
 	if (pipe (read_des) < 0)
+#endif
 		return;
 #ifdef __EMX__ /* os/2 */
 	setmode (read_des[0], O_BINARY);
@@ -1209,6 +1241,10 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 	serv->proxy_sok4 = -1;
 	serv->proxy_sok6 = -1;
 
+#ifdef WIN32
+	CloseHandle(CreateThread(NULL, 0,
+		(LPTHREAD_START_ROUTINE)server_child, serv, 0, (DWORD *)&pid));
+#else
 #ifdef LOOKUPD
 	rand();	/* CL: net_resolve calls rand() when LOOKUPD is set, so prepare a different seed for each child. This method giver a bigger variation in seed values than calling srand(time(0)) in the child itself. */
 #endif
@@ -1223,6 +1259,8 @@ server_connect (server *serv, char *hostname, int port, int no_login)
 		server_child (serv);
 		_exit (0);
 	}
+#endif
+
 	serv->childpid = pid;
 	serv->iotag = fe_input_add (serv->childread, FIA_READ, server_read_child,
 										 serv);

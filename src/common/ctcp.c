@@ -20,7 +20,7 @@
 #include <string.h>
 #include "stdinc.h"
 #include <stdlib.h>
-#include <sys/utsname.h>
+
 #include <time.h>
 
 #include "xchat.h"
@@ -91,7 +91,7 @@ ctcp_handle (session *sess, char *to, char *nick,
 	char outbuf[1024];
 
 	/* consider DCC to be different from other CTCPs */
-	if (!strncasecmp (msg, "DCC", 3))
+	if (!g_ascii_strncasecmp (msg, "DCC", 3))
 	{
 		/* but still let CTCP replies override it */
 		if (!ctcp_check (sess, nick, word, word_eol, word[4] + 2))
@@ -104,7 +104,7 @@ ctcp_handle (session *sess, char *to, char *nick,
 
 	/* consider ACTION to be different from other CTCPs. Check
       ignore as if it was a PRIV/CHAN. */
-	if (!strncasecmp (msg, "ACTION ", 7))
+	if (!g_ascii_strncasecmp (msg, "ACTION ", 7))
 	{
 		if (is_channel (serv, to))
 		{
@@ -131,12 +131,25 @@ ctcp_handle (session *sess, char *to, char *nick,
 
 	if (!strcasecmp (msg, "VERSION") && !prefs.hidever)
 	{
+#ifndef _WIN32
 		struct utsname un;
 
 		uname(&un);
 
 		snprintf (outbuf, sizeof (outbuf), "VERSION conspire "PACKAGE_VERSION" - running on %s %s %s",
 					 un.sysname, un.release, un.machine);
+#else
+		OSVERSIONINFO osvi;
+		SYSTEM_INFO si;
+
+		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+		GetVersionEx(&osvi);
+		GetSystemInfo(&si);
+
+		snprintf(outbuf, sizeof(outbuf), "VERSION conspire "PACKAGE_VERSION" - running on Windows %ld.%ld build %ld (i%d86)",
+			osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber,
+			si.wProcessorLevel);
+#endif
 
 		serv->p_nctcp (serv, nick, outbuf);
 	}

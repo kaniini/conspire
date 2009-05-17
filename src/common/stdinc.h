@@ -38,15 +38,29 @@
 #include <signal.h>
 
 #ifdef _WIN32
+
 # include <process.h>
 
 # define F_OK		00
+# define W_OK		00
+# define X_OK		00
+
 # define S_IRUSR	00
 # define S_IWUSR	00
 # define S_IXUSR	00
 
 # define SIGPIPE	13
 
+/* dcc.c uses S_ISDIR(), this implements it. --nenolod */
+# define __S_ISTYPE(mode, mask) (((mode) & S_IFMT) == (mask))
+# define S_ISDIR(mode) __S_ISTYPE((mode), S_IFDIR)
+
+#endif
+
+#ifndef _WIN32
+# define BIG_STR_TO_INT(x) strtoull(x, NULL, 10)
+#else
+# define BIG_STR_TO_INT(x) _strtoui64(x, NULL, 10)
 #endif
 
 #endif

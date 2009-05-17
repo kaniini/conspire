@@ -39,8 +39,7 @@
 #define WANTDNS
 #include "inet.h"
 
-#include <signal.h>
-#include <sys/wait.h>
+#include "stdinc.h"
 
 #include "xchat.h"
 #include "util.h"
@@ -54,8 +53,6 @@
 #include "xchatc.h"
 #include "base64.h"
 #include "upnp.h"
-
-#define BIG_STR_TO_INT(x) strtoull(x,NULL,10)
 
 struct dccstat_info dccstat[] = {
 	{N_("Waiting"), 1 /*black */ },
@@ -520,7 +517,7 @@ dcc_chat_line (struct DCC *dcc, char *line)
 
 	url_check_line (line, len);
 
-	if (line[0] == 1 && !strncasecmp (line + 1, "ACTION", 6))
+	if (line[0] == 1 && !g_ascii_strncasecmp (line + 1, "ACTION", 6))
 	{
 		po = strchr (line + 8, '\001');
 		if (po)
