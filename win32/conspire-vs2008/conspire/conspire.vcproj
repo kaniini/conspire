@@ -189,10 +189,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\fe-gtk\chanview-tree.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\src\fe-gtk\chanview.c"
 				>
 			</File>

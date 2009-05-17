@@ -88,10 +88,12 @@ chanlist_match (server *serv, const char *str)
 	case 1:
 		return match (GTK_ENTRY (serv->gui->chanlist_wild)->text, str);
 	case 2:
+#ifndef _WIN32
 		if (!serv->gui->have_regex)
 			return 0;
 		/* regex returns 0 if it's a match: */
 		return !regexec (&serv->gui->chanlist_match_regex, str, 1, NULL, REG_NOTBOL);
+#endif
 	default:	/* case 0: */
 		return nocasestrstr (str, GTK_ENTRY (serv->gui->chanlist_wild)->text) ? 1 : 0;
 	}
@@ -370,6 +372,7 @@ chanlist_search_pressed (GtkButton * button, server *serv)
 static void
 chanlist_find_cb (GtkWidget * wid, server *serv)
 {
+#ifndef _WIN32
 	/* recompile the regular expression. */
 	if (serv->gui->have_regex)
 	{
@@ -380,6 +383,7 @@ chanlist_find_cb (GtkWidget * wid, server *serv)
 	if (regcomp (&serv->gui->chanlist_match_regex, GTK_ENTRY (wid)->text,
 					 REG_ICASE | REG_EXTENDED | REG_NOSUB) == 0)
 		serv->gui->have_regex = 1;
+#endif
 }
 
 static void
@@ -607,11 +611,13 @@ chanlist_destroy_widget (GtkWidget *wid, server *serv)
 		serv->gui->chanlist_tag = 0;
 	}
 
+#ifndef _WIN32
 	if (serv->gui->have_regex)
 	{
 		regfree (&serv->gui->chanlist_match_regex);
 		serv->gui->have_regex = 0;
 	}
+#endif
 }
 
 static void
