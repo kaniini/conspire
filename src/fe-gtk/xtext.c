@@ -141,19 +141,24 @@ gtk_xtext_text_width_8bit (GtkXText *xtext, unsigned char *str, int len)
 static void
 xtext_draw_bg(GtkXText *xtext, gint x, gint y, gint width, gint height)
 {
-	cairo_t *cr;
+#ifndef _WIN32
+	g_return_if_fail(xtext != NULL);
+
+	cairo_rectangle(xtext->draw_cr, x, y, width, height);
+	cairo_clip(xtext->draw_cr);
+
+	gdk_cairo_set_source_color(xtext->draw_cr, &xtext->palette[XTEXT_BG]);
+	cairo_paint(xtext->draw_cr);
+#else
+	GdkGC *gc;
 
 	g_return_if_fail(xtext != NULL);
 
-	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
-
-	cairo_rectangle(cr, x, y, width, height);
-	cairo_clip(cr);
-
-	gdk_cairo_set_source_color(cr, &xtext->palette[XTEXT_BG]);
-	cairo_paint(cr);
-
-	cairo_destroy(cr);
+	gc = gdk_gc_new(xtext->draw_buf);
+	gdk_gc_set_foreground(gc, xtext->bgcol);
+	gdk_draw_rectangle(xtext->draw_buf, gc, 1, x, y, width, height);
+	g_object_unref(gc);
+#endif
 }
 
 static void
@@ -543,6 +548,7 @@ gtk_xtext_realize (GtkWidget * widget)
 	GtkXText *xtext;
 	GdkWindowAttr attributes;
 	GdkColormap *cmap;
+	GdkGC *gc;
 
 	GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
 	xtext = GTK_XTEXT (widget);
@@ -579,11 +585,8 @@ gtk_xtext_realize (GtkWidget * widget)
 	xtext->hand_cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (widget->window), GDK_HAND1);
 	xtext->resize_cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (widget->window), GDK_LEFT_SIDE);
 
-	gdk_window_set_back_pixmap (widget->window, NULL, FALSE);
+	gdk_window_set_background(widget->window, xtext->bgcol);
 	widget->style = gtk_style_attach (widget->style, widget->window);
-
-	xtext_draw_bg(xtext, widget->allocation.x, widget->allocation.y, widget->allocation.width, widget->allocation.height);
-
 
 	backend_init (xtext);
 }
