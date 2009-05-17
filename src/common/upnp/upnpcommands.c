@@ -387,6 +387,7 @@ UPNP_DeletePortMapping(const char * controlURL, const char * servicetype,
 	return ret;
 }
 
+
 int UPNP_GetGenericPortMappingEntry(const char * controlURL,
                                      const char * servicetype,
 									 const char * index,
