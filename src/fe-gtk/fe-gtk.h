@@ -7,7 +7,9 @@
 #include <gtk/gtk.h>
 
 #include <sys/types.h>
-#include <regex.h>
+#ifndef _WIN32
+# include <regex.h>
+#endif
 
 #if defined(ENABLE_NLS) && !defined(_)
 #  include <libintl.h>
@@ -68,8 +70,10 @@ struct server_gui
 	gboolean chanlist_match_wants_channel;	/* match in channel name */
 	gboolean chanlist_match_wants_topic;	/* match in topic */
 
+#ifndef _WIN32
 	regex_t chanlist_match_regex;	/* compiled regular expression here */
 	unsigned int have_regex;
+#endif
 
 	guint chanlist_users_found_count;	/* users total for all channels */
 	guint chanlist_users_shown_count;	/* users total for displayed channels */

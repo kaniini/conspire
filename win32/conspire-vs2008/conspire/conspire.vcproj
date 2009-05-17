@@ -41,6 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="&quot;C:\dev-src\gtk\lib\gtk-2.0\include&quot;;&quot;C:\dev-src\gtk\include\pango-1.0&quot;;&quot;C:\dev-src\gtk\include\gail-1.0&quot;;&quot;C:\dev-src\gtk\include\atk-1.0&quot;;&quot;C:\dev-src\gtk\include\cairo&quot;;&quot;C:\dev-src\gtk\include\libpng12&quot;;&quot;C:\dev-src\gtk\lib\glib-2.0\include&quot;;&quot;C:\dev-src\libmowgli\src\libmowgli&quot;;&quot;C:\dev-src\gtk\include\glib-2.0&quot;;&quot;C:\dev-src\gtk\include\gtk-2.0&quot;;&quot;C:\dev-src\conspire\win32&quot;;&quot;C:\dev-src\conspire\src\common&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -60,6 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="C:\dev-src\conspire\win32\conspire-vs2008\Debug\libconspire.lib C:\dev-src\gtk\lib\gdk-win32-2.0.lib C:\dev-src\gtk\lib\gtk-win32-2.0.lib C:\dev-src\gtk\lib\glib-2.0.lib C:\dev-src\gtk\lib\gthread-2.0.lib C:\dev-src\gtk\lib\cairo.lib C:\dev-src\gtk\lib\pango-1.0.lib C:\dev-src\gtk\lib\pangowin32-1.0.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -395,10 +397,6 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
-		<File
-			RelativePath=".\ReadMe.txt"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

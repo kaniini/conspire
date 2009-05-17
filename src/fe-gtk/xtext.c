@@ -51,7 +51,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
 
 #include <cairo.h>
 #include <gtk/gtk.h>

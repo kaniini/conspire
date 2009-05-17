@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libconspire", "libconspire\libconspire.vcproj", "{4AFE7DF6-71B2-4D56-AF19-1B4E197A80C2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "conspire", "conspire\conspire.vcproj", "{E0D757F4-9508-438D-9E16-B5A850140EBB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4AFE7DF6-71B2-4D56-AF19-1B4E197A80C2} = {4AFE7DF6-71B2-4D56-AF19-1B4E197A80C2}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,7 +1,6 @@
 /* Copyright (C) 2006-2007 Peter Zelezny. */
 
 #include <string.h>
-#include <unistd.h>
 #include "../common/xchat.h"
 #include "../common/xchatc.h"
 #include "../common/inbound.h"
@@ -15,7 +14,9 @@
 #include "tray.h"
 
 #include <gtk/gtk.h>
-#include <libnotify/notify.h>
+#ifndef _WIN32
+# include <libnotify/notify.h>
+#endif
 
 typedef enum	/* current icon status */
 {
@@ -114,6 +115,7 @@ fe_tray_set_tooltip(const char *text)
 void
 fe_tray_set_balloon(const char *title, const char *text)
 {
+#ifndef _WIN32
 	char *stext;
 	WinStatus ws;
 	NotifyNotification *n;
@@ -139,6 +141,7 @@ fe_tray_set_balloon(const char *title, const char *text)
 
 	free(stext);
 	g_object_unref(G_OBJECT(n));
+#endif
 }
 
 static void
@@ -676,5 +679,7 @@ tray_init(void)
 
 	signal_attach("gui focused", tray_focus_cb);
 
+#ifndef _WIN32
 	notify_init(PACKAGE_NAME);
+#endif
 }
