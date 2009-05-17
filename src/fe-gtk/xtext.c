@@ -582,6 +582,9 @@ gtk_xtext_realize (GtkWidget * widget)
 	gdk_window_set_back_pixmap (widget->window, NULL, FALSE);
 	widget->style = gtk_style_attach (widget->style, widget->window);
 
+	xtext_draw_bg(xtext, widget->allocation.x, widget->allocation.y, widget->allocation.width, widget->allocation.height);
+
+
 	backend_init (xtext);
 }
 
