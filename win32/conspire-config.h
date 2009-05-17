@@ -10,6 +10,9 @@
 #define XCHATLIBDIR CONSPIRE_LIBDIR
 #define XCHATSHAREDIR CONSPIRE_SHAREDIR
 
+#define HAVE_SNPRINTF
+#define HAVE_VSNPRINTF
+
 #ifndef USE_IPV6
 # define socklen_t int
 #endif
