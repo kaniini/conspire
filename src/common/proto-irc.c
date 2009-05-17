@@ -1186,6 +1186,7 @@ process_peer_join (gpointer *params)
 	session *sess = params[0];
 	char **word = params[1];
 	server *serv = sess->server;
+	char *chan;
 
 	char ip[128], nick[NICKLEN], *ex;
 	/* fill in the "ip" and "nick" buffers */
@@ -1202,8 +1203,7 @@ process_peer_join (gpointer *params)
 		ex[0] = '!';
 	}
 
-	char *chan = word[3];
-
+	chan = word[3];
 	if (*chan == ':')
 		chan++;
 
@@ -1220,6 +1220,7 @@ process_peer_kick (gpointer *params)
 	char **word = params[1];
 	char **word_eol = params[2];
 	server *serv = sess->server;
+	char *kicked, *reason;
 
 	char nick[NICKLEN], *ex;
 	/* fill in the "nick" buffer */
@@ -1234,8 +1235,8 @@ process_peer_kick (gpointer *params)
 		ex[0] = '!';
 	}
 
-	char *kicked = word[4];
-	char *reason = word_eol[5];
+	kicked = word[4];
+	reason = word_eol[5];
 	if (*kicked)
 	{
 		if (*reason == ':')
@@ -1372,8 +1373,9 @@ process_peer_part (gpointer *params)
 	char **word = params[1];
 	char **word_eol = params[2];
 	server *serv = sess->server;
-
+	char *chan, *reason;
 	char ip[128], nick[NICKLEN], *ex;
+
 	/* fill in the "ip" and "nick" buffers */
 	ex = strchr(word[1], '!');
 	if (!ex)							  /* no '!', must be a server message */
@@ -1388,8 +1390,8 @@ process_peer_part (gpointer *params)
 		ex[0] = '!';
 	}
 
-	char *chan = word[3];
-	char *reason = word_eol[4];
+	chan = word[3];
+	reason = word_eol[4];
 
 	if (*chan == ':')
 		chan++;
@@ -1467,9 +1469,9 @@ process_peer_privmsg (gpointer *params)
 			/* needs signals ... */
 			text[len - 1] = '\0';
 			text++;
-			if (strncasecmp (text, "ACTION", 6) != 0)
+			if (g_ascii_strncasecmp (text, "ACTION", 6) != 0)
 				flood_check (nick, ip, serv, sess, 0);
-			if (strncasecmp (text, "DCC ", 4) == 0)
+			if (g_ascii_strncasecmp (text, "DCC ", 4) == 0)
 				/* redo this with handle_quotes TRUE */
 				process_data_init (word[1], word_eol[1], word, word_eol, TRUE, FALSE);
 			ctcp_handle (sess, to, nick, text, word, word_eol, id);
@@ -1659,6 +1661,8 @@ irc_inline (server *serv, char *buf, int len)
 	char *word_eol[PDIWORDS];
 	char pdibuf_static[522]; /* 1 line can potentially be 512*6 in utf8 */
 	char *pdibuf = pdibuf_static;
+	static gchar scratch[512];
+	gint sigs;
 
 	/* need more than 522? fall back to malloc */
 	if (len >= sizeof (pdibuf_static))
@@ -1707,8 +1711,6 @@ irc_inline (server *serv, char *buf, int len)
 		goto xit;
 	}
 
-	static gchar scratch[512];
-	gint sigs;
 	/* see if the second word is a numeric */
 	if (isdigit((unsigned char) word[2][0]))
 	{

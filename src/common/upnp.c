@@ -26,8 +26,8 @@
 #include "upnp/miniupnpc.h"
 #include "upnp/upnpcommands.h"
 
-static struct UPNPUrls urls = {};
-static struct IGDdatas data = {};
+static struct UPNPUrls urls = { NULL, NULL, NULL };
+static struct IGDdatas data;
 static GStaticMutex upnp_mutex = G_STATIC_MUTEX_INIT;
 
 gpointer

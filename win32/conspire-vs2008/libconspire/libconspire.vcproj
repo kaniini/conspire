@@ -40,7 +40,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\dev-src\gtk\lib\gtk-2.0\include&quot;;&quot;C:\dev-src\gtk\include\pango-1.0&quot;;&quot;C:\dev-src\gtk\include\gail-1.0&quot;;&quot;C:\dev-src\gtk\include\atk-1.0&quot;;&quot;C:\dev-src\gtk\include\cairo&quot;;&quot;C:\dev-src\gtk\include\libpng12&quot;;&quot;C:\dev-src\gtk\lib\glib-2.0\include&quot;;&quot;C:\dev-src\libmowgli\src\libmowgli&quot;;&quot;C:\dev-src\gtk\include\glib-2.0&quot;;&quot;C:\dev-src\gtk\include\gtk-2.0&quot;"
+				AdditionalIncludeDirectories="&quot;C:\dev-src\gtk\lib\gtk-2.0\include&quot;;&quot;C:\dev-src\gtk\include\pango-1.0&quot;;&quot;C:\dev-src\gtk\include\gail-1.0&quot;;&quot;C:\dev-src\gtk\include\atk-1.0&quot;;&quot;C:\dev-src\gtk\include\cairo&quot;;&quot;C:\dev-src\gtk\include\libpng12&quot;;&quot;C:\dev-src\gtk\lib\glib-2.0\include&quot;;&quot;C:\dev-src\libmowgli\src\libmowgli&quot;;&quot;C:\dev-src\gtk\include\glib-2.0&quot;;&quot;C:\dev-src\gtk\include\gtk-2.0&quot;;&quot;C:\dev-src\conspire\win32&quot;"
+				PreprocessorDefinitions="_WIN32;WIN32;_CONSPIRE_INTERNAL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -452,6 +453,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\common\signal_printer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\stdbool.h"
 				>
 			</File>
 			<File
