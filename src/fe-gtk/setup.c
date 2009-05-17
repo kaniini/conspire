@@ -1437,7 +1437,9 @@ setup_apply_to_sess (session_gui *gui)
 	else
 		gtk_widget_hide (gui->button_box);
 
+#ifdef HAVE_LIBSEXY
 	sexy_spell_entry_set_checked ((SexySpellEntry *)gui->input_box, prefs.gui_input_spell);
+#endif
 }
 
 static void

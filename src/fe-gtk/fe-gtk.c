@@ -111,7 +111,7 @@ fe_args (int argc, char *argv[])
 
 	if (arg_show_version)
 	{
-		printf (PACKAGE_TARNAME" "PACKAGE_VERSION"\n");
+		printf (PACKAGE_NAME" "PACKAGE_VERSION"\n");
 		return 0;
 	}
 
@@ -205,7 +205,7 @@ fe_main (void)
 	/* sleep for 3 seconds so any QUIT messages are not lost. The  */
 	/* GUI is closed at this point, so the user doesn't even know! */
 	if (prefs.wait_on_exit)
-		sleep (3);
+		g_usleep(3000);
 }
 
 void

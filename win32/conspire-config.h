@@ -18,3 +18,5 @@
 #ifndef USE_IPV6
 # define socklen_t int
 #endif
+
+#define GETTEXT_PACKAGE "conspire"

@@ -1208,13 +1208,14 @@ key_action_page_switch (GtkWidget * wid, GdkEventKey * evt, char *d1,
 
 	if (strcasecmp(d1, "auto") == 0)
 	{
+		session *newsess;
+
 		/* Auto switch makes no sense in detached sessions */
 		if (!sess->gui->is_tab)
 			return 1;
 
 		/* Obtain a session with recent activity */
-		session *newsess = lastact_getfirst(session_check_is_tab);
-
+		newsess = lastact_getfirst(session_check_is_tab);
 		if (newsess)
 		{
 			/*
