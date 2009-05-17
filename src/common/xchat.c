@@ -27,9 +27,6 @@
 #define WANTSOCKET
 #include "inet.h"
 
-#include <sys/wait.h>
-#include <signal.h>
-
 #include "xchat.h"
 #include "fe.h"
 #include "util.h"
@@ -928,31 +925,37 @@ xchat_exit (void)
 static int
 child_handler (gpointer userdata)
 {
+#ifndef _WIN32
 	int pid = GPOINTER_TO_INT (userdata);
 
 	if (waitpid (pid, 0, WNOHANG) == pid)
 		return 0;					  /* remove timeout handler */
-	return 1;						  /* keep the timeout handler */
+	return 1; /* keep the timeout handler */
+#endif
 }
 
 void
 xchat_exec (const char *cmd)
 {
+#ifndef _WIN32
 	int pid = util_exec (cmd);
 	if (pid != -1)
 	/* zombie avoiding system. Don't ask! it has to be like this to work
       with zvt (which overrides the default handler) */
 		g_timeout_add (1000, (GSourceFunc) child_handler, GINT_TO_POINTER (pid));
+#endif
 }
 
 void
 xchat_execv (const char * const argv[])
 {
+#ifndef _WIN32
 	int pid = util_execv (argv);
 	if (pid != -1)
 	/* zombie avoiding system. Don't ask! it has to be like this to work
       with zvt (which overrides the default handler) */
 		g_timeout_add (1000, (GSourceFunc) child_handler, GINT_TO_POINTER (pid));
+#endif
 }
 
 int

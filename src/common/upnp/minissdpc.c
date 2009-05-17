@@ -8,10 +8,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
+#ifndef _WIN32
 #include <sys/types.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#endif
 
 #include "minissdpc.h"
 #include "miniupnpc.h"
@@ -25,6 +27,7 @@
 struct UPNPDev *
 getDevicesFromMiniSSDPD(const char * devtype, const char * socketpath)
 {
+#ifndef _WIN32
 	struct UPNPDev * tmp;
 	struct UPNPDev * devlist = NULL;
 	unsigned char buffer[2048];
@@ -103,5 +106,8 @@ getDevicesFromMiniSSDPD(const char * devtype, const char * socketpath)
 	}
 	close(s);
 	return devlist;
+#else
+	return NULL;
+#endif
 }
 

@@ -28,6 +28,20 @@
 
 #ifndef _WIN32
 # include <unistd.h>
+# include <sys/wait.h>
+#endif
+
+#include <signal.h>
+
+#ifdef _WIN32
+
+# define F_OK		00
+# define S_IRUSR	00
+# define S_IWUSR	00
+# define S_IXUSR	00
+
+# define SIGPIPE	13
+
 #endif
 
 #endif

@@ -15,6 +15,7 @@
 # pragma warning (disable: 4005)
 #endif
 
+#include "stdinc.h"
 #include "debug.h"
 #include "history.h"
 #include "signal_factory.h"

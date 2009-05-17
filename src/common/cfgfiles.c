@@ -81,11 +81,11 @@ list_load_from_data (GSList ** list, char *ibuf, int size)
 	{
 		if (*buf != '#')
 		{
-			if (!strncasecmp (buf, "NAME ", 5))
+			if (!g_ascii_strncasecmp (buf, "NAME ", 5))
 			{
 				g_strlcpy (name, buf + 5, sizeof (name));
 			}
-			else if (!strncasecmp (buf, "CMD ", 4))
+			else if (!g_ascii_strncasecmp (buf, "CMD ", 4))
 			{
 				g_strlcpy (cmd, buf + 4, sizeof (cmd));
 				if (*name)
@@ -134,10 +134,10 @@ regex_list_load_from_data (GSList **list, char *ibuf, int size)
 	{
 		if (*buf != '#')
 		{
-			if (!strncasecmp(buf, "NAME ", 5))
+			if (!g_ascii_strncasecmp(buf, "NAME ", 5))
 			{
 				g_strlcpy(name, buf + 5, sizeof(name));
-			} else if (!strncasecmp(buf, "CMD ", 4))
+			} else if (!g_ascii_strncasecmp(buf, "CMD ", 4))
 			{
 				g_strlcpy(cmd, buf + 4, sizeof(cmd));
 				if (*name)
@@ -272,7 +272,7 @@ cfg_get_str (char *cfg, const char *var, char **dest)
 {
 	while (1)
 	{
-		if (!strncasecmp (var, cfg, strlen (var)))
+		if (!g_ascii_strncasecmp (var, cfg, strlen (var)))
 		{
 			char *value, t;
 			cfg += strlen (var);
