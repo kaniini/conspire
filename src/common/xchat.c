@@ -958,6 +958,24 @@ xchat_execv (const char * const argv[])
 #endif
 }
 
+#ifdef _WIN32
+void
+conspire_init_winsock(void)
+{
+	WORD wVersionRequested;
+	WSADATA wsaData;
+	int err;
+
+	wVersionRequested = MAKEWORD(2, 2);
+
+	err = WSAStartup(wVersionRequested, &wsaData);
+	if (err) {
+		g_print("Winsock failed to initialize, aborting: %d\n", err);
+		exit(EXIT_FAILURE);
+	}
+}
+#endif
+
 int
 main (int argc, char *argv[])
 {
@@ -965,6 +983,10 @@ main (int argc, char *argv[])
 
 	g_thread_init(NULL);
 	mowgli_init();
+
+#ifdef _WIN32
+	conspire_init_winsock();
+#endif
 
 #ifdef GNUTLS
 	gnutls_global_init ();

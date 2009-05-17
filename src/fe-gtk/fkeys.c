@@ -193,6 +193,9 @@ key_init ()
 			fe_message (_("There was an error loading key"
 							" bindings configuration"), FE_MSG_ERROR);
 	}
+#ifdef _WIN32
+	keys_root = NULL;
+#endif
 }
 
 static char *
