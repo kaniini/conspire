@@ -26,11 +26,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <pwd.h>
-#include <sys/time.h>
-#include <sys/utsname.h>
 #include <fcntl.h>
-#include <dirent.h>
 #include <errno.h>
 #include "xchat.h"
 #include "xchatc.h"
@@ -271,7 +267,7 @@ nocasestrstr (const char *s, const char *wanted)
 
 	if (len == 0)
 		return (char *)s;
-	while (rfc_tolower(*s) != rfc_tolower(*wanted) || strncasecmp (s, wanted, len))
+	while (rfc_tolower(*s) != rfc_tolower(*wanted) || g_ascii_strncasecmp (s, wanted, len))
 		if (*s++ == '\0')
 			return (char *)NULL;
 	return (char *)s;
@@ -320,34 +316,9 @@ waitline (int sok, char *buf, int bufsize, int use_recv)
 char *
 expand_homedir (char *file)
 {
-	char *ret, *user;
-	struct passwd *pw;
-
 	if (*file == '~')
-	{
-		if (file[1] != '\0' && file[1] != '/')
-		{
-			user = strdup(file);
-			if (strchr(user,'/') != NULL)
-				*(strchr(user,'/')) = '\0';
-			if ((pw = getpwnam(user + 1)) == NULL)
-			{
-				free(user);
-				return strdup(file);
-			}
-			free(user);
-			user = strchr(file, '/') != NULL ? strchr(file,'/') : file;
-			ret = malloc(strlen(user) + strlen(pw->pw_dir) + 1);
-			strcpy(ret, pw->pw_dir);
-			strcat(ret, user);
-		}
-		else
-		{
-			ret = malloc (strlen (file) + strlen (g_get_home_dir ()) + 1);
-			sprintf (ret, "%s%s", g_get_home_dir (), file + 1);
-		}
-		return ret;
-	}
+		return g_strdup_printf("%s%s", g_get_home_dir (), file + 1);
+
 	return strdup (file);
 }
 
@@ -526,6 +497,8 @@ get_cpu_info (double *mhz, int *cpus)
 }
 #endif
 
+#ifndef _WIN32
+
 char *
 get_cpu_str (void)
 {
@@ -561,6 +534,52 @@ get_cpu_str (void)
 
 	return buf;
 }
+
+#else
+
+static int
+get_mhz(void)
+{
+	HKEY hKey;
+	int result, data, dataSize;
+
+	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Hardware\\Description\\System\\CentralProcessor\\0", 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
+	{
+		dataSize = sizeof(data);
+		result = RegQueryValueEx(hKey, "~Mhz", 0, 0, (LPBYTE)&data, &dataSize);
+		RegCloseKey(hKey);
+		if (result == ERROR_SUCCESS)
+			return data;
+	}
+
+	return 0;
+}
+
+char *
+get_cpu_str(void)
+{
+	OSVERSIONINFO osvi;
+	SYSTEM_INFO si;
+	int mhz;
+
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	GetVersionEx(&osvi);
+	GetSystemInfo(&si);
+
+	mhz = get_mhz();
+	if (mhz)
+	{
+		return g_strdup_printf("Windows %ld.%ld build %ld [i%d86/%.2fMHz]",
+			osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber,
+			si.wProcessorLevel, mhz);
+	}
+
+	return g_strdup_printf("Windows %ld.%ld build %ld [i%d86]",
+		osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber,
+		si.wProcessorLevel);
+}
+
+#endif
 
 int
 buf_get_line (char *ibuf, char **buf, int *position, int len)
@@ -669,39 +688,25 @@ break_while:
 void
 for_files (char *dirname, char *mask, void callback (char *file))
 {
-	DIR *dir;
-	struct dirent *ent;
+	GDir *dir;
+	const gchar *ent;
 	char *buf;
 
-	dir = opendir (dirname);
+	dir = g_dir_open(dirname, 0, NULL);
 	if (dir)
 	{
-		while ((ent = readdir (dir)))
+		while ((ent = g_dir_read_name(dir)))
 		{
-			if (strcmp (ent->d_name, ".") && strcmp (ent->d_name, ".."))
+			if (match (mask, ent))
 			{
-				if (match (mask, ent->d_name))
-				{
-					buf = malloc (strlen (dirname) + strlen (ent->d_name) + 2);
-					sprintf (buf, "%s/%s", dirname, ent->d_name);
-					callback (buf);
-					free (buf);
-				}
+				buf = g_build_filename(dirname, ent, NULL);				
+				callback(buf);
+				g_free(buf);
 			}
 		}
-		closedir (dir);
+		g_dir_close(dir);
 	}
 }
-
-/*void
-tolowerStr (char *str)
-{
-	while (*str)
-	{
-		*str = rfc_tolower (*str);
-		str++;
-	}
-}*/
 
 typedef struct
 {
@@ -1115,14 +1120,16 @@ int my_poptParseArgvString(const char * s, int * argcPtr, char *** argvPtr) {
 int
 util_exec (const char *cmd)
 {
-	int pid;
+#ifndef _WIN32
+	int pid, fd;
+#endif
 	char **argv;
 	int argc;
-	int fd;
 
 	if (my_poptParseArgvString (cmd, &argc, &argv) != 0)
 		return -1;
 
+#ifndef _WIN32
 	pid = fork ();
 	if (pid == -1)
 		return -1;
@@ -1132,16 +1139,23 @@ util_exec (const char *cmd)
 		for (fd = 3; fd < 1024; fd++) close(fd);
 		execvp (argv[0], argv);
 		_exit (0);
-	} else
+	}
+	else
 	{
 		free (argv);
 		return pid;
 	}
+#else
+	_spawnvp(_P_DETACH, argv[0], argv);
+	free(argv);
+	return 0;
+#endif
 }
 
 int
 util_execv (const char * const argv[])
 {
+#ifndef _WIN32
 	int pid, fd;
 
 	pid = fork ();
@@ -1157,6 +1171,10 @@ util_execv (const char * const argv[])
 	{
 		return pid;
 	}
+#else
+	_spawnv(_P_DETACH, argv[0], argv);
+	return 0;
+#endif
 }
 
 unsigned long

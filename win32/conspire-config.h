@@ -13,6 +13,8 @@
 #define HAVE_SNPRINTF
 #define HAVE_VSNPRINTF
 
+#define SHARED_SUFFIX	".dll"
+
 #ifndef USE_IPV6
 # define socklen_t int
 #endif

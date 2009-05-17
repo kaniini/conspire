@@ -29,11 +29,16 @@
 #ifndef _WIN32
 # include <unistd.h>
 # include <sys/wait.h>
+# include <pwd.h>
+# include <sys/time.h>
+# include <sys/utsname.h>
+# include <dirent.h>
 #endif
 
 #include <signal.h>
 
 #ifdef _WIN32
+# include <process.h>
 
 # define F_OK		00
 # define S_IRUSR	00

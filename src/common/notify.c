@@ -306,8 +306,9 @@ notify_send_monitor (server * serv)
 	GSList *list;  
 	GSList *point;
 	struct notify *notify;
-	strcpy (tbuf, "MONITOR + ");
 	int start = 1, count = 0;
+
+	strcpy (tbuf, "MONITOR + ");
 	serv->inside_monitor = TRUE;
 
 	list = point = notify_list;
