@@ -197,6 +197,10 @@ fe_init (void)
 	input_style = create_input_style (gtk_style_new ());
 }
 
+#ifdef _WIN32
+#pragma comment(linker, "/ENTRY:mainCRTStartup")
+#endif
+
 void
 fe_main (void)
 {

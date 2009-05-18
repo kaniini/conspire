@@ -66,6 +66,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
+				EntryPointSymbol=""
 				TargetMachine="1"
 			/>
 			<Tool
@@ -117,12 +118,15 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="true"
+				AdditionalIncludeDirectories="&quot;C:\dev-src\gtk\lib\gtk-2.0\include&quot;;&quot;C:\dev-src\gtk\include\pango-1.0&quot;;&quot;C:\dev-src\gtk\include\gail-1.0&quot;;&quot;C:\dev-src\gtk\include\atk-1.0&quot;;&quot;C:\dev-src\gtk\include\cairo&quot;;&quot;C:\dev-src\gtk\include\libpng12&quot;;&quot;C:\dev-src\gtk\lib\glib-2.0\include&quot;;&quot;C:\dev-src\libmowgli\src\libmowgli&quot;;&quot;C:\dev-src\gtk\include\glib-2.0&quot;;&quot;C:\dev-src\gtk\include\gtk-2.0&quot;;&quot;C:\dev-src\conspire\win32&quot;;&quot;C:\dev-src\conspire\src\common&quot;"
+				PreprocessorDefinitions="WIN32;"
+				BasicRuntimeChecks="0"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="false"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -135,12 +139,16 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib C:\dev-src\conspire\win32\conspire-vs2008\Debug\libcontrast.lib C:\dev-src\conspire\win32\conspire-vs2008\Debug\libconspire.lib C:\dev-src\gtk\lib\gdk-win32-2.0.lib C:\dev-src\gtk\lib\gtk-win32-2.0.lib C:\dev-src\gtk\lib\gdk_pixbuf-2.0.lib C:\dev-src\gtk\lib\glib-2.0.lib C:\dev-src\gtk\lib\gobject-2.0.lib C:\dev-src\gtk\lib\gthread-2.0.lib C:\dev-src\gtk\lib\gmodule-2.0.lib C:\dev-src\gtk\lib\cairo.lib C:\dev-src\gtk\lib\pango-1.0.lib C:\dev-src\gtk\lib\pangocairo-1.0.lib C:\dev-src\gtk\lib\pangowin32-1.0.lib C:\dev-src\libmowgli\win32\libmowgli\Debug\libmowgli.lib"
 				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				SubSystem="1"
+				IgnoreAllDefaultLibraries="false"
+				GenerateDebugInformation="false"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				EntryPointSymbol=""
 				TargetMachine="1"
+				ErrorReporting="1"
 			/>
 			<Tool
 				Name="VCALinkTool"

@@ -6,6 +6,7 @@ syntax: glob
 *.gmo
 *.a
 .deps
+*.suo
 aclocal.m4
 config.log
 config.status
