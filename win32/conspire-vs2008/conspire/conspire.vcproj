@@ -121,7 +121,7 @@
 				AdditionalIncludeDirectories="&quot;C:\dev-src\gtk\lib\gtk-2.0\include&quot;;&quot;C:\dev-src\gtk\include\pango-1.0&quot;;&quot;C:\dev-src\gtk\include\gail-1.0&quot;;&quot;C:\dev-src\gtk\include\atk-1.0&quot;;&quot;C:\dev-src\gtk\include\cairo&quot;;&quot;C:\dev-src\gtk\include\libpng12&quot;;&quot;C:\dev-src\gtk\lib\glib-2.0\include&quot;;&quot;C:\dev-src\libmowgli\src\libmowgli&quot;;&quot;C:\dev-src\gtk\include\glib-2.0&quot;;&quot;C:\dev-src\gtk\include\gtk-2.0&quot;;&quot;C:\dev-src\conspire\win32&quot;;&quot;C:\dev-src\conspire\src\common&quot;"
 				PreprocessorDefinitions="WIN32;"
 				BasicRuntimeChecks="0"
-				RuntimeLibrary="3"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="false"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -139,7 +139,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib C:\dev-src\conspire\win32\conspire-vs2008\Debug\libcontrast.lib C:\dev-src\conspire\win32\conspire-vs2008\Debug\libconspire.lib C:\dev-src\gtk\lib\gdk-win32-2.0.lib C:\dev-src\gtk\lib\gtk-win32-2.0.lib C:\dev-src\gtk\lib\gdk_pixbuf-2.0.lib C:\dev-src\gtk\lib\glib-2.0.lib C:\dev-src\gtk\lib\gobject-2.0.lib C:\dev-src\gtk\lib\gthread-2.0.lib C:\dev-src\gtk\lib\gmodule-2.0.lib C:\dev-src\gtk\lib\cairo.lib C:\dev-src\gtk\lib\pango-1.0.lib C:\dev-src\gtk\lib\pangocairo-1.0.lib C:\dev-src\gtk\lib\pangowin32-1.0.lib C:\dev-src\libmowgli\win32\libmowgli\Debug\libmowgli.lib"
+				AdditionalDependencies="ws2_32.lib C:\dev-src\conspire\win32\conspire-vs2008\Release\libcontrast.lib C:\dev-src\conspire\win32\conspire-vs2008\Release\libconspire.lib C:\dev-src\gtk\lib\gdk-win32-2.0.lib C:\dev-src\gtk\lib\gtk-win32-2.0.lib C:\dev-src\gtk\lib\gdk_pixbuf-2.0.lib C:\dev-src\gtk\lib\glib-2.0.lib C:\dev-src\gtk\lib\gobject-2.0.lib C:\dev-src\gtk\lib\gthread-2.0.lib C:\dev-src\gtk\lib\gmodule-2.0.lib C:\dev-src\gtk\lib\cairo.lib C:\dev-src\gtk\lib\pango-1.0.lib C:\dev-src\gtk\lib\pangocairo-1.0.lib C:\dev-src\gtk\lib\pangowin32-1.0.lib C:\dev-src\libmowgli\win32\libmowgli\Release\libmowgli.lib"
 				LinkIncremental="1"
 				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="false"
