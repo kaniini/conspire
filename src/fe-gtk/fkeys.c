@@ -971,16 +971,9 @@ key_load_kbs (char *filename)
 		switch (state)
 		{
 		case KBSTATE_MOD:
-			/* XXX: why the hell does this happen? --nenolod */
-			if (buf[0] == 'D' && buf[1] == '1')
-				break;
-
 			kb = (struct key_binding *) malloc (sizeof (struct key_binding));
 			if (key_load_kbs_helper_mod (buf, &kb->mod))
-			{
-				g_print("corrupt here MOD\n");
 				goto corrupt_file;
-			}
 			state = KBSTATE_KEY;
 			continue;
 		case KBSTATE_KEY:
@@ -1063,20 +1056,13 @@ key_load_kbs (char *filename)
 			{
 			case '1':
 				if (state != KBSTATE_DT1)
-				{
-					g_print("corrupt here DT1\n");
 					goto corrupt_file;
-				}
 				break;
 			case '2':
 				if (state != KBSTATE_DT2)
-				{
-					g_print("corrupt here DT2\n");
 					goto corrupt_file;
-				}
 				break;
 			default:
-				g_print("corrupt here DT default\n");
 				goto corrupt_file;
 			}
 
