@@ -947,11 +947,9 @@ key_load_kbs_helper_mod (char *in, int *out)
 static int
 key_load_kbs (char *filename)
 {
-	char *buf, *ibuf;
-	struct stat st;
+	char *buf, pbuf[256], ibuf[1024];
 	struct key_binding *kb = NULL, *last = NULL;
 	int fd, len, pnt = 0, state = 0, n;
-	int secondtime = -1;
 
 	if (filename == NULL)
 		fd = xchat_open_file ("keybindings.conf", O_RDONLY, 0, 0);
@@ -959,27 +957,24 @@ key_load_kbs (char *filename)
 		fd = xchat_open_file (filename, O_RDONLY, 0, XOF_FULLPATH);
 	if (fd < 0)
 		return 1;
-	if (fstat (fd, &st) != 0)
-		return 1;
-	ibuf = malloc (st.st_size + 1);
-	read (fd, ibuf, st.st_size);
-	close (fd);
-
-	while (buf_get_line (ibuf, &buf, &pnt, st.st_size))
+	
+	while (waitline (fd, pbuf, sizeof(pbuf), FALSE) != -1)
 	{
+		buf = pbuf;
 		if (buf[0] == '#')
 			continue;
 		if (strlen (buf) == 0)
 		{
-			if (secondtime++ > 0)
-				break;
-
 			continue;
 		}
 
 		switch (state)
 		{
 		case KBSTATE_MOD:
+			/* XXX: why the hell does this happen? --nenolod */
+			if (buf[0] == 'D' && buf[1] == '1')
+				break;
+
 			kb = (struct key_binding *) malloc (sizeof (struct key_binding));
 			if (key_load_kbs_helper_mod (buf, &kb->mod))
 			{
@@ -1005,13 +1000,10 @@ key_load_kbs (char *filename)
 				/* Unknown keyname, abort */
 				if (last)
 					last->next = NULL;
-				free (ibuf);
-				ibuf = malloc (1024);
 				snprintf (ibuf, 1024,
 							 _("Unknown keyname %s in key bindings config file\nLoad aborted, please fix %s/keybindings.conf\n"),
 							 buf, get_xdir_utf8 ());
 				fe_message (ibuf, FE_MSG_ERROR);
-				free (ibuf);
 				return 2;
 			}
 			kb->keyname = gdk_keyval_name (n);
@@ -1043,13 +1035,10 @@ key_load_kbs (char *filename)
 			{
 				if (last)
 					last->next = NULL;
-				free (ibuf);
-				ibuf = malloc (1024);
 				snprintf (ibuf, 1024,
 							 _("Unknown action %s in key bindings config file\nLoad aborted, Please fix %s/keybindings\n"),
 							 buf, get_xdir_utf8 ());
 				fe_message (ibuf, FE_MSG_ERROR);
-				free (ibuf);
 				return 3;
 			}
 			state = KBSTATE_DT1;
@@ -1064,13 +1053,10 @@ key_load_kbs (char *filename)
 
 			if (buf[0] != 'D')
 			{
-				free (ibuf);
-				ibuf = malloc (1024);
 				snprintf (ibuf, 1024,
 							 _("Expecting Data line (beginning Dx{:|!}) but got:\n%s\n\nLoad aborted, Please fix %s/keybindings\n"),
 							 buf, get_xdir_utf8 ());
 				fe_message (ibuf, FE_MSG_ERROR);
-				free (ibuf);
 				return 4;
 			}
 			switch (buf[1])
@@ -1134,12 +1120,13 @@ key_load_kbs (char *filename)
 			continue;
 		}
 	}
+	close(fd);
 	if (last)
 		last->next = NULL;
-	free (ibuf);
 	return 0;
 
  corrupt_file:
+	close(fd);
 	/*if (getenv ("XCHAT_DEBUG"))
 		abort ();*/
 	snprintf (ibuf, 1024,
@@ -1147,7 +1134,6 @@ key_load_kbs (char *filename)
 								 "Please fix %s/keybindings.conf\n"),
 						 get_xdir_utf8 ());
 	fe_message (ibuf, FE_MSG_ERROR);
-	free (ibuf);
 	return 5;
 }
 
