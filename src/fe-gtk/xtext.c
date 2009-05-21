@@ -141,10 +141,11 @@ gtk_xtext_text_width_8bit (GtkXText *xtext, unsigned char *str, int len)
 static void
 xtext_draw_bg(GtkXText *xtext, gint x, gint y, gint width, gint height)
 {
-	cairo_t *cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+	cairo_t *cr;
 
 	g_return_if_fail(xtext != NULL);
 
+	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
 	cairo_rectangle(cr, x, y, width, height);
 	cairo_clip(cr);
 
@@ -541,7 +542,6 @@ gtk_xtext_realize (GtkWidget * widget)
 	GtkXText *xtext;
 	GdkWindowAttr attributes;
 	GdkColormap *cmap;
-	GdkGC *gc;
 
 	GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
 	xtext = GTK_XTEXT (widget);
