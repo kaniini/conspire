@@ -554,9 +554,7 @@ AC_DEFINE_UNQUOTED(PREFIX, "${prefix}")
 
 CONSPIRE_LIBDIR=`eval echo ${libdir}/conspire`
 AC_DEFINE_UNQUOTED([CONSPIRE_LIBDIR], "$CONSPIRE_LIBDIR", [Library DIR])
-
-CONSPIRE_SHAREDIR=`eval echo ${datadir}`
-AC_DEFINE_UNQUOTED([CONSPIRE_SHAREDIR], "$CONSPIRE_SHAREDIR", [Share DIR])
+AC_DEFINE_UNQUOTED([CONSPIRE_SHAREDIR], "${prefix}/share", [Share DIR])
 
 dnl for plugins/xxx/Makefile.am
 dnl USING RPATHS IS WRONG -nenolod
