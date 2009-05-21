@@ -99,7 +99,6 @@ struct _GtkXText
 	GtkAdjustment *adj;
 
 	GdkDrawable *draw_buf;			/* points to ->window */
-	cairo_t *draw_cr;			/* used for queueing draw operations. */
 
 	GdkCursor *hand_cursor;
 	GdkCursor *resize_cursor;

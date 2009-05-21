@@ -141,24 +141,17 @@ gtk_xtext_text_width_8bit (GtkXText *xtext, unsigned char *str, int len)
 static void
 xtext_draw_bg(GtkXText *xtext, gint x, gint y, gint width, gint height)
 {
-#ifndef _WIN32
-	g_return_if_fail(xtext != NULL);
-
-	cairo_rectangle(xtext->draw_cr, x, y, width, height);
-	cairo_clip(xtext->draw_cr);
-
-	gdk_cairo_set_source_color(xtext->draw_cr, &xtext->palette[XTEXT_BG]);
-	cairo_paint(xtext->draw_cr);
-#else
-	GdkGC *gc;
+	cairo_t *cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
 
 	g_return_if_fail(xtext != NULL);
 
-	gc = gdk_gc_new(xtext->draw_buf);
-	gdk_gc_set_foreground(gc, xtext->bgcol);
-	gdk_draw_rectangle(xtext->draw_buf, gc, 1, x, y, width, height);
-	g_object_unref(gc);
-#endif
+	cairo_rectangle(cr, x, y, width, height);
+	cairo_clip(cr);
+
+	gdk_cairo_set_source_color(cr, &xtext->palette[XTEXT_BG]);
+	cairo_paint(cr);
+
+	cairo_destroy(cr);
 }
 
 static void
@@ -578,9 +571,6 @@ gtk_xtext_realize (GtkWidget * widget)
 
 	/* draw directly to window */
 	xtext->draw_buf = widget->window;
-	xtext->draw_cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
-	cairo_set_line_width(xtext->draw_cr, 1.0);
-	cairo_set_antialias(xtext->draw_cr, CAIRO_ANTIALIAS_NONE);
 
 	xtext->hand_cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (widget->window), GDK_HAND1);
 	xtext->resize_cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (widget->window), GDK_LEFT_SIDE);
@@ -784,7 +774,12 @@ gtk_xtext_find_char (GtkXText * xtext, int x, int y, int *off,
 static void
 gtk_xtext_draw_sep (GtkXText * xtext, int y)
 {
-	int x, height;
+	gint x, height;
+	cairo_t *cr;
+
+	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+	cairo_set_line_width(cr, 1.0);
+	cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
 
 	if (y == -1)
 	{
@@ -802,29 +797,40 @@ gtk_xtext_draw_sep (GtkXText * xtext, int y)
 
 		if (xtext->moving_separator)
 		{
-			cairo_set_source_rgb(xtext->draw_cr, 0.9, 0.9, 0.9);
+			cairo_set_source_rgb(cr, 0.9, 0.9, 0.9);
 
-			cairo_move_to(xtext->draw_cr, x, y + height);
-			cairo_line_to(xtext->draw_cr, x, y);
+			cairo_move_to(cr, x, y + height);
+			cairo_line_to(cr, x, y);
 		}
 		else
 		{
-			cairo_set_source_rgb(xtext->draw_cr, 0.6, 0.6, 0.6);
+			cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
 
-			cairo_move_to(xtext->draw_cr, x, y + height);
-			cairo_line_to(xtext->draw_cr, x, y);
+			cairo_move_to(cr, x, y + height);
+			cairo_line_to(cr, x, y);
 		}
 
-		cairo_stroke(xtext->draw_cr);
+		cairo_stroke(cr);
 	}
+
+	cairo_destroy(cr);
 }
 
 static void
 gtk_xtext_draw_marker (GtkXText * xtext, textentry * ent, int y)
 {
 	int x, width, render_y;
+	cairo_t *cr;
 
-	if (!xtext->marker) return;
+	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+	cairo_set_line_width(cr, 1.0);
+	cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
+
+	if (!xtext->marker)
+	{
+		cairo_destroy(cr);
+		return;
+	}
 
 	if (xtext->buffer->marker_pos == ent)
 	{
@@ -839,17 +845,19 @@ gtk_xtext_draw_marker (GtkXText * xtext, textentry * ent, int y)
 	x = 0;
 	width = GTK_WIDGET (xtext)->allocation.width;
 
-	gdk_cairo_set_source_color(xtext->draw_cr, &xtext->palette[XTEXT_MARKER]);
+	gdk_cairo_set_source_color(cr, &xtext->palette[XTEXT_MARKER]);
 
-	cairo_move_to(xtext->draw_cr, x, render_y);
-	cairo_line_to(xtext->draw_cr, x + width, render_y);
+	cairo_move_to(cr, x, render_y);
+	cairo_line_to(cr, x + width, render_y);
 
-	cairo_stroke(xtext->draw_cr);
+	cairo_stroke(cr);
 
 	if (gtk_window_has_toplevel_focus (GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (xtext)))))
 	{
 		xtext->buffer->marker_seen = TRUE;
 	}
+
+	cairo_destroy(cr);
 }
 
 static void
@@ -2060,6 +2068,7 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str, int 
 	int str_width, dofill;
 	GdkDrawable *pix = NULL;
 	int dest_x = 0, dest_y = 0;
+	cairo_t *cr;
 
 	if (xtext->dont_render || len < 1 || xtext->hidden)
 		return 0;
@@ -2134,6 +2143,10 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str, int 
 	if (xtext->underline)
 	{
 dounder:
+		cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+		cairo_set_line_width(cr, 1.0);
+		cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
+
 		if (pix)
 			y = dest_y + xtext->font->ascent + 1;
 		else
@@ -2142,11 +2155,13 @@ dounder:
 			dest_x = x;
 		}
 
-		cairo_move_to(xtext->draw_cr, dest_x, y);
-		cairo_rel_line_to(xtext->draw_cr, str_width - 1, 0);
+		cairo_move_to(cr, dest_x, y);
+		cairo_rel_line_to(cr, str_width - 1, 0);
 
-		gdk_cairo_set_source_color(xtext->draw_cr, xtext->fgcol);		
-		cairo_stroke(xtext->draw_cr);
+		gdk_cairo_set_source_color(cr, xtext->fgcol);		
+		cairo_stroke(cr);
+
+		cairo_destroy(cr);
 	}
 
 	return str_width;
