@@ -335,7 +335,7 @@ const struct text_event te[] = {
 {"WhoIs Special", 3, 
 "%C22*%O$t%C28[%O$1%C28]%O $2"},
 
-{"You Join", 4, 
+{"You Join", 3, 
 "%C27*$t%C27Now talking on %C11$2%O"},
 
 {"You Kicked", 4, 
