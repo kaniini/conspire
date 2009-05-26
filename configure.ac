@@ -200,10 +200,7 @@ PKG_CHECK_MODULES(SEXY, [libsexy],
 PKG_CHECK_MODULES(NOTIFY, [libnotify], , havegtk=no)
 
 if test "$havegtk" = no; then
-	gtkfe=no
-	echo
-	echo Cannot find GTK or its dependencies, not building GTK FrontEnd.
-	echo
+        AC_MSG_ERROR("Cannot find GTK or its dependencies.")
 fi
 
 if test "$gtkfe" != yes; then
