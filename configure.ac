@@ -193,7 +193,7 @@ PKG_CHECK_MODULES(SEXY, [libsexy],
 		AC_DEFINE([HAVE_LIBSEXY], [], [Use libsexy])
 	],
 	[
-		havegtk=no
+		havelibsexy=no
 	]
 )
 

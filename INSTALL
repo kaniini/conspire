@@ -7,23 +7,22 @@ Requirements
 Library files and development headers for the following libraries are required:
 
 * Glib (2.0 or higher)
-* GTK+ (2.0 or higher)
+* GTK+ (2.10 or higher)
 * libsexy
 * libnotify
 * libmowgli (0.6 or higher)
 * build essentials (automake, gmake)
 
-For SSL support, the following libraries are required:
+Optional Dependencies
+---------------------
 
-* GnuTLS
+For the following components, the specified libraries and development headers
+are required in order to make use of these features:
 
-For internationalization, the following libraries are required:
-
-* GNU gettext
-
-Optionally, for outbound regex substitution support, the following libraries are required:
-
-* Glib (2.14 or higher)
+* SSL support: GnuTLS
+* Spell-checking: libsexy
+* Internationalization: GNU gettext
+* GLib: 2.14 or higher
 
 Compilation
 -----------
