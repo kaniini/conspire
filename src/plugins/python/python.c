@@ -26,7 +26,7 @@ py_callback(session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
 }
 
 static PyObject *
-py_conspire_command(PyObject *self, PyObject *args)
+py_conspire_command_register(PyObject *self, PyObject *args)
 {
 	char *name = NULL;
 	char *desc = NULL;
@@ -57,9 +57,9 @@ py_conspire_print(PyObject *self, PyObject* args)
 
 static PyMethodDef py_conspire_functions[] = 
 {
-	{"command_register", py_conspire_command, METH_VARARGS, 
+	{"command_register", py_conspire_command_register, METH_VARARGS, 
 	 "Create a new command in conspire."},
-	{"prnt", py_conspire_print, METH_VARARGS,
+	{"print", py_conspire_print, METH_VARARGS,
 	 "Print out to the current context."},
 	{NULL, NULL, 0, NULL}        /* Sentinel */		
 };
@@ -98,12 +98,13 @@ cmd_pyload(session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
 gboolean
 init(Plugin *p)
 {
+	PyObject* module;	
+	char *argv[] = {"<conspire>", 0};	
+
 	command_stack = mowgli_dictionary_create(g_ascii_strcasecmp);	
 	// TODO: add PYRELOAD, PYUNLOAD, PYLIST, and integrate it into conspire plugin manager	
 	
 	// initialize the python environment		
-	PyObject* module;	
-	char *argv[] = {"<conspire>", 0};	
 	Py_Initialize();
 	Py_SetProgramName("conspire");	
 	PySys_SetArgv(1, argv);	
@@ -112,7 +113,6 @@ init(Plugin *p)
 	command_register("PYLOAD", "Loads a python script", 0, cmd_pyload);
 	return TRUE;
 }
-
 
 gboolean
 fini(Plugin *p)
