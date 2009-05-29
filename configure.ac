@@ -321,7 +321,6 @@ AM_CONDITIONAL([ENABLE_DBUS],[test "x$dbus" = "xyes"])
 
 dnl ** Python **
 
-python=no
 if test "$python" = yes; then
         AC_PATH_PROG(pythonpath, python2)
         if test "_$pythonpath" = _ ; then
@@ -343,16 +342,15 @@ if test "$python" = yes; then
                         PY_PREFIX=`$pythonpath -c 'import sys; print sys.prefix'`
                         PY_EXEC_PREFIX=`$pythonpath -c 'import sys; print sys.exec_prefix'`
                         if test -f $PY_INC/Python.h; then
-								case "$target" in
-									*-apple*)
-										PY_LIBS="-L$PY_LIB/config -lpython$PY_VER -lpthread"
-										;;
-									*)
-										PY_LIBS="-L$PY_LIB/config -lpython$PY_VER -lpthread -lutil"
-										;;
-								esac
+                                case "$target" in
+                                        *-apple*)
+                                                PY_LIBS="-L$PY_LIB/config -lpython$PY_VER -lpthread"
+                                                ;;
+                                        *)
+                                                PY_LIBS="-L$PY_LIB/config -lpython$PY_VER -lpthread -lutil"
+                                                ;;
+                                esac
                                 PY_CFLAGS="-I$PY_INC"
-				XCHATWRAP="$XCHATWRAP conspire-python"
                                 AC_MSG_RESULT(ok)
                         else
                                 python=no
