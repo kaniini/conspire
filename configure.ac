@@ -165,12 +165,12 @@ if test "$regex" = yes; then
 	AM_PATH_GLIB_2_0(2.14.0, glib=yes, glib=no)
 	if test "$glib" = no; then
 		regex=no
-		AM_PATH_GLIB_2_0(2.0.3, glib=yes, glib=no)
+		AM_PATH_GLIB_2_0(2.4.0, glib=yes, glib=no)
 	else
 		AC_DEFINE(REGEX_SUBSTITUTION, [], [Enables support for regex substitution])
 	fi
 else
-	AM_PATH_GLIB_2_0(2.0.3, glib=yes, glib=no)
+	AM_PATH_GLIB_2_0(2.4.0, glib=yes, glib=no)
 fi
 AM_CONDITIONAL(REGEX_SUBSTITUTION, test "$regex" = "yes")
 if test "$glib" = no; then
