@@ -573,5 +573,6 @@ echo
 echo "  GnuTLS support:                         ${gnutls}"
 echo "  IPv6 support:                           ${ipv6}"
 echo "  Plugin loader:                          ${plugin}"
+echo "  - Python Plugin:                        ${python}"
 echo "  Regex substitution support:             ${regex}"
 echo
