@@ -11,6 +11,10 @@
 # include <regex.h>
 #endif
 
+#ifdef _MSC_VER
+#include "resource.h"
+#endif
+
 #if defined(ENABLE_NLS) && !defined(_)
 #  include <libintl.h>
 #  define _(x) gettext(x)

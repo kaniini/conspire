@@ -794,8 +794,11 @@ menu_urlmenu (GdkEventButton *event, char *url)
 		menu_quick_item_with_callback (open_url_cb, _("Open Link in Browser"), menu, str_copy);
 	menu_quick_item_with_callback (copy_to_clipboard_cb, _("Copy Selected Link"), menu, str_copy);
 	/* custom ones from urlhandlers.conf */
+	
+#ifndef _WIN32
 	menu_create (menu, urlhandler_list, str_copy, TRUE);
 	menu_add_plugin_items (menu, "\x4$URL", str_copy);
+#endif
 	menu_popup (menu, event, NULL);
 }
 
@@ -1208,7 +1211,7 @@ menu_ctcpguiopen (void)
 static void
 menu_docs (GtkWidget *wid, gpointer none)
 {
-	fe_open_url ("http://redmine.atheme.org/wiki/conspire");
+	fe_open_url ("http://confluence.atheme.org/display/CON");
 }
 
 /*static void

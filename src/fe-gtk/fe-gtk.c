@@ -730,6 +730,8 @@ fe_set_inputbox_contents (session *sess, char *text)
 	}
 }
 
+#ifndef _WIN32
+
 static gboolean
 try_browser (const char *browser, const char *arg, const char *url)
 {
@@ -753,6 +755,8 @@ try_browser (const char *browser, const char *arg, const char *url)
 	g_free (path);
 	return 1;
 }
+
+#endif
 
 static void
 fe_open_url_inner (const char *url)
@@ -786,6 +790,9 @@ fe_open_url_inner (const char *url)
 static void
 fe_open_url_locale (const char *url)
 {
+#ifdef _WIN32
+	ShellExecuteA (NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
+#else
 	if (url[0] != '/' && strchr (url, ':') == NULL)
 	{
 		url = g_strdup_printf ("http://%s", url);
@@ -794,6 +801,7 @@ fe_open_url_locale (const char *url)
 		return;
 	}
 	fe_open_url_inner (url);
+#endif
 }
 
 void

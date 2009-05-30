@@ -1,0 +1,5 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+IDI_CONSPIRE            ICON                    "conspire.ico"
