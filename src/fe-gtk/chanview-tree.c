@@ -23,6 +23,13 @@ cv_tree_title_cell_data_func (GtkTreeViewColumn *column,
 			      chanview *cv);
 
 static void
+cv_tree_icon_cell_data_func (GtkTreeViewColumn *column,
+			      GtkCellRenderer *cell,
+			      GtkTreeModel *model,
+			      GtkTreeIter *iter,
+			      chanview *cv);
+
+static void
 cv_tree_indent_cell_data_func (GtkTreeViewColumn *column,
 			       GtkCellRenderer *cell,
 			       GtkTreeModel *model,
@@ -155,19 +162,18 @@ cv_tree_init (chanview *cv)
 	gtk_tree_view_column_set_expand(col, TRUE);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
 
-	/* icon column */
-	if (cv->use_icons)
-	{
-		renderer = gtk_cell_renderer_pixbuf_new();
-		g_object_set(G_OBJECT (renderer), "ypad", 0, NULL);
-		gtk_tree_view_column_pack_start(col, renderer, FALSE);
-	}
-
 	/* main column */
 	renderer = gtk_cell_renderer_text_new();
 	g_object_set(G_OBJECT (renderer), "ypad", 0, "visible", FALSE, NULL);
 	gtk_tree_view_column_pack_start(col, renderer, FALSE);
 	gtk_tree_view_column_set_cell_data_func(col, renderer, (GtkTreeCellDataFunc) cv_tree_indent_cell_data_func, cv, NULL);
+
+	/* icon column */
+	renderer = gtk_cell_renderer_pixbuf_new();
+	g_object_set(G_OBJECT (renderer), "ypad", 0, NULL);
+	gtk_tree_view_column_pack_start(col, renderer, FALSE);
+	gtk_tree_view_column_set_cell_data_func(col, renderer, (GtkTreeCellDataFunc) cv_tree_icon_cell_data_func, cv, NULL);
+	gtk_tree_view_column_set_attributes(col, renderer, "pixbuf", COL_PIXBUF, NULL);
 
 	renderer = gtk_cell_renderer_text_new();
 	g_object_set(G_OBJECT (renderer), "ypad", 0, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -224,6 +230,20 @@ cv_tree_title_cell_data_func (GtkTreeViewColumn *column,
 		g_object_set(cell, "weight", PANGO_WEIGHT_BOLD, NULL);
 	else
 		g_object_set(cell, "weight", PANGO_WEIGHT_NORMAL, NULL);
+
+	cv_tree_cell_set_background(((treeview *)cv), cell, depth == 0);
+}
+
+static void
+cv_tree_icon_cell_data_func (GtkTreeViewColumn *column,
+			      GtkCellRenderer *cell,
+			      GtkTreeModel *model,
+			      GtkTreeIter *iter,
+			      chanview *cv)
+{
+	gint depth = gtk_tree_store_iter_depth(GTK_TREE_STORE(cv->store), iter);
+
+	g_object_set(cell, "visible", TRUE, NULL);
 
 	cv_tree_cell_set_background(((treeview *)cv), cell, depth == 0);
 }

@@ -54,7 +54,6 @@ struct _chanview
 
 	unsigned int sorted:1;
 	unsigned int vertical:1;
-	unsigned int use_icons:1;
 };
 
 struct _chan
@@ -222,7 +221,7 @@ chanview_box_destroy_cb (GtkWidget *box, chanview *cv)
 }
 
 chanview *
-chanview_new (int type, int trunc_len, gboolean sort, gboolean use_icons,
+chanview_new (int type, int trunc_len, gboolean sort,
 				  GtkStyle *style)
 {
 	chanview *cv;
@@ -234,7 +233,6 @@ chanview_new (int type, int trunc_len, gboolean sort, gboolean use_icons,
 	cv->box = gtk_hbox_new (0, 0);
 	cv->trunc_len = trunc_len;
 	cv->sorted = sort;
-	cv->use_icons = use_icons;
 	gtk_widget_show (cv->box);
 	chanview_set_impl (cv, type);
 
