@@ -949,7 +949,7 @@ key_load_kbs (char *filename)
 {
 	char *buf, pbuf[256], ibuf[1024];
 	struct key_binding *kb = NULL, *last = NULL;
-	int fd, len, pnt = 0, state = 0, n;
+	int fd, len, state = 0, n;
 
 	if (filename == NULL)
 		fd = xchat_open_file ("keybindings.conf", O_RDONLY, 0, 0);
