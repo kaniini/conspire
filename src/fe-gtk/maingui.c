@@ -2571,7 +2571,7 @@ static void
 mg_create_tabs (session_gui *gui)
 {
 	gui->chanview = chanview_new (prefs.tab_layout, prefs.truncchans,
-											prefs.tab_sort, prefs.tab_icons,
+											prefs.tab_sort,
 											prefs.style_namelistgad ? input_style : NULL);
 	chanview_set_callbacks (gui->chanview, mg_switch_tab_cb, mg_xbutton_cb,
 									mg_tab_contextmenu_cb, (void *)mg_tabs_compare);
