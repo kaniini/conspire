@@ -74,8 +74,10 @@ formatter_process_real(Formatter *f, const gchar *src, gchar *buf, gchar **value
 	const gchar *p;
 	gchar *i;
 
+	g_return_val_if_fail(f != NULL, NULL);
 	g_return_val_if_fail(src != NULL, NULL);
 	g_return_val_if_fail(buf != NULL, NULL);
+	g_return_val_if_fail(values != NULL, NULL);
 
 	i = buf;
 	for (p = src; *p != '\0'; p++)
