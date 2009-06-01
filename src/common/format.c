@@ -53,75 +53,111 @@ formatter_get(const gchar *key)
 	return mowgli_dictionary_retrieve(formatters, key);
 }
 
+/**
+ * formatter_process_real:
+ * 	Replaces control codes in a string.  The string must be zero-terminated.
+ *
+ * Inputs:
+ *	src - the source format string (e.g. a formatter::format).
+ *	buf - destination buffer
+ *
+ * Outputs:
+ *      pointer to buf or NULL on failure.
+ *
+ * Side Effects:
+ *	as buf is a stack-allocated string, the value will be changed in the unwound
+ *	function as well.
+ */
 static gchar *
-formatter_replace(gchar *s, int size, const gchar *old, const gchar *new)
+formatter_process_real(Formatter *f, const gchar *src, gchar *buf, gchar **values)
 {
-	gchar *ptr = s;
-	gint left, avail, oldlen, newlen, diff;
+	const gchar *p;
+	gchar *i;
 
-	if (old == NULL || new == NULL)
-		return s;
+	g_return_val_if_fail(src != NULL, NULL);
+	g_return_val_if_fail(buf != NULL, NULL);
 
-	left = strlen(s);
-	avail = size - (left + 1);
-	oldlen = strlen(old);
-	newlen = strlen(new);
-	diff = newlen - oldlen;
-
-	while (left >= oldlen)
+	i = buf;
+	for (p = src; *p != '\0'; p++)
 	{
-		if (strncmp(ptr, old, oldlen))
+		switch (*p)
 		{
-			left--;
-			ptr++;
-			continue;
-		}
-
-		if (diff > avail)
+		case '%':
+			switch (*(p + 1))
+			{
+			case 'b':
+			case 'B':
+				*i++ = '\x02';
+				p++;
+				break;
+			case 'c':
+			case 'C':
+				*i++ = '\x03';
+				p++;
+				break;
+			case 'h':
+			case 'H':
+				*i++ = prefs.indent_nicks ? '\x08' : ' ';
+				p++;
+				break;
+			case 'o':
+			case 'O':
+				*i++ = '\x0F';
+				p++;
+				break;
+			case 'u':
+			case 'U':
+				*i++ = '\x1F';
+				p++;
+				break;
+			default:
+				*i++ = *p;
+				break;
+			}
 			break;
+		case '$':
+			p++;
+			if (*p == 't')
+				*i++ = '\t';
+			else
+			{
+				gchar *vp;
+				gint arg;
 
-		if (diff != 0)
-			memmove(ptr + oldlen + diff, ptr + oldlen, left + 1 - oldlen);
+				arg = atoi(p);
+				if (arg <= f->args)
+				{
+					for (vp = values[arg - 1]; *vp != '\0'; vp++)
+						*i++ = *vp;
+				}
 
-		memcpy(ptr, new, newlen);
-		ptr += newlen;
-		left -= oldlen;
+				while (isdigit(*(p + 1)))
+					p++;
+			}
+			break;
+		default:
+			*i++ = *p;
+		}
 	}
+	*i++ = '\0';
 
-	return s;
+	return buf;
 }
 
 gchar *
 formatter_process(Formatter *f, gchar **data)
 {
-	gint i;
 	gchar buf[4096];
 	gchar *signame;
 
 	g_return_val_if_fail(f != NULL, NULL);
 	g_return_val_if_fail(data != NULL, NULL);
 
-	g_strlcpy(buf, f->format, 4096);
-
 	signame = g_strdup_printf("format %s", f->key);
 	signal_emit(signame, 2, f->args, data);
 	g_free(signame);
 
-	for (i = 1; i <= f->args; i++)
-	{
-		gchar *token = g_strdup_printf("$%d", i);
-
-		formatter_replace(buf, 4096, token, data[i - 1]);
-
-		g_free(token);
-	}
-
-	formatter_replace(buf, 4096, "%B", "\x02");
-	formatter_replace(buf, 4096, "%C", "\x03");
-	formatter_replace(buf, 4096, "%O", "\x0F");
-	formatter_replace(buf, 4096, "%U", "\x1F");
-	formatter_replace(buf, 4096, "$t", prefs.indent_nicks ? "\t" : " ");
-	formatter_replace(buf, 4096, "%H", prefs.indent_nicks ? "\x08" : " ");	/* XXX: maybe we should always do this? */
+	formatter_process_real(f, f->format, buf, data);
 
 	return g_strdup(buf);
 }
