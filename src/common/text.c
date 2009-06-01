@@ -261,10 +261,7 @@ scrollback_load (session *sess)
 				stamp = BIG_STR_TO_INT(buf + 2); /* just incase time_t is 64 bits */
 			text = strchr (buf + 3, ' ');
 			if (text)
-			{
 				fe_print_text (sess, text, stamp);
-				free (text);
-			}
 			lines++;
 		}
 	}
