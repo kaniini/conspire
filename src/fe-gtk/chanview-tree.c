@@ -100,33 +100,6 @@ cv_tree_click_cb (GtkTreeView *tree, GdkEventButton *event, chanview *cv)
 }
 
 static void
-cv_tree_cell_set_background (treeview *cv,
-			     GtkCellRenderer *cell,
-			     gboolean is_group)
-{
-	GdkColor color;
-	GtkStyle *style;
-
-	g_return_if_fail(cv != NULL);
-	g_return_if_fail(cell != NULL);
-
-	style = gtk_widget_get_style(GTK_WIDGET(cv->tree));
-
-	if (!is_group)
-		g_object_set(cell, "cell-background-gdk", NULL, NULL);
-	else
-	{
-		color = style->text_aa[GTK_STATE_INSENSITIVE];
-
-		color.red = (color.red + (style->white).red) / 2;
-		color.green = (color.green + (style->white).green) / 2;
-		color.blue = (color.blue + (style->white).blue) / 2;
-
-		g_object_set(cell, "cell-background-gdk", &color, NULL);
-	}
-}
-
-static void
 cv_tree_init (chanview *cv)
 {
 	GtkWidget *view, *win;
@@ -230,8 +203,6 @@ cv_tree_title_cell_data_func (GtkTreeViewColumn *column,
 		g_object_set(cell, "weight", PANGO_WEIGHT_BOLD, NULL);
 	else
 		g_object_set(cell, "weight", PANGO_WEIGHT_NORMAL, NULL);
-
-	cv_tree_cell_set_background(((treeview *)cv), cell, depth == 0);
 }
 
 static void
@@ -241,11 +212,7 @@ cv_tree_icon_cell_data_func (GtkTreeViewColumn *column,
 			      GtkTreeIter *iter,
 			      chanview *cv)
 {
-	gint depth = gtk_tree_store_iter_depth(GTK_TREE_STORE(cv->store), iter);
-
 	g_object_set(cell, "visible", TRUE, NULL);
-
-	cv_tree_cell_set_background(((treeview *)cv), cell, depth == 0);
 }
 
 static void
@@ -258,8 +225,6 @@ cv_tree_indent_cell_data_func (GtkTreeViewColumn *column,
 	gint depth = gtk_tree_store_iter_depth(GTK_TREE_STORE(cv->store), iter);
 
 	g_object_set(cell, "text", "   ", "visible", depth >= 1, NULL);
-
-	cv_tree_cell_set_background(((treeview *)cv), cell, depth == 0);
 }
 
 static void
@@ -279,8 +244,6 @@ cv_tree_expander_cell_data_func (GtkTreeViewColumn *column,
 		gtk_tree_path_free(path);
 
 		g_object_set(cell, "visible", TRUE, "expander-style", row_expanded ? GTK_EXPANDER_EXPANDED : GTK_EXPANDER_COLLAPSED, NULL);
-
-		cv_tree_cell_set_background(((treeview *)cv), cell, TRUE);
 	}
 	else
 		g_object_set(cell, "visible", FALSE, NULL);
