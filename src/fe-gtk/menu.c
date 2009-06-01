@@ -1211,7 +1211,7 @@ menu_ctcpguiopen (void)
 static void
 menu_docs (GtkWidget *wid, gpointer none)
 {
-	fe_open_url ("http://confluence.atheme.org/display/CON");
+	fe_open_url ("http://confluence.atheme.org/display/CON/Conspire+Help");
 }
 
 /*static void
