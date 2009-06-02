@@ -1,6 +1,7 @@
 from history cimport *
 from cap cimport *
 from linequeue cimport *
+from signal_factory cimport *
 
 IF GNUTLS:
     cdef from extern "gnutls/gnutls.h":
