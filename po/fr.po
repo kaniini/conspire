@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Conspire\n"
 "Report-Msgid-Bugs-To: www.xchat.org\n"
 "POT-Creation-Date: 2008-05-26 02:19-0400\n"
-"PO-Revision-Date: 2009-06-07 20:59+0100\n"
+"PO-Revision-Date: 2009-06-07 21:50+0100\n"
 "Last-Translator: Bellière Ludovic <xrogaan@gmail.com>\n"
 "Language-Team: French <traduct@traduct.org>\n"
 "MIME-Version: 1.0\n"
@@ -2006,7 +2006,7 @@ msgstr "CTCP <pseudo> <message>, envoyer au pseudo un message CTCP, « VERSION�
 
 #: src/common/outbound.c:3467
 msgid "CYCLE [<channel>], parts the current or given channel and immediately rejoins"
-msgstr "CYCLE [<canal>], quitter le canal actuel et y revenir immédiatement"
+msgstr "CYCLE [<canal>], quitte le canal actuel et y reviens immédiatement"
 
 #: src/common/outbound.c:3469
 msgid ""
@@ -2103,9 +2103,8 @@ msgid "HALFOP <nick>, gives chanhalf-op status to the nick (needs chanop)"
 msgstr "HALFOP <pseudo>, donner l'état de demi-opérateur de canal « chanhalf-op » au pseudo (nécessite d'être opérateur [chanop)]"
 
 #: src/common/outbound.c:3517
-#, fuzzy
 msgid "HOP [<channel>], parts the current or given channel and immediately rejoins"
-msgstr "CYCLE, quitter le canal actuel et y revenir immédiatement"
+msgstr "HOP [<channel>], quitte le canal actuel et y reviens immédiatement"
 
 # ChtiTux
 #: src/common/outbound.c:3518
@@ -3109,9 +3108,8 @@ msgid "_User List"
 msgstr "Liste _Utilisateur"
 
 #: src/fe-gtk/menu.c:1339
-#, fuzzy
 msgid "U_serlist Buttons"
-msgstr "Boutons de la liste des _utilisateurs..."
+msgstr "Boutons de la liste _utilisateurs"
 
 #: src/fe-gtk/menu.c:1340
 msgid "M_ode Buttons"
@@ -3247,7 +3245,7 @@ msgstr "Jamais"
 #: src/fe-gtk/notifygui.c:230
 #, c-format
 msgid "%d minutes ago"
-msgstr "il y a %u minutes"
+msgstr "il y a %d minutes"
 
 #: src/fe-gtk/notifygui.c:220
 msgid "Online"
