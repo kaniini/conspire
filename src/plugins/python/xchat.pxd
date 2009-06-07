@@ -168,23 +168,23 @@ cdef from extern "xchat.h":
         GList *lastact_elem
         int lastact_idx
 
-        int new_data
-        int nick_said
-        int msg_said
-        int ignore_date
-        int ignore_mode
-        int ignore_names
-        int end_of_names
-        int doing_who
+        bint new_data
+        bint nick_said
+        bint msg_said
+        bint ignore_date
+        bint ignore_mode
+        bint ignore_names
+        bint end_of_names
+        bint doing_who
 
-        unsigned int hide_join_part
-        unsigned int beep
-        unsigned int tray
-        unsigned int color_paste
-        int done_away_check
-        unsigned int lastlog_regexp
-        char immutable
-        char ul_blocked
+        bint hide_join_part
+        bint beep
+        bint tray
+        bint color_paste
+        bint done_away_check
+        bint lastlog_regexp
+        bint immutable
+        bint ul_blocked
 
     struct xchatprefs:
         char *nick1
@@ -220,7 +220,7 @@ cdef from extern "xchat.h":
         char *proxy_host
         int proxy_port
         int proxy_type
-        int proxy_use
+        bint proxy_use
         unsigned int proxy_auth
         char *proxy_user
         char *proxy_pass
@@ -388,9 +388,9 @@ cdef from extern "xchat.h":
 
         unsigned int save_pevents
 
-        char redundant_nickstamps
-        char strip_quits
-        char hilight_enable
+        bint redundant_nickstamps
+        bint strip_quits
+        bint hilight_enable
 
     struct popup:
         char *cmd
