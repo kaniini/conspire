@@ -925,7 +925,8 @@ inbound_quit (server *serv, char *nick, char *ip, char *reason)
 		/* strip IRCd Quit: prefix */
 		char *tmp;
 
-		if ((tmp = strstr(reason, "Quit:")) != NULL)
+		if (((tmp = strstr(reason, "Quit:")) != NULL) ||
+		    ((tmp = strstr(reason, "Exit:")) != NULL))
 			reason = tmp + 6; /* skip past Quit: */
 	}
 
