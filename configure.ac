@@ -352,6 +352,7 @@ if test "$python" = yes; then
                                 esac
                                 PY_CFLAGS="-I$PY_INC"
                                 AC_MSG_RESULT(ok)
+                                PYTHON="python"
                         else
                                 python=no
                                 AC_MSG_RESULT([Can't find Python.h])
@@ -363,6 +364,10 @@ if test "$python" = yes; then
         fi
 fi
 
+if test "x$python" = "xno"; then
+    PYTHON=""
+fi
+
 dnl *********************************************************************
 dnl ** CONDITIONALS *****************************************************
 dnl *********************************************************************
@@ -371,6 +376,7 @@ AM_CONDITIONAL(USE_LIBSEXY, test "x$spell" = "xstatic")
 AM_CONDITIONAL(DO_GTK, test "x$gtkfe" = "xyes")
 AM_CONDITIONAL(DO_PLUGIN, test "x$plugin" = "xyes")
 AM_CONDITIONAL(DO_GCONF, test "x$GCONFTOOL" != "xno")
+AM_CONDITIONAL(DO_PYTHON, test "x$python" != "xno")
 
 dnl *********************************************************************
 dnl ** SOCKS5 ***********************************************************
@@ -536,6 +542,7 @@ AC_SUBST(PERL_CFLAGS)
 AC_SUBST(PERL_LDFLAGS)
 AC_SUBST(PY_CFLAGS)
 AC_SUBST(PY_LIBS)
+AC_SUBST(PYTHON)
 
 
 PLUGIN_INCLUDES='-I$(top_srcdir)/plugins'
