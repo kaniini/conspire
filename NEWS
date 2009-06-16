@@ -1,3 +1,18 @@
+conspire 1.0-beta1 (06-16-2009):
+  
+  * Remove STARTTLS--only inspircd supports it, and it doesn't work all that well anyway.
+  * Preliminary work on a new Python plugin.
+  * Updated French translation.
+  * Preliminary IRCPP support via a plugin.
+  * Preliminary Windows port; does not include plugins and has a major graphical bug, but
+    is otherwise usable.
+  * New iconset based on a Tango set on gnomelook.org.
+  * Rewritten event formatter for great sanity.
+  * DCC64 is now always supported, as glib guarantees gint64 presence now.
+  * /exec is now a plugin.
+  * Support more CTCP messages (USERINFO, particularly).
+  * /foreach query and /foreach local-query added.
+
 conspire 0.20~beta4 (07-05-2008):
 
   * Make queue more aggressive.
