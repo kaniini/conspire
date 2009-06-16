@@ -22,7 +22,7 @@ are required in order to make use of these features:
 * SSL support: GnuTLS
 * Spell-checking: libsexy
 * Internationalization: GNU gettext
-* Outbound regex substitution: GLib 1.14 or higher
+* Outbound regex substitution: GLib 2.14 or higher
 * Python plugin: python
 
 Compilation
