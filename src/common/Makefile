@@ -2,9 +2,7 @@ include ../../extra.mk
 
 SUBDIRS = tools
 
-LIB = ${LIB_PREFIX}conspire${LIB_SUFFIX}
-LIB_MAJOR=0
-LIB_MINOR=1
+STATIC_LIB = libconspire.a
 
 SRCS = \
 	base64.c cap.c cfgfiles.c ctcp.c command_factory.c dcc.c format.c history.c \
