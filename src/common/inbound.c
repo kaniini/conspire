@@ -373,6 +373,7 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 		{
 			fe_flash_window (sess);
 			signal_emit("action private hilight", 4, sess, from, text, nickchar);
+			return;
                 } else if (hilight)
 		{
 			signal_emit("action public hilight", 4, sess, from, text, nickchar);
