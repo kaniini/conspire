@@ -2023,46 +2023,73 @@ cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static CommandResult
-cmd_describe(struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
+cmd_describe (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	gchar *act = word_eol[3];
-	gchar *target = word[2];
-	GQueue *acts = split_message(sess, act, "PRIVMSG");
+    char *target = word[2];
+    char *act = word_eol[3];
+    struct session *newsess;
+    GQueue *acts = split_message(sess, act, "PRIVMSG");
+    GQueue *acopy = g_queue_copy(acts);
 
-	if (!(*act))
-		return CMD_EXEC_FAIL;
+    if (!(*target) || !(*act))
+        return CMD_EXEC_FAIL;
 
-	if (sess->type == SESS_SERVER)
-	{
-		notj_msg (sess);
-		return CMD_EXEC_OK;
-	}
-
-	snprintf (tbuf, TBUFSIZE, "\001ACTION %s\001\r", act);
-	/* first try through DCC CHAT */
-	if (dcc_write_chat (target, tbuf))
-	{
-		/* print it to screen */
+    switch (target[0]) {
+        case '.':
+            if (sess->lastnick[0])
+                target = sess->lastnick;
+            break;
+        case '=':
+            target++;
+            snprintf (tbuf, TBUFSIZE, "\001ACTION %s\001\r", act);
+            if (!dcc_write_chat(target, tbuf))
+            {
+                signal_emit("dcc not found", 1, sess);
+                return CMD_EXEC_OK;
+            } else {
 		inbound_action (sess, target, sess->server->nick, act, TRUE, FALSE);
-	} else
-	{
-		/* DCC CHAT failed, try through server */
-		if (sess->server->connected)
-		{
-			while (!g_queue_is_empty(acts)) {
-				act = (gchar *)g_queue_pop_head(acts);
-				sess->server->p_action (sess->server, target, act);
-				/* print it to screen */
-				inbound_action (sess, target, sess->server->nick, act, TRUE, FALSE);
-			}
-			g_queue_free(acts);
-		} else
-		{
-			notc_msg (sess);
-		}
-	}
+                break;
+            }
+        default:
+            g_strlcpy(sess->lastnick, target, NICKLEN);
+    }
 
-	return CMD_EXEC_OK;
+    if (!sess->server->connected)
+    {
+        notc_msg (sess);
+        return CMD_EXEC_OK;
+    }
+    while (!g_queue_is_empty(acts))
+    {
+        act = (gchar *)g_queue_pop_head(acts);
+        sess->server->p_action (sess->server, target, act);
+    }
+    acts = g_queue_copy(acopy);
+
+    newsess = find_dialog (sess->server, target);
+    if (!newsess)
+        newsess = find_channel (sess->server, target);
+
+    if (newsess)
+    {
+        while (!g_queue_is_empty(acts))
+        {
+            act = (gchar *)g_queue_pop_head(acts);
+            inbound_action (newsess, newsess->channel, newsess->server->nick, act, TRUE, FALSE);
+        }
+    } else
+    {
+        while (!g_queue_is_empty(acts))
+        {
+            act = (gchar *)g_queue_pop_head(acts);
+            signal_emit("user action", 3, sess, target, act);
+        }
+    }
+
+    g_queue_free(acts);
+    g_queue_free(acopy);
+
+    return CMD_EXEC_OK;
 }
 
 static CommandResult
