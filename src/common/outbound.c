@@ -1945,6 +1945,7 @@ GQueue *split_message(const struct session *sess, const gchar *text, const gchar
     gint len;
     gchar *note_stop = g_strdup(prefs.text_overflow_stop);
     gint stop_len    = strlen(note_stop);
+    gint max_length  = (prefs.text_overflow_limit) ? prefs.text_overflow_limit : IRC_MAX_LENGTH - 1;
 
     /*
      * build the base string so we know how many bytes to subtract from the
@@ -1969,8 +1970,8 @@ GQueue *split_message(const struct session *sess, const gchar *text, const gchar
      * iterate through the string and push each segment onto a list so we can
      * later send them out one at a time.
      */
-    while ((strlen(text) + len + stop_len) > IRC_MAX_LENGTH-1) {
-        tempstr = g_strrstr_len(text, IRC_MAX_LENGTH - (len + stop_len), " ");
+    while ((strlen(text) + len + stop_len) > max_length-1) {
+        tempstr = g_strrstr_len(text, max_length - (len + stop_len), " ");
         temp = g_strndup(text, tempstr-text);
         g_queue_push_tail(list, g_strconcat(temp, " ", note_stop, NULL));
         text = tempstr;
@@ -2008,9 +2009,53 @@ cmd_me (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		{
 			while (!g_queue_is_empty(acts)) {
 				act = (gchar *)g_queue_pop_head(acts);
-				sess->server->p_action (sess->server, sess->channel, act);
+                                snprintf (tbuf, TBUFSIZE, "\001ACTION %s\001\r", act);
+				sess->server->p_action (sess->server, sess->channel, tbuf);
 				/* print it to screen */
-				inbound_action (sess, sess->channel, sess->server->nick, act, TRUE, FALSE);
+				inbound_action (sess, sess->channel, sess->server->nick, tbuf, TRUE, FALSE);
+			}
+			g_queue_free(acts);
+		} else
+		{
+			notc_msg (sess);
+		}
+	}
+
+	return CMD_EXEC_OK;
+}
+
+static CommandResult
+cmd_describe(struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
+{
+	gchar *act = word_eol[3];
+	gchar *channel = word[2];
+	GQueue *acts = split_message(sess, act, "PRIVMSG");
+
+	if (!(*act))
+		return CMD_EXEC_FAIL;
+
+	if (sess->type == SESS_SERVER)
+	{
+		notj_msg (sess);
+		return CMD_EXEC_OK;
+	}
+
+	snprintf (tbuf, TBUFSIZE, "\001ACTION %s\001\r", act);
+	/* first try through DCC CHAT */
+	if (dcc_write_chat (channel, tbuf))
+	{
+		/* print it to screen */
+		inbound_action (sess, channel, sess->server->nick, act, TRUE, FALSE);
+	} else
+	{
+		/* DCC CHAT failed, try through server */
+		if (sess->server->connected)
+		{
+			while (!g_queue_is_empty(acts)) {
+				act = (gchar *)g_queue_pop_head(acts);
+				sess->server->p_action (sess->server, channel, tbuf);
+				/* print it to screen */
+				inbound_action (sess, channel, sess->server->nick, act, TRUE, FALSE);
 			}
 			g_queue_free(acts);
 		} else
@@ -3007,6 +3052,8 @@ struct commands xc_cmds[] = {
 	 N_("DELBUTTON <name>, deletes a button from under the user-list")},
 	{"DEOP", cmd_deop, 1, 1, 1,
 	 N_("DEOP <nick>, removes chanop status from the nick on the current channel (needs chanop)")},
+        {"DESCRIBE", cmd_describe, 1, 0, 1,
+	 N_("DESCRIBE <channel> <text>, sends text to channel as an action")},
 	{"DEVOICE", cmd_devoice, 1, 1, 1,
 	 N_("DEVOICE <nick>, removes voice status from the nick on the current channel (needs chanop)")},
 	{"DISCONNECT", cmd_discon, 0, 0, 1, N_("DISCON, Disconnects from server")},

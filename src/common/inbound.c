@@ -355,6 +355,10 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 	if (!fromme)
 	{
 		hilight = is_hilight (from, text, sess, serv);
+
+		if (!prefs.hilight_enable)
+			hilight = FALSE;
+
 		if (hilight && prefs.input_beep_hilight)
 			beep = TRUE;
 
@@ -366,10 +370,10 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 
 		/* private action, flash? */
 		if (!is_channel (serv, chan) && prefs.input_flash_priv)
+		{
 			fe_flash_window (sess);
-
-		/* XXX this isn't necessarily a public action */
-		if (hilight && prefs.hilight_enable)
+			signal_emit("action private hilight", 4, sess, from, text, nickchar);
+                } else if (hilight)
 		{
 			signal_emit("action public hilight", 4, sess, from, text, nickchar);
 			return;
@@ -378,8 +382,10 @@ inbound_action (session *sess, char *chan, char *from, char *text, int fromme, i
 
 	if (fromme)
 		signal_emit("user action", 4, sess, from, text, nickchar);
-	else
+	else if (is_channel(serv, chan))
 		signal_emit("action public", 4, sess, from, text, nickchar);
+	else
+		signal_emit("action private", 4, sess, from, text, nickchar);
 }
 
 void

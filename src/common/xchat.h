@@ -131,6 +131,7 @@ struct xchatprefs
 
 	char *text_overflow_start;
 	char *text_overflow_stop;
+	gint *text_overflow_limit;
 
 	char *proxy_host;
 	int proxy_port;

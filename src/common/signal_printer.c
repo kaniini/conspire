@@ -31,6 +31,17 @@
 /* actions */
 
 void
+signal_printer_action_private(gpointer *params)
+{
+	session *sess   = params[0];
+	gchar *from     = params[1];
+	gchar *text     = params[2];
+	gchar *nickchar = params[3];
+
+	session_print_format(sess, "query action", from, nickchar, text);
+}
+
+void
 signal_printer_action_public(gpointer *params)
 {
 	session *sess   = params[0];
@@ -39,6 +50,17 @@ signal_printer_action_public(gpointer *params)
 	gchar *nickchar = params[3];
 
 	session_print_format(sess, "channel action", from, nickchar, text);
+}
+
+void
+signal_printer_action_private_hilight(gpointer *params)
+{
+	session *sess   = params[0];
+	gchar *from     = params[1];
+	gchar *text     = params[2];
+	gchar *nickchar = params[3];
+
+	session_print_format(sess, "query action hilight", from, nickchar, text);
 }
 
 void
@@ -646,8 +668,8 @@ void
 signal_printer_server_netsplit(gpointer *params)
 {
 	session *sess  = params[0];
-        server *serv   = params[1];
-        gchar *victims = params[2];
+	server *serv   = params[1];
+	gchar *victims = params[2];
 
 	session_print_format(sess, "netsplit", serv->split_serv1, serv->split_serv2, victims);
 }
@@ -845,9 +867,9 @@ void
 signal_printer_user_joined(gpointer *params)
 {
 	session *sess  = params[0];
-        gchar *nick    = params[1];
-        gchar *channel = params[2];
-        gchar *host    = params[3];
+	gchar *nick    = params[1];
+	gchar *channel = params[2];
+	gchar *host    = params[3];
 
 	session_print_format(sess, "you join", nick, channel, host);
 }
@@ -1000,7 +1022,7 @@ signal_printer_ctcp_reply(gpointer *params)
 	session *sess  = params[0];
 	gchar *nick    = params[1];
 	gchar *type    = params[2];
-        gchar *content = params[3];
+	gchar *content = params[3];
 
 	session_print_format(sess, "ctcp reply generic", nick, type, content);
 }
@@ -1019,10 +1041,10 @@ void
 signal_printer_channel_bans(gpointer *params)
 {
 	session *sess   = params[0];
-        gchar *channel  = params[1];
-        gchar *mask     = params[2];
-        gchar *nick     = params[3];
-        gchar *time_set = params[4];
+	gchar *channel  = params[1];
+	gchar *mask     = params[2];
+	gchar *nick     = params[3];
+	gchar *time_set = params[4];
 
 	session_print_format(sess, "ban list", channel, mask, nick, time_set);
 }
@@ -1031,8 +1053,8 @@ void
 signal_printer_channel_modes_raw(gpointer *params)
 {
 	session *sess = params[0];
-        gchar *nick   = params[1];
-        gchar *modes  = params[2];
+	gchar *nick   = params[1];
+	gchar *modes  = params[2];
 
 	session_print_format(sess, "raw modes", nick, modes);
 }
@@ -1049,7 +1071,7 @@ void
 signal_printer_ignore_added(gpointer *params)
 {
 	session *sess = params[0];
-        gchar **word  = params[1];
+	gchar **word  = params[1];
 
 	session_print_format(sess, "ignore add", word[2]);
 }
@@ -1058,7 +1080,7 @@ void
 signal_printer_ignore_changed(gpointer *params)
 {
 	session *sess = params[0];
-        gchar **word  = params[1];
+	gchar **word  = params[1];
 
 	session_print_format(sess, "ignore changed", word[2]);
 }
@@ -1187,6 +1209,8 @@ void
 signal_printer_init(void)
 {
 	/* Actions */
+	signal_attach("action private",         signal_printer_action_private);
+	signal_attach("action private hilight", signal_printer_action_private_hilight);
 	signal_attach("action public",          signal_printer_action_public);
 	signal_attach("action public hilight",  signal_printer_action_public_highlight);
 

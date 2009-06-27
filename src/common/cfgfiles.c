@@ -633,7 +633,8 @@ PrefsEntry vars[] = {
 	{"text_transparent", PREFS_TYPE_BOOL, &prefs.transparent},
 	{"text_wordwrap", PREFS_TYPE_BOOL, &prefs.wordwrap},
 	{"text_overflow_start", PREFS_TYPE_STR, &prefs.text_overflow_start},
-	{"text_overflow_stop", PREFS_TYPE_STR, &prefs.text_overflow_start},
+	{"text_overflow_stop", PREFS_TYPE_STR, &prefs.text_overflow_stop},
+	{"text_overflow_limit", PREFS_TYPE_INT, &prefs.text_overflow_limit},
 
 	{0, 0, 0},
 };
@@ -775,6 +776,7 @@ load_config (void)
 
 	prefs.text_overflow_start = strdup("");
 	prefs.text_overflow_stop  = strdup("");
+	prefs.text_overflow_limit = 0;
 
 	g_free ((char *)username);
 	g_free ((char *)realname);
