@@ -159,7 +159,7 @@ const struct text_event te[] = {
 "$1$t$2"},
 
 {"Ignore Add", 1, 
-"%C27*$t%C27$1 removed from ignore list."},
+"%C27*$t%C27$1 added to ignore list."},
 
 {"Ignore Changed", 1, 
 "%C27*$t%C27Ignore on $1 has been changed."},

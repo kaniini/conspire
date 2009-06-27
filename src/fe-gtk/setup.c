@@ -146,6 +146,8 @@ static const setting inputbox_settings[] =
 	{ST_HEADER, N_("Text Overflow"),0,0,0},
 	{ST_ENTRY,  N_("Stop indicator"), &prefs.text_overflow_stop,
 		N_("Used to indicate the end of any message due to overflow."), 0},
+	{ST_NUMBER, N_("Overflow length"), &prefs.text_overflow_limit,
+		N_("Used to determine the length at which to handle overflow."), 0},
 
 	{ST_END, 0, 0, 0, 0, 0}
 };
