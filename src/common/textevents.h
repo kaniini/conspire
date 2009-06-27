@@ -257,6 +257,12 @@ const struct text_event te[] = {
 {"Quit", 3, 
 "%C27*$t%C27$1 ($3) has quit: $2"},
 
+{"Query Action", 3, 
+"%C13*%O$t$1 $3%O"},
+
+{"Query Action Hilight", 3, 
+"%C13*%O$t%C8%B$1%B%O $3%O"},
+
 {"Raw Modes", 2, 
 "%C27*$t%C27$1 sets mode: $2"},
 

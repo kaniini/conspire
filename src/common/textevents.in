@@ -338,6 +338,14 @@ Quit
 %C27*$t%C27$1 ($3) has quit: $2
 3
 
+Query Action
+%C13*%O$t$1 $3%O
+3
+
+Query Action Hilight
+%C13*%O$t%C8%B$1%B%O $3%O
+3
+
 Raw Modes
 %C27*$t%C27$1 sets mode: $2
 2
