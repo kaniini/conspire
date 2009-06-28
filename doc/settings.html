@@ -1,0 +1,419 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Conspire Settings</title>
+        <style type="text/css">
+body {
+    color: black;
+    background-color: white;
+}
+.specifics {
+    font-family: monospace;
+}
+table {
+    border: 1px outset black;
+}
+td, tr {
+    border: 1px inset black;
+}
+        </style>
+    </head>
+    <body>
+        <table>
+            <tr><th>Setting</th><th>Information</th></tr>
+            <tr><td>auto_save</td><td>Toggle auto saving of xchat's config on exit.</td></tr>
+            <tr><td>auto_save_url</td><td>Auto save URLs before quitting to &lt;cfgdir&gt;/url.save.</td></tr>
+            <tr><td>away_auto_unmark</td><td>Toggle automatically unmarking away before message send.</td></tr>
+            <tr><td>away_reason</td><td>Default away reason.</td></tr>
+            <tr><td>away_show_message</td><td>Toggle announcing of away messages.</td></tr>
+            <tr><td>away_show_once</td><td>Show identical away messages only once.</td></tr>
+            <tr><td>away_size_max</td><td>How many users can be away in userlist before they are not colored.</td></tr>
+            <tr><td>away_timeout</td><td>How often in seconds to check for max size for colors in userlist.</td></tr>
+            <tr><td>away_track</td><td>Toggle color change for away users in userlist.</td></tr>
+            <tr>
+                <td>completion_amount</td>
+                <td>
+                    How many nicks starting with input there should be before all are shown in text box.<br>
+                    (E.g. if you have 'k' and completion_amount is set to 6, and there are 6 more nicks beginning with 'k' in the userlist, then all of the nicks starting with 'k' are shown in the text box)
+                </td>
+            </tr>
+            <tr><td>completion_auto</td><td>Toggle automatic nick completion.</td></tr>
+            <tr><td>completion_sort</td><td>Toggle nick completion sorting in "last talk" order.</td></tr>
+            <tr><td>completion_suffix</td><td>Suffix to be appended to nicks after completion.</td></tr>
+            <tr><td>dcc_auto_chat</td><td>Toggle auto accept for DCC chats.</td></tr>
+            <tr><td>dcc_auto_resume</td><td>Toggle auto resume of DCC transfers.</td></tr>
+            <tr>
+                <td>dcc_auto_send</td>
+                <td>
+                    How to accept DCC transfers.
+                    <div class="specifics">
+                        0 = Do not Auto Accept<br>
+                        1 = Auto Accept<br>
+                        2 = Browse for Folder<br>
+                    </div>
+                </td>
+            </tr>
+            <tr><td>dcc_blocksize</td><td>The blocksize for DCC transfers.</td></tr>
+            <tr><td>dcc_completed_dir</td><td>Directory to move completed files to.</td></tr>
+            <tr><td>dcc_dir</td><td>Directory to download files to from DCC.</td></tr>
+            <tr><td>dcc_fast_send</td><td>Toggle speed up of DCC transfers by not waiting to heard if last part was received before sending next.</td></tr>
+            <tr><td>dcc_global_max_get_cps</td><td>Max file transfer speed for all downloads combined in bytes per second.</td></tr>
+            <tr><td>dcc_global_max_send_cps</td><td>Max file transfer speed for all uploads combined in bytes per second.</td></tr>
+            <tr><td>dcc_ip</td><td>DCC IP address to bind to.</td></tr>
+            <tr><td>dcc_ip_from_server</td><td>Get address from IRC server.</td></tr>
+            <tr><td>dcc_max_get_cps</td><td>Max file transfer speed for one download in bytes per second.</td></tr>
+            <tr><td>dcc_max_send_cps</td><td>Max file transfer speed for one upload in bytes per second.</td></tr>
+            <tr>
+                <td>dcc_permissions</td>
+                <td>
+                    What permissions to set on received files.<br>
+                    (It's a CHMOD value in decimal, e.g. to CHMOD a file to 644, which is octal, you need to set dcc_permissions to 420, which is it's decimal equivalent)
+                </td>
+            </tr>
+            <tr><td>dcc_port_first</td><td>First DCC port in range. (Leave ports at 0 for full range)</td></tr>
+            <tr><td>dcc_port_last</td><td>Last DCC port in range. (Leave ports at 0 for full range)</td></tr>
+            <tr><td>dcc_remove</td><td>Toggle automatic removal of finished/failed DCCs.</td></tr>
+            <tr><td>dcc_save_nick</td><td>Toggle saving of nicks in filenames.</td></tr>
+            <tr><td>dcc_send_fillspaces</td><td>Replace spaces in filenames with underscores.</td></tr>
+            <tr><td>dcc_stall_timeout</td><td>Time in seconds to wait before timing out during a DCC send.</td></tr>
+            <tr><td>dcc_timeout</td><td>Time in seconds to wait before timing out a DCC transfer waiting to be accepted.</td></tr>
+            <tr><td>dnsprogram</td><td>Obsolete.</td></tr>
+            <tr><td>flood_ctcp_num</td><td>Number of CTCPs within flood_ctcp_time to be considered a flood.</td></tr>
+            <tr><td>flood_ctcp_time</td><td>Time in seconds for use with flood_ctcp_num.</td></tr>
+            <tr><td>flood_msg_num</td><td>Number of messages within flood_msg_time to be considered a flood.</td></tr>
+            <tr><td>flood_msg_time</td><td>Time in seconds for use with flood_msg_num.</td></tr>
+            <tr><td>gui_auto_open_chat</td><td>Toggle auto opening of Direct Chat Window on DCC Chat.</td></tr>
+            <tr><td>gui_auto_open_dialog</td><td>Toggle auto opening of dialog windows.</td></tr>
+            <tr><td>gui_auto_open_recv</td><td>Toggle auto opening of transfer window on DCC Recv.</td></tr>
+            <tr><td>gui_auto_open_send</td><td>Toggle auto opening of transfer window on DCC Send.</td></tr>
+            <tr><td>gui_colors_from_gtk</td><td>Obtain a reasonable palette from the GTK theme via libcontrast.</td></tr>
+            <tr><td>gui_dialog_height</td><td>New dialog height in pixels.</td></tr>
+            <tr><td>gui_dialog_left</td><td>The X co-ordinance of dialogs when opened.</td></tr>
+            <tr><td>gui_dialog_top</td><td>The Y co-ordinance of dialogs when opened.</td></tr>
+            <tr><td>gui_dialog_width</td><td>New dialog width in pixels.</td></tr>
+            <tr><td>gui_hide_menu</td><td>Hide or unhide menu bar.</td></tr>
+            <tr><td>gui_input_spell</td><td>Toggle spell checking.</td></tr>
+            <tr><td>gui_input_style</td><td>Toggle use of text box colors and fonts in input box.</td></tr>
+            <tr><td>gui_join_dialog</td><td>Obsolete.</td></tr>
+            <tr>
+                <td>gui_lagometer</td>
+                <td>
+                    Toggle types of Lag-O-Meters.
+                    <div class="specifics">
+                        0 = Off<br>
+                        1 = Graph<br>
+                        2 = Text<br>
+                        3 = Both
+                    </div>
+                </td>
+            </tr>
+            <tr><td>gui_mode_buttons</td><td>Toggle mode buttons.</td></tr>
+            <tr><td>gui_pane_left_size</td><td>Change size left pane.</td></tr>
+            <tr><td>gui_pane_right_size</td><td>Change size right pane.</td></tr>
+            <tr><td>gui_quit_dialog</td><td>Obsolete.</td></tr>
+            <tr><td>gui_slist_select</td><td>The number of the server to select by default in the server list starting at 0. (E.g. to select the 67th server, set it to 66)</td></tr>
+            <tr><td>gui_slist_skip</td><td>Toggle server list on startup.</td></tr>
+            <tr>
+                <td>gui_throttlemeter</td>
+                <td>
+                    Toggle types of throttle meters.
+                    <div class="specifics">
+                        0 = Off<br>
+                        1 = Graph<br>
+                        2 = Text<br>
+                        3 = Both
+                    </div>
+                </td>
+            </tr>
+            <tr><td>gui_topicbar</td><td>Toggle topic bar.</td></tr>
+            <tr><td>gui_tray</td><td>Enable system tray icon.</td></tr>
+            <tr>
+                <td>gui_tray_flags</td>
+                <td>
+                    Set tray flags.
+                    <div class="specifics">
+                        0 = Off<br>
+                        1 = Hide to tray on exit<br>
+                        2 = Don't show balloons unless hidden or iconified<br>
+                        4 = Minimize to tray
+                    </div>
+                    To set multiple options at once, add the numbers up. For example, to enable options 2 and 4, use:
+                    <span class="specifics">/set gui_tray_flags 6</span><br>
+                    To toggle a specific option, use:
+                    <span class="specifics">/set -or gui_tray_flags &lt;n&gt;</span><br>
+                    To enable a specific option, use:
+                    <span class="specifics">/set -on gui_tray_flags &lt;n&gt;</span><br>
+                    To disable a specific option, use:
+                    <span class="specifics">/set -off gui_tray_flags &lt;n&gt;</span>
+                </td>
+            </tr>
+            <tr>
+                <td>gui_tweaks</td>
+                <td>
+                    Set gui tweaks.
+                    <div class="specifics">
+                        &nbsp;0 = Off<br>
+                        &nbsp;1 = Show useramount in titlebar<br>
+                        &nbsp;2 = Hide button next to your nickname<br>
+                        &nbsp;4 = Swap the middle and left panes (allows side-by-side userlist/tree)<br>
+                        &nbsp;8 = Disable tree-view dotted connecting lines<br>
+                        16 = Show channel modes in titlebar when key is set<br>
+                        32 = Smaller treeview/userlist row spacing (compact mode) (2.8.6+)
+                    </div>
+                    To set multiple options at once, add the numbers up. For example, to enable options 2, 8, and 32, use:
+                    <span class="specifics">/set gui_tweaks 42</span><br>
+                    To toggle a specific option, use:
+                    <span class="specifics">/set -or gui_tweaks &lt;n&gt;</span><br>
+                    To enable a specific option, use:
+                    <span class="specifics">/set -on gui_tweaks &lt;n&gt;</span><br>
+                    To disable a specific option, use:
+                    <span class="specifics">/set -off gui_tweaks &lt;n&gt;</span>
+                </td>
+            </tr>
+            <tr><td>gui_ulist_buttons</td><td>Toggle userlist buttons.</td></tr>
+            <tr><td>gui_ulist_doubleclick</td><td>Command to run upon double click of user in userlist.</td></tr>
+            <tr><td>gui_ulist_hide</td><td>Hides userlist.</td></tr>
+            <tr><td>gui_ulist_left</td><td>Obsolete.</td></tr>
+            <tr>
+                <td>gui_ulist_pos</td>
+                <td>
+                    Set userlist position.
+                    <div class="specifics">
+                        1 = Left-Upper<br>
+                        2 = Left-Lower<br>
+                        3 = Right-Upper<br>
+                        4 = Right-Lower
+                    </div>
+                </td>
+            </tr>
+            <tr><td>gui_ulist_resizable</td><td>Toggle resizable userlist.</td></tr>
+            <tr><td>gui_ulist_show_hosts</td><td>Toggle user's hosts displaying in userlist.</td></tr>
+            <tr>
+                <td>gui_ulist_sort</td>
+                <td>
+                    How to sort users in the userlist.
+                    <div class="specifics">
+                        0 = A-Z with prefixes first<br>
+                        1 = A-Z<br>
+                        2 = A-Z with prefixes last<br>
+                        3 = Z-A<br>
+                        4 = Unsorted
+                    </div>
+                </td>
+            </tr>
+            <tr><td>gui_ulist_style</td><td>Toggle use of text box colors and fonts in userlist.</td></tr>
+            <tr>
+                <td>gui_url_mod</td>
+                <td>
+                    How to handle URLs when clicked. (And what to hold.)
+                    <div class="specifics">
+                        0 = Left Click Only<br>
+                        1 = Shift<br>
+                        2 = Caps Lock<br>
+                        4 = CTRL<br>
+                        8 = ALT
+                    </div>
+                </td>
+            </tr>
+            <tr><td>gui_usermenu</td><td>Toggle editable usermenu.</td></tr>
+            <tr><td>gui_win_height</td><td>Main window height in pixels.</td></tr>
+            <tr><td>gui_win_left</td><td>The X co-ordinance of main window when opened.</td></tr>
+            <tr><td>gui_win_save</td><td>Toggles saving of state on exit.</td></tr>
+            <tr>
+                <td>gui_win_state</td>
+                <td>
+                    Default state of the main window.
+                    <div class="specifics">
+                        0 = Not Maximized<br>
+                        1 = Maximized
+                    </div>
+                </td>
+            </tr>
+            <tr><td>gui_win_top</td><td>The Y co-ordinance of main window when opened.</td></tr>
+            <tr><td>gui_win_width</td><td>Main window width in pixels.</td></tr>
+            <tr><td>input_balloon_chans</td><td>Show tray balloons on channel messages.</td></tr>
+            <tr><td>input_balloon_hilight</td><td>Show tray balloons on highlighted messages.</td></tr>
+            <tr><td>input_balloon_priv</td><td>Show tray balloons on private messages.</td></tr>
+            <tr><td>input_beep_chans</td><td>Toggle beep on channel messages.</td></tr>
+            <tr><td>input_beep_hilight</td><td>Toggle beep on highlighted messages.</td></tr>
+            <tr><td>input_beep_msg</td><td>Toggle beep on private messages.</td></tr>
+            <tr>
+                <td>input_command_char</td>
+                <td>
+                    Character used to execute commands.<br>
+                    (E.g. if set to '[' then you would use commands like '[me jumps around')
+                </td>
+            </tr>
+            <tr><td>input_filter_beep</td><td>Toggle filtering of beeps sent by others.</td></tr>
+            <tr><td>input_flash_chans</td><td>Toggle whether or not to flash taskbar on channel messages.</td></tr>
+            <tr><td>input_flash_hilight</td><td>Toggle whether or not to flash taskbar on highlighted messages.</td></tr>
+            <tr><td>input_flash_priv</td><td>Toggle whether or not to flash taskbar on private messages.</td></tr>
+            <tr><td>input_perc_ascii</td><td>Toggle interpreting of %nnn as ASCII value.</td></tr>
+            <tr><td>input_perc_color</td><td>Toggle interpreting of %C, %B as color, bold, etc.</td></tr>
+            <tr><td>input_tray_chans</td><td>Blink tray icon on channel messages.</td></tr>
+            <tr><td>input_tray_hilight</td><td>Blink tray icon on highlighted messages.</td></tr>
+            <tr><td>input_tray_priv</td><td>Blink tray icon on private messages.</td></tr>
+            <tr><td>hilight_enable</td><td>Toggle support for hilighting.</td></tr>
+            <tr><td>irc_auto_rejoin</td><td>Toggle auto rejoining when kicked.</td></tr>
+            <tr>
+                <td>irc_ban_type</td>
+                <td>
+                    The default ban type to use for all bans.
+                    <div class="specifics">
+                        0 = *!*@*.host<br>
+                        1 = *!*@domain<br>
+                        2 = *!*user@*.host<br>
+                        3 = *!*user@domain
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>irc_conf_mode</td>
+                <td>
+                    Toggle hiding of join, part and quit messages.
+                    <div class="specifics">
+                        0 = Show join/part/quits<br>
+                        1 = Hide join/part/quits
+                    </div>
+                </td>
+            </tr>
+            <tr><td>irc_extra_hilight</td><td>Extra words to highlight on.</td></tr>
+            <tr><td>irc_hide_version</td><td>Toggle hiding of VERSION reply.</td></tr>
+            <tr><td>irc_id_ntext</td><td>$4 in the channel message, channel message hilight and private message events if unidentified.</td></tr>
+            <tr><td>irc_id_ytext</td><td>$4 in the channel message, channel message hilight and private message events if identified.</td></tr>
+            <tr><td>irc_invisible</td><td>Toggle invisible mode (+i).</td></tr>
+            <tr><td>irc_join_delay</td><td>How long to delay auto-joining a channel after connect.</td></tr>
+            <tr><td>irc_logging</td><td>Toggle logging.</td></tr>
+            <tr><td>irc_logmask</td><td>Mask used to create log filenames.</td></tr>
+            <tr><td>irc_nick1</td><td>First choice nick.</td></tr>
+            <tr><td>irc_nick2</td><td>Second choice nick.</td></tr>
+            <tr><td>irc_nick3</td><td>Third choice nick.</td></tr>
+            <tr><td>irc_nick_hilight</td><td>What nicks to highlight when they talk.</td></tr>
+            <tr><td>irc_no_hilight</td><td>Nicks not to highlight on.</td></tr>
+            <tr><td>irc_part_reason</td><td>Default reason when leaving channel.</td></tr>
+            <tr><td>irc_quit_reason</td><td>Default quit reason.</td></tr>
+            <tr><td>irc_raw_modes</td><td>Toggle RAW channel modes.</td></tr>
+            <tr><td>irc_real_name</td><td>Real name to be sent to server.</td></tr>
+            <tr><td>irc_servernotice</td><td>Toggle receiving of server notices.</td></tr>
+            <tr><td>irc_skip_motd</td><td>Toggle skipping of server MOTD.</td></tr>
+            <tr><td>irc_time_format</td><td>Format used for replaying logs.</td></tr>
+            <tr><td>irc_user_name</td><td>Username to be sent to server.</td></tr>
+            <tr><td>irc_wallops</td><td>Toggle receiving wallops.</td></tr>
+            <tr><td>irc_who_join</td><td>Toggle running WHO after joining channel.</td></tr>
+            <tr><td>irc_whois_front</td><td>Toggle whois results being sent to currently active tab.</td></tr>
+            <tr><td>net_auto_reconnect</td><td>Toggle auto reconnect to server.</td></tr>
+            <tr><td>net_auto_reconnectonfail</td><td>Toggle auto reconnect upon failed connection.</td></tr>
+            <tr><td>net_bind_host</td><td>Network address to bind XChat to.</td></tr>
+            <tr><td>net_ping_timeout</td><td>How long server ping has to be to timeout.</td></tr>
+            <tr><td>net_proxy_auth</td><td>Toggle proxy authentication.</td></tr>
+            <tr><td>net_proxy_host</td><td>Proxy host to use.</td></tr>
+            <tr><td>net_proxy_pass</td><td>Password to use if proxy authentication is turned on.</td></tr>
+            <tr><td>net_proxy_port</td><td>Port to use for proxy host.</td></tr>
+            <tr>
+                <td>net_proxy_type</td>
+                <td>
+                    Type of proxy to use.
+                    <div class="specifics">
+                        0 = Disabled<br>
+                        1 = Wingate<br>
+                        2 = Socks4<br>
+                        3 = Socks5<br>
+                        4 = HTTP<br>
+                        5 = MS Proxy (ISA)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>net_proxy_use</td>
+                <td>
+                    What to use proxies for (if set).
+                    <div class="specifics">
+                        0 = All<br>
+                        1 = IRC Only<br>
+                        2 = DCC Only
+                    </div>
+                </td>
+            </tr>
+            <tr><td>net_proxy_user</td><td>Username to use if proxy authentication is turned on.</td></tr>
+            <tr><td>net_reconnect_delay</td><td>How many seconds to wait before reconnection.</td></tr>
+            <tr><td>net_throttle</td><td>Toggle flood protection (to keep from getting kicked).</td></tr>
+            <tr><td>notify_timeout</td><td>How often in seconds to check for users in your notify list.</td></tr>
+            <tr><td>notify_whois_online</td><td>Toggle performing WHOIS on users on your notify list when they come online.</td></tr>
+            <tr><td>redundant_nickstamps</td><td>Show nicks for monologues (one person saying multiple lines of messages in a row).</td></tr>
+            <tr><td>stamp_log</td><td>Toggle timestamps in logs.</td></tr>
+            <tr><td>stamp_log_format</td><td>Format to use for log timestamps.</td></tr>
+            <tr><td>stamp_text</td><td>Toggle timestamps in text box.</td></tr>
+            <tr><td>stamp_text_format</td><td>Format to use for timestamps in textbox.</td></tr>
+            <tr><td>strip_quits</td><td>Strip 'Quit:' and 'Exit:' text from quit messages.</td></tr>
+            <tr>
+                <td>tab_new_to_front</td>
+                <td>
+                    When to focus new tabs.
+                    <div class="specifics">
+                        0 = Never<br>
+                        1 = Always<br>
+                        2 = Only on requested tabs
+                    </div>
+                </td>
+            </tr>
+            <tr><td>tab_chans</td><td>Open tabs for channels instead of windows.</td></tr>
+            <tr><td>tab_dialogs</td><td>Open tabs for queries instead of windows.</td></tr>
+            <tr><td>tab_icons</td><td>Unused; treeviews always use icons.</td></tr>
+            <tr><td>tab_layout</td><td>Obsolete; Conspire does not support tabs.</td></tr>
+            <tr>
+                <td>tab_new_to_front</td>
+                <td>
+                    When to focus new tabs.
+                    <div class="specifics">
+                        0 = Never<br>
+                        1 = Always<br>
+                        2 = Only on requested tabs
+                    </div>
+                </td>
+            </tr>
+            <tr><td>tab_notices</td><td>Open up extra tabs for server notices.</td></tr>
+            <tr>
+                <td>tab_pos</td>
+                <td>
+                    Set position of tabs.
+                    <div class="specifics">
+                        1 = Left-Upper<br>
+                        2 = Left<br>
+                        3 = Right-Upper<br>
+                        4 = Right<br>
+                        5 = Top<br>
+                        6 = Bottom<br>
+                        7 = Hidden
+                    </div>
+                </td>
+            </tr>
+            <tr><td>tab_position</td><td>Obsolete.</td></tr>
+            <tr><td>tab_server</td><td>Open an extra tab for server messages.</td></tr>
+            <tr><td>tab_small</td><td>Obsolete.</td></tr>
+            <tr><td>tab_sort</td><td>Toggle alphabetical sorting of tabs.</td></tr>
+            <tr><td>tab_trunc</td><td>Obsolete.</td></tr>
+            <tr><td>tab_utils</td><td>Open utils in tabs instead of windows.</td></tr>
+            <tr><td>text_background</td><td>Sets the background image for text box.</td></tr>
+            <tr><td>text_color_nicks</td><td>Toggle colored nicks.</td></tr>
+            <tr><td>text_color_nicks_hilighted</td><td>Toggle colored nicks for hilighted messages.</td></tr>
+            <tr><td>text_font</td><td>Font to be used.</td></tr>
+            <tr><td>text_indent</td><td>Toggle text indentation.</td></tr>
+            <tr><td>text_max_indent</td><td>Max pixels to indent text with.</td></tr>
+            <tr><td>text_max_lines</td><td>Max number or scrollback lines.</td></tr>
+            <tr><td>text_replay</td><td>Reloads conversation buffers on next startup.</td></tr>
+            <tr><td>text_show_marker</td><td>Toggle red marker line feature.</td></tr>
+            <tr><td>text_show_sep</td><td>Toggle separator line.</td></tr>
+            <tr><td>text_stripcolor</td><td>Toggle strip colors.</td></tr>
+            <tr><td>text_thin_sep</td><td>Use thin separator line instead of thick line.</td></tr>
+            <tr><td>text_tint_blue</td><td>Tint of blue to use for transparency settings.</td></tr>
+            <tr><td>text_tint_green</td><td>Tint of green to use for transparency settings.</td></tr>
+            <tr><td>text_tint_red</td><td>Tint of red to use for transparency settings.</td></tr>
+            <tr><td>text_transparent</td><td>Obsolete; Conspire does not support this feature.</td></tr>
+            <tr><td>text_wordwrap</td><td>Toggle wordwrap.</td></tr>
+            <tr><td>text_overflow_stop</td><td>Text to append to messages during overflow processing to show there's more to come.</td></tr>
+            <tr><td>text_overflow_limit</td><td>The longest a line may be before it is wrapped, including IRC cruft.</td></tr>
+        </table>
+    </body>
+</html>
+
