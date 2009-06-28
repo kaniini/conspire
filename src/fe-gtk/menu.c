@@ -553,10 +553,6 @@ menu_nickmenu (session *sess, GdkEventButton *event, char *nick, int num_sel)
 						user->hostname ? user->hostname : _("Unknown"));
 			menu_quick_item (0, buf, submenu, XCMENU_MARKUP, 0, 0);
 
-			snprintf (buf, sizeof (buf), fmt, _("Country:"),
-						user->hostname ? country(user->hostname) : _("Unknown"));
-			menu_quick_item (0, buf, submenu, XCMENU_MARKUP, 0, 0);
-
 			snprintf (buf, sizeof (buf), fmt, _("Server:"),
 						user->servername ? user->servername : _("Unknown"));
 			menu_quick_item (0, buf, submenu, XCMENU_MARKUP, 0, 0);

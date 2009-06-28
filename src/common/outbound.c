@@ -653,33 +653,6 @@ cmd_ctcp (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static CommandResult
-cmd_country (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	char *code = word[2];
-	if (*code)
-	{
-		/* search? */
-		if (strcmp (code, "-s") == 0)
-		{
-			country_search (word[3], sess, (void *)PrintTextf);
-			return CMD_EXEC_OK;
-		}
-
-		/* search, but forgot the -s */
-		if (strchr (code, '*'))
-		{
-			country_search (code, sess, (void *)PrintTextf);
-			return CMD_EXEC_OK;
-		}
-
-		sprintf (tbuf, "%s = %s\n", code, country (code));
-		PrintText (sess, tbuf);
-		return CMD_EXEC_OK;
-	}
-	return CMD_EXEC_FAIL;
-}
-
-static CommandResult
 cmd_hop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	char *key = sess->channelkey;
@@ -2591,8 +2564,6 @@ struct commands xc_cmds[] = {
 	{"CLEAR", cmd_clear, 0, 0, 1, N_("CLEAR [ALL|HISTORY], Clears the current text window or command history")},
 	{"CLOSE", cmd_close, 0, 0, 1, N_("CLOSE, Closes the current window/tab")},
 	{"CONNECT", cmd_newserver, 0, 0, 1, N_("CONNECT [-noconnect] <hostname> [<port>], creates a new server tab. If -noconnect is not specified, connects to the requested server using the same flags used with SERVER.")},
-	{"COUNTRY", cmd_country, 0, 0, 1,
-	 N_("COUNTRY [-s] <code|wildcard>, finds a country code, eg: au = australia")},
 	{"CTCP", cmd_ctcp, 1, 0, 1,
 	 N_("CTCP <nick> <message>, send the CTCP message to nick, common messages are VERSION and USERINFO")},
 	{"CYCLE", cmd_hop, 1, 1, 1,

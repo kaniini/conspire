@@ -28,8 +28,6 @@ int rfc_casecmp (const char *, const char *);
 int rfc_ncasecmp (char *, char *, int);
 int buf_get_line (char *, char **, int *, int len);
 char *nocasestrstr (const char *text, const char *tofind);
-char *country (char *);
-void country_search (char *pattern, void *ud, void (*print)(void *, char *, ...));
 char *get_cpu_str (void);
 int util_exec (const char *cmd);
 int util_execv (const char * const argv[]);
