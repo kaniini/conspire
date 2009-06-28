@@ -237,25 +237,6 @@ def:
 }
 
 static CommandResult
-cmd_addbutton (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	if (*word[2] && *word_eol[3])
-	{
-		if (sess->type == SESS_DIALOG)
-		{
-			list_addentry (&dlgbutton_list, word_eol[3], word[2]);
-			fe_dlgbuttons_update (sess);
-		} else
-		{
-			list_addentry (&button_list, word_eol[3], word[2]);
-			fe_buttons_update (sess);
-		}
-		return CMD_EXEC_OK;
-	}
-	return CMD_EXEC_FAIL;
-}
-
-static CommandResult
 cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	GSList *list = sess_list;
@@ -881,26 +862,6 @@ cmd_debug (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static CommandResult
-cmd_delbutton (struct session *sess, char *tbuf, char *word[],
-					char *word_eol[])
-{
-	if (*word[2])
-	{
-		if (sess->type == SESS_DIALOG)
-		{
-			if (list_delentry (&dlgbutton_list, word[2]))
-				fe_dlgbuttons_update (sess);
-		} else
-		{
-			if (list_delentry (&button_list, word[2]))
-				fe_buttons_update (sess);
-		}
-		return CMD_EXEC_OK;
-	}
-	return CMD_EXEC_FAIL;
-}
-
-static CommandResult
 cmd_dehalfop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
@@ -1136,126 +1097,6 @@ menu_add (char *path, char *label, char *cmd, char *ucmd, int pos, int state, in
 }
 
 static CommandResult
-cmd_menu (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	int idx = 2;
-	int len;
-	int pos = 0xffff;
-	int state;
-	int toggle = FALSE;
-	int enable = TRUE;
-	int markup = FALSE;
-	int key = 0;
-	int mod = 0;
-	char *label;
-	char *group = NULL;
-	char *icon = NULL;
-
-	if (!word[2][0] || !word[3][0])
-		return CMD_EXEC_FAIL;
-
-	/* -eX enabled or not? */
-	if (word[idx][0] == '-' && word[idx][1] == 'e')
-	{
-		enable = atoi (word[idx] + 2);
-		idx++;
-	}
-
-	/* -i<ICONFILE> */
-	if (word[idx][0] == '-' && word[idx][1] == 'i')
-	{
-		icon = word[idx] + 2;
-		idx++;
-	}
-
-	/* -k<mod>,<key> key binding */
-	if (word[idx][0] == '-' && word[idx][1] == 'k')
-	{
-		char *comma = strchr (word[idx], ',');
-		if (!comma)
-			return CMD_EXEC_FAIL;
-		mod = atoi (word[idx] + 2);
-		key = atoi (comma + 1);
-		idx++;
-	}
-
-	/* -m to specify PangoMarkup language */
-	if (word[idx][0] == '-' && word[idx][1] == 'm')
-	{
-		markup = TRUE;
-		idx++;
-	}
-
-	/* -pX to specify menu position */
-	if (word[idx][0] == '-' && word[idx][1] == 'p')
-	{
-		pos = atoi (word[idx] + 2);
-		idx++;
-	}
-
-	/* -rSTATE,GROUP to specify a radio item */
-	if (word[idx][0] == '-' && word[idx][1] == 'r')
-	{
-		state = atoi (word[idx] + 2);
-		group = word[idx] + 4;
-		idx++;
-	}
-
-	/* -tX to specify toggle item with default state */
-	if (word[idx][0] == '-' && word[idx][1] == 't')
-	{
-		state = atoi (word[idx] + 2);
-		idx++;
-		toggle = TRUE;
-	}
-
-	if (word[idx+1][0] == 0)
-		return CMD_EXEC_FAIL;
-
-	/* the path */
-	path_part (word[idx+1], tbuf, 512);
-	len = strlen (tbuf);
-	if (len)
-		tbuf[len - 1] = 0;
-
-	/* the name of the item */
-	label = file_part (word[idx + 1]);
-	if (label[0] == '-' && label[1] == 0)
-		label = NULL;	/* separator */
-
-	if (markup)
-	{
-		char *p;	/* to force pango closing tags through */
-		for (p = label; *p; p++)
-			if (*p == 3)
-				*p = '/';
-	}
-
-	if (!g_ascii_strcasecmp (word[idx], "ADD"))
-	{
-		if (toggle)
-		{
-			menu_add (tbuf, label, word[idx + 2], word[idx + 3], pos, state, markup, enable, mod, key, NULL, NULL);
-		} else
-		{
-			if (word[idx + 2][0])
-				menu_add (tbuf, label, word[idx + 2], NULL, pos, state, markup, enable, mod, key, group, icon);
-			else
-				menu_add (tbuf, label, NULL, NULL, pos, state, markup, enable, mod, key, group, icon);
-		}
-		return CMD_EXEC_OK;
-	}
-
-	if (!g_ascii_strcasecmp (word[idx], "DEL"))
-	{
-		menu_del (tbuf, label);
-		return CMD_EXEC_OK;
-	}
-
-	return CMD_EXEC_FAIL;
-}
-
-static CommandResult
 cmd_devoice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
@@ -1325,129 +1166,6 @@ cmd_gate (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	return CMD_EXEC_FAIL;
 }
 
-typedef struct
-{
-	char *cmd;
-	session *sess;
-} getvalinfo;
-
-static void
-get_int_cb (int cancel, int val, getvalinfo *info)
-{
-	char buf[512];
-
-	if (!cancel)
-	{
-		snprintf (buf, sizeof (buf), "%s %d", info->cmd, val);
-		if (is_session (info->sess))
-			handle_command (info->sess, buf, FALSE);
-	}
-
-	free (info->cmd);
-	free (info);
-}
-
-static CommandResult
-cmd_getint (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	getvalinfo *info;
-
-	if (!word[4][0])
-		return CMD_EXEC_FAIL;
-
-	info = malloc (sizeof (*info));
-	info->cmd = strdup (word[3]);
-	info->sess = sess;
-
-	fe_get_int (word[4], atoi (word[2]), get_int_cb, info);
-
-	return CMD_EXEC_OK;
-}
-
-static void
-get_file_cb (char *cmd, char *file)
-{
-	char buf[1024 + 128];
-
-	/* execute the command once per file, then once more with
-      no args */
-	if (file)
-	{
-		snprintf (buf, sizeof (buf), "%s %s", cmd, file);
-		handle_command (current_sess, buf, FALSE);
-	}
-	else
-	{
-		handle_command (current_sess, cmd, FALSE);
-		free (cmd);
-	}
-}
-
-static CommandResult
-cmd_getfile (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	int idx = 2;
-	int flags = 0;
-
-	if (!word[3][0])
-		return CMD_EXEC_FAIL;
-
-	if (!strcmp (word[2], "-folder"))
-	{
-		flags |= FRF_CHOOSEFOLDER;
-		idx++;
-	}
-
-	if (!strcmp (word[idx], "-multi"))
-	{
-		flags |= FRF_MULTIPLE;
-		idx++;
-	}
-
-	if (!strcmp (word[idx], "-save"))
-	{
-		flags |= FRF_WRITE;
-		idx++;
-	}
-
-	fe_get_file (word[idx+1], word[idx+2], (void *)get_file_cb, strdup (word[idx]), flags);
-
-	return CMD_EXEC_OK;
-}
-
-static void
-get_str_cb (int cancel, char *val, getvalinfo *info)
-{
-	char buf[512];
-
-	if (!cancel)
-	{
-		snprintf (buf, sizeof (buf), "%s %s", info->cmd, val);
-		if (is_session (info->sess))
-			handle_command (info->sess, buf, FALSE);
-	}
-
-	free (info->cmd);
-	free (info);
-}
-
-static CommandResult
-cmd_getstr (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	getvalinfo *info;
-
-	if (!word[4][0])
-		return CMD_EXEC_FAIL;
-
-	info = malloc (sizeof (*info));
-	info->cmd = strdup (word[3]);
-	info->sess = sess;
-
-	fe_get_str (word[4], word[2], get_str_cb, info);
-
-	return CMD_EXEC_OK;
-}
-
 static CommandResult
 cmd_ghost (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
@@ -1458,34 +1176,6 @@ cmd_ghost (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 
 	return CMD_EXEC_FAIL;
-}
-
-static CommandResult
-cmd_gui (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	switch (str_ihash (word[2]))
-	{
-	case 0x058b836e: fe_ctrl_gui (sess, 8, 0); break; /* APPLY */
-	case 0xac1eee45: fe_ctrl_gui (sess, 7, 2); break; /* ATTACH */
-	case 0x05a72f63: fe_ctrl_gui (sess, 4, atoi (word[3])); break; /* COLOR */
-	case 0xb06a1793: fe_ctrl_gui (sess, 7, 1); break; /* DETACH */
-	case 0x05cfeff0: fe_ctrl_gui (sess, 3, 0); break; /* FLASH */
-	case 0x05d154d8: fe_ctrl_gui (sess, 2, 0); break; /* FOCUS */
-	case 0x0030dd42: fe_ctrl_gui (sess, 0, 0); break; /* HIDE */
-	case 0x61addbe3: fe_ctrl_gui (sess, 5, 0); break; /* ICONIFY */
-	case 0xc0851aaa: fe_message (word[3], FE_MSG_INFO|FE_MSG_MARKUP); break; /* MSGBOX */
-	case 0x0035dafd: fe_ctrl_gui (sess, 1, 0); break; /* SHOW */
-	case 0x0033155f: /* MENU */
-		if (!g_ascii_strcasecmp (word[3], "TOGGLE"))
-			fe_ctrl_gui (sess, 6, 0);
-		else
-			return CMD_EXEC_FAIL;
-		break;
-	default:
-		return CMD_EXEC_FAIL;
-	}
-
-	return CMD_EXEC_OK;
 }
 
 typedef struct
@@ -2444,43 +2134,6 @@ cmd_send (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	return CMD_EXEC_OK;
 }
 
-static CommandResult
-cmd_setcursor (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	int delta = FALSE;
-
-	if (*word[2])
-	{
-		if (word[2][0] == '-' || word[2][0] == '+')
-			delta = TRUE;
-		fe_set_inputbox_cursor (sess, delta, atoi (word[2]));
-		return CMD_EXEC_OK;
-	}
-
-	return CMD_EXEC_FAIL;
-}
-
-static CommandResult
-cmd_settab (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	if (*word_eol[2])
-	{
-		strcpy (tbuf, sess->channel);
-		g_strlcpy (sess->channel, word_eol[2], CHANLEN);
-		fe_set_channel (sess);
-		strcpy (sess->channel, tbuf);
-	}
-
-	return CMD_EXEC_OK;
-}
-
-static CommandResult
-cmd_settext (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	fe_set_inputbox_contents (sess, word_eol[2]);
-	return CMD_EXEC_OK;
-}
-
 static int
 parse_irc_url (char *url, char *server_name[], char *port[], char *channel[], int *use_ssl)
 {
@@ -2641,47 +2294,6 @@ cmd_topic (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 		sess->server->p_topic (sess->server, word[2], word_eol[3]);
 	else
 		sess->server->p_topic (sess->server, sess->channel, word_eol[2]);
-	return CMD_EXEC_OK;
-}
-
-static CommandResult
-cmd_tray (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	if (strcmp (word[2], "-b") == 0)
-	{
-		fe_tray_set_balloon (word[3], word[4][0] ? word[4] : NULL);
-		return CMD_EXEC_OK;
-	}
-
-	if (strcmp (word[2], "-t") == 0)
-	{
-		fe_tray_set_tooltip (word[3][0] ? word[3] : NULL);
-		return CMD_EXEC_OK;
-	}
-
-	if (strcmp (word[2], "-i") == 0)
-	{
-		fe_tray_set_icon (atoi (word[3]));
-		return CMD_EXEC_OK;
-	}
-
-	if (strcmp (word[2], "-f") != 0)
-		return CMD_EXEC_FAIL;
-
-	if (!word[3][0])
-	{
-		fe_tray_set_file (NULL);	/* default xchat icon */
-		return CMD_EXEC_OK;
-	}
-
-	if (!word[4][0])
-	{
-		fe_tray_set_file (word[3]);	/* fixed custom icon */
-		return CMD_EXEC_OK;
-	}
-
-	/* flash between 2 icons */
-	fe_tray_set_flash (word[4], word[5][0] ? word[5] : NULL, atoi (word[3]));
 	return CMD_EXEC_OK;
 }
 
@@ -2852,28 +2464,6 @@ userlist_cb (struct User *user, session *sess)
 }
 
 static CommandResult
-cmd_uselect (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	int idx = 2;
-	int clear = TRUE;
-	int scroll = FALSE;
-
-	if (strcmp (word[2], "-a") == 0)	/* ADD (don't clear selections) */
-	{
-		clear = FALSE;
-		idx++;
-	}
-	if (strcmp (word[idx], "-s") == 0)	/* SCROLL TO */
-	{
-		scroll = TRUE;
-		idx++;
-	}
-	/* always valid, no args means clear the selection list */
-	fe_uselect (sess, word + idx, clear, scroll);
-	return CMD_EXEC_OK;
-}
-
-static CommandResult
 cmd_userlist (struct session *sess, char *tbuf, char *word[],
 				  char *word_eol[])
 {
@@ -2994,8 +2584,6 @@ cmd_voice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 /* this is now a table used to fill the command dictionary now with our builtins.
    it doesn't matter if it's properly sorted or not. --nenolod */
 struct commands xc_cmds[] = {
-	{"ADDBUTTON", cmd_addbutton, 0, 0, 1,
-	 N_("ADDBUTTON <name> <action>, adds a button under the user-list")},
 	{"AWAY", cmd_away, 1, 0, 1, N_("AWAY [<reason>], toggles away status")},
 	{"BAN", cmd_ban, 1, 1, 1,
 	 N_("BAN <mask> [<bantype>], bans everyone matching the mask from the current channel. If they are already on the channel this doesn't kick them (needs chanop)")},
@@ -3023,8 +2611,6 @@ struct commands xc_cmds[] = {
 
 	{"DEHALFOP", cmd_dehalfop, 1, 1, 1,
 	 N_("DEHALFOP <nick>, removes chanhalf-op status from the nick on the current channel (needs chanop)")},
-	{"DELBUTTON", cmd_delbutton, 0, 0, 1,
-	 N_("DELBUTTON <name>, deletes a button from under the user-list")},
 	{"DEOP", cmd_deop, 1, 1, 1,
 	 N_("DEOP <nick>, removes chanop status from the nick on the current channel (needs chanop)")},
         {"DESCRIBE", cmd_describe, 1, 0, 1,
@@ -3038,12 +2624,7 @@ struct commands xc_cmds[] = {
 	{"FOREACH", cmd_foreach, 0, 0, 1, N_("FOREACH <[local-]channel|server|[local-]query> performs a given command for all items of the specified type.")},
 	{"GATE", cmd_gate, 0, 0, 1,
 	 N_("GATE <host> [<port>], proxies through a host, port defaults to 23")},
-	{"GETFILE", cmd_getfile, 0, 0, 1, "GETFILE [-folder] [-multi] [-save] <command> <title> [<initial>]"},
-	{"GETINT", cmd_getint, 0, 0, 1, "GETINT <default> <command> <prompt>"},
-	{"GETSTR", cmd_getstr, 0, 0, 1, "GETSTR <default> <command> <prompt>"},
 	{"GHOST", cmd_ghost, 1, 0, 1, N_("GHOST <nick> <password>, Kills a ghosted nickname")},
-	{"GUI", cmd_gui, 0, 0, 1, "GUI [APPLY|ATTACH|DETACH|SHOW|HIDE|FOCUS|FLASH|ICONIFY|COLOR <n>]\n"
-									  "       GUI [MSGBOX <text>|MENU TOGGLE]"},
 	{"HALFOP", cmd_halfop, 1, 1, 1,
 	 N_("HALFOP <nick>, gives chanhalf-op status to the nick (needs chanop)")},
 	{"HELP", cmd_help, 0, 0, 1, 0},
@@ -3073,8 +2654,6 @@ struct commands xc_cmds[] = {
 
 	{"ME", cmd_me, 0, 0, 1,
 	 N_("ME <action>, sends the action to the current channel (actions are written in the 3rd person, like /me jumps)")},
-	{"MENU", cmd_menu, 0, 0, 1, "MENU [-eX] [-i<ICONFILE>] [-k<mod>,<key>] [-m] [-pX] [-r<X,group>] [-tX] {ADD|DEL} <path> [command] [unselect command]\n"
-										 "       See http://xchat.org/docs/menu/ for more details."},
 	{"MODE", cmd_mode, 1, 0, 1, 0},
 	{"MSG", cmd_msg, 0, 0, 1, N_("MSG <nick> <message>, sends a private message")},
 
@@ -3127,25 +2706,13 @@ struct commands xc_cmds[] = {
 	 N_("SERVER <host> [<port>] [<password>], connects to a server, the default port is 6667")},
 #endif
 	{"SET", cmd_set, 0, 0, 1, N_("SET [-e] [-or] [-quiet] <variable> [<value>]")},
-	{"SETCURSOR", cmd_setcursor, 0, 0, 1, N_("SETCURSOR [-|+]<position>")},
-	{"SETTAB", cmd_settab, 0, 0, 1, 0},
-	{"SETTEXT", cmd_settext, 0, 0, 1, 0},
 	{"TOPIC", cmd_topic, 1, 1, 1,
 	 N_("TOPIC [<topic>], sets the topic if one is given, else shows the current topic")},
-	{"TRAY", cmd_tray, 0, 0, 1,
-	 N_("\nTRAY -f <timeout> <file1> [<file2>] Blink tray between two icons.\n"
-		   "TRAY -f <filename>                  Set tray to a fixed icon.\n"
-			"TRAY -i <number>                    Blink tray with an internal icon.\n"
-			"TRAY -t <text>                      Set the tray tooltip.\n"
-			"TRAY -b <title> <text>              Set the tray balloon."
-			)},
 	{"UNBAN", cmd_unban, 1, 1, 1,
 	 N_("UNBAN <mask> [<mask>...], unbans the specified masks.")},
 	{"UNIGNORE", cmd_unignore, 0, 0, 1, N_("UNIGNORE <mask> [QUIET]")},
 	{"UNLOAD", cmd_unload, 0, 0, 1, N_("UNLOAD <name>, unloads a plugin or script")},
 	{"URL", cmd_url, 0, 0, 1, N_("URL <url>, opens a URL in your browser")},
-	{"USELECT", cmd_uselect, 0, 1, 0,
-	 N_("USELECT [-a] [-s] <nick1> <nick2> etc, highlights nick(s) in channel userlist")},
 	{"USERLIST", cmd_userlist, 1, 1, 1, 0},
 	{"VOICE", cmd_voice, 1, 1, 1,
 	 N_("VOICE <nick>, gives voice status to someone (needs chanop)")},
