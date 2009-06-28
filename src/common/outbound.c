@@ -550,50 +550,6 @@ cmd_unban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 static CommandResult
-cmd_chanopt (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	int state;
-	if (!g_ascii_strcasecmp (word[3], "ON"))
-	{
-		state = TRUE;
-	} else if (!g_ascii_strcasecmp (word[3], "OFF"))
-	{
-		state = FALSE;
-	} else
-	{
-		if (!g_ascii_strcasecmp (word[2], "CONFMODE"))
-			state = sess->hide_join_part;
-		else if (!g_ascii_strcasecmp (word[2], "COLORPASTE"))
-			state = sess->color_paste;
-		else if (!g_ascii_strcasecmp (word[2], "BEEP"))
-			state = sess->beep;
-		else if (!g_ascii_strcasecmp (word[2], "TRAY"))
-			state = sess->tray;
-		else
-			return CMD_EXEC_FAIL;
-
-		PrintTextf (sess, "%s is %s\n", word[2], state ? "ON" : "OFF");
-		return CMD_EXEC_OK;
-	}
-
-	if (!g_ascii_strcasecmp (word[2], "CONFMODE"))
-	{
-		sess->hide_join_part = state;
-	} else if (!g_ascii_strcasecmp (word[2], "COLORPASTE"))
-	{
-		fe_set_color_paste (sess, state);
-	} else if (!g_ascii_strcasecmp (word[2], "BEEP"))
-	{
-		sess->beep = state;
-	} else if (!g_ascii_strcasecmp (word[2], "TRAY"))
-	{
-		sess->tray = state;
-	}
-
-	return CMD_EXEC_OK;
-}
-
-static CommandResult
 cmd_charset (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	server *serv = sess->server;
@@ -2475,8 +2431,9 @@ cmd_send (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	}
 	addr = ntohl (addr);
 
-	if ((addr & 0xffff0000) == 0xc0a80000 ||	/* 192.168.x.x */
-		 (addr & 0xff000000) == 0x0a000000)		/* 10.x.x.x */
+	if ((addr & 0xffff0000) == 0xc0a80000 ||	/* 192.168.0.0/24  */
+            (addr & 0xfff00000) == 0xac100000 ||        /* 172.16.0.0/12   */
+	    (addr & 0xff000000) == 0x0a000000)		/* 10.0.0.0/8      */
 		/* we got a private net address, let's PSEND or it'll fail */
 		snprintf (tbuf, 512, "DCC PSEND %s", word_eol[2]);
 	else
@@ -3042,17 +2999,10 @@ struct commands xc_cmds[] = {
 	{"AWAY", cmd_away, 1, 0, 1, N_("AWAY [<reason>], toggles away status")},
 	{"BAN", cmd_ban, 1, 1, 1,
 	 N_("BAN <mask> [<bantype>], bans everyone matching the mask from the current channel. If they are already on the channel this doesn't kick them (needs chanop)")},
-	{"CHANOPT", cmd_chanopt, 0, 0, 1,
-	 N_("Set per channel options\n"
-	 "CHANOPT CONFMODE ON|OFF - Toggle conf mode/showing of join and part messages\n"
-	 "CHANOPT COLORPASTE ON|OFF - Toggle color paste\n"
-	 "CHANOPT BEEP ON|OFF - Toggle beep on message\n"
-	 "CHANOPT TRAY ON|OFF - Toggle tray blink on message"
-	)},
 	{"CHARSET", cmd_charset, 0, 0, 1, 0},
 	{"CLEAR", cmd_clear, 0, 0, 1, N_("CLEAR [ALL|HISTORY], Clears the current text window or command history")},
 	{"CLOSE", cmd_close, 0, 0, 1, N_("CLOSE, Closes the current window/tab")},
-
+	{"CONNECT", cmd_newserver, 0, 0, 1, N_("CONNECT [-noconnect] <hostname> [<port>], creates a new server tab. If -noconnect is not specified, connects to the requested server using the same flags used with SERVER.")},
 	{"COUNTRY", cmd_country, 0, 0, 1,
 	 N_("COUNTRY [-s] <code|wildcard>, finds a country code, eg: au = australia")},
 	{"CTCP", cmd_ctcp, 1, 0, 1,
@@ -3132,7 +3082,6 @@ struct commands xc_cmds[] = {
 	 N_("NAMES, Lists the nicks on the current channel")},
 	{"NCTCP", cmd_nctcp, 1, 0, 1,
 	 N_("NCTCP <nick> <message>, Sends a CTCP notice")},
-	{"NEWSERVER", cmd_newserver, 0, 0, 1, N_("NEWSERVER [-noconnect] <hostname> [<port>]")},
 	{"NICK", cmd_nick, 0, 0, 1, N_("NICK <nickname>, sets your nick")},
 
 	{"NOTICE", cmd_notice, 1, 0, 1,
