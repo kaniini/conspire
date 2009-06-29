@@ -2738,155 +2738,152 @@ help (session *sess, char *tbuf, char *helpcmd, int quiet)
  * - word/word_eol args might be NULL                                        *
  * - this beast is used for UserCommands, UserlistButtons and CTCP replies   */
 
-int
-auto_insert (char *dest, int destlen, unsigned char *src, char *word[],
-				 char *word_eol[], char *a, char *c, char *d, char *e, char *h,
-				 char *n, char *s)
+gint
+auto_insert (gchar *dest, gint destlen, guchar *src, gchar *word[],
+         gchar *word_eol[], gchar *a, gchar *c, gchar *d, gchar *e, gchar *h,
+         gchar *n, gchar *s)
 {
-	int num;
-	char buf[32];
-	time_t now;
-	struct tm *tm_ptr;
-	char *utf;
-	gsize utf_len;
-	char *orig = dest;
+    const gchar *p;
+    gchar *vp;
+    gchar *i = dest;
+    gchar *temp;
+    gchar buf[32];
 
-	destlen--;
+    g_return_val_if_fail(src != NULL, 0);
 
-	while (src[0])
-	{
-		if (src[0] == '%' || src[0] == '&')
-		{
-			if (isdigit ((unsigned char) src[1]))
-			{
-				if (isdigit ((unsigned char) src[2]) && isdigit ((unsigned char) src[3]))
-				{
-					buf[0] = src[1];
-					buf[1] = src[2];
-					buf[2] = src[3];
-					buf[3] = 0;
-					dest[0] = atoi (buf);
-					utf = g_locale_to_utf8 (dest, 1, 0, &utf_len, 0);
-					if (utf)
-					{
-						if ((dest - orig) + utf_len >= destlen)
-						{
-							g_free (utf);
-							return 2;
-						}
+    for (p = src; *p != '\0' && (dest - i) < destlen; p++)
+    {
+        switch (*p)
+        {
+            case '%':
+                switch (*(p + 1))
+                {
+                    case 'a':
+                        temp = a;
+                        break;
+                    case 'c':
+                        temp = c;
+                        break;
+                    case 'd':
+                        temp = d;
+                        break;
+                    case 'e':
+                        temp = e;
+                        break;
+                    case 'h':
+                        temp = h;
+                        break;
+                    case 'm':
+                        temp = get_cpu_str();
+                        break;
+                    case 'n':
+                        temp = n;
+                        break;
+                    case 's':
+                        temp = s;
+                        break;
+                    case 't':
+                        {
+                            time_t now = time(0);
+                            temp = ctime(&now);
+                        }
+                        break;
+                    case 'u':
+                        {
+                            gint arg = 0;
+                            gint arglen = 0;
+                            p++;
+                            while (isxdigit(*(p)) && arglen < 7)
+                            {
+                                arg = arg << 1;
+                                arg += *p - '0';
+                                if (*p >= 'A')
+                                    arg -= 7;
+                                p++;
+                                arglen++;
+                            }
+                            if (arglen == 5) {
+                                p--;
+                                arg >>= 1;
+                            }
+                            g_unichar_to_utf8(arg, &temp);
+                        }
+                        break;
+                    case 'v':
+                        temp = PACKAGE_VERSION;
+                        break;
+                    case 'x':
+                        {
+                            gint arg = 0;
+                            p++;
+                            while (isxdigit(*p) && arg < 255)
+                            {
+                                arg = arg << 1;
+                                arg += *p - '0';
+                                if (*p >= 'A')
+                                    arg -= 7;
+                                p++;
+                            }
+                            g_unichar_to_utf8(arg, &temp);
+                        }
+                        break;
+                    case 'y':
+                        {
+                            time_t now = time(0);
+                            struct tm *diem = localtime(&now);
+                            snprintf (buf, sizeof (buf), "%4d%02d%02d", 1900 + diem->tm_year, 1 + diem->tm_mon, diem->tm_mday);
 
-						memcpy (dest, utf, utf_len);
-						g_free (utf);
-						dest += utf_len;
-					}
-					src += 3;
-				} else
-				{
-					if (word)
-					{
-						src++;
-						num = src[0] - '0';	/* ascii to decimal */
-						if (*word[num] == 0)
-							return 0;
+                            temp = buf;
+                        }
+                        break;
+                }
+                if (temp[0])
+                {
+                    for (vp = temp; *vp != '\0' && (dest - i) < destlen; vp++)
+                    {
+                        *i++ = *vp;
+                    }
+                    temp[0] = NULL;
+                } else {
+                    *i++ = *p;
+                }
+                break;
+            case '$':
+                {
+                    gchar *vp;
+                    gint arg = 0;
+                    p++;
 
-						if (src[-1] == '%')
-							utf = word[num];
-						else
-							utf = word_eol[num];
+                    while (isdigit(*p))
+                    {
+                        arg *= 10;
+                        arg += (*p - '0');
+                        p++;
+                    }
+                    if (*p == '-')
+                    {
+                        for (vp = word_eol[arg]; *vp != '\0' && (dest - i) < destlen; vp++)
+                        {
+                            *i++ = *vp;
+                        }
+                    } else
+                    {
+                        p--;
+                        for (vp = word[arg]; *vp != '\0' && (dest - i) < destlen; vp++)
+                        {
+                            *i++ = *vp;
+                        }
+                    }
+                }
 
-						/* avoid recusive usercommand overflow */
-						if ((dest - orig) + strlen (utf) >= destlen)
-							return 2;
+                break;
+            default:
+                *i++ = *p;
+        }
+    }
+    *i++ = '\0';
 
-						strcpy (dest, utf);
-						dest += strlen (dest);
-					}
-				}
-			} else
-			{
-				if (src[0] == '&')
-					goto lamecode;
-				src++;
-				utf = NULL;
-				switch (src[0])
-				{
-				case '%':
-					if ((dest - orig) + 2 >= destlen)
-						return 2;
-					dest[0] = '%';
-					dest[1] = 0;
-					break;
-				case 'a':
-					utf = a; break;
-				case 'c':
-					utf = c; break;
-				case 'd':
-					utf = d; break;
-				case 'e':
-					utf = e; break;
-				case 'h':
-					utf = h; break;
-				case 'm':
-					utf = get_cpu_str (); break;
-				case 'n':
-					utf = n; break;
-				case 's':
-					utf = s; break;
-				case 't':
-					now = time (0);
-					utf = ctime (&now);
-					utf[19] = 0;
-					break;
-				case 'v':
-					utf = PACKAGE_VERSION; break;
-					break;
-				case 'y':
-					now = time (0);
-					tm_ptr = localtime (&now);
-					snprintf (buf, sizeof (buf), "%4d%02d%02d", 1900 +
-								 tm_ptr->tm_year, 1 + tm_ptr->tm_mon, tm_ptr->tm_mday);
-					utf = buf;
-					break;
-				default:
-					src--;
-					goto lamecode;
-				}
-
-				if (utf)
-				{
-					if ((dest - orig) + strlen (utf) >= destlen)
-						return 2;
-					strcpy (dest, utf);
-					dest += strlen (dest);
-				}
-
-			}
-			src++;
-		} else
-		{
-			utf_len = g_utf8_skip[src[0]];
-
-			if ((dest - orig) + utf_len >= destlen)
-				return 2;
-
-			if (utf_len == 1)
-			{
-		 lamecode:
-				dest[0] = src[0];
-				dest++;
-				src++;
-			} else
-			{
-				memcpy (dest, src, utf_len);
-				dest += utf_len;
-				src += utf_len;
-			}
-		}
-	}
-
-	dest[0] = 0;
-
-	return 1;
+    return 1;
 }
 
 void

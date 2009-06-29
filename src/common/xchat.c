@@ -630,32 +630,29 @@ static char defaultconf_regex_replace[] =
 #endif
 
 static char defaultconf_commands[] =
-	"NAME ACTION\n"         "CMD me &2\n\n"\
-	"NAME AME\n"            "CMD allchan me &2\n\n"\
-	"NAME ANICK\n"          "CMD allserv nick &2\n\n"\
-	"NAME AMSG\n"           "CMD allchan say &2\n\n"\
+	"NAME ACTION\n"         "CMD describe $2 $3-\n\n"\
 	"NAME BANLIST\n"        "CMD quote MODE %c +b\n\n"\
-	"NAME CHAT\n"           "CMD dcc chat %2\n\n"\
-	"NAME DIALOG\n"         "CMD query %2\n\n"\
-	"NAME DMSG\n"           "CMD msg =%2 &3\n\n"\
-	"NAME GREP\n"           "CMD lastlog -r &2\n\n"\
-	"NAME J\n"              "CMD join &2\n\n"\
-	"NAME KILL\n"           "CMD quote KILL %2 :&3\n\n"\
-	"NAME LEAVE\n"          "CMD part &2\n\n"\
-	"NAME M\n"              "CMD msg &2\n\n"\
-	"NAME ONOTICE\n"        "CMD notice @%c &2\n\n"\
-	"NAME RAW\n"            "CMD quote &2\n\n"\
+	"NAME CHAT\n"           "CMD dcc chat $2\n\n"\
+	"NAME DIALOG\n"         "CMD query $2\n\n"\
+	"NAME DMSG\n"           "CMD msg =$2 $3-\n\n"\
+	"NAME GREP\n"           "CMD lastlog -r $2-\n\n"\
+	"NAME J\n"              "CMD join $2-\n\n"\
+	"NAME KILL\n"           "CMD quote KILL $2 :$3-\n\n"\
+	"NAME LEAVE\n"          "CMD part $2-\n\n"\
+	"NAME M\n"              "CMD msg $2-\n\n"\
+	"NAME ONOTICE\n"        "CMD notice @%c $2-\n\n"\
+	"NAME RAW\n"            "CMD quote $2-\n\n"\
 	"NAME SERVHELP\n"       "CMD quote HELP\n\n"\
 	"NAME SPING\n"          "CMD ping\n\n"\
-	"NAME SQUERY\n"         "CMD quote SQUERY %2 :&3\n\n"\
-	"NAME SSLSERVER\n"      "CMD server -ssl &2\n\n"\
+	"NAME SQUERY\n"         "CMD quote SQUERY $2 :$3-\n\n"\
+	"NAME SSLSERVER\n"      "CMD server -ssl $2-\n\n"\
 	"NAME SV\n"             "CMD echo xchat %v %m\n\n"\
-	"NAME UMODE\n"          "CMD mode %n &2\n\n"\
+	"NAME UMODE\n"          "CMD mode %n $2-\n\n"\
 	"NAME UPTIME\n"         "CMD quote STATS u\n\n"\
-	"NAME VER\n"            "CMD ctcp %2 VERSION\n\n"\
-	"NAME VERSION\n"        "CMD ctcp %2 VERSION\n\n"\
-	"NAME WALLOPS\n"        "CMD quote WALLOPS :&2\n\n"\
-	"NAME WII\n"            "CMD quote WHOIS %2 %2\n\n";
+	"NAME VER\n"            "CMD ctcp $2 VERSION\n\n"\
+	"NAME VERSION\n"        "CMD ctcp $2 VERSION\n\n"\
+	"NAME WALLOPS\n"        "CMD quote WALLOPS :$2-\n\n"\
+	"NAME WII\n"            "CMD quote WHOIS $2 $2\n\n";
 
 static char defaultconf_urlhandlers[] =
 	"NAME SUB\n"                            "CMD Epiphany...\n\n"\
