@@ -2746,7 +2746,7 @@ auto_insert (gchar *dest, gint destlen, guchar *src, gchar *word[],
     const gchar *p;
     gchar *vp;
     gchar *i = dest;
-    gchar *temp;
+    gchar *temp = NULL;
     gchar buf[32];
 
     g_return_val_if_fail(src != NULL, 0);
@@ -2806,7 +2806,7 @@ auto_insert (gchar *dest, gint destlen, guchar *src, gchar *word[],
                                 p--;
                                 arg >>= 1;
                             }
-                            g_unichar_to_utf8(arg, &temp);
+                            g_unichar_to_utf8(arg, temp);
                         }
                         break;
                     case 'v':
@@ -2824,7 +2824,7 @@ auto_insert (gchar *dest, gint destlen, guchar *src, gchar *word[],
                                     arg -= 7;
                                 p++;
                             }
-                            g_unichar_to_utf8(arg, &temp);
+                            g_unichar_to_utf8(arg, temp);
                         }
                         break;
                     case 'y':
@@ -2843,7 +2843,7 @@ auto_insert (gchar *dest, gint destlen, guchar *src, gchar *word[],
                     {
                         *i++ = *vp;
                     }
-                    temp[0] = NULL;
+                    temp[0] = 0;
                 } else {
                     *i++ = *p;
                 }
