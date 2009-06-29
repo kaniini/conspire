@@ -29,7 +29,7 @@ typedef struct {
     GPatternSpec *spec;
 } IgnoreEntry;
 
-ignore_entry *ignore_find_entry(const gchar *mask);
+IgnoreEntry *ignore_find_entry(const gchar *mask);
 gboolean ignore_set(const gchar *mask, const IgnoreLevel levels);
 void ignore_showlist(session *sess);
 gboolean ignore_del(const gchar *mask);
