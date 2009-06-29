@@ -1,3 +1,21 @@
+/* Conspire
+ * Copyright (C) 2009 Kiyoshi Aman.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ */
+
 #include <glib/glib.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -115,5 +133,98 @@ gboolean
 ignore_del(gchar *mask)
 {
     return mowgli_dictionary_delete(dict, mask);
+}
+
+ignore_entry *
+ignore_check_entry(mowgli_dictionary_elem_t *element, ignore_entry *mask)
+{
+    ignore_entry *ignore = (ignore_entry *)element->data;
+
+    if (g_pattern_spec_match(ignore->spec, mask->mask)) {
+        if (ignore->levels & mask->levels)
+            return ignore;
+    }
+    return NULL;
+}
+
+gboolean
+ignore_check(gchar *mask, gint32 levels)
+{
+    ignore_entry *ignore = {mask, levels, NULL};
+    }
+    if (mowgli_dictionary_search(ignores, ignore_check_entry, ignore))
+        return TRUE;
+    return FALSE;
+}
+
+void
+ignore_load(void)
+{
+    GError *error;
+    gchar *filename = g_build_filename(get_xdir_fs(), "ignore.txt", NULL);
+    GIOChannel *file = g_io_channel_new_file(filename, "r", &error);
+    gchar *str;
+    gchar **entries;
+    ignore_entry *ignore;
+    gchar *vp;
+    gsize len;
+
+    ignores = mowgli_dictionary_create(strcasecmp);
+
+    if (error != NULL)
+    {
+        g_io_channel_close(file);
+        return;
+    } else
+    {
+        while (g_io_channel_read_line(file, &str, &len;, NULL, &error))
+        {
+            if (error != NULL)
+                g_io_channel_close(file);
+                return;
+            if (len < 1)
+                continue;
+            entries = g_strsplit(str, " = ", 0);
+            ignore->mask = entries[0];
+            ignore->spec = g_pattern_spec_new(entries[0]);
+            
+            for (vp = entries[1]; *vp != '\0'; *vp++)
+            {
+                ignore->levels *= 10;
+                ignore->levels += g_ascii_digit_value(*vp);
+            }
+            mowgli_dictionary_add(ignores, ignore->mask, ignore);
+        }
+    }
+    g_io_channel_close(file);
+}
+
+gint
+ignore_save_entry(mowgli_dictionary_elem_t *element, GIOChannel *file)
+{
+    ignore_entry *ignore = (ignore_entry *)element->data;
+    gchar *buf;
+    gsize bytes;
+    GError *error;
+
+    g_snprintf(buf, "%s = %d\n", 109, ignore->mask, ignore->levels);
+    g_io_channel_write_chars(file, buf, sizeof(buf), &bytes, &error);
+    if (error != NULL)
+        return 1;
+}
+
+
+void
+ignore_save(void)
+{
+    GError *error;
+    gchar *filename = g_build_filename(get_xdir_fs(), "ignore.txt", NULL);
+    GIOChannel *file = g_io_channel_new_file(filename, "r", &error);
+    gchar *str;
+    ignore_entry *ignore;
+
+    mowgli_dictionary_foreach(ignores, ignore_save_entry, file);
+
+    g_io_channel_close(file);
 }
 

@@ -1093,6 +1093,11 @@ signal_printer_ignore_list_empty(gpointer *params)
 	session_print_format(sess, "ignorelist empty");
 }
 
+void
+signal_printer_ignore_list_entry(gpointer *params)
+{
+    /* stub */
+}
 
 void
 signal_printer_ignore_list_footer(gpointer *params)
@@ -1268,6 +1273,7 @@ signal_printer_init(void)
 	signal_attach("ignore added",           signal_printer_ignore_added);
 	signal_attach("ignore changed",         signal_printer_ignore_changed);
 	signal_attach("ignore list empty",      signal_printer_ignore_list_empty);
+        signal_attach("ignore list entry",      signal_printer_ignore_list_entry);
 	signal_attach("ignore list footer",     signal_printer_ignore_list_footer);
 	signal_attach("ignore list header",     signal_printer_ignore_list_header);
 	signal_attach("ignore removed",         signal_printer_ignore_removed);
