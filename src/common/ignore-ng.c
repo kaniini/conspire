@@ -34,8 +34,10 @@
 #include "xchatc.h"
 #include "signal_factory.h"
 
-ignore_entry *
-ignore_exists(gchar *mask)
+mowgli_dictionary_t *ignores;
+
+IgnoreEntry *
+ignore_find_entry(const gchar *mask)
 {
     g_return_val_if_fail(mask != NULL, NULL);
 
@@ -43,9 +45,9 @@ ignore_exists(gchar *mask)
 }
 
 gboolean
-ignore_set(gchar *mask, gint32 levels)
+ignore_set(const gchar *mask, const IgnoreLevel levels)
 {
-    ignore_entry *temp = 0;
+    IgnoreEntry *temp = 0;
     gboolean change_only;
 
     temp = ignore_exists(mask);
@@ -53,7 +55,7 @@ ignore_set(gchar *mask, gint32 levels)
         change_only = TRUE;
 
     if (!change_only)
-        temp = malloc(sizeof(ignore_entry));
+        temp = malloc(sizeof(IgnoreEntry));
 
     if (!temp)
         return FALSE;
@@ -69,11 +71,10 @@ ignore_set(gchar *mask, gint32 levels)
 }
 
 gint
-ignore_show_entry(mowgli_dictionary_elem_t *element, gpointer data)
+ignore_show_entry(mowgli_dictionary_elem_t *element, session *sess)
 {
-    ignore_entry *ignore = (ignore_entry *)element->data;
+    IgnoreEntry *ignore = (IgnoreEntry *)element->data;
     gchar *ignoring = snprintf("%100s  ", 100, ignore->mask);
-    session *sess = data;
 
     if (ignore->levels == IGNORE_NONE)
         g_strconcat(ignoring, "none", NULL);
@@ -110,9 +111,9 @@ ignore_show_entry(mowgli_dictionary_elem_t *element, gpointer data)
         if (ignore->levels & IGNORE_NICKS)
             g_strconcat(ignoring, "nicks", NULL);
         if (ignore->levels & IGNORE_DCC)
-            g_strconcat(ignoring, "dccs", NULL);
+            g_strconcat(ignoring, "dccs ", NULL);
         if (ignore->levels & IGNORE_DCCMSGS)
-            g_strconcat(ignoring, "dccmsgs", NULL);
+            g_strconcat(ignoring, "dccmsgs ", NULL);
         if (ignore->levels & IGNORE_HILIGHT)
             g_strconcat(ignoring, "hilights", NULL);
     }
@@ -130,15 +131,15 @@ ignore_showlist(session *sess)
 }
 
 gboolean
-ignore_del(gchar *mask)
+ignore_del(const gchar *mask)
 {
     return mowgli_dictionary_delete(dict, mask);
 }
 
-ignore_entry *
-ignore_check_entry(mowgli_dictionary_elem_t *element, ignore_entry *mask)
+IgnoreEntry *
+ignore_check_entry(mowgli_dictionary_elem_t *element, IgnoreEntry *mask)
 {
-    ignore_entry *ignore = (ignore_entry *)element->data;
+    IgnoreEntry *ignore = (IgnoreEntry *)element->data;
 
     if (g_pattern_spec_match(ignore->spec, mask->mask)) {
         if (ignore->levels & mask->levels)
@@ -148,10 +149,9 @@ ignore_check_entry(mowgli_dictionary_elem_t *element, ignore_entry *mask)
 }
 
 gboolean
-ignore_check(gchar *mask, gint32 levels)
+ignore_check(const gchar *mask, const IgnoreLevel levels)
 {
-    ignore_entry *ignore = {mask, levels, NULL};
-    }
+    IgnoreEntry *ignore = {mask, levels, NULL};
     if (mowgli_dictionary_search(ignores, ignore_check_entry, ignore))
         return TRUE;
     return FALSE;
@@ -165,7 +165,7 @@ ignore_load(void)
     GIOChannel *file = g_io_channel_new_file(filename, "r", &error);
     gchar *str;
     gchar **entries;
-    ignore_entry *ignore;
+    IgnoreEntry *ignore;
     gchar *vp;
     gsize len;
 
@@ -202,7 +202,7 @@ ignore_load(void)
 gint
 ignore_save_entry(mowgli_dictionary_elem_t *element, GIOChannel *file)
 {
-    ignore_entry *ignore = (ignore_entry *)element->data;
+    IgnoreEntry *ignore = (IgnoreEntry *)element->data;
     gchar *buf;
     gsize bytes;
     GError *error;
@@ -221,7 +221,7 @@ ignore_save(void)
     gchar *filename = g_build_filename(get_xdir_fs(), "ignore.txt", NULL);
     GIOChannel *file = g_io_channel_new_file(filename, "r", &error);
     gchar *str;
-    ignore_entry *ignore;
+    IgnoreEntry *ignore;
 
     mowgli_dictionary_foreach(ignores, ignore_save_entry, file);
 
