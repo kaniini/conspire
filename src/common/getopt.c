@@ -78,7 +78,7 @@ command_option_parse(session *sess, gint *argc, gchar ***argv, CommandOption opt
                         if(*argc < 2)
                         {
                             PrintTextf(sess, "Error: option '%c%s' requires an argument", OPTCHAR, opts[i].opt);
-                            usage(sess, command);
+                            command_option_usage(sess, command, opts);
                             return;
                         }
 
@@ -91,7 +91,7 @@ command_option_parse(session *sess, gint *argc, gchar ***argv, CommandOption opt
                         if(*argc < 2)
                         {
                             PrintTextf(sess, "Error: option '%c%s' requires an argument", OPTCHAR, opts[i].opt);
-                            usage(sess, command);
+                            command_option_usage(sess, command, opts);
                             return;
                         }
 
@@ -104,7 +104,7 @@ command_option_parse(session *sess, gint *argc, gchar ***argv, CommandOption opt
                         break;
 
                     case TYPE_USAGE:
-                        usage(sess, command);
+                        command_option_usage(sess, command, opts);
                     /*NOTREACHED*/ default:
                         PrintTextf(sess,
                                 "Error: internal error in command_option_parse at %s:%d",
@@ -116,7 +116,7 @@ command_option_parse(session *sess, gint *argc, gchar ***argv, CommandOption opt
         if(!found)
         {
             PrintTextf(sess, "Error: unknown argument '%c%s'", OPTCHAR, (*argv)[0]);
-            usage(sess, command);
+            command_option_usage(sess, command, opts);
         }
     }
 }
