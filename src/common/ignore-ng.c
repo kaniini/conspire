@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
-#include <glib/glib.h>
+#include <glib.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -36,6 +36,31 @@
 
 mowgli_dictionary_t *ignores;
 
+gboolean private, public, notice, snotes, ctcp, action, joins, parts, quits, kicks, modes, topics, invites, nicks, dcc, dccmsgs, hilight, all;
+
+/* For parsing /ignore arguments. */
+GOptionEntry ignore[] = {
+    {"private", 'P', 0, G_OPTION_ARG_NONE, &private, "Private messages",       NULL},
+    {"public",  'p', 0, G_OPTION_ARG_NONE, &public,  "Public messages",        NULL},
+    {"notice",  'N', 0, G_OPTION_ARG_NONE, &notice,  "Notices",                NULL},
+    {"snotes",  's', 0, G_OPTION_ARG_NONE, &snotes,  "Server notices",         NULL},
+    {"ctcp",    'c', 0, G_OPTION_ARG_NONE, &ctcp,    "CTCPs",                  NULL},
+    {"action",  'a', 0, G_OPTION_ARG_NONE, &action,  "Actions",                NULL},
+    {"joins",   'j', 0, G_OPTION_ARG_NONE, &joins,   "User joins a channel",   NULL},
+    {"parts",   'r', 0, G_OPTION_ARG_NONE, &parts,   "User parts a channel",   NULL},
+    {"quits",   'q', 0, G_OPTION_ARG_NONE, &quits,   "User quits",             NULL},
+    {"kicks",   'k', 0, G_OPTION_ARG_NONE, &kicks,   "User kicks another",     NULL},
+    {"modes",   'm', 0, G_OPTION_ARG_NONE, &modes,   "User sets modes",        NULL},
+    {"topics",  't', 0, G_OPTION_ARG_NONE, &topics,  "User sets a topic",      NULL},
+    {"invites", 'i', 0, G_OPTION_ARG_NONE, &invites, "User invites you",       NULL},
+    {"nicks",   'n', 0, G_OPTION_ARG_NONE, &nicks,   "User changes nicks",     NULL},
+    {"dcc",     'D', 0, G_OPTION_ARG_NONE, &dcc,     "User tries to DCC file", NULL},
+    {"dccmsgs", 'd', 0, G_OPTION_ARG_NONE, &dccmsgs, "User tries to DCC chat", NULL},
+    {"hilight", 'h', 0, G_OPTION_ARG_NONE, &hilight, "User hilights you",      NULL},
+    {"all",     'A', 0, G_OPTION_ARG_NONE, &all,     "All of the above",       NULL},
+};
+
+
 IgnoreEntry *
 ignore_find_entry(const gchar *mask)
 {
@@ -50,7 +75,7 @@ ignore_set(const gchar *mask, const IgnoreLevel levels)
     IgnoreEntry *temp = 0;
     gboolean change_only;
 
-    temp = ignore_exists(mask);
+    temp = ignore_find_entry(mask);
     if (temp)
         change_only = TRUE;
 
@@ -71,10 +96,12 @@ ignore_set(const gchar *mask, const IgnoreLevel levels)
 }
 
 gint
-ignore_show_entry(mowgli_dictionary_elem_t *element, session *sess)
+ignore_show_entry(mowgli_dictionary_elem_t *element, gpointer data)
 {
     IgnoreEntry *ignore = (IgnoreEntry *)element->data;
-    gchar *ignoring = snprintf("%100s  ", 100, ignore->mask);
+    gchar *ignoring = 0;
+    session *sess = data;
+    snprintf(ignoring, 100, "%100s  ", ignore->mask);
 
     if (ignore->levels == IGNORE_NONE)
         g_strconcat(ignoring, "none", NULL);
@@ -133,7 +160,9 @@ ignore_showlist(session *sess)
 gboolean
 ignore_del(const gchar *mask)
 {
-    return mowgli_dictionary_delete(dict, mask);
+    if (mowgli_dictionary_delete(ignores, mask))
+        return TRUE;
+    return FALSE;
 }
 
 IgnoreEntry *
@@ -141,7 +170,7 @@ ignore_check_entry(mowgli_dictionary_elem_t *element, IgnoreEntry *mask)
 {
     IgnoreEntry *ignore = (IgnoreEntry *)element->data;
 
-    if (g_pattern_spec_match(ignore->spec, mask->mask)) {
+    if (g_pattern_match_string(ignore->spec, mask->mask)) {
         if (ignore->levels & mask->levels)
             return ignore;
     }
@@ -177,7 +206,7 @@ ignore_load(void)
         return;
     } else
     {
-        while (g_io_channel_read_line(file, &str, &len;, NULL, &error))
+        while (g_io_channel_read_line(file, &str, &len, NULL, &error))
         {
             if (error != NULL)
                 g_io_channel_close(file);
@@ -203,7 +232,7 @@ gint
 ignore_save_entry(mowgli_dictionary_elem_t *element, GIOChannel *file)
 {
     IgnoreEntry *ignore = (IgnoreEntry *)element->data;
-    gchar *buf;
+    gchar *buf = 0;
     gsize bytes;
     GError *error;
 
@@ -211,6 +240,7 @@ ignore_save_entry(mowgli_dictionary_elem_t *element, GIOChannel *file)
     g_io_channel_write_chars(file, buf, sizeof(buf), &bytes, &error);
     if (error != NULL)
         return 1;
+    return 0;
 }
 
 
@@ -220,8 +250,6 @@ ignore_save(void)
     GError *error;
     gchar *filename = g_build_filename(get_xdir_fs(), "ignore.txt", NULL);
     GIOChannel *file = g_io_channel_new_file(filename, "r", &error);
-    gchar *str;
-    IgnoreEntry *ignore;
 
     mowgli_dictionary_foreach(ignores, ignore_save_entry, file);
 
