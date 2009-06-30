@@ -42,7 +42,7 @@ typedef struct
     const gchar *desc;      /* description of the argument, usage for printing help */
 } CommandOption;
 
-void usage(session *sess, gchar *name);
+void command_option_usage(session *sess, gchar *name);
 void command_option_parse(session *sess, gint *argc, gchar ***argv, CommandOption opts[]);
 
 #endif /* CONSPIRE_GETOPT_H */
