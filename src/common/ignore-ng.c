@@ -33,33 +33,10 @@
 #include "util.h"
 #include "xchatc.h"
 #include "signal_factory.h"
+#include "command_factory.h"
+#include "getopt.h"
 
 mowgli_dictionary_t *ignores;
-
-gboolean private, public, notice, snotes, ctcp, action, joins, parts, quits, kicks, modes, topics, invites, nicks, dcc, dccmsgs, hilight, all;
-
-/* For parsing /ignore arguments. */
-GOptionEntry ignore[] = {
-    {"private", 'P', 0, G_OPTION_ARG_NONE, &private, "Private messages",       NULL},
-    {"public",  'p', 0, G_OPTION_ARG_NONE, &public,  "Public messages",        NULL},
-    {"notice",  'N', 0, G_OPTION_ARG_NONE, &notice,  "Notices",                NULL},
-    {"snotes",  's', 0, G_OPTION_ARG_NONE, &snotes,  "Server notices",         NULL},
-    {"ctcp",    'c', 0, G_OPTION_ARG_NONE, &ctcp,    "CTCPs",                  NULL},
-    {"action",  'a', 0, G_OPTION_ARG_NONE, &action,  "Actions",                NULL},
-    {"joins",   'j', 0, G_OPTION_ARG_NONE, &joins,   "User joins a channel",   NULL},
-    {"parts",   'r', 0, G_OPTION_ARG_NONE, &parts,   "User parts a channel",   NULL},
-    {"quits",   'q', 0, G_OPTION_ARG_NONE, &quits,   "User quits",             NULL},
-    {"kicks",   'k', 0, G_OPTION_ARG_NONE, &kicks,   "User kicks another",     NULL},
-    {"modes",   'm', 0, G_OPTION_ARG_NONE, &modes,   "User sets modes",        NULL},
-    {"topics",  't', 0, G_OPTION_ARG_NONE, &topics,  "User sets a topic",      NULL},
-    {"invites", 'i', 0, G_OPTION_ARG_NONE, &invites, "User invites you",       NULL},
-    {"nicks",   'n', 0, G_OPTION_ARG_NONE, &nicks,   "User changes nicks",     NULL},
-    {"dcc",     'D', 0, G_OPTION_ARG_NONE, &dcc,     "User tries to DCC file", NULL},
-    {"dccmsgs", 'd', 0, G_OPTION_ARG_NONE, &dccmsgs, "User tries to DCC chat", NULL},
-    {"hilight", 'h', 0, G_OPTION_ARG_NONE, &hilight, "User hilights you",      NULL},
-    {"all",     'A', 0, G_OPTION_ARG_NONE, &all,     "All of the above",       NULL},
-};
-
 
 IgnoreEntry *
 ignore_find_entry(const gchar *mask)
@@ -80,7 +57,7 @@ ignore_set(const gchar *mask, const IgnoreLevel levels)
         change_only = TRUE;
 
     if (!change_only)
-        temp = malloc(sizeof(IgnoreEntry));
+        temp = g_slice_new0(IgnoreEntry);
 
     if (!temp)
         return FALSE;
@@ -103,12 +80,12 @@ ignore_show_entry(mowgli_dictionary_elem_t *element, gpointer data)
     session *sess = data;
     snprintf(ignoring, 100, "%100s  ", ignore->mask);
 
-    if (ignore->levels == IGNORE_NONE)
-        g_strconcat(ignoring, "none", NULL);
-    else if (ignore->levels == IGNORE_ALL)
+    if (ignore->levels == IGNORE_ALL)
         g_strconcat(ignoring, "all", NULL);
     else
     {
+        if (ignore->levels == IGNORE_EXCEPT)
+            g_strconcat(ignoring, "exempt from: ", NULL);
         if (ignore->levels & IGNORE_PRIVATE)
             g_strconcat(ignoring, "private ", NULL);
         if (ignore->levels & IGNORE_PUBLIC)
@@ -180,7 +157,9 @@ ignore_check_entry(mowgli_dictionary_elem_t *element, IgnoreEntry *mask)
 gboolean
 ignore_check(const gchar *mask, const IgnoreLevel levels)
 {
-    IgnoreEntry *ignore = {mask, levels, NULL};
+    IgnoreEntry *ignore = g_slice_new0(IgnoreEntry);
+    ignore->mask = mask;
+    ignore->levels = levels;
     if (mowgli_dictionary_search(ignores, ignore_check_entry, ignore))
         return TRUE;
     return FALSE;
@@ -214,6 +193,7 @@ ignore_load(void)
             if (len < 1)
                 continue;
             entries = g_strsplit(str, " = ", 0);
+            ignore = g_slice_new0(IgnoreEntry);
             ignore->mask = entries[0];
             ignore->spec = g_pattern_spec_new(entries[0]);
             
@@ -243,7 +223,6 @@ ignore_save_entry(mowgli_dictionary_elem_t *element, GIOChannel *file)
     return 0;
 }
 
-
 void
 ignore_save(void)
 {
@@ -254,5 +233,76 @@ ignore_save(void)
     mowgli_dictionary_foreach(ignores, ignore_save_entry, file);
 
     g_io_channel_close(file);
+}
+
+CommandResult
+cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
+{
+    gboolean except, private, public, notice, ctcp, action, joins;
+    gboolean parts, quits, kicks, modes, topics, invites, nicks;
+    gboolean dcc, dccmsgs, hilight, all;
+    CommandOption options[] = {
+        {"except",  TYPE_BOOLEAN, &except,  N_("User will %Bnot%B be ignored.")},
+        {"private", TYPE_BOOLEAN, &private, N_("Private messages from the user will be ignored.")},
+        {"public",  TYPE_BOOLEAN, &public,  N_("Public messages from the user will be ignored.")},
+        {"notice",  TYPE_BOOLEAN, &notice,  N_("Notices from the user will be ignored.")},
+        {"ctcp",    TYPE_BOOLEAN, &ctcp,    N_("CTCPs from the user will be ignored.")},
+        {"action",  TYPE_BOOLEAN, &action,  N_("Actions, both public & private, from the user will be ignored.")},
+        {"join",    TYPE_BOOLEAN, &joins,   N_("Join messages from the user will be ignored.")},
+        {"part",    TYPE_BOOLEAN, &parts,   N_("Part messages from the user will be ignored.")},
+        {"quit",    TYPE_BOOLEAN, &quits,   N_("Quit messages from the user will be ignored.")},
+        {"kick",    TYPE_BOOLEAN, &kicks,   N_("Kicks from the user will be ignored.")},
+        {"mode",    TYPE_BOOLEAN, &modes,   N_("Mode changes from the user will be ignored.")},
+        {"topic",   TYPE_BOOLEAN, &topics,  N_("Topic changes from the user will be ignored.")},
+        {"invite",  TYPE_BOOLEAN, &invites, N_("Invitations from the user will be ignored.")},
+        {"nick",    TYPE_BOOLEAN, &nicks,   N_("Nick changes from the user will be ignored.")},
+        {"dcc",     TYPE_BOOLEAN, &dcc,     N_("DCC file transfers from the user will be ignored.")},
+        {"dccmsgs", TYPE_BOOLEAN, &dccmsgs, N_("DCC chat requests & messages from the user will be ignored.")},
+        {"hilight", TYPE_BOOLEAN, &hilight, N_("Messages from the user that would otherwise hilight, won't.")},
+        {"all",     TYPE_BOOLEAN, &all,     N_("All messages from the user will be ignored.")},
+    };
+    gint len = g_strv_length(word);
+    IgnoreLevel levels = IGNORE_NONE;
+
+    command_option_parse(sess, &len, &word, options);
+
+    if (except)
+        levels += IGNORE_EXCEPT;
+    if (private)
+        levels += IGNORE_PRIVATE;
+    if (public)
+        levels += IGNORE_PUBLIC;
+    if (notice)
+        levels += IGNORE_NOTICE;
+    if (ctcp)
+        levels += IGNORE_CTCP;
+    if (action)
+        levels += IGNORE_ACTION;
+    if (joins)
+        levels += IGNORE_JOINS;
+    if (parts)
+        levels += IGNORE_PARTS;
+    if (quits)
+        levels += IGNORE_QUITS;
+    if (kicks)
+        levels += IGNORE_KICKS;
+    if (modes)
+        levels += IGNORE_MODES;
+    if (topics)
+        levels += IGNORE_TOPICS;
+    if (invites)
+        levels += IGNORE_INVITES;
+    if (nicks)
+        levels += IGNORE_NICKS;
+    if (dcc)
+        levels += IGNORE_DCC;
+    if (dccmsgs)
+        levels += IGNORE_DCCMSGS;
+    if (all)
+        levels = IGNORE_ALL - levels;
+    if (ignore_set(word[2], levels))
+        return CMD_EXEC_OK;
+    else
+        return CMD_EXEC_FAIL;
 }
 
