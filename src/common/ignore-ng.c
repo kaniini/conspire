@@ -50,21 +50,16 @@ gboolean
 ignore_set(const gchar *mask, const IgnoreLevel levels)
 {
     IgnoreEntry *temp = 0;
-    gboolean change_only;
 
     temp = ignore_find_entry(mask);
     if (temp)
-        change_only = TRUE;
+        ignore_del(mask);
 
-    if (!change_only)
-        temp = g_slice_new0(IgnoreEntry);
+    temp = g_slice_new0(IgnoreEntry);
 
-    if (!temp)
-        return FALSE;
-
-    temp->mask = g_strdup(mask);
+    temp->mask   = g_strdup(mask);
     temp->levels = levels;
-    temp->spec = g_pattern_spec_new(mask);
+    temp->spec   = g_pattern_spec_new(mask);
     
     mowgli_dictionary_add(ignores, mask, temp);
     fe_ignore_update(1);
@@ -301,8 +296,22 @@ cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
     if (all)
         levels = IGNORE_ALL - levels;
     if (ignore_set(word[2], levels))
+    {
+        signal_emit("ignore added", 2, sess, word[2]);
         return CMD_EXEC_OK;
-    else
+    } else
         return CMD_EXEC_FAIL;
+}
+
+CommandResult
+cmd_unignore(session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
+{
+    gchar *mask = word[2];
+    if (ignore_del(mask))
+    {
+        signal_emit("ignore removed", 2, sess, mask);
+        return CMD_EXEC_OK;
+    }
+    return CMD_EXEC_FAIL;
 }
 
