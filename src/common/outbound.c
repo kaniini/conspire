@@ -51,6 +51,7 @@
 #include "outbound.h"
 #include "command_factory.h"
 #include "plugin.h"
+#include "command_option.h"
 
 #ifdef USE_DEBUG
 extern int current_mem_usage;
@@ -241,11 +242,22 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	GSList *list = sess_list;
 	server *serv;
+        gboolean chan, chanlocal, server, query, querylocal;
+        CommandOption options[] = {
+            {"channel",       TYPE_BOOLEAN, &chan,       N_("Run command once for each channel.")},
+            {"local-channel", TYPE_BOOLEAN, &chanlocal,  N_("Run command once for each channel on this server.")},
+            {"server",        TYPE_BOOLEAN, &server,     N_("Run command once for each server.")},
+            {"query",         TYPE_BOOLEAN, &query,      N_("Run command once for each query.")},
+            {"local-query",   TYPE_BOOLEAN, &querylocal, N_("Run command once for each query on this server.")},
+        };
+        gint len = g_strv_length(word);
+
+        command_option_parse(sess, &len, &word, options);
 
 	if (!*word_eol[3])
 		return CMD_EXEC_FAIL;
 
-	if (!g_ascii_strcasecmp(word[2], "channel"))
+	if (chan)
 	{
 		while (list)
 		{
@@ -255,7 +267,7 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 				handle_command(sess, word_eol[3], FALSE);
 		}
 	}
-	else if (!g_ascii_strcasecmp(word[2], "local-channel"))
+	else if (chanlocal)
 	{
 		serv = sess->server;
 		while (list)
@@ -266,7 +278,7 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 				handle_command(sess, word_eol[3], FALSE);
 		}
 	}
-	else if (!g_ascii_strcasecmp(word[2], "server"))
+	else if (server)
 	{
 		list = serv_list;
 		while (list)
@@ -277,7 +289,7 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 				handle_command(serv->front_session, word_eol[3], FALSE);
 		}
 	}
-	else if (!g_ascii_strcasecmp(word[2], "query"))
+	else if (query)
 	{
 		while (list)
 		{
@@ -287,7 +299,7 @@ cmd_foreach (session *sess, char *tbuf, char *word[], char *word_eol[])
 				handle_command(sess, word_eol[3], FALSE);
 		}
 	}
-	else if (!g_ascii_strcasecmp(word[2], "local-query"))
+	else if (querylocal)
 	{
 		serv = sess->server;
 		while (list)
