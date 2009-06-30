@@ -11,11 +11,11 @@ SRCS = \
 	signal_printer.c text.c tree.c upnp.c url.c userlist.c util.c xchat.c \
 	upnp/igd_desc_parse.c upnp/minisoap.c upnp/minissdpc.c upnp/miniupnpc.c \
 	upnp/miniwget.c upnp/minixml.c upnp/upnpcommands.c upnp/upnpreplyparse.c \
-	getopt.c
+	command_option.c
 
 INCLUDES = \
 	base64.h cap.h cfgfiles.h command_factory.h conspire-config.h ctcp.h dcc.h \
-	debug.h fe.h format.h getopt.hhistory.h ignore.h inbound.h inet.h linequeue.h \
+	debug.h fe.h format.h command_option.hhistory.h ignore.h inbound.h inet.h linequeue.h \
 	modes.h network.h notify.h outbound.h plugin.h proto-irc.h sasl.h server.h \
 	servlist.h session.h signal_factory.h signal_printer.h stdinc.h text.h \
 	textevents.h tree.h upnp.h url.h userlist.h util.h xchat.h xchatc.h

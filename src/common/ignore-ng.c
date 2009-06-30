@@ -34,7 +34,7 @@
 #include "xchatc.h"
 #include "signal_factory.h"
 #include "command_factory.h"
-#include "getopt.h"
+#include "command_option.h"
 
 mowgli_dictionary_t *ignores;
 
