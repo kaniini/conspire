@@ -30,7 +30,7 @@
 #include "signal_factory.h"
 #include "xchat.h"
 #include "text.h"
-#include "getopt.h"
+#include "command_option.h"
 
 #define OPTCHAR '-'
 
