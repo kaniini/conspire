@@ -62,7 +62,6 @@ ignore_set(const gchar *mask, const IgnoreLevel levels)
     temp->spec   = g_pattern_spec_new(mask);
     
     mowgli_dictionary_add(ignores, mask, temp);
-    fe_ignore_update(1);
     
     return TRUE;
 }
@@ -87,8 +86,6 @@ ignore_show_entry(mowgli_dictionary_elem_t *element, gpointer data)
             g_strconcat(ignoring, "publics ", NULL);
         if (ignore->levels & IGNORE_NOTICE)
             g_strconcat(ignoring, "notices ", NULL);
-        if (ignore->levels & IGNORE_SNOTES)
-            g_strconcat(ignoring, "snotes ", NULL);
         if (ignore->levels & IGNORE_CTCP)
             g_strconcat(ignoring, "ctcps ", NULL);
         if (ignore->levels & IGNORE_ACTION)
@@ -111,8 +108,6 @@ ignore_show_entry(mowgli_dictionary_elem_t *element, gpointer data)
             g_strconcat(ignoring, "nicks", NULL);
         if (ignore->levels & IGNORE_DCC)
             g_strconcat(ignoring, "dccs ", NULL);
-        if (ignore->levels & IGNORE_DCCMSGS)
-            g_strconcat(ignoring, "dccmsgs ", NULL);
         if (ignore->levels & IGNORE_HILIGHT)
             g_strconcat(ignoring, "hilights", NULL);
     }
@@ -252,7 +247,6 @@ cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
         {"invite",  TYPE_BOOLEAN, &invites, N_("Invitations from the user will be ignored.")},
         {"nick",    TYPE_BOOLEAN, &nicks,   N_("Nick changes from the user will be ignored.")},
         {"dcc",     TYPE_BOOLEAN, &dcc,     N_("DCC file transfers from the user will be ignored.")},
-        {"dccmsgs", TYPE_BOOLEAN, &dccmsgs, N_("DCC chat requests & messages from the user will be ignored.")},
         {"hilight", TYPE_BOOLEAN, &hilight, N_("Messages from the user that would otherwise hilight, won't.")},
         {"all",     TYPE_BOOLEAN, &all,     N_("All messages from the user will be ignored.")},
     };
@@ -260,6 +254,8 @@ cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
     IgnoreLevel levels = IGNORE_NONE;
 
     command_option_parse(sess, &len, &word, options);
+
+    PrintTextf(sess, "Ignoring: %s", word[2]);
 
     if (except)
         levels += IGNORE_EXCEPT;
@@ -291,8 +287,6 @@ cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
         levels += IGNORE_NICKS;
     if (dcc)
         levels += IGNORE_DCC;
-    if (dccmsgs)
-        levels += IGNORE_DCCMSGS;
     if (all)
         levels = IGNORE_ALL - levels;
     if (ignore_set(word[2], levels))
@@ -313,5 +307,107 @@ cmd_unignore(session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
         return CMD_EXEC_OK;
     }
     return CMD_EXEC_FAIL;
+}
+
+
+static gboolean
+flood_autodialog_timeout (gpointer data)
+{
+    prefs.autodialog = 1;
+    return FALSE;
+}
+
+gint
+flood_check (gchar *nick, gchar *ip, server *serv, session *sess, gint what)	/*0=ctcp  1=priv */
+{
+    /*
+       serv
+       int ctcp_counter; 
+       time_t ctcp_last_time;
+       prefs
+       unsigned int ctcp_number_limit;
+       unsigned int ctcp_time_limit;
+       */
+    gchar buf[512];
+    gchar real_ip[132];
+    gint i;
+    time_t current_time;
+    current_time = time (NULL);
+
+    if (what == 0)
+    {
+        if (serv->ctcp_last_time == 0)	/*first ctcp in this server */
+        {
+            serv->ctcp_last_time = time (NULL);
+            serv->ctcp_counter++;
+        } else
+        {
+            /*if we got the ctcp in the seconds limit */
+            if (difftime (current_time, serv->ctcp_last_time) < prefs.ctcp_time_limit)
+            {
+                serv->ctcp_counter++;
+                /*if we reached the maximun numbers of ctcp in the seconds limits */
+                if (serv->ctcp_counter == prefs.ctcp_number_limit)
+                {
+                    serv->ctcp_last_time = current_time;	/*we got the flood, restore all the vars for next one */
+                    serv->ctcp_counter = 0;
+                    for (i = 0; i < 128; i++)
+                        if (ip[i] == '@')
+                            break;
+                    snprintf (real_ip, sizeof (real_ip), "*!*%s", &ip[i]);
+
+                    snprintf (buf, sizeof (buf),
+                            _("You are being CTCP flooded from %s, ignoring %s\n"),
+                            nick, real_ip);
+                    PrintText (sess, buf);
+
+                    ignore_set(real_ip, IGNORE_CTCP);
+                    return 0;
+                }
+            }
+        }
+    } else
+    {
+        if (serv->msg_last_time == 0)
+        {
+            serv->msg_last_time = time (NULL);
+            serv->ctcp_counter++;
+        } else
+        {
+            if (difftime (current_time, serv->msg_last_time) < prefs.msg_time_limit)
+            {
+                serv->msg_counter++;
+                /*if we reached the maximun numbers of ctcp in the seconds limits */
+                if (serv->msg_counter == prefs.msg_number_limit)
+                {
+                    snprintf (buf, sizeof (buf),
+                            _("You are being MSG flooded from %s, setting gui_auto_open_dialog OFF and ignoring.\n"),
+                            ip);
+
+                    for (i = 0; i < 128; i++)
+                        if (ip[i] == '@')
+                            break;
+                    snprintf (real_ip, sizeof (real_ip), "*!*%s", &ip[i]);
+                    ignore_set(real_ip, IGNORE_PRIVATE);
+                    PrintText (sess, buf);
+                    /*we got the flood, restore all the vars for next one */
+                    serv->msg_last_time = current_time;
+                    serv->msg_counter = 0;
+                    /*ignore_add (char *mask, int priv, int noti, int chan,
+                      int ctcp, int invi, int unignore, int no_save) */
+
+                    if (prefs.autodialog)
+                    {
+                        /*FIXME: only ignore ctcp or all?, its ignoring ctcps for now */
+                        prefs.autodialog = 0;
+                        /* turn it back on in 30 secs */
+                        g_timeout_add (30000, flood_autodialog_timeout, NULL);
+                    }
+                    return 0;
+                }
+            }
+        }
+    }
+    return 1;
 }
 

@@ -35,7 +35,7 @@
 
 #include "conspire-config.h"
 #include "xchat.h"
-#include "ignore.h"
+#include "ignore-ng.h"
 #include "util.h"
 #include "fe.h"
 #include "cfgfiles.h"			  /* xchat_fopen_file() */
@@ -1286,69 +1286,6 @@ cmd_id (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	return CMD_EXEC_FAIL;
 }
 
-static CommandResult
-cmd_ignore (struct session *sess, char *tbuf, char *word[], char *word_eol[])
-{
-	int i;
-	int type = 0;
-	int quiet = 0;
-
-	if (!*word[2])
-	{
-		ignore_showlist (sess);
-		return CMD_EXEC_OK;
-	}
-	if (!*word[3])
-		return CMD_EXEC_FAIL;
-
-	i = 3;
-	while (1)
-	{
-		if (!*word[i])
-		{
-			if (type == 0)
-				return CMD_EXEC_FAIL;
-			i = ignore_add (word[2], type);
-			if (quiet)
-				return CMD_EXEC_OK;
-			switch (i)
-			{
-			case 1:
-				signal_emit("ignore added", 2, sess, word);
-				break;
-			case 2:	/* old ignore changed */
-				signal_emit("ignore changed", 2, sess, word);
-			}
-			return CMD_EXEC_OK;
-		}
-		if (!g_ascii_strcasecmp (word[i], "UNIGNORE"))
-			type |= IG_UNIG;
-		else if (!g_ascii_strcasecmp (word[i], "ALL"))
-			type |= IG_PRIV | IG_NOTI | IG_CHAN | IG_CTCP | IG_INVI | IG_DCC;
-		else if (!g_ascii_strcasecmp (word[i], "PRIV"))
-			type |= IG_PRIV;
-		else if (!g_ascii_strcasecmp (word[i], "NOTI"))
-			type |= IG_NOTI;
-		else if (!g_ascii_strcasecmp (word[i], "CHAN"))
-			type |= IG_CHAN;
-		else if (!g_ascii_strcasecmp (word[i], "CTCP"))
-			type |= IG_CTCP;
-		else if (!strcasecmp (word[i], "INVI"))
-			type |= IG_INVI;
-		else if (!strcasecmp (word[i], "QUIET"))
-			quiet = 1;
-		else if (!strcasecmp (word[i], "NOSAVE"))
-			type |= IG_NOSAVE;
-		else if (!strcasecmp (word[i], "DCC"))
-			type |= IG_DCC;
-		else
-		{
-			sprintf (tbuf, _("Unknown arg '%s' ignored."), word[i]);
-			PrintText (sess, tbuf);
-		}
-		i++;
-	}
-}
 
 static CommandResult
 cmd_invite (struct session *sess, char *tbuf, char *word[], char *word_eol[])
@@ -2268,24 +2205,6 @@ cmd_topic (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	else
 		sess->server->p_topic (sess->server, sess->channel, word_eol[2]);
 	return CMD_EXEC_OK;
-}
-
-static CommandResult
-cmd_unignore (struct session *sess, char *tbuf, char *word[],
-				  char *word_eol[])
-{
-	char *mask = word[2];
-	char *arg = word[3];
-	if (*mask)
-	{
-		if (ignore_del (mask, NULL))
-		{
-			if (g_ascii_strcasecmp (arg, "QUIET"))
-				signal_emit("ignore removed", 2, sess, mask);
-		}
-		return CMD_EXEC_OK;
-	}
-	return CMD_EXEC_FAIL;
 }
 
 static CommandResult

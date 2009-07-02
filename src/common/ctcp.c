@@ -28,12 +28,13 @@
 #include "util.h"
 #include "modes.h"
 #include "outbound.h"
-#include "ignore.h"
+#include "ignore-ng.h"
 #include "inbound.h"
 #include "dcc.h"
 #include "text.h"
 #include "ctcp.h"
 #include "server.h"
+#include "userlist.h"
 #include "xchatc.h"
 
 
@@ -83,12 +84,16 @@ ctcp_check (session *sess, char *nick, char *word[], char *word_eol[],
 }
 
 void
-ctcp_handle (session *sess, char *to, char *nick,
-				 char *msg, char *word[], char *word_eol[], int id)
+ctcp_handle (session *sess, char *to, char *nick, char *msg, char *word[], char *word_eol[], int id)
 {
 	char *po;
 	server *serv = sess->server;
 	char outbuf[1024];
+	struct User *user = userlist_find(sess, nick);
+	gchar *hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
+	gboolean channel = is_channel(serv, to);
+	IgnoreLevel level = (channel) ? IGNORE_PUBLIC : IGNORE_PRIVATE;
+        level |= IGNORE_CTCP;
 
 	/* consider DCC to be different from other CTCPs */
 	if (!g_ascii_strncasecmp (msg, "DCC", 3))
@@ -96,7 +101,7 @@ ctcp_handle (session *sess, char *to, char *nick,
 		/* but still let CTCP replies override it */
 		if (!ctcp_check (sess, nick, word, word_eol, word[4] + 2))
 		{
-			if (!ignore_check (word[1], IG_DCC))
+			if (!ignore_check (hostmask, IGNORE_DCC))
 				handle_dcc (sess, nick, word, word_eol);
 		}
 		return;
@@ -106,18 +111,6 @@ ctcp_handle (session *sess, char *to, char *nick,
       ignore as if it was a PRIV/CHAN. */
 	if (!g_ascii_strncasecmp (msg, "ACTION ", 7))
 	{
-		if (is_channel (serv, to))
-		{
-			/* treat a channel action as a CHAN */
-			if (ignore_check (word[1], IG_CHAN))
-				return;
-		} else
-		{
-			/* treat a private action as a PRIV */
-			if (ignore_check (word[1], IG_PRIV))
-				return;
-		}
-
 		/* but still let CTCP replies override it */
 		if (ctcp_check (sess, nick, word, word_eol, word[4] + 2))
 			goto generic;
@@ -126,57 +119,50 @@ ctcp_handle (session *sess, char *to, char *nick,
 		return;
 	}
 
-	if (ignore_check (word[1], IG_CTCP))
-		return;
-
-	if (!strcasecmp (msg, "VERSION") && !prefs.hidever)
-	{
+	if (!ignore_check(hostmask, level)) {
+		if (!strcasecmp (msg, "VERSION") && !prefs.hidever)
+		{
 #ifndef _WIN32
-		struct utsname un;
+			struct utsname un;
 
-		uname(&un);
+			uname(&un);
 
-		snprintf (outbuf, sizeof (outbuf), "VERSION conspire "PACKAGE_VERSION" - running on %s %s %s",
-					 un.sysname, un.release, un.machine);
+			snprintf (outbuf, sizeof (outbuf), "VERSION conspire "PACKAGE_VERSION" - running on %s %s %s",
+						 un.sysname, un.release, un.machine);
 #else
-		OSVERSIONINFO osvi;
-		SYSTEM_INFO si;
+			OSVERSIONINFO osvi;
+			SYSTEM_INFO si;
 
-		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		GetVersionEx(&osvi);
-		GetSystemInfo(&si);
+			osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+			GetVersionEx(&osvi);
+			GetSystemInfo(&si);
 
-		snprintf(outbuf, sizeof(outbuf), "VERSION conspire "PACKAGE_VERSION" - running on Windows %ld.%ld build %ld (i%d86)",
-			osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber,
-			si.wProcessorLevel);
+			snprintf(outbuf, sizeof(outbuf), "VERSION conspire "PACKAGE_VERSION" - running on Windows %ld.%ld build %ld (i%d86)",
+				osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber,
+				si.wProcessorLevel);
 #endif
 
-		serv->p_nctcp (serv, nick, outbuf);
-	}
+			serv->p_nctcp (serv, nick, outbuf);
+		} else if (!strcasecmp(msg, "CLIENTINFO"))
+		{
+			snprintf(outbuf, sizeof(outbuf), "CLIENTINFO CLIENTINFO PING TIME USERINFO VERSION");
 
-	if (!strcasecmp(msg, "CLIENTINFO"))
-	{
-		snprintf(outbuf, sizeof(outbuf), "CLIENTINFO CLIENTINFO PING TIME USERINFO VERSION");
+			serv->p_nctcp(serv, nick, outbuf);
+		} else if (!strcasecmp(msg, "USERINFO"))
+		{
+			snprintf(outbuf, sizeof(outbuf), "USERINFO %s", prefs.realname);
 
-		serv->p_nctcp(serv, nick, outbuf);
-	}
+			serv->p_nctcp(serv, nick, outbuf);
+		} else if (!strcasecmp(msg, "TIME")) {
+			time_t time_val = time(NULL);
+			struct tm *tval = localtime(&time_val);
+			char tbuf[200];
+			strftime(tbuf, sizeof(tbuf), prefs.irc_time_format, tval); //Sun Feb  3 18:33:27 CST 2008
+			snprintf(outbuf, sizeof(outbuf), "TIME %s", tbuf);
 
-	if (!strcasecmp(msg, "USERINFO"))
-	{
-		snprintf(outbuf, sizeof(outbuf), "USERINFO %s", prefs.realname);
-
-		serv->p_nctcp(serv, nick, outbuf);
-	}
-
-	if (!strcasecmp(msg, "TIME")) {
-		time_t time_val = time(NULL);
-		struct tm *tval = localtime(&time_val);
-		char tbuf[200];
-		strftime(tbuf, sizeof(tbuf), prefs.irc_time_format, tval); //Sun Feb  3 18:33:27 CST 2008
-		snprintf(outbuf, sizeof(outbuf), "TIME %s", tbuf);
-
-		serv->p_nctcp(serv, nick, outbuf);
-	}
+			serv->p_nctcp(serv, nick, outbuf);
+		}
+        }
 
 generic:
 	po = strchr (msg, '\001');

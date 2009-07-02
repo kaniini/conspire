@@ -34,7 +34,6 @@
 
 #include "xchat.h"
 #include "util.h"
-#include "ignore.h"
 #include "fe.h"
 #include "modes.h"
 #include "notify.h"

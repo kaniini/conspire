@@ -1353,7 +1353,6 @@ static struct mymenu mymenu[] = {
 	{N_("Character Chart..."), ascii_open, 0, M_MENUITEM, 0, 0, 1},
 	{N_("Direct Chat..."), menu_dcc_chat_win, 0, M_MENUITEM, 0, 0, 1},
 	{N_("File Transfers..."), menu_dcc_win, 0, M_MENUITEM, 0, 0, 1},
-	{N_("Ignore List..."), ignore_gui_open, 0, M_MENUITEM, 0, 0, 1},
 	{N_("Notify List..."), notify_opengui, 0, M_MENUITEM, 0, 0, 1},
 	{N_("Plugins and Scripts..."), menu_pluginlist, 0, M_MENUITEM, 0, 0, 1},
 	{N_("Raw Log..."), menu_rawlog, 0, M_MENUITEM, 0, 0, 1},	/* 62 */

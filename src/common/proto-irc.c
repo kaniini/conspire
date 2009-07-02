@@ -30,7 +30,7 @@
 #include "xchat.h"
 #include "ctcp.h"
 #include "fe.h"
-#include "ignore.h"
+#include "ignore-ng.h"
 #include "inbound.h"
 #include "modes.h"
 #include "notify.h"
@@ -1163,7 +1163,7 @@ process_peer_invite (gpointer *params)
 	char nick[NICKLEN], *ex;
 	/* fill in the "nick" buffer */
 	ex = strchr(word[1], '!');
-	if (!ex)							  /* no '!', must be a server message */
+	if (!ex)  /* no '!', must be a server message */
 	{
 		g_strlcpy(nick, word[1], sizeof (nick));
 	} else
@@ -1173,9 +1173,6 @@ process_peer_invite (gpointer *params)
 		g_strlcpy(nick, word[1], sizeof (nick));
 		ex[0] = '!';
 	}
-
-	if (ignore_check(word[1], IG_INVI))
-		return;
 
 	signal_emit("channel invited", 4, sess, word, nick, serv);
 }
@@ -1362,8 +1359,7 @@ process_peer_notice (gpointer *params)
 			text++;
 	}
 
-	if (!ignore_check(word[1], IG_NOTI))
-		inbound_notice(serv, word[3], nick, text, ip, id);
+	inbound_notice(serv, word[3], nick, text, ip, id);
 }
 
 static void
@@ -1480,14 +1476,10 @@ process_peer_privmsg (gpointer *params)
 		{
 			if (is_channel(serv, to))
 			{
-				if (ignore_check(word[1], IG_CHAN))
-					return;
 				inbound_chanmsg(serv, NULL, to, nick, text, FALSE, id);
 			}
 			else
 			{
-				if (ignore_check(word[1], IG_PRIV))
-					return;
 				inbound_privmsg(serv, nick, ip, text, id);
 			}
 		}

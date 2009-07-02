@@ -31,7 +31,7 @@
 #include "fe.h"
 #include "util.h"
 #include "cfgfiles.h"
-#include "ignore.h"
+#include "ignore-ng.h"
 #include "notify.h"
 #include "server.h"
 #include "servlist.h"

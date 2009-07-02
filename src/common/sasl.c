@@ -26,7 +26,6 @@
 #include "xchat.h"
 #include "ctcp.h"
 #include "fe.h"
-#include "ignore.h"
 #include "inbound.h"
 #include "modes.h"
 #include "notify.h"
