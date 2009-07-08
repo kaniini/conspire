@@ -84,16 +84,20 @@ ctcp_check (session *sess, char *nick, char *word[], char *word_eol[],
 }
 
 void
-ctcp_handle (session *sess, char *to, char *nick, char *msg, char *word[], char *word_eol[], int id)
+ctcp_handle (session *sess, char *to, char *nick, char *ip, char *msg, char *word[], char *word_eol[], int id)
 {
 	char *po;
 	server *serv = sess->server;
 	char outbuf[1024];
-	struct User *user = userlist_find(sess, nick);
-	gchar *hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
+	gchar *hostmask;
 	gboolean channel = is_channel(serv, to);
 	IgnoreLevel level = (channel) ? IGNORE_PUBLIC : IGNORE_PRIVATE;
         level |= IGNORE_CTCP;
+
+	if (*ip != '\0')
+		hostmask = g_strjoin("!", nick, ip, NULL);
+	else
+		hostmask = g_strdup(nick);
 
 	/* consider DCC to be different from other CTCPs */
 	if (!g_ascii_strncasecmp (msg, "DCC", 3))
@@ -104,6 +108,7 @@ ctcp_handle (session *sess, char *to, char *nick, char *msg, char *word[], char 
 			if (!ignore_check (hostmask, IGNORE_DCC))
 				handle_dcc (sess, nick, word, word_eol);
 		}
+		g_free(hostmask);
 		return;
 	}
 
@@ -116,6 +121,7 @@ ctcp_handle (session *sess, char *to, char *nick, char *msg, char *word[], char 
 			goto generic;
 
 		inbound_action (sess, to, nick, msg + 7, FALSE, id);
+		g_free(hostmask);
 		return;
 	}
 
@@ -169,5 +175,6 @@ generic:
 	if (po)
 		po[0] = 0;
 
-	signal_emit("ctcp inbound", 4, sess, msg, nick, to);
+	signal_emit("ctcp inbound", 4, sess, msg, hostmask, to);
+	g_free(hostmask);
 }

@@ -1428,9 +1428,10 @@ process_peer_privmsg (gpointer *params)
 	ex = strchr(word[1], '!');
 	if (!ex)							  /* no '!', must be a server message */
 	{
-		g_strlcpy(ip, word[1], sizeof (ip));
 		g_strlcpy(nick, word[1], sizeof (nick));
-	} else
+		*ip = '\0';
+	}
+	else
 	{
 		g_strlcpy(ip, ex + 1, sizeof (ip));
 		ex[0] = 0;
@@ -1470,7 +1471,7 @@ process_peer_privmsg (gpointer *params)
 			if (g_ascii_strncasecmp (text, "DCC ", 4) == 0)
 				/* redo this with handle_quotes TRUE */
 				process_data_init (word[1], word_eol[1], word, word_eol, TRUE, FALSE);
-			ctcp_handle (sess, to, nick, text, word, word_eol, id);
+			ctcp_handle (sess, to, nick, ip, text, word, word_eol, id);
 		}
 		else
 		{
