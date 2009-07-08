@@ -66,49 +66,60 @@ ignore_set(const gchar *mask, const IgnoreLevel levels)
     return TRUE;
 }
 
+static gchar *
+ignore_concat_keyword(gchar *in, gchar *keyword)
+{
+    gchar *out;
+
+    out = g_strconcat(in, keyword, NULL);
+    g_free(in);
+
+    return out;
+}
+
 gint
 ignore_show_entry(mowgli_dictionary_elem_t *element, gpointer data)
 {
     IgnoreEntry *ignore = (IgnoreEntry *)element->data;
     session *sess = data;
-    gchar *ignoring = g_strdup_printf("%100s  ", ignore->mask);
+    gchar *ignoring = g_strdup_printf("%-50s  ", ignore->mask);
 
     if (ignore->levels == IGNORE_ALL)
-        g_strconcat(ignoring, "all", NULL);
+        ignoring = ignore_concat_keyword(ignoring, "all");
     else
     {
         if (ignore->levels & IGNORE_EXCEPT)
-            g_strconcat(ignoring, "exempt from: ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "exempt from: ");
         if (ignore->levels & IGNORE_PRIVATE)
-            g_strconcat(ignoring, "private ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "private ");
         if (ignore->levels & IGNORE_PUBLIC)
-            g_strconcat(ignoring, "publics ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "publics ");
         if (ignore->levels & IGNORE_NOTICE)
-            g_strconcat(ignoring, "notices ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "notices ");
         if (ignore->levels & IGNORE_CTCP)
-            g_strconcat(ignoring, "ctcps ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "ctcps ");
         if (ignore->levels & IGNORE_ACTION)
-            g_strconcat(ignoring, "actions ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "actions ");
         if (ignore->levels & IGNORE_JOINS)
-            g_strconcat(ignoring, "joins ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "joins ");
         if (ignore->levels & IGNORE_PARTS)
-            g_strconcat(ignoring, "parts ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "parts ");
         if (ignore->levels & IGNORE_QUITS)
-            g_strconcat(ignoring, "quits ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "quits ");
         if (ignore->levels & IGNORE_KICKS)
-            g_strconcat(ignoring, "kicks ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "kicks ");
         if (ignore->levels & IGNORE_MODES)
-            g_strconcat(ignoring, "modes ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "modes ");
         if (ignore->levels & IGNORE_TOPICS)
-            g_strconcat(ignoring, "topics ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "topics ");
         if (ignore->levels & IGNORE_INVITES)
-            g_strconcat(ignoring, "invites ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "invites ");
         if (ignore->levels & IGNORE_NICKS)
-            g_strconcat(ignoring, "nicks", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "nicks");
         if (ignore->levels & IGNORE_DCC)
-            g_strconcat(ignoring, "dccs ", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "dccs ");
         if (ignore->levels & IGNORE_HILIGHT)
-            g_strconcat(ignoring, "hilights", NULL);
+            ignoring = ignore_concat_keyword(ignoring, "hilights");
     }
     signal_emit("ignore list entry", 2, sess, ignoring);
     g_free(ignoring);
@@ -243,9 +254,9 @@ ignore_save(void)
 CommandResult
 cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
 {
-    gboolean except, private, public, notice, ctcp, action, joins;
-    gboolean parts, quits, kicks, modes, topics, invites, nicks;
-    gboolean dcc, hilight, all;
+    gboolean except = FALSE, private = FALSE, public = FALSE, notice = FALSE, ctcp = FALSE, action = FALSE, joins = FALSE;
+    gboolean parts = FALSE, quits = FALSE, kicks = FALSE, modes = FALSE, topics = FALSE, invites = FALSE, nicks = FALSE;
+    gboolean dcc = FALSE, hilight = FALSE, all = FALSE;
     CommandOption options[] = {
         {"except",  TYPE_BOOLEAN, &except,  N_("User will %Bnot%B be ignored.")},
         {"private", TYPE_BOOLEAN, &private, N_("Private messages from the user will be ignored.")},
@@ -264,52 +275,54 @@ cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
         {"dcc",     TYPE_BOOLEAN, &dcc,     N_("DCC file transfers from the user will be ignored.")},
         {"hilight", TYPE_BOOLEAN, &hilight, N_("Messages from the user that would otherwise hilight, won't.")},
         {"all",     TYPE_BOOLEAN, &all,     N_("All messages from the user will be ignored.")},
+        {NULL},
     };
     gint len = g_strv_length(word);
     IgnoreLevel levels = IGNORE_NONE;
 
     command_option_parse(sess, &len, &word, options);
 
-    if (*word[1] == '\0') {
+    if (*word[0] == '\0') {
         ignore_showlist(sess);
         return CMD_EXEC_OK;
     }
 
     if (except)
-        levels += IGNORE_EXCEPT;
+        levels |= IGNORE_EXCEPT;
     if (private)
-        levels += IGNORE_PRIVATE;
+        levels |= IGNORE_PRIVATE;
     if (public)
-        levels += IGNORE_PUBLIC;
+        levels |= IGNORE_PUBLIC;
     if (notice)
-        levels += IGNORE_NOTICE;
+        levels |= IGNORE_NOTICE;
     if (ctcp)
-        levels += IGNORE_CTCP;
+        levels |= IGNORE_CTCP;
     if (action)
-        levels += IGNORE_ACTION;
+        levels |= IGNORE_ACTION;
     if (joins)
-        levels += IGNORE_JOINS;
+        levels |= IGNORE_JOINS;
     if (parts)
-        levels += IGNORE_PARTS;
+        levels |= IGNORE_PARTS;
     if (quits)
-        levels += IGNORE_QUITS;
+        levels |= IGNORE_QUITS;
     if (kicks)
-        levels += IGNORE_KICKS;
+        levels |= IGNORE_KICKS;
     if (modes)
-        levels += IGNORE_MODES;
+        levels |= IGNORE_MODES;
     if (topics)
-        levels += IGNORE_TOPICS;
+        levels |= IGNORE_TOPICS;
     if (invites)
-        levels += IGNORE_INVITES;
+        levels |= IGNORE_INVITES;
     if (nicks)
-        levels += IGNORE_NICKS;
+        levels |= IGNORE_NICKS;
     if (dcc)
-        levels += IGNORE_DCC;
+        levels |= IGNORE_DCC;
     if (all)
-        levels = IGNORE_ALL - levels;
-    if (ignore_set(word[1], levels))
+        levels |= (IGNORE_ALL & ~levels);
+
+    if (ignore_set(word[0], levels ? levels : IGNORE_ALL))
     {
-        signal_emit("ignore added", 2, sess, word[1]);
+        signal_emit("ignore added", 2, sess, word[0]);
         return CMD_EXEC_OK;
     }
     else

@@ -176,7 +176,7 @@ const struct text_event te[] = {
 {"Ignorelist Empty", 0, 
 "%C27*$t%C27Ignore list is empty."},
 
-{"Ignorelist Entry", 0, 
+{"Ignorelist Entry", 1, 
 "%C27*$t%C27$1"},
 
 {"Invited", 3, 

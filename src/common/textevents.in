@@ -232,7 +232,7 @@ Ignorelist Empty
 
 Ignorelist Entry
 %C27*$t%C27$1
-0
+1
 
 Invited
 %C27*$t%C27You have been invited to $1 by $2 ($3).

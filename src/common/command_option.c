@@ -40,6 +40,10 @@ command_option_parse(session *sess, gint *argc, gchar ***argv, CommandOption opt
     gint i;
     gchar *command = (*argv)[0];
 
+    /* skip past command. */
+    (*argc)--;
+    (*argv)++;
+
     /* loop through each argument */
     for (;;)
     {
