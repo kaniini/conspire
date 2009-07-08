@@ -173,7 +173,8 @@ ignore_load(void)
     {
         g_io_channel_close(file);
         return;
-    } else
+    }
+    else
     {
         while (g_io_channel_read_line(file, &str, &len, NULL, &error))
         {
@@ -187,7 +188,7 @@ ignore_load(void)
             ignore->mask = entries[0];
             ignore->spec = g_pattern_spec_new(entries[0]);
             
-            for (vp = entries[1]; *vp != '\0'; *vp++)
+            for (vp = entries[1]; *vp != '\0'; vp++)
             {
                 ignore->levels *= 10;
                 ignore->levels += g_ascii_digit_value(*vp);
@@ -293,7 +294,8 @@ cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
     {
         signal_emit("ignore added", 2, sess, word[2]);
         return CMD_EXEC_OK;
-    } else
+    }
+    else
         return CMD_EXEC_FAIL;
 }
 
@@ -340,7 +342,8 @@ flood_check (gchar *nick, gchar *ip, server *serv, session *sess, gint what)	/*0
         {
             serv->ctcp_last_time = time (NULL);
             serv->ctcp_counter++;
-        } else
+        }
+        else
         {
             /*if we got the ctcp in the seconds limit */
             if (difftime (current_time, serv->ctcp_last_time) < prefs.ctcp_time_limit)
@@ -366,13 +369,15 @@ flood_check (gchar *nick, gchar *ip, server *serv, session *sess, gint what)	/*0
                 }
             }
         }
-    } else
+    }
+    else
     {
         if (serv->msg_last_time == 0)
         {
             serv->msg_last_time = time (NULL);
             serv->ctcp_counter++;
-        } else
+        }
+        else
         {
             if (difftime (current_time, serv->msg_last_time) < prefs.msg_time_limit)
             {
