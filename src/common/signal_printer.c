@@ -1421,18 +1421,18 @@ void
 signal_printer_ignore_added(gpointer *params)
 {
 	session *sess = params[0];
-	gchar **word  = params[1];
+	gchar *mask   = params[1];
 
-	session_print_format(sess, "ignore add", word[2]);
+	session_print_format(sess, "ignore add", mask);
 }
 
 void
 signal_printer_ignore_changed(gpointer *params)
 {
 	session *sess = params[0];
-	gchar **word  = params[1];
+	gchar *mask   = params[1];
 
-	session_print_format(sess, "ignore changed", word[2]);
+	session_print_format(sess, "ignore changed", mask);
 }
 
 void
@@ -1446,7 +1446,10 @@ signal_printer_ignore_list_empty(gpointer *params)
 void
 signal_printer_ignore_list_entry(gpointer *params)
 {
-    /* stub */
+	session *sess = params[0];
+	gchar *buffer = params[1];
+
+	session_print_format(sess, "ignorelist entry", buffer);
 }
 
 void

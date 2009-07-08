@@ -165,16 +165,19 @@ const struct text_event te[] = {
 "%C27*$t%C27Ignore on $1 has been changed."},
 
 {"Ignore Footer", 0, 
-"%C24,18                                                              "},
+"%C27*$t%C27End of ignore list."},
 
 {"Ignore Header", 0, 
-"%C24,18 Hostmask                  PRIV NOTI CHAN CTCP DCC  INVI UNIG "},
+"%C27*$t%C27List of current ignores:"},
 
 {"Ignore Remove", 1, 
 "%C27*$t%C27$1 removed from ignore list."},
 
 {"Ignorelist Empty", 0, 
 "%C27*$t%C27Ignore list is empty."},
+
+{"Ignorelist Entry", 0, 
+"%C27*$t%C27$1"},
 
 {"Invited", 3, 
 "%C27*$t%C27You have been invited to $1 by $2 ($3)."},

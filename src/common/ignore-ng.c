@@ -77,7 +77,7 @@ ignore_show_entry(mowgli_dictionary_elem_t *element, gpointer data)
         g_strconcat(ignoring, "all", NULL);
     else
     {
-        if (ignore->levels == IGNORE_EXCEPT)
+        if (ignore->levels & IGNORE_EXCEPT)
             g_strconcat(ignoring, "exempt from: ", NULL);
         if (ignore->levels & IGNORE_PRIVATE)
             g_strconcat(ignoring, "private ", NULL);
@@ -267,8 +267,11 @@ cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
     IgnoreLevel levels = IGNORE_NONE;
 
     command_option_parse(sess, &len, &word, options);
-    if (*word[2] == '\0')
-        return CMD_EXEC_FAIL;
+
+    if (*word[1] == '\0') {
+        ignore_showlist(sess);
+        return CMD_EXEC_OK;
+    }
 
     if (except)
         levels += IGNORE_EXCEPT;
@@ -302,9 +305,9 @@ cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
         levels += IGNORE_DCC;
     if (all)
         levels = IGNORE_ALL - levels;
-    if (ignore_set(word[2], levels))
+    if (ignore_set(word[1], levels))
     {
-        signal_emit("ignore added", 2, sess, word[2]);
+        signal_emit("ignore added", 2, sess, word[1]);
         return CMD_EXEC_OK;
     }
     else

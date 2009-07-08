@@ -215,11 +215,11 @@ Ignore Changed
 1
 
 Ignore Footer
-%C24,18                                                              
+%C27*$t%C27End of ignore list.
 0
 
 Ignore Header
-%C24,18 Hostmask                  PRIV NOTI CHAN CTCP DCC  INVI UNIG 
+%C27*$t%C27List of current ignores:
 0
 
 Ignore Remove
@@ -228,6 +228,10 @@ Ignore Remove
 
 Ignorelist Empty
 %C27*$t%C27Ignore list is empty.
+0
+
+Ignorelist Entry
+%C27*$t%C27$1
 0
 
 Invited
