@@ -111,6 +111,7 @@ ignore_show_entry(mowgli_dictionary_elem_t *element, gpointer data)
             g_strconcat(ignoring, "hilights", NULL);
     }
     signal_emit("ignore list entry", 2, sess, ignoring);
+    g_free(ignoring);
 
     return 0;
 }
@@ -128,6 +129,7 @@ ignore_del(const gchar *mask)
 {
     if (mowgli_dictionary_delete(ignores, mask))
         return TRUE;
+
     return FALSE;
 }
 
