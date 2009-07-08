@@ -49,7 +49,7 @@ ignore_find_entry(const gchar *mask)
 gboolean
 ignore_set(const gchar *mask, const IgnoreLevel levels)
 {
-    IgnoreEntry *temp = 0;
+    IgnoreEntry *temp = NULL;
 
     temp = ignore_find_entry(mask);
     if (temp)
@@ -70,9 +70,8 @@ gint
 ignore_show_entry(mowgli_dictionary_elem_t *element, gpointer data)
 {
     IgnoreEntry *ignore = (IgnoreEntry *)element->data;
-    gchar *ignoring = 0;
     session *sess = data;
-    snprintf(ignoring, 100, "%100s  ", ignore->mask);
+    gchar *ignoring = g_strdup_printf("%100s  ", ignore->mask);
 
     if (ignore->levels == IGNORE_ALL)
         g_strconcat(ignoring, "all", NULL);
@@ -132,9 +131,10 @@ ignore_del(const gchar *mask)
     return FALSE;
 }
 
-IgnoreEntry *
-ignore_check_entry(mowgli_dictionary_elem_t *element, IgnoreEntry *mask)
+gpointer
+ignore_check_entry(mowgli_dictionary_elem_t *element, gpointer data)
 {
+    IgnoreEntry *mask = (IgnoreEntry *)data;
     IgnoreEntry *ignore = (IgnoreEntry *)element->data;
 
     if (g_pattern_match_string(ignore->spec, mask->mask)) {
@@ -147,12 +147,20 @@ ignore_check_entry(mowgli_dictionary_elem_t *element, IgnoreEntry *mask)
 gboolean
 ignore_check(const gchar *mask, const IgnoreLevel levels)
 {
-    IgnoreEntry *ignore = g_slice_new0(IgnoreEntry);
-    ignore->mask = mask;
+    IgnoreEntry *ignore;
+    gboolean ret = FALSE;
+
+    ignore = g_slice_new0(IgnoreEntry);
+    ignore->mask = g_strdup(mask);
     ignore->levels = levels;
+
     if (mowgli_dictionary_search(ignores, ignore_check_entry, ignore))
-        return TRUE;
-    return FALSE;
+        ret = TRUE;
+
+    g_free(ignore->mask);
+    g_slice_free(IgnoreEntry, ignore);
+
+    return ret;
 }
 
 void
@@ -200,17 +208,21 @@ ignore_load(void)
 }
 
 gint
-ignore_save_entry(mowgli_dictionary_elem_t *element, GIOChannel *file)
+ignore_save_entry(mowgli_dictionary_elem_t *element, gpointer data)
 {
+    GIOChannel *file = (GIOChannel *)data;
     IgnoreEntry *ignore = (IgnoreEntry *)element->data;
-    gchar *buf = 0;
+    gchar *buf;
     gsize bytes;
     GError *error;
 
-    g_snprintf(buf, "%s = %d\n", 109, ignore->mask, ignore->levels);
-    g_io_channel_write_chars(file, buf, sizeof(buf), &bytes, &error);
+    buf = g_strdup_printf("%s = %d\n", ignore->mask, ignore->levels);
+    g_io_channel_write_chars(file, buf, -1, &bytes, &error);
+    g_free(buf);
+
     if (error != NULL)
         return 1;
+
     return 0;
 }
 
@@ -231,7 +243,7 @@ cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
 {
     gboolean except, private, public, notice, ctcp, action, joins;
     gboolean parts, quits, kicks, modes, topics, invites, nicks;
-    gboolean dcc, dccmsgs, hilight, all;
+    gboolean dcc, hilight, all;
     CommandOption options[] = {
         {"except",  TYPE_BOOLEAN, &except,  N_("User will %Bnot%B be ignored.")},
         {"private", TYPE_BOOLEAN, &private, N_("Private messages from the user will be ignored.")},
