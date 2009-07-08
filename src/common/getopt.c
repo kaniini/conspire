@@ -105,6 +105,7 @@ command_option_parse(session *sess, gint *argc, gchar ***argv, CommandOption opt
 
                     case TYPE_USAGE:
                         command_option_usage(sess, command, opts);
+                        break;
                     /*NOTREACHED*/ default:
                         PrintTextf(sess,
                                 "Error: internal error in command_option_parse at %s:%d",
@@ -122,7 +123,7 @@ command_option_parse(session *sess, gint *argc, gchar ***argv, CommandOption opt
 }
 
 void
-command_option_usage(session *sess, gchar *name, CommandOption opts[])
+command_option_usage(session *sess, gchar *name, CommandOption *opts)
 {
     gint i = 0;
     gchar *temp;
