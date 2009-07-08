@@ -49,7 +49,10 @@ signal_printer_action_private(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PRIVATE | IGNORE_ACTION))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 	session_print_format(sess, "query action", from, nickchar, text);
 }
@@ -69,7 +72,10 @@ signal_printer_action_public(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PUBLIC | IGNORE_ACTION))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 	session_print_format(sess, "channel action", from, nickchar, text);
 }
@@ -92,6 +98,7 @@ signal_printer_action_private_hilight(gpointer *params)
 			session_print_format(sess, "query action hilight", from, nickchar, text);
 		else if (!ignore_check(hostmask, IGNORE_PRIVATE | IGNORE_ACTION))
 			session_print_format(sess, "query action", from, nickchar, text);
+                g_free(hostmask);
 	} else
 		session_print_format(sess, "query action hilight", from, nickchar, text);
 }
@@ -114,6 +121,7 @@ signal_printer_action_public_highlight(gpointer *params)
 			session_print_format(sess, "channel action hilight", from, nickchar, text);
 		else if (!ignore_check(hostmask, IGNORE_PUBLIC | IGNORE_ACTION))
 			session_print_format(sess, "channel action", from, nickchar, text);
+		g_free(hostmask);
 	} else
 		session_print_format(sess, "channel action hilight", from, nickchar, text);
 }
@@ -184,7 +192,10 @@ signal_printer_channel_invited(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_INVITES))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
         
 	if (word[4][0] == ':')
@@ -228,7 +239,10 @@ signal_printer_channel_topic_changed(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_TOPICS))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "topic change", nick, topic, channel);
@@ -259,7 +273,10 @@ signal_printer_channel_join(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_JOINS))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "join", nick, channel, host);
@@ -281,7 +298,10 @@ signal_printer_channel_kick(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_KICKS))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "kick", kicker, nick, channel, reason, 0);
@@ -303,7 +323,10 @@ signal_printer_channel_part(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PARTS))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	if (*reason)
@@ -327,7 +350,10 @@ signal_printer_channel_quit(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_QUITS))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "quit", nick, reason, host);
@@ -368,7 +394,10 @@ signal_printer_dcc_chat_duplicate(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_DCC))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "dcc chat reoffer", nick);
@@ -408,7 +437,10 @@ signal_printer_dcc_chat_request(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_DCC))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess->server->front_session, "dcc chat offer", nick);
@@ -487,7 +519,10 @@ signal_printer_dcc_file_request(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_DCC))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess->server->front_session, "dcc recv offer", nick, file, tbuf, tbuf + 24, 0);
@@ -518,7 +553,10 @@ signal_printer_dcc_file_resume(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_DCC))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "dcc resume request", nick, file_part (dcc->file), tbuf);
@@ -538,7 +576,10 @@ signal_printer_dcc_generic_offer(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_DCC))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess->server->front_session, "dcc generic offer", data, nick);
@@ -573,7 +614,10 @@ signal_printer_dcc_malformed(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_DCC))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "dcc malformed", nick, data);
@@ -675,7 +719,10 @@ signal_printer_message_private(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PRIVATE))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	if (sess->type == SESS_DIALOG) {
@@ -700,7 +747,10 @@ signal_printer_query_quit(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PRIVATE | IGNORE_QUITS))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "quit", nick, reason, host);
@@ -724,7 +774,10 @@ signal_printer_message_public(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PUBLIC))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "channel message", from, nickchar, idtext, message);
@@ -769,7 +822,10 @@ signal_printer_notice_private(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PRIVATE | IGNORE_NOTICE))
+                {
+			g_free(hostmask);
 			return;
+                }
 	}
 
 
@@ -791,7 +847,10 @@ signal_printer_notice_public(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PUBLIC | IGNORE_NOTICE))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "channel notice", nick, to, message);
@@ -1053,6 +1112,7 @@ signal_printer_ctcp_inbound(gpointer *params)
 
 			session_print_format(chansess, "ctcp generic to channel", msg, nick, to);
 		}
+		g_free(hostmask);
         } else
 	{
 		if(!is_channel(sess->server, to))
@@ -1197,7 +1257,10 @@ signal_printer_nick_changed(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_NICKS))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "change nick", nick, newnick);
@@ -1292,7 +1355,10 @@ signal_printer_ctcp_reply(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_CTCP))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "ctcp reply generic", nick, type, content);
@@ -1334,7 +1400,10 @@ signal_printer_channel_modes_raw(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_MODES))
+                {
+			g_free(hostmask);
 			return;
+                }
         }
 
 	session_print_format(sess, "raw modes", nick, modes);
