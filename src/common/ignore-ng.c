@@ -267,8 +267,8 @@ cmd_ignore (struct session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[])
     IgnoreLevel levels = IGNORE_NONE;
 
     command_option_parse(sess, &len, &word, options);
-
-    PrintTextf(sess, "Ignoring: %s", word[2]);
+    if (*word[2] == '\0')
+        return CMD_EXEC_FAIL;
 
     if (except)
         levels += IGNORE_EXCEPT;
