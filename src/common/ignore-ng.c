@@ -179,8 +179,8 @@ ignore_check(const gchar *mask, const IgnoreLevel levels)
 void
 ignore_load(void)
 {
-    GError *error;
-    gchar *filename = g_build_filename(get_xdir_fs(), "ignore.txt", NULL);
+    GError *error = NULL;
+    gchar *filename = g_build_filename(get_xdir_fs(), "ignore.conf", NULL);
     GIOChannel *file = g_io_channel_new_file(filename, "r", &error);
     gchar *str;
     gchar **entries;
@@ -192,6 +192,7 @@ ignore_load(void)
 
     if (error != NULL)
     {
+        g_print("error: %s\n", error->message);
         g_io_channel_close(file);
         return;
     }
@@ -242,9 +243,14 @@ ignore_save_entry(mowgli_dictionary_elem_t *element, gpointer data)
 void
 ignore_save(void)
 {
-    GError *error;
-    gchar *filename = g_build_filename(get_xdir_fs(), "ignore.txt", NULL);
-    GIOChannel *file = g_io_channel_new_file(filename, "r", &error);
+    GError *error = NULL;
+    gchar *filename = g_build_filename(get_xdir_fs(), "ignore.conf", NULL);
+    GIOChannel *file = g_io_channel_new_file(filename, "w", &error);
+
+    if (error != NULL) {
+        g_print("error: %s\n", error->message);
+        return;
+    }
 
     mowgli_dictionary_foreach(ignores, ignore_save_entry, file);
 
