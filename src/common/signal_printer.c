@@ -41,19 +41,7 @@ signal_printer_action_private(gpointer *params)
 	gchar *from       = params[1];
 	gchar *text       = params[2];
 	gchar *nickchar   = params[3];
-	struct User *user = userlist_find(sess, from);
-	gchar *hostmask;
 
-	if (user != NULL)
-	{
-		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
-
-		if (ignore_check(hostmask, IGNORE_PRIVATE | IGNORE_ACTION))
-                {
-			g_free(hostmask);
-			return;
-                }
-        }
 	session_print_format(sess, "query action", from, nickchar, text);
 }
 
@@ -64,19 +52,7 @@ signal_printer_action_public(gpointer *params)
 	gchar *from     = params[1];
 	gchar *text     = params[2];
 	gchar *nickchar = params[3];
-	struct User *user = userlist_find(sess, from);
-	gchar *hostmask;
 
-	if (user != NULL)
-	{
-		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
-
-		if (ignore_check(hostmask, IGNORE_PUBLIC | IGNORE_ACTION))
-                {
-			g_free(hostmask);
-			return;
-                }
-        }
 	session_print_format(sess, "channel action", from, nickchar, text);
 }
 
@@ -184,20 +160,7 @@ signal_printer_channel_invited(gpointer *params)
 	gchar **word  = params[1];
 	gchar *nick   = params[2];
 	server *serv  = params[3];
-	struct User *user = userlist_find(sess, nick);
-	gchar *hostmask;
-
-	if (user != NULL)
-	{
-		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
-
-		if (ignore_check(hostmask, IGNORE_INVITES))
-                {
-			g_free(hostmask);
-			return;
-                }
-        }
-        
+       
 	if (word[4][0] == ':')
 		session_print_format(sess, "invited", word[4] + 1, nick, serv->servername);
 	else
@@ -265,19 +228,6 @@ signal_printer_channel_join(gpointer *params)
 	gchar *nick    = params[1];
 	gchar *channel = params[2];
 	gchar *host    = params[3];
-	struct User *user = userlist_find(sess, nick);
-	gchar *hostmask;
-
-	if (user != NULL)
-	{
-		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
-
-		if (ignore_check(hostmask, IGNORE_JOINS))
-                {
-			g_free(hostmask);
-			return;
-                }
-        }
 
 	session_print_format(sess, "join", nick, channel, host);
 }
@@ -290,19 +240,6 @@ signal_printer_channel_kick(gpointer *params)
 	gchar *nick    = params[2];
 	gchar *channel = params[3];
 	gchar *reason  = params[4];
-	struct User *user = userlist_find(sess, kicker);
-	gchar *hostmask;
-
-	if (user != NULL)
-	{
-		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
-
-		if (ignore_check(hostmask, IGNORE_KICKS))
-                {
-			g_free(hostmask);
-			return;
-                }
-        }
 
 	session_print_format(sess, "kick", kicker, nick, channel, reason, 0);
 }
@@ -315,19 +252,6 @@ signal_printer_channel_part(gpointer *params)
 	gchar *host    = params[2];
 	gchar *channel = params[3];
 	gchar *reason  = params[4];
-	struct User *user = userlist_find(sess, nick);
-	gchar *hostmask;
-
-	if (user != NULL)
-	{
-		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
-
-		if (ignore_check(hostmask, IGNORE_PARTS))
-                {
-			g_free(hostmask);
-			return;
-                }
-        }
 
 	if (*reason)
 		session_print_format(sess, "part with reason", nick, host, channel, reason, 0);
@@ -342,19 +266,6 @@ signal_printer_channel_quit(gpointer *params)
 	gchar *nick   = params[1];
 	gchar *reason = params[2];
 	gchar *host   = params[3];
-	struct User *user = userlist_find(sess, nick);
-	gchar *hostmask;
-
-	if (user != NULL)
-	{
-		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
-
-		if (ignore_check(hostmask, IGNORE_QUITS))
-                {
-			g_free(hostmask);
-			return;
-                }
-        }
 
 	session_print_format(sess, "quit", nick, reason, host);
 }

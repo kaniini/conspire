@@ -186,6 +186,8 @@ ignore_load(void)
     gchar *vp;
     gsize len;
 
+    ignore_signals_init();
+
     ignores = mowgli_dictionary_create(g_ascii_strcasecmp);
 
     if (error != NULL)

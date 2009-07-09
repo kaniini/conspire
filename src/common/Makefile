@@ -6,7 +6,7 @@ STATIC_LIB = libconspire.a
 
 SRCS = \
 	base64.c cap.c cfgfiles.c ctcp.c command_factory.c dcc.c format.c \
-	history.c ignore-ng.c inbound.c linequeue.c modes.c network.c notify.c \
+	history.c ignore-ng.c ignore-signals.c inbound.c linequeue.c modes.c network.c notify.c \
 	outbound.c plugin.c proto-irc.c sasl.c server.c servlist.c session.c   \
 	signal_factory.c signal_printer.c text.c tree.c upnp.c url.c userlist.c\
 	util.c xchat.c upnp/igd_desc_parse.c upnp/minisoap.c upnp/minissdpc.c  \

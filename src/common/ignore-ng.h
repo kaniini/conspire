@@ -40,5 +40,7 @@ gint flood_check(gchar *nick, gchar *ip, server *serv, session *sess, gint what)
 CommandResult cmd_ignore(session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[]);
 CommandResult cmd_unignore(session *sess, gchar *tbuf, gchar *word[], gchar *word_eol[]);
 
+void ignore_signals_init(void);
+
 #endif
 
