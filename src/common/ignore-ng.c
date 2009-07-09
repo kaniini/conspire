@@ -130,9 +130,7 @@ ignore_show_entry(mowgli_dictionary_elem_t *element, gpointer data)
 void
 ignore_showlist(session *sess)
 {
-    signal_emit("ignore list header", 1, sess);
     mowgli_dictionary_foreach(ignores, ignore_show_entry, sess);
-    signal_emit("ignore list footer", 1, sess);
 }
 
 gboolean
@@ -188,7 +186,7 @@ ignore_load(void)
     gchar *vp;
     gsize len;
 
-    ignores = mowgli_dictionary_create(strcasecmp);
+    ignores = mowgli_dictionary_create(g_ascii_strcasecmp);
 
     if (error != NULL)
     {
@@ -200,14 +198,15 @@ ignore_load(void)
     {
         while (g_io_channel_read_line(file, &str, &len, NULL, &error))
         {
-            if (error != NULL)
+            if (error != NULL) {
                 g_io_channel_close(file);
                 return;
+            }
             if (len < 1)
                 continue;
             entries = g_strsplit(str, " = ", 0);
             ignore = g_slice_new0(IgnoreEntry);
-            ignore->mask = entries[0];
+            ignore->mask = g_strdup(entries[0]);
             ignore->spec = g_pattern_spec_new(entries[0]);
             
             for (vp = entries[1]; *vp != '\0'; vp++)
@@ -216,6 +215,7 @@ ignore_load(void)
                 ignore->levels += g_ascii_digit_value(*vp);
             }
             mowgli_dictionary_add(ignores, ignore->mask, ignore);
+            g_strfreev(entries);
         }
     }
     g_io_channel_close(file);
@@ -230,7 +230,7 @@ ignore_save_entry(mowgli_dictionary_elem_t *element, gpointer data)
     gsize bytes;
     GError *error;
 
-    buf = g_strdup_printf("%s = %d\n", ignore->mask, ignore->levels);
+    buf = g_strdup_printf("%s = %u\n", ignore->mask, ignore->levels);
     g_io_channel_write_chars(file, buf, -1, &bytes, &error);
     g_free(buf);
 
