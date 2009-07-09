@@ -2756,13 +2756,13 @@ auto_insert (gchar *dest, gint destlen, guchar *src, gchar *word[],
                         }
                         break;
                 }
-                if (temp[0])
+                if (*temp)
                 {
                     for (vp = temp; *vp != '\0' && (dest - i) < destlen; vp++)
                     {
                         *i++ = *vp;
                     }
-                    temp[0] = 0;
+                    p++;
                 } else {
                     *i++ = *p;
                 }
