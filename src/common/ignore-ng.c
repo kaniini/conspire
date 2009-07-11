@@ -198,7 +198,7 @@ ignore_load(void)
     }
     else
     {
-        while (g_io_channel_read_line(file, &str, &len, NULL, &error))
+        while ((g_io_channel_read_line(file, &str, &len, NULL, &error) == G_IO_STATUS_NORMAL))
         {
             if (error != NULL) {
                 g_io_channel_close(file);
