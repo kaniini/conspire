@@ -198,6 +198,16 @@ ignore_load(void)
     }
     else
     {
+        if (g_io_channel_read_line(file, &str, &len, NULL, &error) == G_IO_STATUS_NORMAL) {
+            if (g_ascii_strcasecmp(str, IGNORE_VERSION)) {
+                g_io_channel_close(file);
+                return;
+            }
+        } else {
+            g_io_channel_close(file);
+            return;
+        }
+        
         while ((g_io_channel_read_line(file, &str, &len, NULL, &error) == G_IO_STATUS_NORMAL))
         {
             if (error != NULL) {
@@ -236,8 +246,11 @@ ignore_save_entry(mowgli_dictionary_elem_t *element, gpointer data)
     g_io_channel_write_chars(file, buf, -1, &bytes, &error);
     g_free(buf);
 
-    if (error != NULL)
+    if (error != NULL) {
+        g_print("error: %s\n", error->message);
+        g_io_channel_close(file);
         return 1;
+    }
 
     return 0;
 }
@@ -248,9 +261,19 @@ ignore_save(void)
     GError *error = NULL;
     gchar *filename = g_build_filename(get_xdir_fs(), "ignore.conf", NULL);
     GIOChannel *file = g_io_channel_new_file(filename, "w", &error);
+    gint bytes = 0;
 
     if (error != NULL) {
         g_print("error: %s\n", error->message);
+        g_io_channel_close(file);
+        return;
+    }
+
+    g_io_channel_write_chars(file, IGNORE_VERSION"\n", -1, &bytes, &error);
+
+    if (error != NULL) {
+        g_print("error: %s\n", error->message);
+        g_io_channel_close(file);
         return;
     }
 

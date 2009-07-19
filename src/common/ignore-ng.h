@@ -1,6 +1,8 @@
 #ifndef CONSPIRE_IGNORE_H
 #define CONSPIRE_IGNORE_H
 
+#define IGNORE_VERSION "Ignore v1"
+
 typedef enum {
     IGNORE_NONE    = (0),
     IGNORE_EXCEPT  = (1 <<  1),
