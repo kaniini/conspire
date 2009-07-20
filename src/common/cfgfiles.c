@@ -772,6 +772,9 @@ load_config (void)
 	prefs.irc_no_hilight = strdup("NickServ,ChanServ");
 	prefs.irc_time_format = strdup("%a %b %e %T %Z %Y");
 
+	prefs.gui_ulist_pos = 2;
+	prefs.tab_pos = 1;
+
 	prefs.hilight_enable = TRUE;
 
 	prefs.text_overflow_start = strdup("");
@@ -825,45 +828,6 @@ load_config (void)
 	sp = strchr (prefs.username, ' ');
 	if (sp)
 		sp[0] = 0;	/* spaces in username would break the login */
-
-	/* try to make sense of old ulist/tree position settings */
-	if (prefs.gui_ulist_pos == 0)
-	{
-		prefs.gui_ulist_pos = 3;	/* top right */
-		if (prefs._gui_ulist_left)
-			prefs.gui_ulist_pos = 2;	/* bottom left */
-
-		switch (prefs._tabs_position)
-		{
-		case 0:
-			prefs.tab_pos = 6; /* bottom */
-			break;
-		case 1:
-			prefs.tab_pos = 5;	/* top */
-			break;
-		case 2:
-			prefs.tab_pos = 1; 	/* left */
-			break;
-		case 3:
-			prefs.tab_pos = 4; 	/* right */
-			break;
-		case 4:
-			prefs.tab_pos = 1;	/* (hidden)left */
-			break;
-		case 5:
-			if (prefs._gui_ulist_left)
-			{
-				prefs.tab_pos = 1; 	/* above ulist left */
-				prefs.gui_ulist_pos = 2;
-			}
-			else
-			{
-				prefs.tab_pos = 3; 	/* above ulist right */
-				prefs.gui_ulist_pos = 4;
-			}
-			break;
-		}
-	}
 }
 
 int
