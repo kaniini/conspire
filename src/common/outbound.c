@@ -2767,6 +2767,10 @@ auto_insert (gchar *dest, gint destlen, guchar *src, gchar *word[],
                     *i++ = *p;
                 }
                 break;
+            case '\':
+                p++;
+                *i++ = *p;
+                break;
             case '$':
                 {
                     gchar *vp;
