@@ -2767,7 +2767,7 @@ auto_insert (gchar *dest, gint destlen, guchar *src, gchar *word[],
                     *i++ = *p;
                 }
                 break;
-            case '\':
+            case '\\':
                 p++;
                 *i++ = *p;
                 break;
