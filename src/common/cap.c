@@ -103,5 +103,8 @@ cap_add_cap(CapState *cap, const gchar *token)
 void
 cap_request(CapState *cap)
 {
-	tcp_sendf_now(cap->serv, "CAP REQ :%s", cap->caps_request);
+	if (*cap->caps_request)
+		tcp_sendf_now(cap->serv, "CAP REQ :%s", cap->caps_request);
+	else
+		tcp_sendf_now(cap->serv, "CAP END");
 }
