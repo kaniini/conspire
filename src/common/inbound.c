@@ -44,7 +44,7 @@
 #include "text.h"
 #include "ctcp.h"
 #include "xchatc.h"
-
+#include "ignore-ng.h"
 
 void
 clear_channel (session *sess)
