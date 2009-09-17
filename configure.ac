@@ -269,7 +269,7 @@ if test "$plugin" = yes; then
 	AC_PATH_PROG(pkgconfigpath, pkg-config)
 	dnl we just need the -Wl,--export-dynamic, but not -lgmodule-2.0
 	RDYNAMIC_FLAGS="`$pkgconfigpath gmodule-2.0 --libs`"
-	LIBS="$LIBS $RDYNAMIC_FLAGS"
+	COMMON_LIBS="$COMMON_LIBS $RDYNAMIC_FLAGS"
 fi
 
 dnl ** DBus **
