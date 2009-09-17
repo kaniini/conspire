@@ -5,7 +5,6 @@ TODO
 
 IDEAS
 - Implement a sane theme engine
-- Rewrite the ignore system so that it's actually worth using
 - Add irssi-style tabcompletion alongside the bash-style implementation and
   provide a toggle
 - Possibly implement hilight notifications through a pane above or below the
