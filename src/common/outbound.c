@@ -1433,7 +1433,7 @@ static CommandResult
 cmd_load (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	FILE *fp;
-	char *arg, *nl, *file;
+	char *nl, *file;
 	int len;
 
 	if (!word[2][0])
