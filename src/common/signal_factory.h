@@ -37,6 +37,7 @@ gint signal_emit(const gchar *signal, int params, ...);
 void signal_continue(int params, ...);
 
 void signal_stop(const gchar *signal);
+void signal_stop_current(void);
 const gchar *signal_get_current_name(void);
 
 void signal_disconnect(const gchar *signal, SignalHandler hdl);
