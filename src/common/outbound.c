@@ -881,6 +881,7 @@ typedef struct
 
 GSList *menu_list = NULL;
 
+#if 0
 static void
 menu_free (menu_entry *me)
 {
@@ -897,6 +898,7 @@ menu_free (menu_entry *me)
 		free (me->icon);
 	free (me);
 }
+#endif
 
 /* strings equal? but ignore underscores */
 
@@ -924,6 +926,7 @@ menu_streq (const char *s1, const char *s2, int def)
 	return def;
 }
 
+#if 0
 static menu_entry *
 menu_entry_find (char *path, char *label)
 {
@@ -1068,6 +1071,7 @@ menu_add (char *path, char *label, char *cmd, char *ucmd, int pos, int state, in
 		g_free (label); /* this is from pango */
 	}
 }
+#endif
 
 static CommandResult
 cmd_devoice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
