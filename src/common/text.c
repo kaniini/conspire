@@ -878,7 +878,9 @@ void
 pevent_save (char *fn)
 {
 	int fd;
+#if 0
 	char buf[1024];
+#endif
 
 	if (!fn)
 		fd = xchat_open_file ("pevents.conf", O_CREAT | O_TRUNC | O_WRONLY,
