@@ -261,7 +261,7 @@ ignore_save(void)
     GError *error = NULL;
     gchar *filename = g_build_filename(get_xdir_fs(), "ignore.conf", NULL);
     GIOChannel *file = g_io_channel_new_file(filename, "w", &error);
-    gint bytes = 0;
+    gsize bytes = 0;
 
     if (error != NULL) {
         g_print("error: %s\n", error->message);
