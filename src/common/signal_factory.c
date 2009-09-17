@@ -138,6 +138,15 @@ signal_stop(const gchar *signal)
 	sig->stop++;
 }
 
+void
+signal_stop_current(void)
+{
+	if (current_sig_ == NULL)
+		return;
+
+	current_sig_->stop++;
+}
+
 const gchar *
 signal_get_current_name(void)
 {
