@@ -63,7 +63,7 @@ ignore_signal_action_private(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PRIVATE | IGNORE_ACTION))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
 	}
@@ -84,7 +84,7 @@ ignore_signal_action_private_hilight(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
                 if (ignore_check(hostmask, IGNORE_HILIGHT)) {
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 			signal_emit("action private", 5, sess, nick, text, nickchar);
                 }
 
@@ -105,7 +105,7 @@ ignore_signal_action_public(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PUBLIC | IGNORE_ACTION))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
 	}
@@ -126,7 +126,7 @@ ignore_signal_action_public_hilight(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
                 if (ignore_check(hostmask, IGNORE_HILIGHT)) {
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 			signal_emit("action public", 5, sess, nick, text, nickchar);
                 }
 
@@ -147,7 +147,7 @@ ignore_signal_channel_invited(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_INVITES))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
@@ -166,7 +166,7 @@ ignore_signal_channel_topic_changed(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_TOPICS))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
@@ -185,7 +185,7 @@ ignore_signal_channel_join(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_JOINS))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
@@ -204,7 +204,7 @@ ignore_signal_channel_kick(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_KICKS))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
@@ -223,7 +223,7 @@ ignore_signal_channel_modes_raw(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_MODES))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
@@ -242,7 +242,7 @@ ignore_signal_channel_part(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PARTS))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
 	}
@@ -261,7 +261,7 @@ ignore_signal_channel_quit(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_QUITS))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
@@ -283,11 +283,11 @@ ignore_signal_ctcp_inbound(gpointer *params)
 		if (!is_channel(sess->server, to))
 		{
 			if (ignore_check(hostmask, IGNORE_PRIVATE | IGNORE_CTCP))
-				signal_stop(signal_get_current_name());
+				signal_stop_current();
 		} else
 		{
 			if (ignore_check(hostmask, IGNORE_PUBLIC | IGNORE_CTCP))
-				signal_stop(signal_get_current_name());
+				signal_stop_current();
 		}
 
 		g_free(hostmask);
@@ -307,7 +307,7 @@ ignore_signal_ctcp_reply(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PRIVATE | IGNORE_CTCP))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
@@ -326,7 +326,7 @@ ignore_signal_dcc_generic(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_DCC))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
@@ -345,7 +345,7 @@ ignore_signal_message_private(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PRIVATE))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
@@ -364,7 +364,7 @@ ignore_signal_message_public(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PUBLIC))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
@@ -386,7 +386,7 @@ ignore_signal_message_public_hilight(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
                 if (ignore_check(hostmask, IGNORE_HILIGHT)) {
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 			signal_emit("message public", 5, sess, nick, message, nickchar, idtext);
                 }
 
@@ -409,7 +409,7 @@ ignore_signal_nick_changed(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_NICKS))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
@@ -428,7 +428,7 @@ ignore_signal_notice_private(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PRIVATE | IGNORE_NOTICE))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
 	}
@@ -447,7 +447,7 @@ ignore_signal_notice_public(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PUBLIC | IGNORE_NOTICE))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
 	}
@@ -466,7 +466,7 @@ ignore_signal_query_quit(gpointer *params)
 		hostmask = g_strjoin("!", user->nick, user->hostname, NULL);
 
 		if (ignore_check(hostmask, IGNORE_PRIVATE | IGNORE_QUITS))
-			signal_stop(signal_get_current_name());
+			signal_stop_current();
 
 		g_free(hostmask);
         }
