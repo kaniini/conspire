@@ -165,6 +165,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\common\command_option.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\common\ctcp.c"
 				>
 			</File>
@@ -328,6 +332,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\common\command_factory.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\common\command_option.h"
 				>
 			</File>
 			<File
