@@ -50,7 +50,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include <unistd.h>
+#ifndef _WIN32
+# include <unistd.h>
+#endif
 #include <time.h>
 
 #include <cairo.h>
