@@ -185,7 +185,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\common\ignore.c"
+				RelativePath="..\..\..\src\common\ignore-ng.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\common\ignore-signals.c"
 				>
 			</File>
 			<File
@@ -360,6 +364,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\common\upnp\igd_desc_parse.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\common\ignore-ng.h"
 				>
 			</File>
 			<File
