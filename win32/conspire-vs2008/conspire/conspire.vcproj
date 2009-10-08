@@ -67,6 +67,7 @@
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				EntryPointSymbol=""
+				ImportLibrary="C:\dev-src\conspire\win32\conspire-vs2008\Debug\conspire.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -147,6 +148,7 @@
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				EntryPointSymbol=""
+				ImportLibrary="C:\dev-src\conspire\win32\conspire-vs2008\Release\conspire.lib"
 				TargetMachine="1"
 				ErrorReporting="1"
 			/>

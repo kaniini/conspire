@@ -2,7 +2,7 @@
 #define USE_PLUGIN
 
 #define PACKAGE_NAME "conspire"
-#define PACKAGE_VERSION "1.0-alpha1"
+#define PACKAGE_VERSION "1.0.0"
 
 #define CONSPIRE_LIBDIR "."
 #define CONSPIRE_SHAREDIR "."
