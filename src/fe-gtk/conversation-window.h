@@ -35,6 +35,7 @@ ConversationWindow *conversation_window_new(void);
 
 void conversation_window_update_preferences(ConversationWindow *win);
 void conversation_window_set_urlcheck_function(ConversationWindow *win, int (*urlcheck_function) (GtkWidget *, char *, int));
+void conversation_window_set_contextmenu_function(ConversationWindow *win, void (*callback)(GtkWidget *xtext, char *word, GdkEventButton *event));
 gpointer conversation_window_get_opaque_buffer(ConversationWindow *win);
 void conversation_window_set_opaque_buffer(ConversationWindow *win, gpointer buf);
 

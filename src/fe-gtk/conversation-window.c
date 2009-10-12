@@ -110,6 +110,17 @@ conversation_window_set_urlcheck_function(ConversationWindow *win, int (*urlchec
 	gtk_xtext_set_urlcheck_function(GTK_XTEXT(priv_win->xtext), urlcheck_function);
 }
 
+void
+conversation_window_set_contextmenu_function(ConversationWindow *win, void (*callback)(GtkWidget *xtext, char *word, GdkEventButton *event))
+{
+	ConversationWindowPriv *priv_win = (ConversationWindowPriv *) win;
+	
+	g_return_if_fail(win != NULL);
+	g_return_if_fail(priv_win->xtext != NULL);
+
+        g_signal_connect (G_OBJECT(priv_win->xtext), "word_click", G_CALLBACK(callback), NULL);
+}
+
 gpointer
 conversation_window_get_opaque_buffer(ConversationWindow *win)
 {

@@ -1993,31 +1993,9 @@ mg_create_textarea (session *sess, GtkWidget *box)
 	gui->xtext = conversation_window_new();
 	gtk_container_add (GTK_CONTAINER (frame), CONVERSATION_WIDGET(gui->xtext));
 	gtk_widget_show_all(CONVERSATION_WIDGET(gui->xtext));
+
 	conversation_window_set_urlcheck_function(gui->xtext, mg_word_check);
-
-#ifdef NOTYET
-	g_signal_connect (G_OBJECT (xtext), "word_click",
-							G_CALLBACK (mg_word_clicked), NULL);
-
-	gui->vscrollbar = gtk_vscrollbar_new (GTK_XTEXT (xtext)->adj);
-	gtk_box_pack_start (GTK_BOX (inbox), gui->vscrollbar, FALSE, TRUE, 0);
-	/* needs more work */
-	gtk_drag_dest_set (gui->vscrollbar, 5, dnd_dest_targets, 2,
-							 GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK);
-	g_signal_connect (G_OBJECT (gui->vscrollbar), "drag_begin",
-							G_CALLBACK (mg_drag_begin_cb), NULL);
-	g_signal_connect (G_OBJECT (gui->vscrollbar), "drag_drop",
-							G_CALLBACK (mg_drag_drop_cb), NULL);
-	g_signal_connect (G_OBJECT (gui->vscrollbar), "drag_motion",
-							G_CALLBACK (mg_drag_motion_cb), gui->vscrollbar);
-	g_signal_connect (G_OBJECT (gui->vscrollbar), "drag_end",
-							G_CALLBACK (mg_drag_end_cb), NULL);
-
-	gtk_drag_dest_set (gui->xtext, GTK_DEST_DEFAULT_ALL, dnd_targets, 1,
-							 GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK);
-	g_signal_connect (G_OBJECT (gui->xtext), "drag_data_received",
-							G_CALLBACK (mg_dialog_dnd_drop), NULL);
-#endif
+	conversation_window_set_contextmenu_function(gui->xtext, mg_word_clicked);
 }
 
 static GtkWidget *
