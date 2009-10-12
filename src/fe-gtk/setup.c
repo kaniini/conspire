@@ -1413,7 +1413,7 @@ setup_apply_entry_style (GtkWidget *entry)
 static void
 setup_apply_to_sess (session_gui *gui)
 {
-	mg_update_xtext (gui->xtext);
+	conversation_window_update_preferences(gui->xtext);
 
 	if (prefs.style_namelistgad)
 		gtk_widget_set_style (gui->user_tree, input_style);

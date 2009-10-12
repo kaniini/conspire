@@ -31,6 +31,7 @@
 #include <gtk/gtkstock.h>
 
 #include "../common/xchat.h"
+#include "../common/fe.h"
 #include "../common/xchatc.h"
 #include "../common/cfgfiles.h"
 #include "../common/server.h"
@@ -62,15 +63,37 @@ conversation_window_new(void)
 	win->widget = gtk_hbox_new(FALSE, 2);
 
 	priv_win->xtext = gtk_xtext_new(colors, 0);
-	gtk_xtext_set_font(GTK_XTEXT(priv_win->xtext), prefs.font_normal);
-	gtk_box_pack_start(GTK_BOX(win->widget), priv_win->xtext, 0, 0, 0);
-	gtk_widget_show(priv_win->xtext);
+	gtk_box_pack_start(GTK_BOX(win->widget), priv_win->xtext, TRUE, TRUE, 0);
 
-        priv_win->vs = gtk_vscrollbar_new(GTK_XTEXT(priv_win->xtext)->adj);
-        gtk_box_pack_start(GTK_BOX(win->widget), priv_win->vs, FALSE, FALSE, 0);
-        show_and_unfocus(priv_win->vs);
+	priv_win->vs = gtk_vscrollbar_new(GTK_XTEXT(priv_win->xtext)->adj);
+	gtk_box_pack_start(GTK_BOX(win->widget), priv_win->vs, FALSE, FALSE, 0);
+
+	gtk_widget_show_all(win->widget);
 
 	return win;
+}
+
+void
+conversation_window_update_preferences(ConversationWindow *win)
+{
+	ConversationWindowPriv *priv_win = (ConversationWindowPriv *) win;
+
+	gtk_xtext_set_palette(GTK_XTEXT(priv_win->xtext), colors);
+	gtk_xtext_set_max_indent(GTK_XTEXT(priv_win->xtext), prefs.max_auto_indent);
+	gtk_xtext_set_thin_separator(GTK_XTEXT(priv_win->xtext), prefs.thin_separator);
+	gtk_xtext_set_max_lines(GTK_XTEXT(priv_win->xtext), prefs.max_lines);
+	gtk_xtext_set_wordwrap(GTK_XTEXT(priv_win->xtext), prefs.wordwrap);
+	gtk_xtext_set_show_marker(GTK_XTEXT(priv_win->xtext), prefs.show_marker);
+	gtk_xtext_set_show_separator(GTK_XTEXT(priv_win->xtext), prefs.show_separator);
+	gtk_xtext_set_indent(GTK_XTEXT(priv_win->xtext), prefs.indent_nicks);
+
+	if (!gtk_xtext_set_font(GTK_XTEXT(priv_win->xtext), prefs.font_normal))
+	{
+		fe_message ("No font is available", FE_MSG_WAIT | FE_MSG_ERROR);
+		exit(1);
+	}
+
+	gtk_xtext_refresh(GTK_XTEXT(priv_win->xtext));
 }
 
 gpointer
@@ -93,6 +116,30 @@ conversation_window_set_opaque_buffer(ConversationWindow *win, gpointer buf)
 	g_return_if_fail(priv_win->xtext != NULL);
 
 	gtk_xtext_buffer_show(GTK_XTEXT(priv_win->xtext), buf, TRUE);
+}
+
+gpointer
+conversation_buffer_new(ConversationWindow *win, gboolean timestamp)
+{
+	ConversationWindowPriv *priv_win = (ConversationWindowPriv *) win;
+	gpointer buf;
+
+	g_return_val_if_fail(win != NULL, NULL);
+	g_return_val_if_fail(priv_win->xtext != NULL, NULL);
+
+	buf = gtk_xtext_buffer_new(GTK_XTEXT(priv_win->xtext));
+	conversation_buffer_set_time_stamp(buf, timestamp);
+
+	return buf;
+}
+
+void
+conversation_buffer_set_time_stamp(gpointer buf, gboolean timestamp)
+{
+	g_return_if_fail(buf != NULL);
+
+	gtk_xtext_set_time_stamp(buf, timestamp);
+	((xtext_buffer *)buf)->needs_recalc = TRUE;
 }
 
 void

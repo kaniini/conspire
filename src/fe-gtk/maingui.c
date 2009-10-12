@@ -67,6 +67,7 @@
 #include "tray.h"
 #include "xtext.h"
 #include "sync-menu.h"
+#include "conversation-window.h"
 
 #ifdef HAVE_LIBSEXY
 # include <libsexy/sexy.h>
@@ -703,7 +704,7 @@ mg_populate (session *sess)
 {
 	session_gui *gui = sess->gui;
 	restore_gui *res = sess->res;
-	int i, render = TRUE;
+	int i;
 
 	switch (sess->type)
 	{
@@ -742,8 +743,9 @@ mg_populate (session *sess)
 	if (gui->is_tab)
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (gui->note_book), 0);
 
-	gtk_xtext_buffer_show (GTK_XTEXT (gui->xtext), res->buffer, render);
-	GTK_XTEXT (gui->xtext)->color_paste = sess->color_paste;
+	conversation_buffer_set_time_stamp(sess->res->buffer, prefs.timestamp);
+	conversation_window_update_preferences(sess->gui->xtext);
+	conversation_window_set_opaque_buffer(gui->xtext, res->buffer);
 
 	if (gui->is_tab)
 		gtk_widget_set_sensitive (gui->menu, TRUE);
@@ -794,12 +796,6 @@ mg_populate (session *sess)
 	}
 
 	mg_set_topic_tip (sess);
-
-	/* recalculate line widths... window size may have changed on us. --nenolod */
-	gtk_xtext_set_time_stamp (sess->res->buffer, prefs.timestamp);
-	((xtext_buffer *)sess->res->buffer)->needs_recalc = TRUE;
-
-	mg_update_xtext(sess->gui->xtext);
 }
 
 void
@@ -1381,9 +1377,8 @@ mg_add_chan (session *sess)
 
 	if (sess->res->buffer == NULL)
 	{
-		sess->res->buffer = gtk_xtext_buffer_new (GTK_XTEXT (sess->gui->xtext));
-		gtk_xtext_set_time_stamp (sess->res->buffer, prefs.timestamp);
-		sess->res->user_model = userlist_create_model ();
+		sess->res->buffer = conversation_buffer_new(CONVERSATION_WINDOW(sess->gui->xtext), prefs.timestamp);
+		sess->res->user_model = userlist_create_model();
 	}
 }
 
@@ -1443,8 +1438,7 @@ mg_topic_cb (GtkWidget *entry, gpointer userdata)
 		sess->server->p_topic (sess->server, sess->channel, text);
 	} else
 		gtk_entry_set_text (GTK_ENTRY (entry), "");
-	/* restore focus to the input widget, where the next input will most
-likely be */
+	/* restore focus to the input widget, where the next input will most likely be */
 	gtk_widget_grab_focus (sess->gui->input_box);
 }
 
@@ -1466,8 +1460,8 @@ mg_tabwindow_kill_cb (GtkWidget *win, gpointer userdata)
 		if (!sess->gui->is_tab)
 		{
 			xchat_is_quitting = FALSE;
-/*			puts("-> will not exit, some toplevel windows left");*/
-		} else
+		}
+		else
 		{
 			mg_ircdestroy (sess);
 		}
@@ -1531,7 +1525,9 @@ mg_link_irctab (session *sess, int focus)
 	win = mg_changui_destroy (sess);
 	mg_changui_new (sess, sess->res, 1, focus);
 	/* the buffer is now attached to a different widget */
+#if 0
 	((xtext_buffer *)sess->res->buffer)->xtext = (GtkXText *)sess->gui->xtext;
+#endif
 	if (win)
 		gtk_widget_destroy (win);
 }
@@ -1956,26 +1952,6 @@ mg_word_clicked (GtkWidget *xtext, char *word, GdkEventButton *even)
 	}
 }
 
-void
-mg_update_xtext (GtkWidget *wid)
-{
-	GtkXText *xtext = GTK_XTEXT (wid);
-
-	gtk_xtext_set_palette (xtext, colors);
-	gtk_xtext_set_max_lines (xtext, prefs.max_lines);
-	gtk_xtext_set_wordwrap (xtext, prefs.wordwrap);
-	gtk_xtext_set_show_marker (xtext, prefs.show_marker);
-	gtk_xtext_set_show_separator (xtext, prefs.indent_nicks ? prefs.show_separator : 0);
-	gtk_xtext_set_indent (xtext, prefs.indent_nicks);
-	if (!gtk_xtext_set_font (xtext, prefs.font_normal))
-	{
-		fe_message ("Failed to open any font. I'm out of here!", FE_MSG_WAIT | FE_MSG_ERROR);
-		exit (1);
-	}
-
-	gtk_xtext_refresh (xtext);
-}
-
 /* handle errors reported by xtext */
 
 static void
@@ -1995,8 +1971,7 @@ mg_xtext_error (int type)
 static void
 mg_create_textarea (session *sess, GtkWidget *box)
 {
-	GtkWidget *inbox, *vbox, *frame;
-	GtkXText *xtext;
+	GtkWidget *vbox, *frame;
 	session_gui *gui = sess->gui;
 	static const GtkTargetEntry dnd_targets[] =
 	{
@@ -2011,23 +1986,15 @@ mg_create_textarea (session *sess, GtkWidget *box)
 	vbox = gtk_vbox_new (FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (box), vbox);
 
-	inbox = gtk_hbox_new (FALSE, SCROLLBAR_SPACING);
-	gtk_container_add (GTK_CONTAINER (vbox), inbox);
-
 	frame = gtk_frame_new (NULL);
 	gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
-	gtk_container_add (GTK_CONTAINER (inbox), frame);
+	gtk_container_add (GTK_CONTAINER (vbox), frame);
 
-	gui->xtext = gtk_xtext_new (colors, TRUE);
-	xtext = GTK_XTEXT (gui->xtext);
-	gtk_xtext_set_max_indent (xtext, prefs.max_auto_indent);
-	gtk_xtext_set_thin_separator (xtext, prefs.thin_separator);
-	gtk_xtext_set_error_function (xtext, mg_xtext_error);
-	gtk_xtext_set_urlcheck_function (xtext, mg_word_check);
-	gtk_xtext_set_max_lines (xtext, prefs.max_lines);
-	gtk_container_add (GTK_CONTAINER (frame), GTK_WIDGET (xtext));
-	mg_update_xtext (GTK_WIDGET (xtext));
+	gui->xtext = conversation_window_new();
+	gtk_container_add (GTK_CONTAINER (frame), CONVERSATION_WIDGET(gui->xtext));
+	gtk_widget_show_all(CONVERSATION_WIDGET(gui->xtext));
 
+#ifdef NOTYET
 	g_signal_connect (G_OBJECT (xtext), "word_click",
 							G_CALLBACK (mg_word_clicked), NULL);
 
@@ -2049,6 +2016,7 @@ mg_create_textarea (session *sess, GtkWidget *box)
 							 GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK);
 	g_signal_connect (G_OBJECT (gui->xtext), "drag_data_received",
 							G_CALLBACK (mg_dialog_dnd_drop), NULL);
+#endif
 }
 
 static GtkWidget *
@@ -2582,10 +2550,12 @@ static gboolean
 mg_tabwin_focus_cb (GtkWindow * win, GdkEventFocus *event, gpointer userdata)
 {
 	current_sess = current_tab;
+#ifdef NOTYET
 	if (current_sess)
 	{
-		gtk_xtext_check_marker_visibility (GTK_XTEXT (current_sess->gui->xtext));
+		gtk_xtext_check_marker_visibility(GTK_XTEXT(current_sess->gui->xtext));
 	}
+#endif
 
 	gtk_window_set_urgency_hint(win, FALSE);
 
@@ -2600,7 +2570,9 @@ mg_topwin_focus_cb (GtkWindow * win, GdkEventFocus *event, session *sess)
 	current_sess = sess;
 	if (!sess->server->server_session)
 		sess->server->server_session = sess;
+#ifdef NOTYET
 	gtk_xtext_check_marker_visibility(GTK_XTEXT (current_sess->gui->xtext));
+#endif
 
 	gtk_window_set_urgency_hint (win, FALSE);
 
@@ -2681,10 +2653,9 @@ mg_create_topwindow (session *sess)
 
 	if (sess->res->buffer == NULL)
 	{
-		sess->res->buffer = gtk_xtext_buffer_new (GTK_XTEXT (sess->gui->xtext));
-		gtk_xtext_buffer_show (GTK_XTEXT (sess->gui->xtext), sess->res->buffer, TRUE);
-		gtk_xtext_set_time_stamp (sess->res->buffer, prefs.timestamp);
-		sess->res->user_model = userlist_create_model ();
+		sess->res->buffer = conversation_buffer_new(sess->gui->xtext, prefs.timestamp);
+		conversation_window_set_opaque_buffer(sess->gui->xtext, sess->res->buffer);
+		sess->res->user_model = userlist_create_model();
 	}
 
 	userlist_show (sess);
@@ -2717,6 +2688,8 @@ mg_create_topwindow (session *sess)
 	mg_place_userlist_and_chanview (sess->gui);
 
 	gtk_widget_show (win);
+
+	conversation_window_update_preferences(sess->gui->xtext);
 }
 
 static gboolean
@@ -2819,8 +2792,8 @@ mg_apply_setup (void)
 	while (list)
 	{
 		sess = list->data;
-		gtk_xtext_set_time_stamp (sess->res->buffer, prefs.timestamp);
-		((xtext_buffer *)sess->res->buffer)->needs_recalc = TRUE;
+		conversation_buffer_set_time_stamp(sess->res->buffer, prefs.timestamp);
+		conversation_window_update_preferences(sess->gui->xtext);
 		if (!sess->gui->is_tab || !done_main)
 			mg_place_userlist_and_chanview (sess->gui);
 		if (sess->gui->is_tab)

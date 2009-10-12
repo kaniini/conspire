@@ -34,6 +34,7 @@
 #include <gtk/gtkcontainer.h>
 #include <gtk/gtksignal.h>
 
+#include "conversation-window.h"
 #include "chanview.h"
 
 #undef gtk_signal_connect
@@ -123,8 +124,9 @@ typedef struct restore_gui
 
 typedef struct session_gui
 {
+	ConversationWindow *xtext;
+
 	GtkWidget
-		*xtext,
 		*vscrollbar,
 		*window,	/* toplevel */
 		*topic_entry,

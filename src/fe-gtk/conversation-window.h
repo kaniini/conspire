@@ -28,14 +28,18 @@ typedef struct {
     const gchar *engineid;
 } ConversationWindow;
 
-#define CONVERSATION_WIDGET(win) ((ConversationWindow *)win->widget)
+#define CONVERSATION_WINDOW(win) ((ConversationWindow *)(win))
+#define CONVERSATION_WIDGET(win) (CONVERSATION_WINDOW(win)->widget)
 
 ConversationWindow *conversation_window_new(void);
 
+void conversation_window_update_preferences(ConversationWindow *win);
 gpointer conversation_window_get_opaque_buffer(ConversationWindow *win);
 void conversation_window_set_opaque_buffer(ConversationWindow *win, gpointer buf);
 
+gpointer conversation_buffer_new(ConversationWindow *win, gboolean timestamp);
 void conversation_buffer_append_text(gpointer buf, guchar *text, time_t stamp);
+void conversation_buffer_set_time_stamp(gpointer buf, gboolean timestamp);
 void conversation_buffer_clear(gpointer buf);
 
 void conversation_window_append_text(ConversationWindow *win, guchar *text, time_t stamp);

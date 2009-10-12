@@ -51,6 +51,7 @@
 #include "fkeys.h"
 #include "tray.h"
 #include "urlgrab.h"
+#include "conversation-window.h"
 
 GdkPixmap *channelwin_pix;
 
@@ -410,7 +411,7 @@ fe_notify_update (char *name)
 void
 fe_text_clear (struct session *sess)
 {
-	gtk_xtext_clear (sess->res->buffer);
+	conversation_buffer_clear(sess->res->buffer);
 }
 
 void
@@ -435,7 +436,7 @@ fe_progressbar_end (server *serv)
 void
 fe_print_text (struct session *sess, char *text, time_t stamp)
 {
-	PrintTextRaw (sess->res->buffer, (unsigned char *)text, prefs.indent_nicks, stamp);
+	conversation_buffer_append_text(sess->res->buffer, (unsigned char *)text, stamp);
 
 	if (!sess->new_data && sess != current_tab &&
 		 sess->gui->is_tab && !sess->nick_said && stamp == 0)
@@ -455,7 +456,7 @@ fe_beep (void)
 	gdk_beep ();
 }
 
-#ifndef _WIN32
+#if 0
 static int
 lastlog_regex_cmp (char *a, regex_t *reg)
 {
@@ -466,9 +467,8 @@ lastlog_regex_cmp (char *a, regex_t *reg)
 void
 fe_lastlog (session *sess, session *lastlog_sess, char *sstr, gboolean regexp)
 {
-#ifndef _WIN32
+#if 0
 	regex_t reg;
-#endif
 
 	if (gtk_xtext_is_empty (sess->res->buffer))
 	{
@@ -483,7 +483,6 @@ fe_lastlog (session *sess, session *lastlog_sess, char *sstr, gboolean regexp)
 		return;
 	}
 
-#ifndef _WIN32
 	if (regcomp (&reg, sstr, REG_ICASE | REG_EXTENDED | REG_NOSUB) == 0)
 	{
 		gtk_xtext_lastlog (lastlog_sess->res->buffer, sess->res->buffer,

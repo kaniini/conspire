@@ -108,7 +108,7 @@ PrintTextLine (xtext_buffer *xtbuf, unsigned char *text, int len, int indent, ti
 		{
 			text = tab+1;
 			len -= leftlen;
-			gtk_xtext_append_indent (xtbuf, 0, 0, text, len, timet);
+			gtk_xtext_append_indent (xtbuf, NULL, 0, text, len, timet);
 		}
 		else
 		{
