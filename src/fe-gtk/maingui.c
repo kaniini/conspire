@@ -1294,52 +1294,6 @@ mg_tab_contextmenu_cb (chanview *cv, chan *ch, int tag, gpointer ud, GdkEventBut
 	return TRUE;
 }
 
-void
-mg_dnd_drop_file (session *sess, char *target, char *uri)
-{
-	char *p, *data, *next, *fname;
-
-	p = data = strdup (uri);
-	while (*p)
-	{
-		next = strchr (p, '\r');
-		if (g_ascii_strncasecmp ("file:", p, 5) == 0)
-		{
-			if (next)
-				*next = 0;
-			fname = g_filename_from_uri (p, NULL, NULL);
-			if (fname)
-			{
-				/* dcc_send() expects utf-8 */
-				p = xchat_filename_to_utf8 (fname, -1, 0, 0, 0);
-				if (p)
-				{
-					dcc_send (sess, target, p, prefs.dcc_max_send_cps, 0);
-					g_free (p);
-				}
-				g_free (fname);
-			}
-		}
-		if (!next)
-			break;
-		p = next + 1;
-		if (*p == '\n')
-			p++;
-	}
-	free (data);
-
-}
-
-static void
-mg_dialog_dnd_drop (GtkWidget * widget, GdkDragContext * context, gint x,
-						  gint y, GtkSelectionData * selection_data, guint info,
-						  guint32 time, gpointer ud)
-{
-	if (current_sess->type == SESS_DIALOG)
-		/* sess->channel is really the nickname of dialogs */
-		mg_dnd_drop_file (current_sess, current_sess->channel, selection_data->data);
-}
-
 /* add a tabbed channel */
 
 static void
@@ -1952,36 +1906,11 @@ mg_word_clicked (GtkWidget *xtext, char *word, GdkEventButton *even)
 	}
 }
 
-/* handle errors reported by xtext */
-
-static void
-mg_xtext_error (int type)
-{
-	switch (type)
-	{
-	case 0:
-		fe_message (_("Unable to set transparent background!\n\n"
-						"You may be using a non-compliant window\n"
-						"manager that is not currently supported.\n"), FE_MSG_WARN);
-		prefs.transparent = 0;
-		/* no others exist yet */
-	}
-}
-
 static void
 mg_create_textarea (session *sess, GtkWidget *box)
 {
 	GtkWidget *vbox, *frame;
 	session_gui *gui = sess->gui;
-	static const GtkTargetEntry dnd_targets[] =
-	{
-		{"text/uri-list", 0, 1}
-	};
-	static const GtkTargetEntry dnd_dest_targets[] =
-	{
-		{"XCHAT_CHANVIEW", GTK_TARGET_SAME_APP, 75 },
-		{"XCHAT_USERLIST", GTK_TARGET_SAME_APP, 75 }
-	};
 
 	vbox = gtk_vbox_new (FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (box), vbox);
