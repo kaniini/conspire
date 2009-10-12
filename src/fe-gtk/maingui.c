@@ -2526,8 +2526,6 @@ mg_create_irctab (session *sess, GtkWidget *table)
 static void
 mg_create_topwindow (session *sess)
 {
-	GdkScreen *screen;
-	GdkColormap *colormap;
 	GtkWidget *win;
 	GtkWidget *table;
 
@@ -2539,11 +2537,7 @@ mg_create_topwindow (session *sess)
 										  prefs.mainwindow_width,
 										  prefs.mainwindow_height, 0);
 
-	/* take advantage of a compositor if one is available. */
-	screen = gtk_widget_get_screen(GTK_WIDGET(win));
-	colormap = gdk_screen_get_rgba_colormap(screen);
-	if (colormap != NULL && gdk_screen_is_composited(screen))
-		gtk_widget_set_colormap(GTK_WIDGET(win), colormap);
+	g_print("mg_create_topwindow\n");
 
 	sess->gui->window = win;
 	gtk_container_set_border_width (GTK_CONTAINER (win), GUI_BORDER);
@@ -2635,11 +2629,14 @@ mg_tabwindow_de_cb (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 static void
 mg_create_tabwindow (session *sess)
 {
+	GdkScreen *screen;
+	GdkColormap *colormap;
 	GtkWidget *win;
 	GtkWidget *table;
 
 	win = gtkutil_window_new ("conspire", NULL, prefs.mainwindow_width,
 									  prefs.mainwindow_height, 0);
+
 	sess->gui->window = win;
 	gtk_window_move (GTK_WINDOW (win), prefs.mainwindow_left,
 						  prefs.mainwindow_top);
@@ -2693,6 +2690,15 @@ mg_create_tabwindow (session *sess)
 		gtk_widget_hide (sess->gui->button_box);
 
 	mg_place_userlist_and_chanview (sess->gui);
+
+	/* take advantage of a compositor if one is available. */
+	screen = gtk_widget_get_screen(GTK_WIDGET(win));
+	colormap = gdk_screen_get_rgba_colormap(screen);
+
+	if (colormap != NULL && gdk_screen_is_composited(screen)) {
+		gtk_widget_set_colormap(GTK_WIDGET(win), colormap);
+		gtk_widget_set_colormap(GTK_WIDGET(CONVERSATION_WIDGET(sess->gui->xtext)), colormap);
+	}
 
 	gtk_widget_show (win);
 }

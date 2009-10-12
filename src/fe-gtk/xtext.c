@@ -124,6 +124,19 @@ static unsigned char *
 gtk_xtext_strip_color (unsigned char *text, int len, unsigned char *outbuf,
 							  int *newlen, int *mb_ret, int strip_hidden);
 
+static void
+set_source_color_alpha (cairo_t *cr,
+                        const GdkColor *color,
+                        guchar alpha)
+{
+	cairo_set_source_rgba (cr,
+				color->red / 65535.,
+				color->green / 65535.,
+				color->blue / 65535.,
+				alpha / 255.);
+}
+
+
 /* gives width of a 8bit string - with no mIRC codes in it */
 
 static int
@@ -150,10 +163,11 @@ xtext_draw_bg(GtkXText *xtext, gint x, gint y, gint width, gint height)
 
 	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
 	cairo_rectangle(cr, x, y, width, height);
-	cairo_clip(cr);
 
-	gdk_cairo_set_source_color(cr, &xtext->palette[XTEXT_BG]);
-	cairo_paint(cr);
+        cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+	cairo_set_source(cr, xtext->bg_pattern);
+
+	cairo_fill(cr);
 
 	cairo_destroy(cr);
 }
@@ -164,6 +178,10 @@ xtext_set_bg(GtkXText *xtext, gint color)
 	g_return_if_fail(xtext != NULL);
 
 	xtext->bgcol = &xtext->palette[color];
+	xtext->bg_pattern = cairo_pattern_create_rgba (xtext->bgcol->red / 65535.,
+						       xtext->bgcol->green / 65535.,
+						       xtext->bgcol->blue / 65535.,
+						       0.7);
 }
 
 static void
@@ -299,15 +317,7 @@ backend_draw_text (GtkXText *xtext, int dofill, int x, int y, const gchar *str, 
 	pango_layout_set_text (xtext->layout, str, len);
 
 	if (dofill)
-	{
-		cairo_rectangle(cr, x, y, str_width, xtext->fontsize);
-		cairo_clip(cr);
-
-		gdk_cairo_set_source_color(cr, xtext->bgcol);
-		cairo_paint(cr);
-
-		cairo_reset_clip(cr);
-	}
+		xtext_draw_bg(xtext, x, y, str_width, xtext->fontsize);
 
 	gdk_cairo_set_source_color(cr, xtext->fgcol);
 
@@ -578,7 +588,7 @@ gtk_xtext_realize (GtkWidget * widget)
 	xtext->hand_cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (widget->window), GDK_HAND1);
 	xtext->resize_cursor = gdk_cursor_new_for_display (gdk_drawable_get_display (widget->window), GDK_LEFT_SIDE);
 
-	gdk_window_set_background(widget->window, xtext->bgcol);
+	xtext_draw_bg (xtext, attributes.x, attributes.y, attributes.width, attributes.height);
 	widget->style = gtk_style_attach (widget->style, widget->window);
 
 	backend_init (xtext);

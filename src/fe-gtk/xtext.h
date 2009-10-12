@@ -172,6 +172,8 @@ struct _GtkXText
 	int clip_y;			/* clipping (y directions) */
 	int clip_y2;		/* from y to y2 */
 
+	cairo_pattern_t *bg_pattern;
+
 	/* current text states */
 	unsigned int bold:1;
 	unsigned int underline:1;
