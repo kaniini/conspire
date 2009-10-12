@@ -361,7 +361,6 @@ gtk_xtext_init (GtkXText * xtext)
 	xtext->clip_x2 = 1000000;
 	xtext->clip_y = 0;
 	xtext->clip_y2 = 1000000;
-	xtext->error_function = NULL;
 	xtext->urlcheck_function = NULL;
 	xtext->color_paste = FALSE;
 	xtext->skip_border_fills = FALSE;
@@ -3764,12 +3763,6 @@ gtk_xtext_foreach (xtext_buffer *buf, GtkXTextForeach func, void *data)
 		(*func) (buf->xtext, ent->str, data);
 		ent = ent->next;
 	}
-}
-
-void
-gtk_xtext_set_error_function (GtkXText *xtext, void (*error_function) (int))
-{
-	xtext->error_function = error_function;
 }
 
 void
