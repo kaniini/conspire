@@ -1993,6 +1993,7 @@ mg_create_textarea (session *sess, GtkWidget *box)
 	gui->xtext = conversation_window_new();
 	gtk_container_add (GTK_CONTAINER (frame), CONVERSATION_WIDGET(gui->xtext));
 	gtk_widget_show_all(CONVERSATION_WIDGET(gui->xtext));
+	conversation_window_set_urlcheck_function(gui->xtext, mg_word_check);
 
 #ifdef NOTYET
 	g_signal_connect (G_OBJECT (xtext), "word_click",

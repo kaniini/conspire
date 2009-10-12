@@ -34,6 +34,7 @@ typedef struct {
 ConversationWindow *conversation_window_new(void);
 
 void conversation_window_update_preferences(ConversationWindow *win);
+void conversation_window_set_urlcheck_function(ConversationWindow *win, int (*urlcheck_function) (GtkWidget *, char *, int));
 gpointer conversation_window_get_opaque_buffer(ConversationWindow *win);
 void conversation_window_set_opaque_buffer(ConversationWindow *win, gpointer buf);
 

@@ -78,6 +78,9 @@ conversation_window_update_preferences(ConversationWindow *win)
 {
 	ConversationWindowPriv *priv_win = (ConversationWindowPriv *) win;
 
+	g_return_if_fail(win != NULL);
+	g_return_if_fail(priv_win->xtext != NULL);
+
 	gtk_xtext_set_palette(GTK_XTEXT(priv_win->xtext), colors);
 	gtk_xtext_set_max_indent(GTK_XTEXT(priv_win->xtext), prefs.max_auto_indent);
 	gtk_xtext_set_thin_separator(GTK_XTEXT(priv_win->xtext), prefs.thin_separator);
@@ -94,6 +97,17 @@ conversation_window_update_preferences(ConversationWindow *win)
 	}
 
 	gtk_xtext_refresh(GTK_XTEXT(priv_win->xtext));
+}
+
+void
+conversation_window_set_urlcheck_function(ConversationWindow *win, int (*urlcheck_function) (GtkWidget *, char *, int))
+{
+	ConversationWindowPriv *priv_win = (ConversationWindowPriv *) win;
+	
+	g_return_if_fail(win != NULL);
+	g_return_if_fail(priv_win->xtext != NULL);
+
+	gtk_xtext_set_urlcheck_function(GTK_XTEXT(priv_win->xtext), urlcheck_function);
 }
 
 gpointer
