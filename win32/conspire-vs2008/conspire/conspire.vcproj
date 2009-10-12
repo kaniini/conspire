@@ -204,6 +204,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\fe-gtk\conversation-window.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\fe-gtk\custom-list.c"
 				>
 			</File>
@@ -315,6 +319,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\fe-gtk\chanview.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\fe-gtk\conversation-window.h"
 				>
 			</File>
 			<File
