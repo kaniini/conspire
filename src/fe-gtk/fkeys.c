@@ -1260,6 +1260,7 @@ static int
 key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1,
 								char *d2, struct session *sess)
 {
+#ifdef NOTYET
 	int value, end;
 	GtkAdjustment *adj;
 	enum scroll_type { PAGE_UP, PAGE_DOWN, LINE_UP, LINE_DOWN };
@@ -1306,7 +1307,7 @@ key_action_scroll_page (GtkWidget * wid, GdkEventKey * evt, char *d1,
 		value = end;
 
 	gtk_adjustment_set_value (adj, value);
-
+#endif
 	return 0;
 }
 
