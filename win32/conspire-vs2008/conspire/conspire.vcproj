@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(DevSrc)\gtk\lib\gtk-2.0\include&quot;;&quot;C:\dev-src\gtk\include\pango-1.0&quot;;&quot;C:\dev-src\gtk\include\gail-1.0&quot;;&quot;C:\dev-src\gtk\include\atk-1.0&quot;;&quot;C:\dev-src\gtk\include\cairo&quot;;&quot;C:\dev-src\gtk\include\libpng12&quot;;&quot;C:\dev-src\gtk\lib\glib-2.0\include&quot;;&quot;C:\dev-src\libmowgli\src\libmowgli&quot;;&quot;C:\dev-src\gtk\include\glib-2.0&quot;;&quot;C:\dev-src\gtk\include\gtk-2.0&quot;;&quot;C:\dev-src\conspire\win32&quot;;&quot;C:\dev-src\conspire\src\common&quot;;&quot;C:\dev-src\conspire\win32\conspire-vs2008\conspire\res&quot;"
+				AdditionalIncludeDirectories="&quot;C:\dev-src\gtk\lib\gtk-2.0\include&quot;;&quot;C:\dev-src\gtk\include\pango-1.0&quot;;&quot;C:\dev-src\gtk\include\gail-1.0&quot;;&quot;C:\dev-src\gtk\include\atk-1.0&quot;;&quot;C:\dev-src\gtk\include\cairo&quot;;&quot;C:\dev-src\gtk\include\libpng12&quot;;&quot;C:\dev-src\gtk\lib\glib-2.0\include&quot;;&quot;C:\dev-src\libmowgli\src\libmowgli&quot;;&quot;C:\dev-src\gtk\include\glib-2.0&quot;;&quot;C:\dev-src\gtk\include\gtk-2.0&quot;;&quot;C:\dev-src\conspire\win32&quot;;&quot;C:\dev-src\conspire\src\common&quot;;&quot;C:\dev-src\conspire\win32\conspire-vs2008\conspire\res&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
