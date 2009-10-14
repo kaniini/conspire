@@ -207,6 +207,17 @@ conversation_window_clear(ConversationWindow *win)
 	conversation_buffer_clear(GTK_XTEXT(priv_win->xtext)->buffer);
 }
 
+void
+conversation_window_set_transparency(ConversationWindow *win, double trans)
+{
+	ConversationWindowPriv *priv_win = (ConversationWindowPriv *) win;
+
+	g_return_if_fail(win != NULL);
+	g_return_if_fail(priv_win->xtext != NULL);
+
+	gtk_xtext_set_transparency(GTK_XTEXT(priv_win->xtext), trans);
+}
+
 #else
 
 

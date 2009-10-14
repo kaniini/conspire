@@ -517,6 +517,7 @@ PrefsEntry vars[] = {
 	{"gui_ulist_style", PREFS_TYPE_BOOL, &prefs.style_namelistgad},
 	{"gui_url_mod", PREFS_TYPE_INT, &prefs.gui_url_mod},
 	{"gui_usermenu", PREFS_TYPE_BOOL, &prefs.gui_usermenu},
+	{"gui_transparency", PREFS_TYPE_INT, &prefs.gui_transparency},
 	{"gui_win_height", PREFS_TYPE_INT, &prefs.mainwindow_height},
 	{"gui_win_left", PREFS_TYPE_INT, &prefs.mainwindow_left},
 	{"gui_win_save", PREFS_TYPE_BOOL, &prefs.mainwindow_save},
@@ -681,6 +682,7 @@ load_config (void)
 	memset (&prefs, 0, sizeof (struct xchatprefs));
 
 	/* put in default values, anything left out is automatically zero */
+	prefs.gui_transparency = 255;
 	prefs.local_ip = 0xffffffff;
 	prefs.redundant_nickstamps = TRUE;
 	prefs.strip_quits = TRUE;

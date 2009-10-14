@@ -108,6 +108,9 @@ static const setting textbox_settings[] =
 	{ST_TOGGLE, N_("Automatically replay logged chats"), &prefs.text_replay,
 					N_("Automatically replays logs for channels and queries."),0,0},
 
+	{ST_HEADER,	N_("Transparency Settings"), 0, 0, 0},
+        {ST_HSCALE, N_("Transparency:"), &prefs.gui_transparency, 0, 0, 0},
+
 	{ST_HEADER,	N_("Time Stamps"),0,0,0},
 	{ST_TOGGLE, N_("Enable time stamps"), &prefs.timestamp,0,0,2},
 	{ST_ENTRY,  N_("Time stamp format:"), &prefs.stamp_format,
@@ -598,10 +601,24 @@ setup_create_spin (GtkWidget *table, int row, const setting *set)
 	return wid;
 }
 
+static gboolean
+setup_apply_tint (int *tag)
+{
+	conversation_window_set_transparency(current_sess->gui->xtext, (prefs.gui_transparency / 255.));
+
+	*tag = 0;
+	return FALSE;
+}
+
 static void
 setup_hscale_cb (GtkHScale *wid, const setting *set)
 {
+        static int tag = 0;
+
 	*((int *) set->ptr) = gtk_range_get_value(GTK_RANGE(wid));
+        if(tag == 0)
+                tag = g_idle_add ((GSourceFunc)setup_apply_tint, &tag);
+
 }
 
 static void

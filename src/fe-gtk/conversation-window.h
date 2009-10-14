@@ -46,5 +46,6 @@ void conversation_buffer_clear(gpointer buf);
 
 void conversation_window_append_text(ConversationWindow *win, guchar *text, time_t stamp);
 void conversation_window_clear(ConversationWindow *win);
+void conversation_window_set_transparency(ConversationWindow *win, double trans);
 
 #endif

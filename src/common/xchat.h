@@ -310,6 +310,8 @@ struct xchatprefs
 	gboolean redundant_nickstamps;
 	gboolean strip_quits;
         gboolean hilight_enable;
+
+	unsigned int gui_transparency;
 };
 
 /* Session types */

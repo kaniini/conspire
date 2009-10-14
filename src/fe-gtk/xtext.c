@@ -124,19 +124,6 @@ static unsigned char *
 gtk_xtext_strip_color (unsigned char *text, int len, unsigned char *outbuf,
 							  int *newlen, int *mb_ret, int strip_hidden);
 
-static void
-set_source_color_alpha (cairo_t *cr,
-                        const GdkColor *color,
-                        guchar alpha)
-{
-	cairo_set_source_rgba (cr,
-				color->red / 65535.,
-				color->green / 65535.,
-				color->blue / 65535.,
-				alpha / 255.);
-}
-
-
 /* gives width of a 8bit string - with no mIRC codes in it */
 
 static int
@@ -181,7 +168,7 @@ xtext_set_bg(GtkXText *xtext, gint color)
 	xtext->bg_pattern = cairo_pattern_create_rgba (xtext->bgcol->red / 65535.,
 						       xtext->bgcol->green / 65535.,
 						       xtext->bgcol->blue / 65535.,
-						       0.7);
+						       xtext->transparency);
 }
 
 static void
@@ -370,6 +357,7 @@ gtk_xtext_init (GtkXText * xtext)
 	xtext->recycle = FALSE;
 	xtext->dont_render = FALSE;
 	xtext->dont_render2 = FALSE;
+	xtext->transparency = 1.0;
 
 	xtext->adj = (GtkAdjustment *) gtk_adjustment_new (0, 0, 1, 1, 1, 1);
 	g_object_ref (G_OBJECT (xtext->adj));
@@ -3763,6 +3751,12 @@ gtk_xtext_foreach (xtext_buffer *buf, GtkXTextForeach func, void *data)
 		(*func) (buf->xtext, ent->str, data);
 		ent = ent->next;
 	}
+}
+
+void
+gtk_xtext_set_transparency (GtkXText *xtext, double transparency)
+{
+	xtext->transparency = transparency;
 }
 
 void
