@@ -1786,17 +1786,14 @@ gtk_xtext_selection_get_text (GtkXText *xtext, int *len_ret)
 		return NULL;
 
 	/* now allocate mem and copy buffer */
-	pos = txt = malloc (len);
+	pos = txt = g_malloc0(len);
 	ent = buf->last_ent_start;
 	while (ent)
 	{
 		if (ent->mark_start != -1)
 		{
 			if (!first)
-			{
-				*pos = '\n';
-				pos++;
-			}
+				*pos++ = '\n';
 			first = FALSE;
 			if (ent->mark_end - ent->mark_start > 0)
 			{
@@ -1805,14 +1802,18 @@ gtk_xtext_selection_get_text (GtkXText *xtext, int *len_ret)
 				{
 					char *time_str;
 					int stamp_size = xtext_get_stamp_str (ent->stamp, &time_str);
-					memcpy (pos, time_str, stamp_size);
+					strncpy (pos, time_str, stamp_size);
 					g_free (time_str);
 					pos += stamp_size;
 				}
 
-				memcpy (pos, ent->str + ent->mark_start,
+				strncpy (pos, ent->str + ent->mark_start,
 						  ent->mark_end - ent->mark_start);
-				pos += ent->mark_end - ent->mark_start;
+				pos += (ent->mark_end - ent->mark_start);
+
+				/* if a fragment has a \0 in it, it fucks everything up. --nenolod */
+				if (*(pos - 1) == '\0')
+					pos--;
 			}
 		}
 		if (ent == buf->last_ent_end)
