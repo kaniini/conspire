@@ -144,7 +144,7 @@ AC_ARG_ENABLE(spell,
 		  spell=$enableval, spell=libsexy)
 
 AC_ARG_ENABLE(regex,
-[  --disable-regex          enable regex substitution support based on GRegex],
+[  --disable-regex         disable regex substitution support based on GRegex],
 		regex=$enableval, regex=yes)
 
 dnl *********************************************************************
