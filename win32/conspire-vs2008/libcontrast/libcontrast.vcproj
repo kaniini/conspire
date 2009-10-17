@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\dev-src\gtk\lib\gtk-2.0\include&quot;;&quot;C:\dev-src\gtk\include\pango-1.0&quot;;&quot;C:\dev-src\gtk\include\gail-1.0&quot;;&quot;C:\dev-src\gtk\include\atk-1.0&quot;;&quot;C:\dev-src\gtk\include\cairo&quot;;&quot;C:\dev-src\gtk\include\libpng12&quot;;&quot;C:\dev-src\gtk\lib\glib-2.0\include&quot;;&quot;C:\dev-src\libmowgli\src\libmowgli&quot;;&quot;C:\dev-src\gtk\include\glib-2.0&quot;;&quot;C:\dev-src\gtk\include\gtk-2.0&quot;;&quot;C:\dev-src\conspire\win32&quot;"
+				AdditionalIncludeDirectories="&quot;$(DepsGTK32)\lib\gtk-2.0\include&quot;;&quot;$(DepsGTK32)\include\pango-1.0&quot;;&quot;$(DepsGTK32)\include\gail-1.0&quot;;&quot;$(DepsGTK32)\include\atk-1.0&quot;;&quot;$(DepsGTK32)\include\cairo&quot;;&quot;$(DepsGTK32)\include\libpng12&quot;;&quot;$(DepsGTK32)\lib\glib-2.0\include&quot;;&quot;$(DepsMowgli)\src\libmowgli&quot;;&quot;$(DepsGTK32)\include\glib-2.0&quot;;&quot;$(DepsGTK32)\include\gtk-2.0&quot;;&quot;..\..&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -105,7 +105,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;C:\dev-src\gtk\lib\gtk-2.0\include&quot;;&quot;C:\dev-src\gtk\include\pango-1.0&quot;;&quot;C:\dev-src\gtk\include\gail-1.0&quot;;&quot;C:\dev-src\gtk\include\atk-1.0&quot;;&quot;C:\dev-src\gtk\include\cairo&quot;;&quot;C:\dev-src\gtk\include\libpng12&quot;;&quot;C:\dev-src\gtk\lib\glib-2.0\include&quot;;&quot;C:\dev-src\libmowgli\src\libmowgli&quot;;&quot;C:\dev-src\gtk\include\glib-2.0&quot;;&quot;C:\dev-src\gtk\include\gtk-2.0&quot;;&quot;C:\dev-src\conspire\win32&quot;"
+				AdditionalIncludeDirectories="&quot;$(DepsGTK32)\lib\gtk-2.0\include&quot;;&quot;$(DepsGTK32)\include\pango-1.0&quot;;&quot;$(DepsGTK32)\include\gail-1.0&quot;;&quot;$(DepsGTK32)\include\atk-1.0&quot;;&quot;$(DepsGTK32)\include\cairo&quot;;&quot;$(DepsGTK32)\include\libpng12&quot;;&quot;$(DepsGTK32)\lib\glib-2.0\include&quot;;&quot;$(DepsMowgli)\src\libmowgli&quot;;&quot;$(DepsGTK32)\include\glib-2.0&quot;;&quot;$(DepsGTK32)\include\gtk-2.0&quot;;&quot;..\..&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
