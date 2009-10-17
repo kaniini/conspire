@@ -68,7 +68,6 @@
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				EntryPointSymbol=""
-				ImportLibrary="..\$(ConfigurationName)\conspire.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -150,7 +149,6 @@
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				EntryPointSymbol=""
-				ImportLibrary="..\$(ConfigurationName)\conspire.lib"
 				TargetMachine="1"
 				ErrorReporting="1"
 			/>
