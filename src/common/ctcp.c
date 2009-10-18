@@ -138,14 +138,24 @@ ctcp_handle (session *sess, char *to, char *nick, char *ip, char *msg, char *wor
 #else
 			OSVERSIONINFO osvi;
 			SYSTEM_INFO si;
+			int cpu_arch;
 
 			osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 			GetVersionEx(&osvi);
 			GetSystemInfo(&si);
+			
+			if (si.wProcessorArchitecture == 9)
+			{
+				cpu_arch = 64;
+			}
+			else
+			{
+				cpu_arch = 86;
+			}
 
-			snprintf(outbuf, sizeof(outbuf), "VERSION conspire "PACKAGE_VERSION" - running on Windows %ld.%ld build %ld (i%d86)",
+			snprintf(outbuf, sizeof(outbuf), "VERSION conspire "PACKAGE_VERSION" - running on Windows %ld.%ld build %ld (x%d)",
 				osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber,
-				si.wProcessorLevel);
+				cpu_arch);
 #endif
 
 			serv->p_nctcp (serv, nick, outbuf);
