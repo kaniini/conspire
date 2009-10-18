@@ -561,22 +561,32 @@ get_cpu_str(void)
 	OSVERSIONINFO osvi;
 	SYSTEM_INFO si;
 	int mhz;
+	int cpu_arch;
 
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	GetVersionEx(&osvi);
 	GetSystemInfo(&si);
 
+	if (si.wProcessorArchitecture == 9)
+	{
+		cpu_arch = 64;
+	}
+	else
+	{
+		cpu_arch = 86;
+	}
+
 	mhz = get_mhz();
 	if (mhz)
 	{
-		return g_strdup_printf("Windows %ld.%ld build %ld [i%d86/%.2fMHz]",
+		return g_strdup_printf("Windows %ld.%ld build %ld [x%d/%.2fMHz]",
 			osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber,
-			si.wProcessorLevel, mhz);
+			cpu_arch, mhz);
 	}
 
-	return g_strdup_printf("Windows %ld.%ld build %ld [i%d86]",
+	return g_strdup_printf("Windows %ld.%ld build %ld [x%d]",
 		osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber,
-		si.wProcessorLevel);
+		cpu_arch);
 }
 
 #endif
