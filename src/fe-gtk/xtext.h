@@ -110,8 +110,8 @@ struct _GtkXText
 	int last_win_h;
 	int last_win_w;
 
-	GdkColor *fgcol;
-	GdkColor *bgcol;
+	gint fgcol;
+	gint bgcol;
 	GdkColor palette[XTEXT_COLS];
 
 	gint io_tag;					  /* for delayed refresh events */

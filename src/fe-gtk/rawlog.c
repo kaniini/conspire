@@ -53,6 +53,7 @@ close_rawlog (GtkWidget *wid, server *serv)
 static void
 rawlog_save (server *serv, char *file)
 {
+#if 0
 	int fh = -1;
 
 	if (file)
@@ -66,6 +67,7 @@ rawlog_save (server *serv, char *file)
 			close (fh);
 		}
 	}
+#endif
 }
 
 static int

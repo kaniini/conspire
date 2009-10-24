@@ -162,12 +162,16 @@ xtext_draw_bg(GtkXText *xtext, gint x, gint y, gint width, gint height)
 static void
 xtext_set_bg(GtkXText *xtext, gint color)
 {
+	GdkColor *bgcol;
+
 	g_return_if_fail(xtext != NULL);
 
-	xtext->bgcol = &xtext->palette[color];
-	xtext->bg_pattern = cairo_pattern_create_rgba (xtext->bgcol->red / 65535.,
-						       xtext->bgcol->green / 65535.,
-						       xtext->bgcol->blue / 65535.,
+	xtext->bgcol = color;
+	bgcol = &xtext->palette[xtext->bgcol];
+
+	xtext->bg_pattern = cairo_pattern_create_rgba (bgcol->red / 65535.,
+						       bgcol->green / 65535.,
+						       bgcol->blue / 65535.,
 						       xtext->transparency);
 }
 
@@ -176,7 +180,7 @@ xtext_set_fg(GtkXText *xtext, gint color)
 {
 	g_return_if_fail(xtext != NULL);
 
-	xtext->fgcol = &xtext->palette[color];
+	xtext->fgcol = color;
 }
 
 /* ======================================= */
@@ -306,7 +310,7 @@ backend_draw_text (GtkXText *xtext, int dofill, int x, int y, const gchar *str, 
 	if (dofill)
 		xtext_draw_bg(xtext, x, y, str_width, xtext->fontsize);
 
-	gdk_cairo_set_source_color(cr, xtext->fgcol);
+	gdk_cairo_set_source_color(cr, &xtext->palette[xtext->fgcol]);
 
 	cairo_move_to(cr, x, y);
 	pango_cairo_show_layout(cr, xtext->layout);
@@ -2158,7 +2162,7 @@ dounder:
 		cairo_move_to(cr, dest_x, y);
 		cairo_rel_line_to(cr, str_width - 1, 0);
 
-		gdk_cairo_set_source_color(cr, xtext->fgcol);		
+		gdk_cairo_set_source_color(cr, &xtext->palette[xtext->fgcol]);
 		cairo_stroke(cr);
 
 		cairo_destroy(cr);
@@ -2249,11 +2253,11 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			/* fill the indent area with background gc */
 			if (indent >= xtext->clip_x)
 			{
-				GdkColor *old_bg = xtext->bgcol;
+				gint old_bg = xtext->bgcol;
 
 				xtext_set_bg(xtext, XTEXT_BG);
 				xtext_draw_bg (xtext, 0, y - xtext->font->ascent, indent, xtext->fontsize);
-				xtext->bgcol = old_bg;
+				xtext_set_bg(xtext, old_bg);
 			}
 		}
 	}
@@ -2969,25 +2973,6 @@ gtk_xtext_set_font (GtkXText *xtext, char *name)
 		gtk_xtext_recalc_widths (xtext->buffer, TRUE);
 
 	return TRUE;
-}
-
-void
-gtk_xtext_save (GtkXText * xtext, int fh)
-{
-	textentry *ent;
-	int newlen;
-	char *buf;
-
-	ent = xtext->buffer->text_first;
-	while (ent)
-	{
-		buf = gtk_xtext_strip_color (ent->str, ent->str_len, NULL,
-											  &newlen, NULL, FALSE);
-		write (fh, buf, newlen);
-		write (fh, "\n", 1);
-		free (buf);
-		ent = ent->next;
-	}
 }
 
 /* count how many lines 'ent' will take (with wraps) */

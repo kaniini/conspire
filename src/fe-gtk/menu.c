@@ -1028,6 +1028,7 @@ menu_flushbuffer (GtkWidget * wid, gpointer none)
 static void
 savebuffer_req_done (session *sess, char *file)
 {
+#if 0
 	int fh;
 
 	if (!file)
@@ -1039,6 +1040,7 @@ savebuffer_req_done (session *sess, char *file)
 		gtk_xtext_save (GTK_XTEXT (sess->gui->xtext), fh);
 		close (fh);
 	}
+#endif
 }
 
 static void
