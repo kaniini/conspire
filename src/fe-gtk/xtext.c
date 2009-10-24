@@ -2251,7 +2251,7 @@ gtk_xtext_render_str (GtkXText * xtext, int y, textentry * ent,
 			{
 				GdkColor *old_bg = xtext->bgcol;
 
-				xtext->bgcol = &xtext->palette[XTEXT_BG];
+				xtext_set_bg(xtext, XTEXT_BG);
 				xtext_draw_bg (xtext, 0, y - xtext->font->ascent, indent, xtext->fontsize);
 				xtext->bgcol = old_bg;
 			}
