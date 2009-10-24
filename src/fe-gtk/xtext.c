@@ -3178,6 +3178,7 @@ gtk_xtext_render_page (GtkXText * xtext)
 	overlap = xtext->buffer->last_pixel_pos - pos;
 	xtext->buffer->last_pixel_pos = pos;
 
+#if 0
 	if (abs (overlap) < height)
 	{
 		GdkGC *gc = gdk_gc_new(xtext->draw_buf);
@@ -3214,6 +3215,7 @@ gtk_xtext_render_page (GtkXText * xtext)
 		return;
 	}
 
+#endif
 	xtext->buffer->grid_dirty = FALSE;
 	width -= MARGIN;
 	lines_max = ((height + xtext->pixel_offset) / xtext->fontsize) + 1;
