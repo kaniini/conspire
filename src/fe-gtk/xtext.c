@@ -169,6 +169,9 @@ xtext_set_bg(GtkXText *xtext, gint color)
 	xtext->bgcol = color;
 	bgcol = &xtext->palette[xtext->bgcol];
 
+	if (xtext->bg_pattern != NULL)
+		cairo_pattern_destroy(xtext->bg_pattern);
+
 	xtext->bg_pattern = cairo_pattern_create_rgba (bgcol->red / 65535.,
 						       bgcol->green / 65535.,
 						       bgcol->blue / 65535.,
