@@ -2070,7 +2070,8 @@ static int
 gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str, int len, int is_mb)
 {
 	int str_width, dofill;
-	int dest_x = 0;
+	GdkDrawable *pix = NULL;
+	int dest_x = 0, dest_y = 0;
 	cairo_t *cr;
 
 	if (xtext->dont_render || len < 1 || xtext->hidden)
@@ -2084,7 +2085,6 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str, int 
 	/* roll-your-own clipping (avoiding XftDrawString is always good!) */
 	if (x > xtext->clip_x2 || x + str_width < xtext->clip_x)
 		return str_width;
-
 	if (y - xtext->font->ascent > xtext->clip_y2 || (y - xtext->font->ascent) + xtext->fontsize < xtext->clip_y)
 		return str_width;
 
@@ -2097,9 +2097,52 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str, int 
 			goto dounder;
 	}
 
+	if (str_width)
+		pix = gdk_pixmap_new (xtext->draw_buf, str_width, xtext->fontsize, xtext->depth);
+	else
+		pix = NULL;
+
+	if (pix)
+	{
+		dest_x = x;
+		dest_y = y - xtext->font->ascent;
+
+		x = 0;
+		y = 0;
+		xtext->draw_buf = pix;
+	}
+
 	dofill = TRUE;
 
-	backend_draw_text (xtext, dofill, x, (y - xtext->font->ascent), str, len, str_width, is_mb);
+	backend_draw_text (xtext, dofill, x, y, str, len, str_width, is_mb);
+
+	if (pix)
+	{
+		GdkRectangle clip;
+		GdkRectangle dest;
+		GdkGC *gc;
+
+		xtext->draw_buf = GTK_WIDGET (xtext)->window;
+		gc = gdk_gc_new(xtext->draw_buf);
+
+		gdk_gc_set_ts_origin (gc, xtext->ts_x, xtext->ts_y);
+
+		clip.x = xtext->clip_x;
+		clip.y = xtext->clip_y;
+		clip.width = xtext->clip_x2 - xtext->clip_x;
+		clip.height = xtext->clip_y2 - xtext->clip_y;
+
+		dest.x = dest_x;
+		dest.y = dest_y;
+		dest.width = str_width;
+		dest.height = xtext->fontsize;
+
+		if (gdk_rectangle_intersect (&clip, &dest, &dest))
+			gdk_draw_drawable (xtext->draw_buf, gc, pix, dest.x - dest_x, dest.y - dest_y, dest.x, dest.y, dest.width, dest.height);
+
+		g_object_unref(gc);
+		g_object_unref(pix);
+	}
 
 	if (xtext->underline)
 	{
@@ -2108,8 +2151,13 @@ dounder:
 		cairo_set_line_width(cr, 1.0);
 		cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
 
-		y++;
-		dest_x = x;
+		if (pix)
+			y = dest_y + xtext->font->ascent + 1;
+		else
+		{
+			y++;
+			dest_x = x;
+		}
 
 		cairo_move_to(cr, dest_x, y);
 		cairo_rel_line_to(cr, str_width - 1, 0);
