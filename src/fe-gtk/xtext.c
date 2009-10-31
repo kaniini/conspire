@@ -3183,6 +3183,42 @@ gtk_xtext_render_page (GtkXText * xtext)
 	overlap = xtext->buffer->last_pixel_pos - pos;
 	xtext->buffer->last_pixel_pos = pos;
 
+	if (abs (overlap) < height)
+	{
+		GdkGC *gc = gdk_gc_new(xtext->draw_buf);
+		gdk_gc_set_exposures(gc, TRUE);
+
+		if (overlap < 1)	/* DOWN */
+		{
+			int remainder;
+
+			gdk_draw_drawable (xtext->draw_buf, gc, xtext->draw_buf,
+									 0, -overlap, 0, 0, width, height + overlap);
+			remainder = ((height - xtext->font->descent) % xtext->fontsize) +
+							xtext->font->descent;
+			area.y = (height + overlap) - remainder;
+			area.height = remainder - overlap;
+		} else
+		{
+			gdk_draw_drawable (xtext->draw_buf, gc, xtext->draw_buf,
+									 0, 0, 0, overlap, width, height - overlap);
+			area.y = 0;
+			area.height = overlap;
+		}
+
+		g_object_unref(gc);
+
+		if (area.height > 0)
+		{
+			area.x = 0;
+			area.width = width;
+			gtk_xtext_paint (GTK_WIDGET (xtext), &area);
+		}
+		xtext->buffer->grid_dirty = TRUE;
+
+		return;
+	}
+
 	xtext->buffer->grid_dirty = FALSE;
 	width -= MARGIN;
 	lines_max = ((height + xtext->pixel_offset) / xtext->fontsize) + 1;
