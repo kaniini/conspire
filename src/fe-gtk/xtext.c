@@ -303,7 +303,10 @@ backend_get_char_width (GtkXText *xtext, unsigned char *str, int *mbl_ret)
 static void
 backend_draw_text (GtkXText *xtext, int dofill, int x, int y, const gchar *str, int len, int str_width, int is_mb)
 {
-	cairo_t *cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+	cairo_t *cr;
+
+	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+	cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
 
 	if (xtext->italics)
 		pango_layout_set_font_description (xtext->layout, xtext->font->ifont);
@@ -848,7 +851,11 @@ gtk_xtext_draw_marker (GtkXText * xtext, textentry * ent, int y)
 	{
 		render_y = y + xtext->font->descent + xtext->fontsize * ent->lines_taken;
 	}
-	else return;
+	else
+	{
+		cairo_destroy(cr);
+		return;
+	}
 
 	x = 0;
 	width = GTK_WIDGET (xtext)->allocation.width;
@@ -2079,7 +2086,6 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str, int 
 	int str_width, dofill;
 	GdkDrawable *pix = NULL;
 	int dest_x = 0, dest_y = 0;
-	cairo_t *cr;
 
 	if (xtext->dont_render || len < 1 || xtext->hidden)
 		return 0;
@@ -2153,6 +2159,7 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str, int 
 
 	if (xtext->underline)
 	{
+		cairo_t *cr;
 dounder:
 		cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
 		cairo_set_line_width(cr, 1.0);
@@ -2804,7 +2811,7 @@ gtk_xtext_render_line (GtkXText * xtext, textentry * ent, int line,
 	entline = taken = 0;
 	str = ent->str;
 	indent = ent->indent;
-	start_subline = 0;
+	start_subline = subline;
 
 	/* draw the timestamp */
 	if (xtext->auto_indent && xtext->buffer->time_stamp &&
