@@ -2804,7 +2804,7 @@ gtk_xtext_render_line (GtkXText * xtext, textentry * ent, int line,
 	entline = taken = 0;
 	str = ent->str;
 	indent = ent->indent;
-	start_subline = subline;
+	start_subline = 0;
 
 	/* draw the timestamp */
 	if (xtext->auto_indent && xtext->buffer->time_stamp &&
@@ -3204,7 +3204,7 @@ gtk_xtext_render_page (GtkXText * xtext)
 	int startline = xtext->adj->value;
 
 	if(!GTK_WIDGET_REALIZED(xtext))
-	  return;
+		return;
 
 	if (xtext->buffer->indent < MARGIN)
 		xtext->buffer->indent = MARGIN;	  /* 2 pixels is our left margin */
