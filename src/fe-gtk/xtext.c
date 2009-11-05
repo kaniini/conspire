@@ -124,6 +124,22 @@ static unsigned char *
 gtk_xtext_strip_color (unsigned char *text, int len, unsigned char *outbuf,
 							  int *newlen, int *mb_ret, int strip_hidden);
 
+static cairo_t *
+gtk_xtext_create_cairo_handle (GtkXText *xtext)
+{
+	cairo_t *cr;
+
+	g_return_val_if_fail(xtext != NULL, NULL);
+	g_return_val_if_fail(xtext->draw_buf != NULL, NULL);
+
+	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+#if GTK_CHECK_VERSION(2,18,0)
+	gdk_cairo_reset_clip(cr, GDK_DRAWABLE(xtext->draw_buf));
+#endif
+
+	return cr;
+}
+
 /* gives width of a 8bit string - with no mIRC codes in it */
 
 static int
@@ -148,7 +164,7 @@ xtext_draw_bg(GtkXText *xtext, gint x, gint y, gint width, gint height)
 
 	g_return_if_fail(xtext != NULL);
 
-	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+	cr = gtk_xtext_create_cairo_handle(xtext);
 	cairo_rectangle(cr, x, y, width, height);
 
         cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
@@ -305,7 +321,7 @@ backend_draw_text (GtkXText *xtext, int dofill, int x, int y, const gchar *str, 
 {
 	cairo_t *cr;
 
-	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+	cr = gtk_xtext_create_cairo_handle(xtext);
 	cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
 
 	if (xtext->italics)
@@ -788,7 +804,7 @@ gtk_xtext_draw_sep (GtkXText * xtext, int y)
 	gint x, height;
 	cairo_t *cr;
 
-	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+	cr = gtk_xtext_create_cairo_handle(xtext);
 	cairo_set_line_width(cr, 1.0);
 	cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
 
@@ -833,7 +849,7 @@ gtk_xtext_draw_marker (GtkXText * xtext, textentry * ent, int y)
 	int x, width, render_y;
 	cairo_t *cr;
 
-	cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+	cr = gtk_xtext_create_cairo_handle(xtext);
 	cairo_set_line_width(cr, 1.0);
 	cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
 
@@ -2161,7 +2177,7 @@ gtk_xtext_render_flush (GtkXText * xtext, int x, int y, unsigned char *str, int 
 	{
 		cairo_t *cr;
 dounder:
-		cr = gdk_cairo_create(GDK_DRAWABLE(xtext->draw_buf));
+		cr = gtk_xtext_create_cairo_handle(xtext);
 		cairo_set_line_width(cr, 1.0);
 		cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
 
