@@ -1583,7 +1583,7 @@ gtk_xtext_set_clip_owner (GtkWidget * xtext, GdkEventButton * event)
 		free (str);
 	}
 
-#if 0
+#if ! GTK_CHECK_VERSION(2,18,0)
 	gtk_selection_owner_set (xtext, GDK_SELECTION_PRIMARY, event->time);
 #endif
 }
