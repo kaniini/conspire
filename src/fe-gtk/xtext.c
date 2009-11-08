@@ -1767,10 +1767,10 @@ gtk_xtext_button_press (GtkWidget * widget, GdkEventButton * event)
 /* another program has claimed the selection */
 
 static gboolean
-gtk_xtext_selection_kill (GtkXText *xtext, GdkEventSelection *event)
+gtk_xtext_selection_kill (GtkWidget *xtext, GdkEventSelection *event)
 {
-	if (xtext->buffer->last_ent_start)
-		gtk_xtext_unselect (xtext);
+	if (GTK_XTEXT(xtext)->buffer->last_ent_start)
+		gtk_xtext_unselect (GTK_XTEXT(xtext));
 	return TRUE;
 }
 
@@ -1971,7 +1971,7 @@ gtk_xtext_class_init (GtkXTextClass * class)
 	widget_class->button_press_event = gtk_xtext_button_press;
 	widget_class->button_release_event = gtk_xtext_button_release;
 	widget_class->motion_notify_event = gtk_xtext_motion_notify;
-	widget_class->selection_clear_event = (void *)gtk_xtext_selection_kill;
+	widget_class->selection_clear_event = gtk_xtext_selection_kill;
 	widget_class->selection_get = gtk_xtext_selection_get;
 	widget_class->expose_event = gtk_xtext_expose;
 	widget_class->scroll_event = gtk_xtext_scroll;
