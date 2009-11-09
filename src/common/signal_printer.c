@@ -42,7 +42,7 @@ signal_printer_action_private(gpointer *params)
 	gchar *text     = params[2];
 	gchar *nickchar = params[3];
 	gint nickcolor  = color_of(from);
-	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *temp = g_strdup_printf("\x03%d%s\x03", nickcolor, from);
 	gchar *nick;
 
 	if (prefs.colorednicks)
@@ -67,7 +67,7 @@ signal_printer_action_public(gpointer *params)
 	gchar *text     = params[2];
 	gchar *nickchar = params[3];
 	gint nickcolor  = color_of(from);
-	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *temp = g_strdup_printf("\x03%d%s\x03", nickcolor, from);
 	gchar *nick;
 
 	if (prefs.colorednicks)
@@ -92,7 +92,7 @@ signal_printer_action_private_hilight(gpointer *params)
 	gchar *text     = params[2];
 	gchar *nickchar = params[3];
 	gint nickcolor  = color_of(from);
-	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *temp = g_strdup_printf("\x03%d%s\x03", nickcolor, from);
 	gchar *nick;
 
 	if (prefs.coloredhnicks)
@@ -117,7 +117,7 @@ signal_printer_action_public_highlight(gpointer *params)
 	gchar *text     = params[2];
 	gchar *nickchar = params[3];
 	gint nickcolor  = color_of(from);
-	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *temp = g_strdup_printf("\x03%d%s\x03", nickcolor, from);
 	gchar *nick;
 
 	if (prefs.coloredhnicks)
@@ -564,7 +564,7 @@ signal_printer_message_private(gpointer *params)
 	gchar *message = params[2];
 	gchar *idtext  = params[3];
 	gint nickcolor  = color_of(from);
-	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *temp = g_strdup_printf("\x03%d%s\x03", nickcolor, from);
 	gchar *nick;
 
 	if (prefs.colorednicks)
@@ -607,7 +607,7 @@ signal_printer_message_public(gpointer *params)
 	gchar *nickchar = params[3];
 	gchar *idtext   = params[4];
 	gint nickcolor  = color_of(from);
-	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *temp = g_strdup_printf("\x03%d%s\x03", nickcolor, from);
 	gchar *nick;
 
 	if (prefs.colorednicks)
@@ -633,7 +633,7 @@ signal_printer_message_public_highlight(gpointer *params)
 	gchar *nickchar = params[3];
 	gchar *idtext   = params[4];
 	gint nickcolor  = color_of(from);
-	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *temp = g_strdup_printf("\x03%d%s\x03", nickcolor, from);
 	gchar *nick;
 
 	if (prefs.coloredhnicks)
