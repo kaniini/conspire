@@ -37,12 +37,26 @@
 void
 signal_printer_action_private(gpointer *params)
 {
-	session *sess     = params[0];
-	gchar *from       = params[1];
-	gchar *text       = params[2];
-	gchar *nickchar   = params[3];
+	session *sess   = params[0];
+	gchar *from     = params[1];
+	gchar *text     = params[2];
+	gchar *nickchar = params[3];
+	gint nickcolor  = color_of(from);
+	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *nick;
 
-	session_print_format(sess, "query action", from, nickchar, text);
+	if (prefs.colorednicks)
+	{
+		nick = g_strdup(temp);
+		g_free(temp);
+	}
+	else
+	{
+		nick = g_strdup(from);
+	}
+
+	session_print_format(sess, "query action", nick, nickchar, text);
+	g_free(nick);
 }
 
 void
@@ -52,8 +66,22 @@ signal_printer_action_public(gpointer *params)
 	gchar *from     = params[1];
 	gchar *text     = params[2];
 	gchar *nickchar = params[3];
+	gint nickcolor  = color_of(from);
+	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *nick;
 
-	session_print_format(sess, "channel action", from, nickchar, text);
+	if (prefs.colorednicks)
+	{
+		nick = g_strdup(temp);
+		g_free(temp);
+	}
+	else
+	{
+		nick = g_strdup(from);
+	}
+
+	session_print_format(sess, "channel action", nick, nickchar, text);
+	g_free(nick);
 }
 
 void
@@ -63,8 +91,22 @@ signal_printer_action_private_hilight(gpointer *params)
 	gchar *from     = params[1];
 	gchar *text     = params[2];
 	gchar *nickchar = params[3];
+	gint nickcolor  = color_of(from);
+	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *nick;
 
-	session_print_format(sess, "query action hilight", from, nickchar, text);
+	if (prefs.coloredhnicks)
+	{
+		nick = g_strdup(temp);
+		g_free(temp);
+	}
+	else
+	{
+		nick = g_strdup(from);
+	}
+
+	session_print_format(sess, "query action hilight", nick, nickchar, text);
+	g_free(nick);
 }
 
 void
@@ -74,8 +116,22 @@ signal_printer_action_public_highlight(gpointer *params)
 	gchar *from     = params[1];
 	gchar *text     = params[2];
 	gchar *nickchar = params[3];
+	gint nickcolor  = color_of(from);
+	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *nick;
 
-	session_print_format(sess, "channel action hilight", from, nickchar, text);
+	if (prefs.coloredhnicks)
+	{
+		nick = g_strdup(temp);
+		g_free(temp);
+	}
+	else
+	{
+		nick = g_strdup(from);
+	}
+
+	session_print_format(sess, "channel action hilight", nick, nickchar, text);
+	g_free(nick);
 }
 
 /* Channels */
@@ -504,15 +560,29 @@ void
 signal_printer_message_private(gpointer *params)
 {
 	session *sess  = params[0];
-	gchar *nick    = params[1];
+	gchar *from    = params[1];
 	gchar *message = params[2];
 	gchar *idtext  = params[3];
+	gint nickcolor  = color_of(from);
+	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *nick;
+
+	if (prefs.colorednicks)
+	{
+		nick = g_strdup(temp);
+		g_free(temp);
+	}
+	else
+	{
+		nick = g_strdup(from);
+	}
 
 	if (sess->type == SESS_DIALOG) {
 		session_print_format(sess, "private message to dialog", nick, message, idtext);
 	} else {
 		session_print_format(sess, "private message", nick, message, idtext);
 	}
+        g_free(nick);
 }
 
 void
@@ -536,8 +606,22 @@ signal_printer_message_public(gpointer *params)
 	gchar *message  = params[2];
 	gchar *nickchar = params[3];
 	gchar *idtext   = params[4];
+	gint nickcolor  = color_of(from);
+	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *nick;
 
-	session_print_format(sess, "channel message", from, nickchar, idtext, message);
+	if (prefs.colorednicks)
+	{
+		nick = g_strdup(temp);
+		g_free(temp);
+	}
+	else
+	{
+		nick = g_strdup(from);
+	}
+
+	session_print_format(sess, "channel message", nick, nickchar, idtext, message);
+	g_free(nick);
 }
 
 void
@@ -548,8 +632,22 @@ signal_printer_message_public_highlight(gpointer *params)
 	gchar *message  = params[2];
 	gchar *nickchar = params[3];
 	gchar *idtext   = params[4];
+	gint nickcolor  = color_of(from);
+	gchar *temp = g_strdup_printf("\x03%d%s", nickcolor, from);
+	gchar *nick;
 
-	session_print_format(sess, "channel msg hilight", from, nickchar, idtext, message);
+	if (prefs.coloredhnicks)
+	{
+		nick = g_strdup(temp);
+		g_free(temp);
+	}
+	else
+	{
+		nick = g_strdup(from);
+	}
+
+	session_print_format(sess, "channel msg hilight", nick, nickchar, idtext, message);
+	g_free(nick);
 }
 
 /* notices */
