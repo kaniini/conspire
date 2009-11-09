@@ -854,14 +854,13 @@ load_text_events ()
 	pevent_load(NULL);
 }
 
-#if 0
 /* black n white(0/1) are bad colors for nicks, and we'll use color 2 for us */
 /* also light/dark gray (14/15) */
 /* 5,7,8 are all shades of yellow which happen to look dman near the same */
 
 static char rcolors[] = { 2, 3, 4, 5, 6, 7, 10, 12, 13, 18, 19, 20, 21, 22, 23, 26, 27, 28, 29 };
 
-static int
+int
 color_of (char *name)
 {
 	int i = 0, sum = 0;
@@ -871,7 +870,6 @@ color_of (char *name)
 	sum %= sizeof (rcolors) / sizeof (char);
 	return rcolors[sum];
 }
-#endif
 
 /* called by EMIT_SIGNAL macro */
 void
