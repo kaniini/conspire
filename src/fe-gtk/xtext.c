@@ -591,6 +591,10 @@ gtk_xtext_realize (GtkWidget * widget)
 	widget->window = gdk_window_new (gtk_widget_get_parent_window(widget), &attributes, GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP);
 	gdk_window_set_user_data (widget->window, xtext);
 
+#if GTK_CHECK_VERSION(2, 18, 0)
+	gdk_window_ensure_native (widget->window);
+#endif
+
 	xtext->depth = gdk_drawable_get_visual (widget->window)->depth;
 
 	xtext_set_fg(xtext, XTEXT_FG);
@@ -1583,9 +1587,7 @@ gtk_xtext_set_clip_owner (GtkWidget * xtext, GdkEventButton * event)
 		free (str);
 	}
 
-#if ! GTK_CHECK_VERSION(2,18,0)
 	gtk_selection_owner_set (xtext, GDK_SELECTION_PRIMARY, event->time);
-#endif
 }
 
 static void
