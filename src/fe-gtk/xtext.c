@@ -1862,7 +1862,7 @@ gtk_xtext_selection_get_text (GtkXText *xtext, int *len_ret)
 	} else
 	{
 		stripped = gtk_xtext_strip_color (txt, strlen (txt), NULL, &len, 0, FALSE);
-		free (txt);
+		g_free(txt);
 	}
 
 	*len_ret = len;
