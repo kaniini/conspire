@@ -689,10 +689,8 @@ servlist_celledit_cb (GtkCellRendererText *cell, gchar *arg1, gchar *arg2,
 			return;
 		}
 
-		netname = net->name;
 		net->name = strdup (arg2);
 		gtk_list_store_set (GTK_LIST_STORE (model), &iter, 0, net->name, -1);
-		free (netname);
 	}
 
 	gtk_tree_path_free (path);
