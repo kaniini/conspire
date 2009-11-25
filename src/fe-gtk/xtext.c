@@ -485,9 +485,6 @@ gtk_xtext_new (GdkColor palette[], int separator)
 	xtext->buffer = gtk_xtext_buffer_new (xtext);
 	xtext->orig_buffer = xtext->buffer;
 
-#ifdef _WIN32
-	gtk_widget_set_double_buffered (GTK_WIDGET (xtext), FALSE);
-#endif
 	gtk_xtext_set_palette (xtext, palette);
 
 	return GTK_WIDGET (xtext);
