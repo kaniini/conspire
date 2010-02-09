@@ -29,6 +29,8 @@ int main()
 		i++;
 	}
 
+        printf("\n{NULL} /* sentinel */\n");
+
 	printf("};\n");
 	
 	return 0;

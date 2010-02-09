@@ -382,4 +382,6 @@ const struct text_event te[] = {
 
 {"Plugin Error", 2, 
 "%C23*%O$t%C23Couldn't load plugin $1: $2"},
+
+{NULL} /* sentinel */
 };
