@@ -552,11 +552,14 @@ inbound_005 (server * serv, char *word[])
 			}
 
 			/* use /NICKSERV */
-			if (strcasecmp (word[w] + 8, "RusNet") == 0)
+			if ((!strcasecmp(word[w] + 8, "RusNet")) ||
+                                (!strcasecmp(word[w] + 8, "DALnet")) ||
+                                (!strcasecmp(word[w] + 8, "BRASnet")))
 				serv->nickservtype = 1;
+                        else if (!strcasecmp(word[w] + 8, "FreeNode"))
+                            serv->nickservtype = 2;
 			else if (strcasecmp (word[w] + 8, "UniBG") == 0)
 				serv->nickservtype = 3;
-
 		} else if (strncmp (word[w], "CASEMAPPING=", 12) == 0)
 		{
 			if (strcmp (word[w] + 12, "ascii") == 0)	/* bahamut */

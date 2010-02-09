@@ -876,9 +876,8 @@ void
 pevent_save (char *fn)
 {
 	int fd;
-#if 0
 	char buf[1024];
-#endif
+        int i = 0;
 
 	if (!fn)
 		fd = xchat_open_file ("pevents.conf", O_CREAT | O_TRUNC | O_WRONLY,
@@ -898,15 +897,12 @@ pevent_save (char *fn)
 		return;
 	}
 
-#if 0
-	for (i = 0; i < NUM_XP; i++)
+        while (te[i].name != NULL)
 	{
-		write (fd, buf, snprintf (buf, sizeof (buf),
-										  "event_name=%s\n", te[i].name));
-		write (fd, buf, snprintf (buf, sizeof (buf),
-										  "event_text=%s\n\n", pntevts_text[i]));
+		write (fd, buf, snprintf (buf, sizeof (buf), "event_name=%s\n", te[i].name));
+		write (fd, buf, snprintf (buf, sizeof (buf), "event_text=%s\n\n", te[i].def));
+                i++;
 	}
-#endif
 
 	close (fd);
 }

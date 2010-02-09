@@ -338,18 +338,6 @@ process_numeric_001 (gpointer *params)
 	server *serv = sess->server;
 
 	inbound_login_start (sess, word[3], word[1]);
-
-	/* umm .. what the fuck is all this shit? we should just set a services agent
-	   in the network factory .. --nenolod */
-
-	/* use /NICKSERV */
-	if (strcasecmp (word[7], "DALnet") == 0 ||
-		 strcasecmp (word[7], "BRASnet") == 0)
-		serv->nickservtype = 1;
-
-	/* use /NS */
-	else if (strcasecmp (word[7], "FreeNode") == 0)
-		serv->nickservtype = 2;
 }
 
 static void
