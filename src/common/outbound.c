@@ -375,8 +375,8 @@ cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 	return CMD_EXEC_OK;
 }
 
-static void
-ban (session * sess, char *tbuf, char *mask, char *bantypestr, int deop)
+void
+banlike (session * sess, char *modechar, char *tbuf, char *mask, char *bantypestr, int deop)
 {
 	int bantype;
 	struct User *user;
@@ -389,11 +389,11 @@ ban (session * sess, char *tbuf, char *mask, char *bantypestr, int deop)
 	{
 		if (deop)
 		{
-			mode = "-o+b ";
+			mode = g_strconcat("-o+", modechar, " ", NULL);
 			p2 = user->nick;
 		} else
 		{
-			mode = "+b";
+			mode = g_strconcat("+", modechar, NULL);
 			p2 = "";
 		}
 
@@ -490,7 +490,7 @@ ban (session * sess, char *tbuf, char *mask, char *bantypestr, int deop)
 
 	} else
 	{
-		snprintf (tbuf, TBUFSIZE, "+b %s", mask);
+		snprintf (tbuf, TBUFSIZE, "+%s %s", modechar, mask);
 	}
 	serv->p_mode (serv, sess->channel, tbuf);
 }
@@ -502,7 +502,7 @@ cmd_ban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 	if (*mask)
 	{
-		ban (sess, tbuf, mask, word[3], 0);
+		banlike (sess, "b", tbuf, mask, word[3], 0);
 	} else
 	{
 		sess->server->p_mode (sess->server, sess->channel, "+b");	/* banlist */
@@ -1351,10 +1351,10 @@ cmd_kickban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
 		if (isdigit ((unsigned char) reason[0]) && reason[1] == 0)
 		{
-			ban (sess, tbuf, nick, reason, (user && user->op));
+			banlike (sess, "b", tbuf, nick, reason, (user && user->op));
 			reason[0] = 0;
 		} else
-			ban (sess, tbuf, nick, "", (user && user->op));
+			banlike (sess, "b", tbuf, nick, "", (user && user->op));
 
 		sess->server->p_kick (sess->server, sess->channel, nick, reason);
 
