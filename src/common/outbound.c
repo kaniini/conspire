@@ -50,6 +50,7 @@
 #include "tree.h"
 #include "outbound.h"
 #include "command_factory.h"
+#include "command_option.h"
 #include "plugin.h"
 
 #ifdef USE_DEBUG
@@ -376,9 +377,8 @@ cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 void
-banlike (session * sess, char *modechar, char *tbuf, char *mask, char *bantypestr, int deop)
+banlike (session * sess, char *modechar, char *tbuf, char *mask, gint type, int deop)
 {
-	int bantype;
 	struct User *user;
 	char *at, *dot, *lastdot;
 	char username[64], fullhost[128], domain[128], *mode, *p2;
@@ -432,10 +432,8 @@ banlike (session * sess, char *modechar, char *tbuf, char *mask, char *bantypest
 			g_strlcpy (domain, fullhost, sizeof (domain));
 		}
 
-		if (*bantypestr)
-			bantype = atoi (bantypestr);
-		else
-			bantype = prefs.bantype;
+		if (type == -1)
+			type = prefs.bantype;
 
 		tbuf[0] = 0;
 		if (inet_addr (fullhost) != -1)	/* "fullhost" is really a IP number */
@@ -448,7 +446,7 @@ banlike (session * sess, char *modechar, char *tbuf, char *mask, char *bantypest
 			strcpy (domain, fullhost);
 			*lastdot = '.';
 
-			switch (bantype)
+			switch (type)
 			{
 			case 0:
 				snprintf (tbuf, TBUFSIZE, "%s%s *!*@%s.*", mode, p2, domain);
@@ -468,7 +466,7 @@ banlike (session * sess, char *modechar, char *tbuf, char *mask, char *bantypest
 			}
 		} else
 		{
-			switch (bantype)
+			switch (type)
 			{
 			case 0:
 				snprintf (tbuf, TBUFSIZE, "%s%s *!*@*%s", mode, p2, domain);
@@ -498,36 +496,70 @@ banlike (session * sess, char *modechar, char *tbuf, char *mask, char *bantypest
 static CommandResult
 cmd_ban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	char *mask = word[2];
+    gboolean except = FALSE;
+    gint type = -1;
+    gchar *mask;
+    gchar *bantype = "b";
+    CommandOption options[] = {
+        {"except", TYPE_BOOLEAN, &except, N_("Place mask on the ban exemption list.")},
+        {"type", TYPE_INTEGER, &type, N_("Specify a mask type; only valid with nicks.")},
+        {NULL}
+    };
+    gint len = g_strv_length(word);
 
-	if (*mask)
-	{
-		banlike (sess, "b", tbuf, mask, word[3], 0);
-	} else
-	{
-		sess->server->p_mode (sess->server, sess->channel, "+b");	/* banlist */
-	}
+    command_option_parse(sess, &len, &word, options);
 
-	return CMD_EXEC_OK;
+    if (except)
+    {
+        bantype = "e";
+    }
+
+    mask = word[0];
+
+    if (*mask && strncmp(mask, "", 1))
+    {
+        banlike(sess, bantype, tbuf, mask, type, FALSE);
+    } else
+    {
+        gchar *mode = g_strconcat("+", bantype, NULL);
+        sess->server->p_mode(sess->server, sess->channel, mode);
+        g_free(mode);
+    }
+    return CMD_EXEC_OK;
 }
 
 static CommandResult
 cmd_unban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	/* Allow more than one mask in /unban -- tvk */
-	int i = 2;
+    gboolean except = FALSE;
+    gchar bantype = 'b';
+    CommandOption options[] = {
+        {"except", TYPE_BOOLEAN, &except, N_("Place mask on the ban exemption list.")},
+        {NULL}
+    };
+    gint len = g_strv_length(word);
+    gint i;
 
-	while (1)
-	{
-		if (!*word[i])
-		{
-			if (i == 2)
-				return CMD_EXEC_FAIL;
-			send_channel_modes (sess, tbuf, word, 2, i, '-', 'b', 0);
-			return CMD_EXEC_OK;
-		}
-		i++;
-	}
+    command_option_parse(sess, &len, &word, options);
+
+    if (except)
+    {
+        bantype = 'e';
+    }
+    if (word[0] == NULL)
+        return CMD_EXEC_FAIL;
+
+    len = 0;
+
+    for (i = 0; i < PDIWORDS && word[i] != NULL; i++)
+    {
+        if (!strncmp(word[i], "", 1))
+            break;
+        len++;
+    }
+
+    send_channel_modes (sess, tbuf, word, 0, len, '-', bantype, 0);
+    return CMD_EXEC_OK;
 }
 
 static CommandResult
@@ -1339,28 +1371,35 @@ cmd_kick (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 static CommandResult
 cmd_kickban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	char *nick = word[2];
-	char *reason = word_eol[3];
-	struct User *user;
+    gint type = -1;
+    gchar *nick;
+    gchar *reason;
+    struct User *user;
+    CommandOption options[] = {
+        {"type", TYPE_INTEGER, &type, "Mask type"},
+        {NULL}
+    };
+    gint len = g_strv_length(word);
 
-	if (*nick)
-	{
-		/* if the reason is a 1 digit number, treat it as a bantype */
+    command_option_parse(sess, &len, &word, options);
 
-		user = userlist_find (sess, nick);
+    nick = word[0];
+    if (!strncmp(word_eol[4], "", 1))
+        reason = word_eol[3];
+    else
+        reason = word_eol[5];
 
-		if (isdigit ((unsigned char) reason[0]) && reason[1] == 0)
-		{
-			banlike (sess, "b", tbuf, nick, reason, (user && user->op));
-			reason[0] = 0;
-		} else
-			banlike (sess, "b", tbuf, nick, "", (user && user->op));
+    if (nick != NULL)
+    {
+        user = userlist_find(sess, nick);
 
-		sess->server->p_kick (sess->server, sess->channel, nick, reason);
+        banlike(sess, "b", tbuf, nick, type, (user && user->op));
 
-		return CMD_EXEC_OK;
-	}
-	return CMD_EXEC_FAIL;
+        sess->server->p_kick(sess->server, sess->channel, nick, reason);
+
+        return CMD_EXEC_OK;
+    }
+    return CMD_EXEC_FAIL;
 }
 
 static CommandResult
@@ -2095,110 +2134,94 @@ urlserv:
 static CommandResult
 cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	int offset = 0;
-	char *server_name = NULL;
-	char *port = NULL;
-	char *pass = NULL;
-	char *channel = NULL;
-	int use_ssl = FALSE;
-	int is_url = TRUE;
-	server *serv = sess->server;
-
+    gchar *servername;
+    gint port = -1;
+    gchar *pass = NULL;
+    gchar *channel = NULL;
 #ifdef GNUTLS
-	/* BitchX uses -ssl, mIRC uses -e, let's support both */
-	if (strcmp (word[2], "-ssl") == 0 || strcmp (word[2], "-e") == 0)
-	{
-		use_ssl = TRUE;
-		offset++;	/* args move up by 1 word */
-	}
+    gint use_ssl = FALSE;
+#endif
+    gboolean use_uri = FALSE;
+    server *serv = sess->server;
+    CommandOption options[] = {
+#ifdef GNUTLS
+        {"ssl", TYPE_BOOLEAN, &use_ssl, "Enable SSL; if passing this, do not pass -e."},
+        {"e", TYPE_BOOLEAN, &use_ssl, "Enable SSL; if passing this, do not pass -ssl."},
+#endif
+        {"channel", TYPE_STRING, &channel, "Join channel(s) after connecting; if passing this, do not pass -j."},
+        {"j", TYPE_STRING, &channel, "Join channel(s) after connecting; if passing this, do not pass -channel."},
+        {"port", TYPE_INTEGER, &port, "Connect on this port."},
+        {"pass", TYPE_STRING, &pass, "Use this password."},
+        {NULL}
+    };
+    gint len = g_strv_length(word);
+
+    if (!strncasecmp(word[2], "irc://", 6) || !strncasecmp(word[2], "ircs://", 7))
+    {
+        gchar *uri_port = "-1";
+        gint i;
+
+        if (!parse_irc_url (word[2], &servername, &uri_port, &channel, &use_ssl))
+            return CMD_EXEC_FAIL;
+
+        if (uri_port[0] != '-')
+        {
+            port = 0;
+            for (i = 0; i < strlen(uri_port) && g_ascii_isdigit(uri_port[i]); i++)
+            {
+                port *= 10;
+                port += g_ascii_digit_value(uri_port[i]);
+            }
+        }
+        /*
+         * URI doesn't include a channel prefix because zed and khaled are
+         * first-rate idiots.
+         */
+        if ((channel[0] != '#') && channel[0] != '\0')
+            channel = g_strdup_printf("#%s", channel);
+
+        use_uri = TRUE;
+    } else
+    {
+        command_option_parse(sess, &len, &word, options);
+
+        servername = word[0];
+    }
+
+    if (!servername)
+        return CMD_EXEC_FAIL;
+
+    sess->server->network = NULL;
+
+    if (channel)
+        g_strlcpy(sess->willjoinchannel, channel, sizeof(sess->willjoinchannel));
+
+    if (pass)
+    {
+        g_strlcpy(serv->password, pass, sizeof(serv->password));
+    }
+#ifdef GNUTLS
+    serv->use_ssl = use_ssl;
+    serv->accept_invalid_cert = TRUE;
 #endif
 
-	if (!parse_irc_url (word[2 + offset], &server_name, &port, &channel, &use_ssl))
-	{
-		is_url = FALSE;
-		server_name = word[2 + offset];
-	}
-	if (port)
-		pass = word[3 + offset];
-	else
-	{
-		port = word[3 + offset];
-		pass = word[4 + offset];
-	}
+    /* try to connect by Network name */
+    if (servlist_connect_by_netname (sess, servername, TRUE))
+        return CMD_EXEC_OK;
 
-	if (!(*server_name))
-		return CMD_EXEC_FAIL;
+    serv->connect(serv, servername, port, FALSE);
 
-	sess->server->network = NULL;
+    /* try to associate this connection with a listed network */
+    if (!serv->network)
+        /* search for this hostname in the entire server list */
+        serv->network = servlist_net_find_from_server (servername);
+    /* may return NULL, but that's OK */
 
-	/* dont clear it for /servchan */
-	if (g_ascii_strncasecmp (word_eol[1], "SERVCHAN ", 9))
-		sess->willjoinchannel[0] = 0;
+    /* clean up after URI-specific anti-stupidity measures. */
+    if (use_uri && channel[0] != '\0')
+        g_free(channel);
 
-	if (channel)
-	{
-		sess->willjoinchannel[0] = '#';
-		g_strlcpy ((sess->willjoinchannel + 1), channel, (CHANLEN - 1));
-	}
-
-	/* support +7000 style ports like mIRC */
-	if (port[0] == '+')
-	{
-		port++;
-#ifdef GNUTLS
-		use_ssl = TRUE;
-#endif
-	}
-
-	if (*pass)
-	{
-		g_strlcpy (serv->password, pass, sizeof (serv->password));
-	}
-#ifdef GNUTLS
-	serv->use_ssl = use_ssl;
-	serv->accept_invalid_cert = TRUE;
-#endif
-
-	/* try to connect by Network name */
-	if (servlist_connect_by_netname (sess, server_name, !is_url))
-		return CMD_EXEC_OK;
-
-	if (*port)
-	{
-		serv->connect (serv, server_name, atoi (port), FALSE);
-	} else
-	{
-		/* -1 for default port */
-		serv->connect (serv, server_name, -1, FALSE);
-	}
-
-	/* try to associate this connection with a listed network */
-	if (!serv->network)
-		/* search for this hostname in the entire server list */
-		serv->network = servlist_net_find_from_server (server_name);
-		/* may return NULL, but that's OK */
-
-	return CMD_EXEC_OK;
-}
-
-static CommandResult
-cmd_servchan (struct session *sess, char *tbuf, char *word[],
-				  char *word_eol[])
-{
-	int offset = 0;
-
-#ifdef GNUTLS
-	if (strcmp (word[2], "-ssl") == 0)
-		offset++;
-#endif
-
-	if (*word[4 + offset])
-	{
-		g_strlcpy (sess->willjoinchannel, word[4 + offset], CHANLEN);
-		return cmd_server (sess, tbuf, word, word_eol);
-	}
-
-	return CMD_EXEC_FAIL;
+    return CMD_EXEC_OK;
 }
 
 static CommandResult
@@ -2417,31 +2440,6 @@ cmd_wallchop (struct session *sess, char *tbuf, char *word[],
 }
 
 static CommandResult
-cmd_wallchan (struct session *sess, char *tbuf, char *word[],
-				  char *word_eol[])
-{
-	GSList *list;
-
-	if (*word_eol[2])
-	{
-		list = sess_list;
-		while (list)
-		{
-			sess = list->data;
-			if (sess->type == SESS_CHANNEL)
-			{
-				inbound_chanmsg (sess->server, NULL, sess->channel,
-									  sess->server->nick, word_eol[2], TRUE, FALSE);
-				sess->server->p_message (sess->server, sess->channel, word_eol[2]);
-			}
-			list = list->next;
-		}
-		return CMD_EXEC_OK;
-	}
-	return CMD_EXEC_FAIL;
-}
-
-static CommandResult
 cmd_halfop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
@@ -2480,17 +2478,20 @@ cmd_voice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 /* this is now a table used to fill the command dictionary now with our builtins.
    it doesn't matter if it's properly sorted or not. --nenolod */
 struct commands xc_cmds[] = {
-	{"AWAY", cmd_away, 1, 0, 1, N_("AWAY [<reason>], toggles away status")},
+	{"AWAY", cmd_away, 1, 0, 1, N_("AWAY [<reason>]\ntoggles away status")},
 	{"BAN", cmd_ban, 1, 1, 1,
-	 N_("BAN <mask> [<bantype>], bans everyone matching the mask from the current channel. If they are already on the channel this doesn't kick them (needs chanop)")},
+	 N_("BAN [-except] [-type <0-3>] <mask>\n"
+            "Without the -except flag, this command bans the supplied mask. The -type flag\n"
+            "specifies the masking mechanism used when the mask is a nick.")},
 	{"CHARSET", cmd_charset, 0, 0, 1, 0},
-	{"CLEAR", cmd_clear, 0, 0, 1, N_("CLEAR [ALL|HISTORY], Clears the current text window or command history")},
-	{"CLOSE", cmd_close, 0, 0, 1, N_("CLOSE, Closes the current window/tab")},
-	{"CONNECT", cmd_newserver, 0, 0, 1, N_("CONNECT [-noconnect] <hostname> [<port>], creates a new server tab. If -noconnect is not specified, connects to the requested server using the same flags used with SERVER.")},
+	{"CLEAR", cmd_clear, 0, 0, 1, N_("CLEAR [ALL|HISTORY]\nClears the current text window or command history")},
+	{"CLOSE", cmd_close, 0, 0, 1, N_("CLOSE\nCloses the current window/tab")},
+	{"CONNECT", cmd_newserver, 0, 0, 1,
+	 N_("CONNECT [-noconnect] <hostname>\nCreates a new server tab, wrapping SERVER if -noconnect is not specified.")},
 	{"CTCP", cmd_ctcp, 1, 0, 1,
-	 N_("CTCP <nick> <message>, send the CTCP message to nick, common messages are VERSION and USERINFO")},
+	 N_("CTCP <nick> <message>\nSend the CTCP message to nick; common messages are VERSION and USERINFO")},
 	{"CYCLE", cmd_hop, 1, 1, 1,
-	 N_("CYCLE [<channel>], parts the current or given channel and immediately rejoins")},
+	 N_("CYCLE [<channel>]\nParts the current or given channel and immediately rejoins")},
 	{"DCC", cmd_dcc, 0, 0, 1,
 	 N_("\n"
 	 "DCC GET <nick>                      - accept an offered file\n"
@@ -2504,116 +2505,138 @@ struct commands xc_cmds[] = {
 	{"DEBUG", cmd_debug, 0, 0, 1, 0},
 
 	{"DEHALFOP", cmd_dehalfop, 1, 1, 1,
-	 N_("DEHALFOP <nick>, removes chanhalf-op status from the nick on the current channel (needs chanop)")},
+	 N_("DEHALFOP <nick>\nremoves halfop status from the nick on the current channel (needs op)")},
 	{"DEOP", cmd_deop, 1, 1, 1,
-	 N_("DEOP <nick>, removes chanop status from the nick on the current channel (needs chanop)")},
+	 N_("DEOP <nick>\nremoves op status from the nick on the current channel (needs op)")},
         {"DESCRIBE", cmd_describe, 1, 0, 1,
-	 N_("DESCRIBE <target> <text>, performs an action in the target channel/query with the specified text.")},
+	 N_("DESCRIBE <target> <text>\nPerforms an action in the target channel/query with the specified text.")},
 	{"DEVOICE", cmd_devoice, 1, 1, 1,
-	 N_("DEVOICE <nick>, removes voice status from the nick on the current channel (needs chanop)")},
-	{"DISCONNECT", cmd_discon, 0, 0, 1, N_("DISCON, Disconnects from server")},
-	{"ECHO", cmd_echo, 0, 0, 1, N_("ECHO <text>, Prints text locally")},
-	{"EXIT", cmd_killall, 0, 0, 1, N_("EXIT terminates all connections and closes Conspire.")},
-	{"FLUSHQ", cmd_flushq, 0, 0, 1, N_("FLUSHQ, flushes the current server's send queue")},
-	{"FOREACH", cmd_foreach, 0, 0, 1, N_("FOREACH <[local-]channel|server|[local-]query> performs a given command for all items of the specified type.")},
+	 N_("DEVOICE <nick>\nRemoves voice status from the nick on the current channel (needs chanop)")},
+	{"DISCONNECT", cmd_discon, 0, 0, 1, N_("DISCONNECT\nDisconnects from server")},
+	{"ECHO", cmd_echo, 0, 0, 1, N_("ECHO <text>\nPrints text locally")},
+	{"EXIT", cmd_killall, 0, 0, 1, N_("EXIT\nTerminates all connections and closes Conspire.")},
+	{"FLUSHQ", cmd_flushq, 0, 0, 1, N_("FLUSHQ\nFlushes the current server's send queue")},
+	{"FOREACH", cmd_foreach, 0, 0, 1, N_("FOREACH <[local-]channel|server|[local-]query>\nPerforms a given command for all items of the specified type.")},
 	{"GATE", cmd_gate, 0, 0, 1,
-	 N_("GATE <host> [<port>], proxies through a host, port defaults to 23")},
-	{"GHOST", cmd_ghost, 1, 0, 1, N_("GHOST <nick> <password>, Kills a ghosted nickname")},
+	 N_("GATE <host> [<port>]\nProxies through a host, port defaults to 23")},
+	{"GHOST", cmd_ghost, 1, 0, 1, N_("GHOST <nick> <password>\nKills a ghosted nickname")},
 	{"HALFOP", cmd_halfop, 1, 1, 1,
-	 N_("HALFOP <nick>, gives chanhalf-op status to the nick (needs chanop)")},
+	 N_("HALFOP <nick>\nGives halfop status to the nick (needs op)")},
 	{"HELP", cmd_help, 0, 0, 1, 0},
 	{"HOP", cmd_hop, 1, 1, 1,
-	 N_("HOP [<channel>], parts the current or given channel and immediately rejoins")},
-	{"ID", cmd_id, 1, 0, 1, N_("ID <password>, identifies yourself to nickserv")},
+	 N_("HOP [<channel>]\nParts the current or given channel and immediately rejoins")},
+	{"ID", cmd_id, 1, 0, 1, N_("ID <password>\nIdentifies yourself to nickserv")},
 	{"IGNORE", cmd_ignore, 0, 0, 1,
-	 N_("IGNORE <mask> <types..> <options..>\n"
-	 "    mask - host mask to ignore, eg: *!*@*.aol.com\n"
-	 "    types - types of data to ignore, one or all of:\n"
-	 "            PRIV, CHAN, NOTI, CTCP, DCC, INVI, ALL\n"
-	 "    options - NOSAVE, QUIET")},
+	 N_("IGNORE [flags] <mask>\n"
+            "Ignores messages carrying the specific flags from the specified mask.\n\n"
+            "Supported flags:\n"
+            "-except   User will %Bnot%B be ignored.\n"
+            "-private  Private messages from the user will be ignored.\n"
+            "-public   Public messages from the user will be ignored.\n"
+            "-notice   Notices from the user will be ignored.\n"
+            "-ctcp     CTCPs from the user will be ignored.\n"
+            "-action   Actions, both public & private, from the user will be ignored.\n"
+            "-join     Join messages from the user will be ignored.\n"
+            "-part     Part messages from the user will be ignored.\n"
+            "-quit     Quit messages from the user will be ignored.\n"
+            "-kick     Kicks from the user will be ignored.\n"
+            "-mode     Mode changes from the user will be ignored.\n"
+            "-topic    Topic changes from the user will be ignored.\n"
+            "-invite   Invitations from the user will be ignored.\n"
+            "-nick     Nick changes from the user will be ignored.\n"
+            "-dcc      DCC file transfers from the user will be ignored.\n"
+            "-hilight  Messages from the user that would otherwise hilight, won't.\n"
+            "-all      All messages from the user will be ignored.\n\n"
+            "Passing -all with other flags will pass through messages of those types. In addition, using /ignore again on an ignored mask replaces the old ignore with the new one."
+            )},
 
 	{"INVITE", cmd_invite, 1, 0, 1,
-	 N_("INVITE <nick> [<channel>], invites someone to a channel, by default the current channel (needs chanop)")},
-	{"JOIN", cmd_join, 1, 0, 0, N_("JOIN <channel>, joins the channel")},
+	 N_("INVITE <nick> [<channel>]\nInvites someone to a channel, by default the current channel (needs chanop)")},
+	{"JOIN", cmd_join, 1, 0, 0, N_("JOIN <channel>\nJoins the channel")},
 	{"KICK", cmd_kick, 1, 1, 1,
-	 N_("KICK <nick>, kicks the nick from the current channel (needs chanop)")},
+	 N_("KICK <nick>\nKicks the nick from the current channel (needs op)")},
 	{"KICKBAN", cmd_kickban, 1, 1, 1,
-	 N_("KICKBAN <nick>, bans then kicks the nick from the current channel (needs chanop)")},
+	 N_("KICKBAN [-type <n>] <nick> [reason]\nBans then kicks the nick from the current channel (needs op)")},
 	{"LAGCHECK", cmd_lagcheck, 0, 0, 1,
-	 N_("LAGCHECK, forces a new lag check")},
+	 N_("LAGCHECK\nForces a new lag check")},
 	{"LASTLOG", cmd_lastlog, 0, 0, 1,
-	 N_("LASTLOG <string>, searches for a string in the buffer")},
+	 N_("LASTLOG <string>\nSearches for a string in the buffer")},
 	{"LIST", cmd_list, 1, 0, 1, 0},
-	{"LOAD", cmd_load, 0, 0, 1, N_("LOAD [-e] <file>, loads a plugin or script")},
+	{"LOAD", cmd_load, 0, 0, 1, N_("LOAD [-e] <file>\nLoads a plugin")},
 
 	{"ME", cmd_me, 0, 0, 1,
-	 N_("ME <action>, sends the action to the current channel (actions are written in the 3rd person, like /me jumps)")},
+	 N_("ME <action>\nSends the action to the current channel (actions are written in the 3rd person, like /me jumps)")},
 	{"MODE", cmd_mode, 1, 0, 1, 0},
-	{"MSG", cmd_msg, 0, 0, 1, N_("MSG <nick> <message>, sends a private message")},
+	{"MSG", cmd_msg, 0, 0, 1, N_("MSG <nick> <message>\nSends a private message")},
 
 	{"NAMES", cmd_names, 1, 0, 1,
-	 N_("NAMES, Lists the nicks on the current channel")},
-	{"NCTCP", cmd_nctcp, 1, 0, 1,
-	 N_("NCTCP <nick> <message>, Sends a CTCP notice")},
-	{"NICK", cmd_nick, 0, 0, 1, N_("NICK <nickname>, sets your nick")},
+	 N_("NAMES\nLists the nicks on the current channel")},
+	{"CTCPREPLY", cmd_nctcp, 1, 0, 1,
+	 N_("CTCPREPLY <nick> <message>\nSends a CTCP reply")},
+	{"NICK", cmd_nick, 0, 0, 1, N_("NICK <nickname>\nSets your nick")},
 
 	{"NOTICE", cmd_notice, 1, 0, 1,
-	 N_("NOTICE <nick/channel> <message>, sends a notice. Notices are a type of message that should be auto reacted to")},
+	 N_("NOTICE <nick/channel> <message>\nSends a notice. Notices should not elicit a reply.")},
 	{"NOTIFY", cmd_notify, 0, 0, 1,
-	 N_("NOTIFY [-n network1[,network2,...]] [<nick>], displays your notify list or adds someone to it")},
+	 N_("NOTIFY [-n network1[,network2,...]] [<nick>]\nDisplays your notify list or adds someone to it")},
 	{"OP", cmd_op, 1, 1, 1,
-	 N_("OP <nick>, gives chanop status to the nick (needs chanop)")},
+	 N_("OP <nick>\nGives op status to the nick (needs op)")},
 	{"PART", cmd_part, 1, 1, 1,
-	 N_("PART [<channel>] [<reason>], leaves the channel, by default the current one")},
+	 N_("PART [<channel>] [<reason>]\nLeaves the channel, by default the current one")},
 	{"PING", cmd_ping, 1, 0, 1,
-	 N_("PING <nick | channel>, CTCP pings nick or channel")},
+	 N_("PING <nick | channel>\nSends a CTCP PING to a nick or channel")},
 	{"QUERY", cmd_query, 0, 0, 1,
-	 N_("QUERY [-nofocus] <nick>, opens up a new privmsg window to someone")},
+	 N_("QUERY [-nofocus] <nick>\nOpens a new query window with someone")},
 	{"QUIT", cmd_quit, 0, 0, 1,
-	 N_("QUIT [<reason>], disconnects from the current server")},
+	 N_("QUIT [<reason>]\nDisconnects from the current server")},
 	{"QUOTE", cmd_quote, 1, 0, 1,
-	 N_("QUOTE <text>, sends the text in raw form to the server")},
+	 N_("QUOTE <text>\nSends the text in raw form to the server")},
 #ifdef GNUTLS
 	{"RECONNECT", cmd_reconnect, 0, 0, 1,
-	 N_("RECONNECT [-ssl] [<host>] [<port>] [<password>], Can be called just as /RECONNECT to reconnect to the current server or with /RECONNECT ALL to reconnect to all the open servers")},
+	 N_("RECONNECT [-ssl] [<host>] [<port>] [<password>]\nCan be called just as /RECONNECT to reconnect to the current server or with /RECONNECT ALL to reconnect to all the open servers")},
 #else
 	{"RECONNECT", cmd_reconnect, 0, 0, 1,
-	 N_("RECONNECT [<host>] [<port>] [<password>], Can be called just as /RECONNECT to reconnect to the current server or with /RECONNECT ALL to reconnect to all the open servers")},
+	 N_("RECONNECT [<host>] [<port>] [<password>]\nCan be called just as /RECONNECT to reconnect to the current server or with /RECONNECT ALL to reconnect to all the open servers")},
 #endif
-	{"RECV", cmd_recv, 1, 0, 1, N_("RECV <text>, send raw data to xchat, as if it was received from the irc server")},
+	{"RECV", cmd_recv, 1, 0, 1, N_("RECV <text>\nSend raw text to Conspire, as if it were received from the server")},
 
 	{"SAY", cmd_say, 0, 0, 1,
-	 N_("SAY <text>, sends the text to the object in the current window")},
+	 N_("SAY <text>\nSends the text to the object in the current window")},
 	{"SEND", cmd_send, 0, 0, 1, N_("SEND <nick> [<file>]")},
 #ifdef GNUTLS
-	{"SERVCHAN", cmd_servchan, 0, 0, 1,
-	 N_("SERVCHAN [-ssl] <host> <port> <channel>, connects and joins a channel")},
-#else
-	{"SERVCHAN", cmd_servchan, 0, 0, 1,
-	 N_("SERVCHAN <host> <port> <channel>, connects and joins a channel")},
-#endif
-#ifdef GNUTLS
 	{"SERVER", cmd_server, 0, 0, 1,
-	 N_("SERVER [-ssl] <host> [[+]<port>] [<password>], connects to a server, the default port is 6667 for normal connections, and 9999 for ssl connections. Note that the + flag is required for SSL usage in the network editor.")},
+	 N_("SERVER [flags] <host>\nConnects to a server.\n\n"
+		"Supported flags:\n"
+		"-ssl or -e      Connect via SSL.\n"
+		"-channel or -j <channel>  Join channel(s) on connect.\n"
+		"-port <port>              Connect on the specified port. (default: 6667)\n"
+		"-pass <password>          Connect with the specified password.\n\n"
+                "This command also supports irc://server:port/channel and ircs://server:port/channel URIs.\n"
+                "Note: The network editor uses a variant of this scheme which requires that SSL ports be prefixed with a +.\n"
+		)},
 #else
 	{"SERVER", cmd_server, 0, 0, 1,
-	 N_("SERVER <host> [<port>] [<password>], connects to a server, the default port is 6667")},
+	 N_("SERVER [flags] <host>\nConnects to a server.\n\n"
+		"Supported flags:\n"
+		"-channel or -j <channel>  Join channel(s) on connect.\n"
+		"-port <port>              Connect on the specified port. (default: 6667)\n"
+		"-pass <password>          Connect with the specified password.\n\n"
+                "This command also supports irc://server:port/channel URIs.\n"
+		)},
 #endif
 	{"SET", cmd_set, 0, 0, 1, N_("SET [-e] [-or] [-quiet] <variable> [<value>]")},
 	{"TOPIC", cmd_topic, 1, 1, 1,
-	 N_("TOPIC [<topic>], sets the topic if one is given, else shows the current topic")},
+	 N_("TOPIC [<topic>]\nsets the topic if one is given, else shows the current topic")},
 	{"UNBAN", cmd_unban, 1, 1, 1,
-	 N_("UNBAN <mask> [<mask>...], unbans the specified masks.")},
-	{"UNIGNORE", cmd_unignore, 0, 0, 1, N_("UNIGNORE <mask> [QUIET]")},
-	{"UNLOAD", cmd_unload, 0, 0, 1, N_("UNLOAD <name>, unloads a plugin or script")},
-	{"URL", cmd_url, 0, 0, 1, N_("URL <url>, opens a URL in your browser")},
+	 N_("UNBAN [-except] <masks>\nRemoves all masks from the ban list (or ban-exception list, with -except).")},
+	{"UNIGNORE", cmd_unignore, 0, 0, 1, N_("UNIGNORE <mask>\nUnignores the given mask.")},
+	{"UNLOAD", cmd_unload, 0, 0, 1, N_("UNLOAD <name>\nUnloads a plugin")},
+	{"URL", cmd_url, 0, 0, 1, N_("URL <url>\nOpens a URL in your browser")},
 	{"USERLIST", cmd_userlist, 1, 1, 1, 0},
 	{"VOICE", cmd_voice, 1, 1, 1,
-	 N_("VOICE <nick>, gives voice status to someone (needs chanop)")},
-	{"WALLCHAN", cmd_wallchan, 1, 1, 1,
-	 N_("WALLCHAN <message>, writes the message to all channels")},
+	 N_("VOICE <nick>\nGives voice status to someone (needs op)")},
 	{"WALLCHOP", cmd_wallchop, 1, 1, 1,
-	 N_("WALLCHOP <message>, sends the message to all chanops on the current channel")},
+	 N_("WALLCHOP <message>\nSends a message to all ops on the current channel")},
 	{0, 0, 0, 0, 0, 0}
 };
 

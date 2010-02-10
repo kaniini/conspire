@@ -651,6 +651,7 @@ static char defaultconf_commands[] =
 	"NAME UPTIME\n"         "CMD quote STATS u\n\n"\
 	"NAME VER\n"            "CMD ctcp $2 VERSION\n\n"\
 	"NAME VERSION\n"        "CMD ctcp $2 VERSION\n\n"\
+	"NAME WALLCHAN\n"       "CMD echo No. People who use this 'feature' are annoying..\n\n"\
 	"NAME WALLOPS\n"        "CMD quote WALLOPS :$2-\n\n"\
 	"NAME WII\n"            "CMD quote WHOIS $2 $2\n\n";
 
