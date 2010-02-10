@@ -2440,31 +2440,6 @@ cmd_wallchop (struct session *sess, char *tbuf, char *word[],
 }
 
 static CommandResult
-cmd_wallchan (struct session *sess, char *tbuf, char *word[],
-				  char *word_eol[])
-{
-	GSList *list;
-
-	if (*word_eol[2])
-	{
-		list = sess_list;
-		while (list)
-		{
-			sess = list->data;
-			if (sess->type == SESS_CHANNEL)
-			{
-				inbound_chanmsg (sess->server, NULL, sess->channel,
-									  sess->server->nick, word_eol[2], TRUE, FALSE);
-				sess->server->p_message (sess->server, sess->channel, word_eol[2]);
-			}
-			list = list->next;
-		}
-		return CMD_EXEC_OK;
-	}
-	return CMD_EXEC_FAIL;
-}
-
-static CommandResult
 cmd_halfop (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
 	int i = 2;
@@ -2660,8 +2635,6 @@ struct commands xc_cmds[] = {
 	{"USERLIST", cmd_userlist, 1, 1, 1, 0},
 	{"VOICE", cmd_voice, 1, 1, 1,
 	 N_("VOICE <nick>\nGives voice status to someone (needs op)")},
-	{"WALLCHAN", cmd_wallchan, 1, 1, 1,
-	 N_("WALLCHAN <message>\nSends a message to all channels")},
 	{"WALLCHOP", cmd_wallchop, 1, 1, 1,
 	 N_("WALLCHOP <message>\nSends a message to all ops on the current channel")},
 	{0, 0, 0, 0, 0, 0}
