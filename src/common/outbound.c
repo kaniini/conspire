@@ -2134,110 +2134,94 @@ urlserv:
 static CommandResult
 cmd_server (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	int offset = 0;
-	char *server_name = NULL;
-	char *port = NULL;
-	char *pass = NULL;
-	char *channel = NULL;
-	int use_ssl = FALSE;
-	int is_url = TRUE;
-	server *serv = sess->server;
-
+    gchar *servername;
+    gint port = -1;
+    gchar *pass = NULL;
+    gchar *channel = NULL;
 #ifdef GNUTLS
-	/* BitchX uses -ssl, mIRC uses -e, let's support both */
-	if (strcmp (word[2], "-ssl") == 0 || strcmp (word[2], "-e") == 0)
-	{
-		use_ssl = TRUE;
-		offset++;	/* args move up by 1 word */
-	}
+    gint use_ssl = FALSE;
+#endif
+    gboolean use_uri = FALSE;
+    server *serv = sess->server;
+    CommandOption options[] = {
+#ifdef GNUTLS
+        {"ssl", TYPE_BOOLEAN, &use_ssl, "Enable SSL; if passing this, do not pass -e."},
+        {"e", TYPE_BOOLEAN, &use_ssl, "Enable SSL; if passing this, do not pass -ssl."},
+#endif
+        {"channel", TYPE_STRING, &channel, "Join channel(s) after connecting; if passing this, do not pass -j."},
+        {"j", TYPE_STRING, &channel, "Join channel(s) after connecting; if passing this, do not pass -channel."},
+        {"port", TYPE_INTEGER, &port, "Connect on this port."},
+        {"pass", TYPE_STRING, &pass, "Use this password."},
+        {NULL}
+    };
+    gint len = g_strv_length(word);
+
+    if (!strncasecmp(word[2], "irc://", 6) || !strncasecmp(word[2], "ircs://", 7))
+    {
+        gchar *uri_port = "-1";
+        gint i;
+
+        if (!parse_irc_url (word[2], &servername, &uri_port, &channel, &use_ssl))
+            return CMD_EXEC_FAIL;
+
+        if (uri_port[0] != '-')
+        {
+            port = 0;
+            for (i = 0; i < strlen(uri_port) && g_ascii_isdigit(uri_port[i]); i++)
+            {
+                port *= 10;
+                port += g_ascii_digit_value(uri_port[i]);
+            }
+        }
+        /*
+         * URI doesn't include a channel prefix because zed and khaled are
+         * first-rate idiots.
+         */
+        if ((channel[0] != '#') && channel[0] != '\0')
+            channel = g_strdup_printf("#%s", channel);
+
+        use_uri = TRUE;
+    } else
+    {
+        command_option_parse(sess, &len, &word, options);
+
+        servername = word[0];
+    }
+
+    if (!servername)
+        return CMD_EXEC_FAIL;
+
+    sess->server->network = NULL;
+
+    if (channel)
+        g_strlcpy(sess->willjoinchannel, channel, sizeof(sess->willjoinchannel));
+
+    if (pass)
+    {
+        g_strlcpy(serv->password, pass, sizeof(serv->password));
+    }
+#ifdef GNUTLS
+    serv->use_ssl = use_ssl;
+    serv->accept_invalid_cert = TRUE;
 #endif
 
-	if (!parse_irc_url (word[2 + offset], &server_name, &port, &channel, &use_ssl))
-	{
-		is_url = FALSE;
-		server_name = word[2 + offset];
-	}
-	if (port)
-		pass = word[3 + offset];
-	else
-	{
-		port = word[3 + offset];
-		pass = word[4 + offset];
-	}
+    /* try to connect by Network name */
+    if (servlist_connect_by_netname (sess, servername, TRUE))
+        return CMD_EXEC_OK;
 
-	if (!(*server_name))
-		return CMD_EXEC_FAIL;
+    serv->connect(serv, servername, port, FALSE);
 
-	sess->server->network = NULL;
+    /* try to associate this connection with a listed network */
+    if (!serv->network)
+        /* search for this hostname in the entire server list */
+        serv->network = servlist_net_find_from_server (servername);
+    /* may return NULL, but that's OK */
 
-	/* dont clear it for /servchan */
-	if (g_ascii_strncasecmp (word_eol[1], "SERVCHAN ", 9))
-		sess->willjoinchannel[0] = 0;
+    /* clean up after URI-specific anti-stupidity measures. */
+    if (use_uri && channel[0] != '\0')
+        g_free(channel);
 
-	if (channel)
-	{
-		sess->willjoinchannel[0] = '#';
-		g_strlcpy ((sess->willjoinchannel + 1), channel, (CHANLEN - 1));
-	}
-
-	/* support +7000 style ports like mIRC */
-	if (port[0] == '+')
-	{
-		port++;
-#ifdef GNUTLS
-		use_ssl = TRUE;
-#endif
-	}
-
-	if (*pass)
-	{
-		g_strlcpy (serv->password, pass, sizeof (serv->password));
-	}
-#ifdef GNUTLS
-	serv->use_ssl = use_ssl;
-	serv->accept_invalid_cert = TRUE;
-#endif
-
-	/* try to connect by Network name */
-	if (servlist_connect_by_netname (sess, server_name, !is_url))
-		return CMD_EXEC_OK;
-
-	if (*port)
-	{
-		serv->connect (serv, server_name, atoi (port), FALSE);
-	} else
-	{
-		/* -1 for default port */
-		serv->connect (serv, server_name, -1, FALSE);
-	}
-
-	/* try to associate this connection with a listed network */
-	if (!serv->network)
-		/* search for this hostname in the entire server list */
-		serv->network = servlist_net_find_from_server (server_name);
-		/* may return NULL, but that's OK */
-
-	return CMD_EXEC_OK;
-}
-
-static CommandResult
-cmd_servchan (struct session *sess, char *tbuf, char *word[],
-				  char *word_eol[])
-{
-	int offset = 0;
-
-#ifdef GNUTLS
-	if (strcmp (word[2], "-ssl") == 0)
-		offset++;
-#endif
-
-	if (*word[4 + offset])
-	{
-		g_strlcpy (sess->willjoinchannel, word[4 + offset], CHANLEN);
-		return cmd_server (sess, tbuf, word, word_eol);
-	}
-
-	return CMD_EXEC_FAIL;
+    return CMD_EXEC_OK;
 }
 
 static CommandResult
@@ -2527,9 +2511,10 @@ struct commands xc_cmds[] = {
 	{"CHARSET", cmd_charset, 0, 0, 1, 0},
 	{"CLEAR", cmd_clear, 0, 0, 1, N_("CLEAR [ALL|HISTORY]\nClears the current text window or command history")},
 	{"CLOSE", cmd_close, 0, 0, 1, N_("CLOSE\nCloses the current window/tab")},
-	{"CONNECT", cmd_newserver, 0, 0, 1, N_("CONNECT [-noconnect] <hostname> [<port>]\nCreates a new server tab. If -noconnect is not specified, connects to the requested server using the same flags used with SERVER.")},
+	{"CONNECT", cmd_newserver, 0, 0, 1,
+	 N_("CONNECT [-noconnect] <hostname>\nCreates a new server tab, wrapping SERVER if -noconnect is not specified.")},
 	{"CTCP", cmd_ctcp, 1, 0, 1,
-	 N_("CTCP <nick> <message>\nSend the CTCP message to nick, common messages are VERSION and USERINFO")},
+	 N_("CTCP <nick> <message>\nSend the CTCP message to nick; common messages are VERSION and USERINFO")},
 	{"CYCLE", cmd_hop, 1, 1, 1,
 	 N_("CYCLE [<channel>]\nParts the current or given channel and immediately rejoins")},
 	{"DCC", cmd_dcc, 0, 0, 1,
@@ -2569,7 +2554,7 @@ struct commands xc_cmds[] = {
 	{"IGNORE", cmd_ignore, 0, 0, 1,
 	 N_("IGNORE [flags] <mask>\n"
             "Ignores messages carrying the specific flags from the specified mask.\n\n"
-            "Currently-supported flags:\n"
+            "Supported flags:\n"
             "-except   User will %Bnot%B be ignored.\n"
             "-private  Private messages from the user will be ignored.\n"
             "-public   Public messages from the user will be ignored.\n"
@@ -2587,7 +2572,7 @@ struct commands xc_cmds[] = {
             "-dcc      DCC file transfers from the user will be ignored.\n"
             "-hilight  Messages from the user that would otherwise hilight, won't.\n"
             "-all      All messages from the user will be ignored.\n\n"
-            "Passing -all with other flags will pass through messages of those types. In addition, using /ignore again on an ignored mask replaces the old ignore with the new one.\n"
+            "Passing -all with other flags will pass through messages of those types. In addition, using /ignore again on an ignored mask replaces the old ignore with the new one."
             )},
 
 	{"INVITE", cmd_invite, 1, 0, 1,
@@ -2644,18 +2629,25 @@ struct commands xc_cmds[] = {
 	 N_("SAY <text>\nSends the text to the object in the current window")},
 	{"SEND", cmd_send, 0, 0, 1, N_("SEND <nick> [<file>]")},
 #ifdef GNUTLS
-	{"SERVCHAN", cmd_servchan, 0, 0, 1,
-	 N_("SERVCHAN [-ssl] <host> <port> <channel>\nconnects and joins a channel")},
-#else
-	{"SERVCHAN", cmd_servchan, 0, 0, 1,
-	 N_("SERVCHAN <host> <port> <channel>\nconnects and joins a channel")},
-#endif
-#ifdef GNUTLS
 	{"SERVER", cmd_server, 0, 0, 1,
-	 N_("SERVER [-ssl] <host> [[+]<port>] [<password>]\nConnects to a server, the default port is 6667 for normal connections, and 9999 for ssl connections. Note that the + flag is required for SSL usage in the network editor.")},
+	 N_("SERVER [flags] <host>\nConnects to a server.\n\n"
+		"Supported flags:\n"
+		"-ssl or -e      Connect via SSL.\n"
+		"-channel or -j <channel>  Join channel(s) on connect.\n"
+		"-port <port>              Connect on the specified port. (default: 6667)\n"
+		"-pass <password>          Connect with the specified password.\n\n"
+                "This command also supports irc://server:port/channel and ircs://server:port/channel URIs.\n"
+                "Note: The network editor uses a variant of this scheme which requires that SSL ports be prefixed with a +.\n"
+		)},
 #else
 	{"SERVER", cmd_server, 0, 0, 1,
-	 N_("SERVER <host> [<port>] [<password>]\nConnects to a server, the default port is 6667")},
+	 N_("SERVER [flags] <host>\nConnects to a server.\n\n"
+		"Supported flags:\n"
+		"-channel or -j <channel>  Join channel(s) on connect.\n"
+		"-port <port>              Connect on the specified port. (default: 6667)\n"
+		"-pass <password>          Connect with the specified password.\n\n"
+                "This command also supports irc://server:port/channel URIs.\n"
+		)},
 #endif
 	{"SET", cmd_set, 0, 0, 1, N_("SET [-e] [-or] [-quiet] <variable> [<value>]")},
 	{"TOPIC", cmd_topic, 1, 1, 1,
