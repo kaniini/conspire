@@ -498,7 +498,7 @@ cmd_ban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
     gboolean except = FALSE;
     gint type = -1;
-    gchar *mask = word[2];
+    gchar *mask;
     gchar *bantype = "b";
     CommandOption options[] = {
         {"except", TYPE_BOOLEAN, &except, N_("Place mask on the ban exemption list.")},
@@ -514,7 +514,9 @@ cmd_ban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
         bantype = "e";
     }
 
-    if (*mask)
+    mask = word[0];
+
+    if (*mask && strncmp(mask, "", 1))
     {
         banlike(sess, bantype, tbuf, mask, type, FALSE);
     } else
@@ -1381,8 +1383,11 @@ cmd_kickban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 
     command_option_parse(sess, &len, &word, options);
 
-    nick = word[2];
-    reason = word_eol[3];
+    nick = word[0];
+    if (!strncmp(word_eol[4], "", 1))
+        reason = word_eol[3];
+    else
+        reason = word_eol[5];
 
     if (nick != NULL)
     {
