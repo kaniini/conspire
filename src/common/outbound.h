@@ -4,7 +4,7 @@
 extern struct commands xc_cmds[];
 extern GSList *menu_list;
 
-void banlike (session *sess, char *modechar, char *tbuf, char *mask, char *bantypestr, int deop);
+void banlike (session *sess, char *modechar, char *tbuf, char *mask, gint type, int deop);
 
 int auto_insert (char *dest, int destlen, unsigned char *src, char *word[], char *word_eol[],
 				 char *a, char *c, char *d, char *e, char *h, char *n, char *s);

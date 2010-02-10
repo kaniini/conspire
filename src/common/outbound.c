@@ -50,6 +50,7 @@
 #include "tree.h"
 #include "outbound.h"
 #include "command_factory.h"
+#include "command_option.h"
 #include "plugin.h"
 
 #ifdef USE_DEBUG
@@ -376,9 +377,8 @@ cmd_away (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 }
 
 void
-banlike (session * sess, char *modechar, char *tbuf, char *mask, char *bantypestr, int deop)
+banlike (session * sess, char *modechar, char *tbuf, char *mask, gint type, int deop)
 {
-	int bantype;
 	struct User *user;
 	char *at, *dot, *lastdot;
 	char username[64], fullhost[128], domain[128], *mode, *p2;
@@ -432,10 +432,8 @@ banlike (session * sess, char *modechar, char *tbuf, char *mask, char *bantypest
 			g_strlcpy (domain, fullhost, sizeof (domain));
 		}
 
-		if (*bantypestr)
-			bantype = atoi (bantypestr);
-		else
-			bantype = prefs.bantype;
+		if (type == -1)
+			type = prefs.bantype;
 
 		tbuf[0] = 0;
 		if (inet_addr (fullhost) != -1)	/* "fullhost" is really a IP number */
@@ -448,7 +446,7 @@ banlike (session * sess, char *modechar, char *tbuf, char *mask, char *bantypest
 			strcpy (domain, fullhost);
 			*lastdot = '.';
 
-			switch (bantype)
+			switch (type)
 			{
 			case 0:
 				snprintf (tbuf, TBUFSIZE, "%s%s *!*@%s.*", mode, p2, domain);
@@ -468,7 +466,7 @@ banlike (session * sess, char *modechar, char *tbuf, char *mask, char *bantypest
 			}
 		} else
 		{
-			switch (bantype)
+			switch (type)
 			{
 			case 0:
 				snprintf (tbuf, TBUFSIZE, "%s%s *!*@*%s", mode, p2, domain);
@@ -498,36 +496,68 @@ banlike (session * sess, char *modechar, char *tbuf, char *mask, char *bantypest
 static CommandResult
 cmd_ban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	char *mask = word[2];
+    gboolean except = FALSE;
+    gint type = -1;
+    gchar *mask = word[2];
+    gchar *bantype = "b";
+    CommandOption options[] = {
+        {"except", TYPE_BOOLEAN, &except, N_("Place mask on the ban exemption list.")},
+        {"type", TYPE_INTEGER, &type, N_("Specify a mask type; only valid with nicks.")},
+        {NULL}
+    };
+    gint len = g_strv_length(word);
 
-	if (*mask)
-	{
-		banlike (sess, "b", tbuf, mask, word[3], 0);
-	} else
-	{
-		sess->server->p_mode (sess->server, sess->channel, "+b");	/* banlist */
-	}
+    command_option_parse(sess, &len, &word, options);
 
-	return CMD_EXEC_OK;
+    if (except)
+    {
+        bantype = "e";
+    }
+
+    if (*mask)
+    {
+        banlike(sess, bantype, tbuf, mask, type, FALSE);
+    } else
+    {
+        gchar *mode = g_strconcat("+", bantype, NULL);
+        sess->server->p_mode(sess->server, sess->channel, mode);
+        g_free(mode);
+    }
+    return CMD_EXEC_OK;
 }
 
 static CommandResult
 cmd_unban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	/* Allow more than one mask in /unban -- tvk */
-	int i = 2;
+    gboolean except = FALSE;
+    gchar bantype = 'b';
+    CommandOption options[] = {
+        {"except", TYPE_BOOLEAN, &except, N_("Place mask on the ban exemption list.")},
+        {NULL}
+    };
+    gint len = g_strv_length(word);
+    gint i;
 
-	while (1)
-	{
-		if (!*word[i])
-		{
-			if (i == 2)
-				return CMD_EXEC_FAIL;
-			send_channel_modes (sess, tbuf, word, 2, i, '-', 'b', 0);
-			return CMD_EXEC_OK;
-		}
-		i++;
-	}
+    command_option_parse(sess, &len, &word, options);
+
+    if (except)
+    {
+        bantype = 'e';
+    }
+    if (word[0] == NULL)
+        return CMD_EXEC_FAIL;
+
+    len = 0;
+
+    for (i = 0; i < PDIWORDS && word[i] != NULL; i++)
+    {
+        if (!strncmp(word[i], "", 1))
+            break;
+        len++;
+    }
+
+    send_channel_modes (sess, tbuf, word, 0, len, '-', bantype, 0);
+    return CMD_EXEC_OK;
 }
 
 static CommandResult
@@ -1339,28 +1369,32 @@ cmd_kick (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 static CommandResult
 cmd_kickban (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 {
-	char *nick = word[2];
-	char *reason = word_eol[3];
-	struct User *user;
+    gint type = -1;
+    gchar *nick;
+    gchar *reason;
+    struct User *user;
+    CommandOption options[] = {
+        {"type", TYPE_INTEGER, &type, "Mask type"},
+        {NULL}
+    };
+    gint len = g_strv_length(word);
 
-	if (*nick)
-	{
-		/* if the reason is a 1 digit number, treat it as a bantype */
+    command_option_parse(sess, &len, &word, options);
 
-		user = userlist_find (sess, nick);
+    nick = word[2];
+    reason = word_eol[3];
 
-		if (isdigit ((unsigned char) reason[0]) && reason[1] == 0)
-		{
-			banlike (sess, "b", tbuf, nick, reason, (user && user->op));
-			reason[0] = 0;
-		} else
-			banlike (sess, "b", tbuf, nick, "", (user && user->op));
+    if (nick != NULL)
+    {
+        user = userlist_find(sess, nick);
 
-		sess->server->p_kick (sess->server, sess->channel, nick, reason);
+        banlike(sess, "b", tbuf, nick, type, (user && user->op));
 
-		return CMD_EXEC_OK;
-	}
-	return CMD_EXEC_FAIL;
+        sess->server->p_kick(sess->server, sess->channel, nick, reason);
+
+        return CMD_EXEC_OK;
+    }
+    return CMD_EXEC_FAIL;
 }
 
 static CommandResult
@@ -2482,7 +2516,10 @@ cmd_voice (struct session *sess, char *tbuf, char *word[], char *word_eol[])
 struct commands xc_cmds[] = {
 	{"AWAY", cmd_away, 1, 0, 1, N_("AWAY [<reason>], toggles away status")},
 	{"BAN", cmd_ban, 1, 1, 1,
-	 N_("BAN <mask> [<bantype>], bans everyone matching the mask from the current channel. If they are already on the channel this doesn't kick them (needs chanop)")},
+	 N_("\n"
+            "BAN [-except] [-type <0-3>] <mask>\n"
+            "Without the -except flag, this command bans the supplied mask. The -type flag\n"
+            "specifies the masking mechanism used when the mask is a nick.")},
 	{"CHARSET", cmd_charset, 0, 0, 1, 0},
 	{"CLEAR", cmd_clear, 0, 0, 1, N_("CLEAR [ALL|HISTORY], Clears the current text window or command history")},
 	{"CLOSE", cmd_close, 0, 0, 1, N_("CLOSE, Closes the current window/tab")},
@@ -2603,7 +2640,8 @@ struct commands xc_cmds[] = {
 	{"TOPIC", cmd_topic, 1, 1, 1,
 	 N_("TOPIC [<topic>], sets the topic if one is given, else shows the current topic")},
 	{"UNBAN", cmd_unban, 1, 1, 1,
-	 N_("UNBAN <mask> [<mask>...], unbans the specified masks.")},
+	 N_("UNBAN [-except] <masks>\n"
+            "Removes all masks from the ban list (or ban-exception list, with -except).")},
 	{"UNIGNORE", cmd_unignore, 0, 0, 1, N_("UNIGNORE <mask> [QUIET]")},
 	{"UNLOAD", cmd_unload, 0, 0, 1, N_("UNLOAD <name>, unloads a plugin or script")},
 	{"URL", cmd_url, 0, 0, 1, N_("URL <url>, opens a URL in your browser")},
