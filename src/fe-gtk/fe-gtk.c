@@ -657,7 +657,11 @@ fe_gui_info (session *sess, int info_type)
 	switch (info_type)
 	{
 	case 0:	/* window status */
+#if GTK_CHECK_VERSION(2,18,0)
+		if (!gtk_widget_get_visible(GTK_WIDGET(sess->gui->window)))
+#else
 		if (!GTK_WIDGET_VISIBLE (GTK_WINDOW (sess->gui->window)))
+#endif
 			return 2;	/* hidden (iconified or systray) */
 		if (gtk_window_is_active (GTK_WINDOW (sess->gui->window)))
 			return 1;	/* active/focused */
