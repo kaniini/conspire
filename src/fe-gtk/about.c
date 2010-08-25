@@ -35,6 +35,7 @@
 
 static const gchar *authors[] = {
 	"William Pitcock <nenolod@sacredspiral.co.uk>",
+	"JD Horelick <jdhore1@gmail.com>",
 	"Kiyoshi Aman <kiyoshi.aman@gmail.com>",
 	"Robin Burchell <w00t@inspircd.org>",
 	"Noah Fontes <nfontes@transtruct.org>",
@@ -76,7 +77,7 @@ menu_about (GtkWidget * wid, gpointer sess)
 		"license", license,
 		"wrap-license", TRUE,
 		"logo", about_pix,
-		"copyright", "Copyright (c) 2007-2008 William Pitcock\n"
+		"copyright", "Copyright (c) 2007-2010 William Pitcock\n"
 			     "Copyright (c) 2007-2008 Kiyoshi Aman\n"
 			     "Copyright (c) 2008 Robin Burchell\n"
 			     "Copyright (c) 1998-2007 Peter Zelezny",
