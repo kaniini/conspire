@@ -22,7 +22,7 @@
 
 #ifdef GDK_WINDOWING_QUARTZ
 
-#include <gdk/gdkkeysyms.h>
+#include <gdk/gdk.h>
 
 #include <Carbon/Carbon.h>
 

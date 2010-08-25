@@ -25,14 +25,7 @@
 
 #include "fe-gtk.h"
 
-#include <gtk/gtkmain.h>
-#include <gtk/gtkentry.h>
-#include <gtk/gtkprogressbar.h>
-#include <gtk/gtkbox.h>
-#include <gtk/gtklabel.h>
-#include <gtk/gtktogglebutton.h>
-#include <gtk/gtkmessagedialog.h>
-#include <gtk/gtkversion.h>
+#include <gtk/gtk.h>
 
 #include "../common/xchat.h"
 #include "../common/fe.h"

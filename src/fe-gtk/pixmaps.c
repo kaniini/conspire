@@ -28,7 +28,7 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk-pixbuf/gdk-pixdata.h>
-#include <gtk/gtkstock.h>
+#include <gtk/gtk.h>
 
 GdkPixbuf *pix_conspire;
 GdkPixbuf *pix_book;

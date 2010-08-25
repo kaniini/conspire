@@ -30,10 +30,6 @@
 #  define _(x) (x)
 #endif
 
-#include <gtk/gtkwidget.h>
-#include <gtk/gtkcontainer.h>
-#include <gtk/gtksignal.h>
-
 #include "conversation-window.h"
 #include "chanview.h"
 

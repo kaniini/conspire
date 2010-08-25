@@ -23,7 +23,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <gdk/gdkcolor.h>
+#include <gdk/gdk.h>
 
 /*
  * Defined colors.  Keep this list alphabetized if you add new ones, but set the
