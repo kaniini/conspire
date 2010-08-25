@@ -886,7 +886,6 @@ xchat_init (void)
 	servlist_init ();							/* load server list */
 
 	sess = new_ircwindow (NULL, _("Event Console"), SESS_SERVER, 0);
-	sess->immutable = TRUE;
 
 	/* turned OFF via -a arg */
 	if (!arg_dont_autoconnect && servlist_have_auto())

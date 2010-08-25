@@ -1,3 +1,7 @@
+- Conspire is mostly dead. It's been abandoned by nenolod for xirssi.
+  It is highly recommended to switch to that. jdhore may be making minor
+  changes to it, but it is effectively dead.
+
 TODO
 - Implement an awaylog for storing hilighted messages.
 - Separate IRC code from IRC-inspecific code.

@@ -1,3 +1,7 @@
+Conspire is mostly dead. It's been abandoned by nenolod for xirssi.
+It is highly recommended to switch to that. jdhore may be making minor 
+changes to it, but it is effectively dead.
+
 conspire 1.0-beta1 (06-16-2009):
   
   * Remove STARTTLS--only inspircd supports it, and it doesn't work all that well anyway.
