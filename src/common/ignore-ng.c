@@ -247,7 +247,6 @@ ignore_save_entry(mowgli_dictionary_elem_t *element, gpointer data)
     g_free(buf);
 
     if (error != NULL) {
-        g_print("error: %s\n", error->message);
         g_io_channel_close(file);
         return 1;
     }
@@ -264,7 +263,6 @@ ignore_save(void)
     gsize bytes = 0;
 
     if (error != NULL) {
-        g_print("error: %s\n", error->message);
         g_io_channel_close(file);
         return;
     }
@@ -272,7 +270,6 @@ ignore_save(void)
     g_io_channel_write_chars(file, IGNORE_VERSION"\n", -1, &bytes, &error);
 
     if (error != NULL) {
-        g_print("error: %s\n", error->message);
         g_io_channel_close(file);
         return;
     }
