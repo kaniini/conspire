@@ -1,11 +1,12 @@
 include ../../../extra.mk
 
 PLUGIN = python${PLUGIN_SUFFIX}
-plugindir = ${LIBDIR}/conspire/plugins
 SRCS = python.c
 
 include ../../../buildsys.mk
 include ../../../extra.mk
+
+plugindir := ${plugindir}/plugins
 
 CFLAGS += ${PLUGIN_CFLAGS} 
 CPPFLAGS += -I../../.. -I../.. -I../../common $(COMMON_CFLAGS) $(PY_CFLAGS) $(GUI_CFLAGS) -DG_DISABLE_CAST_CHECKS -DLOCALEDIR=\"$(localedir)\" -DSHAREDIR=\"$(prefix)/share\"
